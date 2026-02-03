@@ -1,0 +1,16 @@
+# History\n\n## 2026-02-03
+- Initial scaffolding of the project structure.
+- Created apps: web, api, cli.
+- Created packages: client-sdk, config, eslint-config, logger, typescript-config, ui.
+- Established mandates in .gemini/GEMINI.md.
+- Switched package manager from `npm` to `pnpm`.
+- Created ADR 002: Centralized Configuration Strategy (Infisical + Zod).
+- Created ADR 003: Centralized Logger Strategy (Pino + Better Stack).
+- Created ADR 004: Domain-Driven Design & Frontend Architecture.
+- Created ADR 005: Platform Domains & Multi-Tenancy Strategy.
+- Created ADR 006: Universal UI Component Strategy (React Native Web + NativeWind).
+- Created ADR 007: Deployment & Environment Strategy.
+- Created ADR 008: CLI Orchestrator Strategy (@sous/cli).
+- Created ADR 009: Security, Authentication, and Authorization Strategy.
+- Added Global Mandate: All infrastructure must operate within service **Free Tiers**.
+- Created ADR 010: Backend API Architecture & Communication Strategy (REST, GQL, WS, BullMQ, Resend).
