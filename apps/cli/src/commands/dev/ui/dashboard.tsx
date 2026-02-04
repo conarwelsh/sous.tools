@@ -11,6 +11,15 @@ interface Props {
 
 type ViewMode = 'services' | 'god-view' | 'infra' | 'rpi';
 
+const WORDMARK = `
+   _____  ____  _    _  _____ 
+  / ____|/ __ \\| |  | |/ ____|
+ | (___ | |  | | |  | | (___  
+  \\___ \\| |  | | |  | |\\___ \\ 
+  ____) | |__| | |__| |____) |
+ |_____/ \\____/ \\____/|_____/ 
+`.trim();
+
 export const Dashboard: React.FC<Props> = ({ manager }) => {
   const { exit } = useApp();
   const [activeTab, setActiveTab] = useState<ViewMode>('services');
@@ -183,10 +192,10 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
   return (
     <Box flexDirection="column" padding={1} flexGrow={1}>
       {/* Header & Tabs */}
-      <Box borderStyle="double" borderColor="#06b6d4" paddingX={1} justifyContent="space-between">
-        <Box>
-            <Text bold color="#06b6d4">👨‍🍳 SOUS.TOOLS </Text>
-            <Box marginLeft={2}>
+      <Box paddingX={1} justifyContent="space-between" alignItems="flex-end">
+        <Box flexDirection="column">
+            <Text bold color="#06b6d4">{WORDMARK}</Text>
+            <Box marginTop={1}>
                 <Tabs onChange={(v) => setActiveTab(v as ViewMode)}>
                     <Tab name="services">Services</Tab>
                     <Tab name="god-view">God View</Tab>
@@ -194,9 +203,6 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
                     <Tab name="rpi">RPi</Tab>
                 </Tabs>
             </Box>
-        </Box>
-        <Box>
-            <Text color="gray">{new Date().toLocaleTimeString()}</Text>
         </Box>
       </Box>
 
@@ -220,7 +226,11 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
       <Box flexDirection="column" height={8} borderStyle="round" marginTop={0} paddingX={1} borderColor={isCommandMode ? "#ec4899" : "#374151"}>
         <Box justifyContent="space-between">
             <Text bold color={isCommandMode ? "#ec4899" : "#9ca3af"}>COMMAND PANEL</Text>
-            {isCommandMode && <Text color="#ec4899" bold italic> COMMAND MODE ACTIVE </Text>}
+            {isCommandMode ? (
+                <Text color="#ec4899" bold italic> COMMAND MODE ACTIVE </Text>
+            ) : (
+                <Text color="gray" dimColor> Press [:] to type command </Text>
+            )}
         </Box>
         <Box flexDirection="column" flexGrow={1} marginTop={1}>
           {terminalOutput.map((line, i) => (
