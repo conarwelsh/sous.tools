@@ -1,4 +1,20 @@
 services:
+  traefik:
+    image: traefik:v3.1
+    container_name: sous-proxy
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--providers.file.filename=/etc/traefik/dynamic.yml"
+    ports:
+      - "80:80"
+      - "8082:8080" # Dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik-dynamic.yml:/etc/traefik/dynamic.yml:ro
+
   postgres:
     image: postgres:16-alpine
     container_name: sous-postgres
@@ -10,12 +26,26 @@ services:
       POSTGRES_DB: sous_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    labels:
+      - "traefik.enable=true"
 
   redis:
     image: redis:7-alpine
     container_name: sous-redis
     ports:
       - "6379:6379"
+    labels:
+      - "traefik.enable=true"
+
+  # Infisical - Local Instance (Commented out per ADR 035 / Phase 1.1)
+  # infisical:
+  #   image: infisical/infisical:latest
+  #   container_name: sous-infisical
+  #   ports:
+  #     - "8081:8080"
+  #   environment:
+  #     - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+  #     - AUTH_SECRET=${AUTH_SECRET}
 
 volumes:
   postgres_data:

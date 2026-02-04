@@ -1,8 +1,17 @@
 # History
 
 ## 2026-02-04
-- Comprehensive README overhaul: Created/Updated `README.md` for all 9 apps and 8 packages, adhering to **Mandate 6** (Responsibilities, Setup, Tech Stack, ADR links).
+- **Phase 1.2 Accomplishments:**
+    - **CLI DDD Refactoring:** Reorganized `@sous/cli` into strategic umbrellas (`dev`, `env`, `quality`, `maintenance`).
+    - **Robust Dev Orchestrator:** Implemented an interactive React Ink TUI for `sous dev`, replacing static logging with a real-time process dashboard.
+    - **ZSH Customization:** Implemented `sous dev install shell` which adds brand-aligned prompts, infrastructure health indicators, and productivity aliases (`sous`, `sd`, `sl`, `c`, `ls`, etc.) to the user's terminal.
+- Enforced **Mandate 15: The Shell Pattern** by moving strategic umbrellas from `@sous/web` to the shared **`@sous/features`** package, ensuring absolute logic reuse between platforms.
+- Completed **Phase 1.1** of the rollout plan.
+- Migrated `@sous/api` and `@sous/web` to the **Nested DDD** folder structure (moving core logic to `domains/` and `features/`).
+- Configured Traefik in `docker-compose.yml` as a reverse proxy, including a dynamic bridge to the Raspberry Pi (`rpi.sous.local`).
+- Created **ADR 040: CI/CD Strategy for Native Binaries** to utilize self-hosted GitHub runners for Windows and ARM64 builds.
 - Refined **ADR 039: CLI-Driven ZSH Customization** to include a robust set of productivity aliases (`sous`, `c`, `ls`, `sd`, `sl`, etc.).
+- Comprehensive README overhaul: Created/Updated `README.md` for all 9 apps and 8 packages, adhering to **Mandate 6** (Responsibilities, Setup, Tech Stack, ADR links).
 - Rewrote `@sous/cli` README.md to accurately reflect the tool's capabilities and document the upcoming shell customization features.
 - Created **ADR 039: CLI-Driven ZSH Customization** to improve Developer Experience with brand-aligned prompts and infrastructure status indicators.
 - Updated `phase-rollout-plan.md` to include ZSH customization in Phase 1.2.

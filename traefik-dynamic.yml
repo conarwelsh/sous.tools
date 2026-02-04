@@ -1,0 +1,14 @@
+# Dynamic configuration for Traefik
+http:
+  routers:
+    rpi-router:
+      rule: "Host(`rpi.sous.local`)"
+      service: rpi-service
+      entryPoints:
+        - web
+
+  services:
+    rpi-service:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.1.10:8080" # Assuming headless app runs on 8080 or 80

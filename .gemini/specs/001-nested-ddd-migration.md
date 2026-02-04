@@ -20,22 +20,28 @@ All business logic must move into `src/domains/`.
   │                 ├── user.controller.ts
   │                 ├── user.service.ts
   │                 └── user.schema.ts
-  ├── app.module.ts (Entry point)
+  ├── app.module.ts
   └── main.ts
 ```
 
-### 2. `@sous/web` structure
-Features move into `src/features/`.
+### 2. `@sous/features` structure (Shared logic)
+The source of truth for all frontend organisms, hooks, and actions.
 ```text
-@sous/web/src/
-  ├── app/ (Routes only)
-  ├── features/
+@sous/features/src/
+  ├── domains/
   │     └── iam/
   │           └── auth/
   │                 ├── components/
   │                 ├── hooks/
   │                 └── services/
-  └── lib/ (Common utils)
+```
+
+### 3. `@sous/web` structure (Thin Shell)
+The web app contains only routing and platform initialization.
+```text
+@sous/web/src/
+  ├── app/ (Routes only)
+  └── lib/ (Platform glue)
 ```
 
 ## Implementation Plan

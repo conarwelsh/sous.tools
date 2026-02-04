@@ -11,6 +11,7 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "target": "ES2023",
+    "jsx": "react",
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",

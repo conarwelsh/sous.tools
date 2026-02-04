@@ -26,9 +26,16 @@
     "@nestjs/core": "^11.1.13",
     "@nestjs/platform-express": "^11.0.1",
     "@sous/config": "workspace:*",
+    "chalk": "^5.6.2",
+    "concurrently": "^9.2.1",
+    "ink": "^6.6.0",
     "nest-commander": "^3.20.1",
+    "react": "^19.2.4",
+    "react-reconciler": "^0.33.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2"
+    "rxjs": "^7.8.2",
+    "ssh2": "^1.17.0",
+    "tree-kill": "^1.2.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -39,6 +46,9 @@
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.10.7",
+    "@types/react": "^19.2.11",
+    "@types/react-reconciler": "^0.33.0",
+    "@types/ssh2": "^1.15.5",
     "@types/supertest": "^6.0.2",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",

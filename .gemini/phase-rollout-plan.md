@@ -10,9 +10,9 @@ This document provides the strategic implementation order for the `sous.tools` p
 
 - [x] **Monorepo Init:** TurboRepo, pnpm workspaces, and Husky.
 - [x] **App Scaffolding:** Create "Hello World" skeletons for all 9 apps.
-- [ ] **Nested DDD Migration:** Refactor all apps to use Strategic Umbrella folders (Spec 001).
-- [ ] **Local Cloud Infra:** Configure `docker-compose.yml` with mocks (ADR 035).
-- [ ] **Web/API Deployment:** Verify automated Vercel/Render deployments for `@sous/web`, `@sous/api`, and `@sous/docs`.
+- [x] **Nested DDD Migration:** Refactor all apps to use Strategic Umbrella folders (Spec 001).
+- [x] **Local Cloud Infra:** Configure `docker-compose.yml` with Traefik proxy and RPi bridge (ADR 035).
+- [x] **Web/API Deployment:** Verify automated Vercel/Render deployments for `@sous/web`, `@sous/api`, and `@sous/docs`.
 
 ### Phase 1.2: Core Utilities & DX
 
@@ -21,9 +21,9 @@ This document provides the strategic implementation order for the `sous.tools` p
 - [x] **@sous/config:** Zod schemas + Infisical integration.
 - [x] **@sous/logger:** Pino + Better Stack.
 - [x] **@sous/features:** Centralized "Organisms" and logic (ADR 036).
-- [ ] **CLI DDD Refactoring:** Reorganize commands into strategic umbrellas (Spec 002).
+- [x] **CLI DDD Refactoring:** Reorganize commands into strategic umbrellas (Spec 002).
 - [ ] **Robust Dev Orchestrator:** Implement the React Ink TUI for `sous dev` (Spec 003).
-- [ ] **ZSH Customization:** Implement brand-aligned shell prompts and infra status (ADR 039).
+- [x] **ZSH Customization:** Implement brand-aligned shell prompts and infra status (ADR 039).
 - [ ] **Documentation Hub:** Implement the Branding Lab & Knowledge Base (Spec 005).
 
 ### Phase 1.3: Universal UI & Identity

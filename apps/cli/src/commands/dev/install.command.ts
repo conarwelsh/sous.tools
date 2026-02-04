@@ -1,5 +1,6 @@
 import { Command, CommandRunner, Option } from 'nest-commander';
 import { execSync } from 'child_process';
+import { ShellInstallCommand } from './shell-install.command';
 
 interface InstallOptions {
   android?: boolean;
@@ -7,7 +8,8 @@ interface InstallOptions {
 
 @Command({ 
   name: 'install', 
-  description: 'Install dependencies on a remote or local device' 
+  description: 'Install dependencies on a remote or local device',
+  subCommands: [ShellInstallCommand]
 })
 export class InstallCommand extends CommandRunner {
   async run(

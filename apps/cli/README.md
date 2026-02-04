@@ -2,19 +2,35 @@
 
 The command-line orchestrator for the `sous.tools` platform.
 
-## Features
-- **Development Orchestration**: `sous dev` (launches Zellij with all services).
-- **Log Management**: `sous logs tail` and `sous logs wipe`.
-- **Infrastructure Setup**: `sous install` (manages environment dependencies).
-- **Quality Checks**: `sous check` (lint, typecheck, test, build).
-- **Maintenance**: `sous housekeep` (clean workspace artifacts).
+## Strategic Umbrellas
+The CLI is organized into strategic domains following the **Nested DDD** mandate:
+
+### 1. Development (`sous dev`)
+Manages the local development lifecycle and hardware integration.
+- `sous dev`: Launches the multi-service dev environment (Zellij/Ink).
+- `sous dev install`: Runs the platform installation wizard.
+- `sous dev sync`: Synchronizes local schemas and hardware state.
+
+### 2. Infrastructure (`sous env`)
+Manages environment variables, secrets, and logs.
+- `sous env config`: View or add environment configurations (Infisical).
+- `sous env logs`: View or wipe centralized platform logs.
+
+### 3. Quality (`sous quality`)
+Enforces code standards and runs validation suites.
+- `sous quality test`: Runs the unit and integration test suites.
+- `sous quality check`: Runs a full health check (lint, typecheck, test, build).
+
+### 4. Maintenance (`sous maintenance`)
+Handles system cleanup and workspace health.
+- `sous maintenance housekeep`: Deep cleans build artifacts and caches.
 
 ## Installation & Setup
 
 ### Shell Customization (Recommended)
 To align your terminal with the `sous.tools` brand and enable productivity aliases, run:
 ```bash
-pnpm sous install shell
+pnpm sous dev install shell
 ```
 This will configure your ZSH environment with brand-aligned prompts and useful shortcuts.
 
@@ -22,20 +38,23 @@ This will configure your ZSH environment with brand-aligned prompts and useful s
 When the `@sous` shell customization is installed, the following aliases are available:
 
 ### Platform Commands
-| Alias | Command | Description |
+| Alias | Target Command | Description |
 |---|---|---|
 | `sous` | `pnpm -w sous` | Run the CLI from any subdirectory |
 | `sd` | `sous dev` | Start development environment |
-| `sl` | `sous logs tail` | Tail centralized logs |
-| `sw` | `sous logs wipe` | Wipe centralized logs |
-| `sc` | `sous check` | Run full platform health check |
-| `si` | `sous install` | Run installation wizard |
+| `si` | `sous dev install` | Run installation wizard |
+| `ss` | `sous dev sync` | Sync schemas/hardware |
+| `st` | `cd ~/sous.tools` | Quick jump to project root |
+| `sl` | `sous env logs tail` | Tail centralized logs |
+| `sw` | `sous env logs wipe` | Wipe centralized logs |
+| `sq` | `sous quality check` | Run full health check |
+| `sm` | `sous maintenance housekeep` | Deep clean workspace |
 
 ### Productivity Shortcuts
 | Alias | Command | Description |
 |---|---|---|
 | `c` | `clear` | Clear terminal |
-| `ls` | `ls -lah` | List all files with details and sizes |
+| `ls` | `ls -lah --color=auto` | List all files with details |
 | `ni` | `pnpm install` | Quick install |
 | `nx` | `pnpm exec` | Quick execute |
 | `..` | `cd ..` | Go up one level |
