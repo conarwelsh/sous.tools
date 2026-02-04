@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Text, useInput, useApp } from 'ink';
-import { ProcessManager, ManagedProcess } from '../process-manager.service';
+import { ProcessManager, ManagedProcess } from '../process-manager.service.js';
 
 interface Props {
   manager: ProcessManager;
@@ -8,11 +8,12 @@ interface Props {
 
 export const Dashboard: React.FC<Props> = ({ manager }) => {
   const { exit } = useApp();
-  const [processes, setProcesses] = useState<ManagedProcess[]>(manager.getProcesses());
+  // Ensure manager exists before calling methods
+  const [processes, setProcesses] = useState<ManagedProcess[]>(manager?.getProcesses() || []);
   const [selectedIdx, setSelectedIdx] = useState(0);
-  const [activeLogs, setActiveLogs] = useState<string>('Select an app to view logs...');
 
   useEffect(() => {
+    if (!manager) return;
     const handleUpdate = () => {
       setProcesses([...manager.getProcesses()]);
     };
@@ -27,6 +28,8 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
     if (input === 'q') {
       exit();
     }
+
+    if (!manager || processes.length === 0) return;
 
     if (key.upArrow) {
       setSelectedIdx(Math.max(0, selectedIdx - 1));
@@ -45,6 +48,14 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
       }
     }
   });
+
+  if (!manager) {
+    return (
+      <Box padding={1}>
+        <Text color="red">Error: ProcessManager not initialized.</Text>
+      </Box>
+    );
+  }
 
   const selectedApp = processes[selectedIdx];
 
@@ -75,11 +86,11 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
 
         {/* Log Area */}
         <Box flexDirection="column" width="70%" borderStyle="round" paddingX={1} marginLeft={1}>
-          <Text underline>Logs: {selectedApp.name}</Text>
+          <Text underline>Logs: {selectedApp?.name || 'None'}</Text>
           <Box height={10} flexDirection="column">
-            {selectedApp.logs.slice(-10).map((log, i) => (
+            {selectedApp?.logs.slice(-10).map((log, i) => (
               <Text key={i} wrap="truncate">{log.trim()}</Text>
-            ))}
+            )) || <Text color="gray">No logs available.</Text>}
           </Box>
         </Box>
       </Box>

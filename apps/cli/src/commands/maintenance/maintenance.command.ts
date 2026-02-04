@@ -1,5 +1,5 @@
 import { Command, CommandRunner } from 'nest-commander';
-import { HousekeepCommand } from './housekeep/housekeep.command';
+import { HousekeepCommand } from './housekeep/housekeep.command.js';
 
 @Command({
   name: 'maintenance',
@@ -7,7 +7,10 @@ import { HousekeepCommand } from './housekeep/housekeep.command';
   subCommands: [HousekeepCommand],
 })
 export class MaintenanceCommand extends CommandRunner {
-  async run(): Promise<void> {
+  async run(passedParam: string[]): Promise<void> {
+    if (passedParam.length > 0 && ['housekeep'].includes(passedParam[0])) {
+      return;
+    }
     console.log('Please specify a subcommand: housekeep');
   }
 }

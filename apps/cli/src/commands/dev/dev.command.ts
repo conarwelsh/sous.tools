@@ -1,12 +1,12 @@
 import { Command, CommandRunner, Option } from 'nest-commander';
-import { SyncCommand } from './sync.command';
-import { InstallCommand } from './install.command';
+import { SyncCommand } from './sync.command.js';
+import { InstallCommand } from './install.command.js';
 import { execSync } from 'child_process';
-import * as path from 'path';
 import React from 'react';
 import { render } from 'ink';
-import { Dashboard } from './ui/dashboard';
-import { ProcessManager } from './process-manager.service';
+import { Dashboard } from './ui/dashboard.js';
+import { ProcessManager } from './process-manager.service.js';
+import { Inject } from '@nestjs/common';
 
 interface DevOptions {
   sync?: boolean;
@@ -20,7 +20,7 @@ interface DevOptions {
   subCommands: [InstallCommand, SyncCommand],
 })
 export class DevCommand extends CommandRunner {
-  constructor(private readonly manager: ProcessManager) {
+  constructor(@Inject(ProcessManager) private readonly manager: ProcessManager) {
     super();
   }
 

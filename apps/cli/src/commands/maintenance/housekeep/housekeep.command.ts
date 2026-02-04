@@ -1,10 +1,10 @@
-import { Command, CommandRunner, Option } from 'nest-commander';
+import { SubCommand, CommandRunner, Option } from 'nest-commander';
 import { spawn } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as readline from 'readline';
 
-@Command({
+@SubCommand({
   name: 'housekeep',
   description: 'Clean up the monorepo (delete node_modules, .next, dist, etc.)',
 })

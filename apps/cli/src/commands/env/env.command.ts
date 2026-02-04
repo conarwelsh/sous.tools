@@ -1,6 +1,6 @@
 import { Command, CommandRunner } from 'nest-commander';
-import { ConfigCommand } from './config/config.command';
-import { LogsCommand } from './logs/logs.command';
+import { ConfigCommand } from './config/config.command.js';
+import { LogsCommand } from './logs/logs.command.js';
 
 @Command({
   name: 'env',
@@ -8,7 +8,10 @@ import { LogsCommand } from './logs/logs.command';
   subCommands: [ConfigCommand, LogsCommand],
 })
 export class EnvCommand extends CommandRunner {
-  async run(): Promise<void> {
+  async run(passedParam: string[]): Promise<void> {
+    if (passedParam.length > 0 && ['config', 'logs'].includes(passedParam[0])) {
+      return;
+    }
     console.log('Please specify a subcommand: config, logs');
   }
 }

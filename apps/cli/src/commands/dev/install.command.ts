@@ -1,12 +1,12 @@
-import { Command, CommandRunner, Option } from 'nest-commander';
+import { SubCommand, CommandRunner, Option } from 'nest-commander';
 import { execSync } from 'child_process';
-import { ShellInstallCommand } from './shell-install.command';
+import { ShellInstallCommand } from './shell-install.command.js';
 
 interface InstallOptions {
   android?: boolean;
 }
 
-@Command({ 
+@SubCommand({ 
   name: 'install', 
   description: 'Install dependencies on a remote or local device',
   subCommands: [ShellInstallCommand]
@@ -16,6 +16,10 @@ export class InstallCommand extends CommandRunner {
     passedParam: string[],
     options?: InstallOptions,
   ): Promise<void> {
+    if (passedParam.length > 0 && ['shell'].includes(passedParam[0])) {
+      return;
+    }
+
     const targetIp = passedParam[0];
     
     if (!targetIp) {

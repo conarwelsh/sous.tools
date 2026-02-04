@@ -1,9 +1,9 @@
-import { Command, CommandRunner } from 'nest-commander';
+import { SubCommand, CommandRunner } from 'nest-commander';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 
-@Command({
+@SubCommand({
   name: 'shell',
   description: 'Install brand-aligned ZSH customization and productivity aliases',
 })

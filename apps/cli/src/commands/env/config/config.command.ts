@@ -1,12 +1,12 @@
-import { Command, CommandRunner, Option } from 'nest-commander';
+import { SubCommand, CommandRunner, Option } from 'nest-commander';
 import { getConfig } from '@sous/config';
-import { ConfigAddCommand } from './config-add.command';
+import { ConfigAddCommand } from './config-add.command.js';
 
 interface ConfigOptions {
   env?: string;
 }
 
-@Command({ 
+@SubCommand({ 
   name: 'config', 
   description: 'Manage platform configuration',
   subCommands: [ConfigAddCommand]

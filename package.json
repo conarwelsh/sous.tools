@@ -16,6 +16,7 @@
     "husky": "^9.1.7",
     "prettier": "latest",
     "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
     "turbo": "latest"
   }
 }

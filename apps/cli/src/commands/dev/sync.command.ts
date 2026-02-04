@@ -1,7 +1,7 @@
-import { Command, CommandRunner } from 'nest-commander';
+import { SubCommand, CommandRunner } from 'nest-commander';
 import { execSync } from 'child_process';
 
-@Command({
+@SubCommand({
   name: 'sync',
   description: 'Synchronize development environment and dependencies'
 })

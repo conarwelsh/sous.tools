@@ -1,16 +1,17 @@
-import { Command, CommandRunner } from 'nest-commander';
-import { LogsTailCommand } from './logs-tail.command';
-import { LogsWipeCommand } from './logs-wipe.command';
+import { SubCommand, CommandRunner } from 'nest-commander';
+import { LogsTailCommand } from './logs-tail.command.js';
+import { LogsWipeCommand } from './logs-wipe.command.js';
 
-@Command({
+@SubCommand({
   name: 'logs',
   description: 'Manage and view logs',
   subCommands: [LogsTailCommand, LogsWipeCommand],
 })
 export class LogsCommand extends CommandRunner {
-  async run(): Promise<void> {
-    // If no subcommand is provided, show help
-    // nest-commander usually handles this, but we can print a message
+  async run(passedParam: string[]): Promise<void> {
+    if (passedParam.length > 0 && ['tail', 'wipe'].includes(passedParam[0])) {
+      return;
+    }
     console.log('Please specify a subcommand: tail, wipe');
   }
 }

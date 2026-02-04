@@ -1,8 +1,8 @@
-import { Command, CommandRunner, Option } from 'nest-commander';
+import { SubCommand, CommandRunner, Option } from 'nest-commander';
 import { spawn } from 'child_process';
 import * as path from 'path';
 
-@Command({
+@SubCommand({
   name: 'check',
   description: 'Run comprehensive health check (lint, typecheck, test, build)',
 })

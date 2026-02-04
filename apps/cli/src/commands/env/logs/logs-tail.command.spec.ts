@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { LogsTailCommand } from './logs-tail.command';
+import { LogsTailCommand } from './logs-tail.command.js';
 import { spawn } from 'child_process';
 import * as fs from 'fs';
 
