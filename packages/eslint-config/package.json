@@ -1,1 +1,12 @@
-{"name": "@sous/eslint-config", "version": "0.0.0", "main": "index.js", "types": "index.d.ts"}
+{
+  "name": "@sous/eslint-config",
+  "version": "0.1.0",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "test": "echo \"No tests defined\" && exit 0",
+    "typecheck": "echo 'Placeholder'",
+    "build": "echo 'Placeholder'",
+    "lint": "echo 'Placeholder'"
+  }
+}

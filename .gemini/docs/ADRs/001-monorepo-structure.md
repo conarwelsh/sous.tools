@@ -17,6 +17,7 @@ We have decided to use a Monorepo structure managed by **TurboRepo**.
 - **Frontend:** Next.js 16 (React) - `@sous/web`
 - **Backend:** NestJS - `@sous/api`
 - **CLI:** NestJS - `@sous/cli`
+- **Watch:** Compose for Wear OS - `@sous/wearos`
 - **Build System:** TurboRepo
 
 ### Shared Packages Strategy:
@@ -26,6 +27,27 @@ We have decided to use a Monorepo structure managed by **TurboRepo**.
 - **`@sous/client-sdk`**: Generated SDK for client-server communication.
 - **`@sous/eslint-config`** & **`@sous/typescript-config`**: Shared standards.
 
+### Git Hooks & CI/CD:
+- **Husky:** Used to manage git hooks for local quality enforcement.
+- **Branch Strategy:** 
+  - **`main` / `staging`:** Strict enforcement of `lint`, `typecheck`, and `build` on push/PR.
+  - **`development`:** All quality checks (lint, build, typecheck) are BYPASSED during push to allow for rapid iteration.
+
 ## Consequences
 - **Positive:** centralized dependency management, shared code reuse, unified build pipeline, enforced architectural constraints (config/logging).
 - **Negative:** Increased initial complexity in setting up the build pipeline and workspace configuration.
+
+## Research & Implementation Plan
+
+### Research
+- **TurboRepo:** Evaluated for its caching capabilities and task orchestration. Verified it handles `pnpm` workspaces efficiently.
+- **pnpm Workspaces:** Chosen for its strict dependency management and performance.
+- **Project Structure:** Standardized on `apps/` for deployable units and `packages/` for shared libraries.
+
+### Implementation Plan
+1. **Initialize Monorepo:** Setup `pnpm-workspace.yaml` and `turbo.json`.
+2. **Husky Setup:** Initialize Husky and create a `pre-push` hook that checks the current branch and skips checks for `development`.
+3. **Standardize Tooling:** Create `@sous/typescript-config` and `@sous/eslint-config`.
+3. **Scaffold Core Packages:** Initialize `@sous/config` and `@sous/logger` as first-order dependencies.
+4. **Setup Apps:** Create basic Next.js and NestJS skeletons in `apps/`.
+5. **CI/CD Integration:** Configure GitHub Actions to run `turbo run build lint test` on every PR.

@@ -10,6 +10,7 @@ Proposed
 The `@sous/api` (NestJS) serves as the core intelligence of the platform. It must support:
 - **Multiple Protocols:** REST (for standard integration), GraphQL (for complex frontend data requirements), and WebSockets (for real-time updates).
 - **Background Processing:** Long-running tasks like recipe costing or IoT telemetry processing must not block the main thread.
+- **Scheduled Tasks:** Ability to run recurring cron jobs (e.g., daily reports, cache cleanup).
 - **Communication:** A unified `client-sdk` that supports request-response and real-time streams.
 - **Outbound Communication:** Rich HTML emails sent from `@sous.tools`.
 - **Branding:** Documentation (Swagger/GraphiQL) must reflect the `sous.tools` brand.
@@ -19,17 +20,21 @@ The `@sous/api` (NestJS) serves as the core intelligence of the platform. It mus
 
 ### 1. API Architecture
 We will implement a hybrid API approach within a **Domain-Driven Design (DDD)** structure.
+- **Database & ORM:** **Drizzle ORM** with PostgreSQL (Supabase).
+  - **Choice:** Drizzle provides a "TypeScript-first" experience with zero-overhead, allowing for type-safe queries that remain close to raw SQL.
+  - **Migrations:** Managed via `drizzle-kit`.
 - **REST:** Built using `@nestjs/swagger`. 
   - **Documentation:** We will use **Scalar** (via `nestjs-scalar`) for a modern, branded UI.
 - **GraphQL:** Built using `@nestjs/graphql` with the Apollo driver.
   - **Sub-decisions:** Code-first approach. Subscriptions will be enabled via WebSockets.
   - **Documentation:** **GraphiQL** will be the IDE, themed with `@sous/ui` colors.
 
-### 2. Real-Time & Message Queuing
+### 2. Real-Time, Message Queuing & Scheduling
 - **WebSockets:** `@nestjs/websockets` using Socket.io for robust cross-platform support (Web & Mobile).
 - **Queue Engine:** **BullMQ** with **Upstash Redis** (Free Tier).
   - **Usage:** Email sending, report generation, and complex calculation tasks.
   - **Isolation:** Workers will be defined within their respective Domain modules.
+- **Scheduling:** **@nestjs/schedule** (Cron) for recurring system tasks.
 
 ### 3. Generated Client SDK
 The `@sous/client-sdk` will be the exclusive way for `@sous/web` and `@sous/cli` to interact with the API.
@@ -61,3 +66,17 @@ The `@sous/client-sdk` will be the exclusive way for `@sous/web` and `@sous/cli`
 - **Negative:**
   - **Bundle Size:** Supporting REST, GQL, and WS in a single SDK can increase the package size for the frontend.
   - **Complexity:** Maintaining schema parity between REST and GQL requires discipline in NestJS decorators.
+
+## Research & Implementation Plan
+
+### Research
+- **Drizzle ORM:** Benchmarked against Prisma. Drizzle won on performance and its ability to handle RLS natively without a proxy.
+- **Scalar:** Selected for API documentation due to its superior UI/UX compared to standard Swagger UI.
+- **BullMQ:** Industry standard for Redis-backed job queues.
+
+### Implementation Plan
+1. **API Core:** Setup the NestJS boilerplate with Drizzle and Scalar documentation.
+2. **GraphQL Engine:** Configure Apollo Driver and code-first schema generation.
+3. **Real-time Gateway:** Implement the Socket.io gateway for bidirectional communication.
+4. **Job Queue:** Setup BullMQ workers for background tasks (Emails, Reports).
+5. **Client SDK:** Configure `openapi-typescript` and `graphql-codegen` to auto-generate the SDK on every build.

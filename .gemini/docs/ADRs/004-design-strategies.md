@@ -27,10 +27,12 @@ For `@sous/web` (and other UI apps), we strictly separate **Logic** from **Rende
 - **Role:** Handles data fetching, state management, and side effects.
 - **Implementation:**
   - In Next.js App Router: This is typically the **Page** (Server Component) or a top-level **Client Component** wrapper.
+  - **Mandate: Server-Side First:** Whenever possible, data fetching must happen on the server using **Server Components**. 
+  - **Mandate: Server Actions:** Mutations and side effects should prefer **Server Actions** to reduce client-side bundle size and improve reliability.
   - Responsibilities:
     - Validating inputs (Zod).
-    - Calling APIs/SDKs.
-    - Managing local state (hooks).
+    - Calling APIs/SDKs (Directly in Server Components when possible).
+    - Managing local state (hooks in Client Components).
     - Defining event handlers.
     - Passing data *down* to Views.
 
@@ -59,3 +61,16 @@ src/app/dashboard/
 - **Negative:**
   - **Verbosity:** Requires creating at least two files per major feature (Controller + View).
   - **Prop Drilling:** Data must be passed explicitly from Controller to View.
+  
+  ## Research & Implementation Plan
+  
+  ### Research
+  - **Next.js App Router:** Optimized for server-side data fetching. Server Components act naturally as "Controllers" in the Controller-View pattern.
+  - **NestJS Modules:** Align perfectly with DDD, grouping related logic into cohesive modules.
+  
+  ### Implementation Plan
+  1. **Directory Convention:** Enforce `features/` folders in `@sous/web` and domain-based modules in `@sous/api`.
+  2. **View Standards:** Create a lint rule or template that forbids data fetching inside components located in `_components/` or `View.tsx` files.
+  3. **Controller Standards:** Document the use of Server Actions for mutations and `fetch` (with caching) in Server Components for data.
+  4. **Shared Types:** Ensure the `client-sdk` provides the shared types needed by both Controllers and Views.
+  

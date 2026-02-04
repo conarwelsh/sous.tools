@@ -68,3 +68,16 @@ export function Button({ className, children, ...props }) {
 - **Negative:**
   - **Setup Complexity:** Configuring TurboRepo to handle `react-native-web` transpilation for Next.js 16 requires careful configuration (transpile-modules).
   - **Web-First Limitations:** Some web-specific CSS properties (like complex animations or grid layouts) have limited support in React Native and must be handled carefully.
+
+## Research & Implementation Plan
+
+### Research
+- **NativeWind v4:** The latest version allows for a "Shadcn-like" experience using Tailwind CSS on both Web (via CSS) and Native (via runtime transformations).
+- **React Native Web:** Maturity check confirmed it's stable for Next.js 16 integration.
+- **@rn-primitives:** Verified these offer the accessibility features of Radix UI while remaining platform-agnostic.
+
+### Implementation Plan
+1. **Monorepo Setup:** Configure the `@sous/ui` package with the necessary Babel/Metro/Turbo configurations for cross-platform transpilation.
+2. **Design Tokens:** Define the theme (colors, spacing, radius) in a `tailwind.config.js` shared across the monorepo.
+3. **Core Atoms:** Build the base component set (Button, Input, Card, Text) using React Native primitives and NativeWind.
+4. **Documentation (Storybook):** Setup Storybook (or `@sous/docs`) to visualize components on both Web and (simulated) Mobile.

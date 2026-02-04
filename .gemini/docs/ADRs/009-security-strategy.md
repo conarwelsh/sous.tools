@@ -19,7 +19,8 @@ As a multi-tenant SaaS platform (`sous.tools`), we must ensure strict data isola
 We will implement **Row-Level Security (RLS)** at the database level (Supabase/PostgreSQL).
 - Every table containing tenant-specific data will include an `organization_id`.
 - Database policies will be configured to ensure that a database user (or a scoped session) can only access rows matching their `organization_id`.
-- The `@sous/api` will act as the gatekeeper, assuming a "Service Role" to set the appropriate tenant context for each request.
+- The `@sous/api` will act as the gatekeeper, using **Drizzle ORM** to execute scoped queries and manage tenant-specific session context within the database connection.
+- **Enforcement:** Drizzle's relational queries and middleware will be used to ensure `organization_id` is consistently applied.
 
 ### 2. Identity & Access Management (IAM)
 - **Roles:** We will start with three hierarchical roles:
@@ -51,3 +52,15 @@ We will implement **Row-Level Security (RLS)** at the database level (Supabase/P
 - **Negative:**
   - **Performance:** Checking the Redis Deny List on every refresh/socket connection adds a small latency overhead.
   - **Complexity:** Managing RLS policies in PostgreSQL requires careful migration planning and testing.
+
+## Research & Implementation Plan
+
+### Research
+- **Supabase Auth vs. Custom JWT:** Selected custom JWT for full control over session lifecycle and integration with our Redis-based revoke list.
+- **PostgreSQL RLS:** Verified the performance of RLS policies with complex joins.
+
+### Implementation Plan
+1. **IAM Module:** Build the core authentication logic in `@sous/api` (Login, Register, Refresh).
+2. **RLS Policies:** Write the SQL migrations to enable RLS and create the `auth.uid()` and `auth.org_id()` policies.
+3. **Redis Integration:** Setup Upstash Redis and implement the token revocation check in a NestJS Guard.
+4. **Guard Implementation:** Create `@Roles()` decorators and `RolesGuard` to enforce RBAC at the controller level.

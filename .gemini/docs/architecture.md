@@ -1,1 +1,14 @@
-# Architecture\n\n## Overview\nThis project is a monorepo managed by TurboRepo.\n\n## Components\n- **Frontend**: Next.js (@sous/web)\n- **Backend**: NestJS (@sous/api)\n- **CLI**: NestJS (@sous/cli)\n- **Shared Libraries**: Located in `packages/`.\n\n## Constraints\n- **Environment Variables**: Only `@sous/config` can access `process.env`.\n- **Logging**: All logging must use `@sous/logger`.
+# Architecture
+
+## Overview
+This project is a monorepo managed by TurboRepo.
+
+## Components
+- **Frontend**: Next.js (@sous/web)
+- **Backend**: NestJS (@sous/api)
+- **CLI**: NestJS (@sous/cli)
+- **Shared Libraries**: Located in `packages/`.
+
+## Constraints
+- **Environment Variables**: Only `@sous/config` can access `process.env`. The use of `.env` files in applications is strictly forbidden; all config (including ports) must be resolved via `@sous/config`.
+- **Logging**: All logging must use `@sous/logger`.

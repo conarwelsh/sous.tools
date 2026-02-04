@@ -25,7 +25,7 @@ This is a monorepo for the `@sous` suite of tools, managed using TurboRepo. It c
   - `@sous/typescript-config`: Shared TSConfig.
 
 ## Coding Mandates & Conventions
-1.  **Environment Variables:** NEVER access `process.env` directly in apps or other packages. Always define and export them from `@sous/config`.
+1.  **Environment Variables:** NEVER access `process.env` directly in apps or other packages. Always define and export them from `@sous/config`. The use of `.env` files within applications is FORBIDDEN; all configuration (including ports for Next.js and Vite) MUST be centralized in `@sous/config`.
 2.  **Logging:** NEVER use `console.log`, `console.error`, etc. Always import and use the logger from `@sous/logger`.
 3.  **Namespace:** All internal packages are scoped under `@sous/` (e.g., `@sous/ui`).
 4.  **Documentation:** The `.gemini/docs/` folder tracks features, architecture, and ADRs.
@@ -70,6 +70,7 @@ The application is a **Multi-Tenant SaaS** for restaurant management.
 
 ## Current State (as of 2026-02-03)
 - Initial scaffold complete.
-- Apps created but barebones.
-- Packages created but empty (placeholders).
+- Apps created (Web, API, CLI, Native Suite).
+- Packages operational: `@sous/config` (Infisical SDK v4), `@sous/logger`, `@sous/ui`, etc.
+- CLI Features: Development orchestration (`sous dev`), Log management (`sous logs`), Config management (`sous config`), Quality checks (`sous test`, `sous check`), Maintenance (`sous housekeep`).
 - Strict linting/build pipeline configured via Turbo.

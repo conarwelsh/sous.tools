@@ -1,0 +1,14 @@
+{
+  "name": "@sous/native-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "echo \"No tests defined\" && exit 0",
+    "build": "echo 'No build for native-bridge (Rust)'",
+    "typecheck": "echo 'No typecheck for native-bridge (Rust)'",
+    "lint": "echo 'No lint for native-bridge (Rust)'"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.10.0"
+  }
+}

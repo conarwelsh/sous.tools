@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sous-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: sous_user
+      POSTGRES_PASSWORD: sous_password
+      POSTGRES_DB: sous_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: sous-redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:

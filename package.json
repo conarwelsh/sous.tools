@@ -1,14 +1,21 @@
 {
   "name": "sous-tools",
   "private": true,
+  "packageManager": "pnpm@10.27.0",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "prepare": "husky",
+    "sous": "pnpm --filter @sous/cli run start --"
   },
   "devDependencies": {
-    "turbo": "latest",
-    "prettier": "latest"
+    "husky": "^9.1.7",
+    "prettier": "latest",
+    "tsup": "^8.5.1",
+    "turbo": "latest"
   }
 }

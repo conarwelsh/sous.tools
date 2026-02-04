@@ -57,3 +57,17 @@ The logger will support two layers of context:
 - **Negative:**
   - `AsyncLocalStorage` introduces slight complexity in setting up the "root" context in apps (middleware required).
   - Dependency on Better Stack for remote viewing.
+  
+  ## Research & Implementation Plan
+  
+  ### Research
+  - **Pino:** Benchmark-proven low overhead. Excellent support for "pretty" dev logs and structured JSON prod logs.
+  - **Better Stack (Logtail):** Provides a seamless Pino transport and a high-quality dashboard for log aggregation.
+  - **AsyncLocalStorage:** Native Node.js module used to propagate request-level context (trace IDs) without manual prop drilling.
+  
+  ### Implementation Plan
+  1. **Core Logger:** Build the base Pino configuration in `@sous/logger`.
+  2. **Transports:** Configure `pino-pretty` for development and `@logtail/pino` for production.
+  3. **Context Middleware:** Create a NestJS interceptor and Next.js middleware to initialize `AsyncLocalStorage` with unique trace IDs for every request.
+  4. **Branding:** Implement custom `pino-pretty` coloring that matches the `@sous/ui` design system.
+  

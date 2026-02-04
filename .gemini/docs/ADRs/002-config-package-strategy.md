@@ -53,3 +53,16 @@ We will strictly enforce a **Centralized Configuration** strategy using the `@so
 - **Negative:**
   - Adds a runtime dependency on the config package initialization.
   - Requires setup of Infisical for local development.
+  
+  ## Research & Implementation Plan
+  
+  ### Research
+  - **Infisical:** Selected for its CLI-based secret injection and robust API. It allows us to keep `.env` files out of the repository.
+  - **Zod:** Chosen for its type inference and runtime validation. It ensures that if an environment variable is missing, the app fails immediately with a clear error.
+  
+  ### Implementation Plan
+  1. **Define Schema:** Create `src/schema.ts` in `@sous/config` using Zod to define all required variables.
+  2. **Infisical Setup:** Configure the Infisical CLI to inject variables into the local environment during `pnpm dev`.
+  3. **Validation Logic:** Implement an initializer that parses `process.env` against the Zod schema and exports a frozen, typed `config` object.
+  4. **Integration:** Update all apps to import `config` from `@sous/config` and remove any direct `process.env` calls.
+  

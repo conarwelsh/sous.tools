@@ -1,1 +1,26 @@
-{"name": "@sous/ui", "version": "0.0.0", "main": "index.js", "types": "index.d.ts"}
+{
+  "name": "@sous/ui",
+  "version": "0.1.0",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "test": "echo \"No tests defined\" && exit 0",
+    "typecheck": "echo 'Placeholder'",
+    "build": "echo 'Placeholder'",
+    "lint": "echo 'Placeholder'"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "lucide-react-native": "^0.563.0",
+    "nativewind": "^4.2.1",
+    "react-native": "^0.83.1",
+    "react-native-web": "^0.21.2",
+    "tailwind-merge": "^3.4.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.24",
+    "babel-plugin-react-native-web": "^0.21.2",
+    "postcss": "^8.5.6",
+    "tailwindcss": "3.4.17"
+  }
+}

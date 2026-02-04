@@ -1,0 +1,11 @@
+{
+  "name": "@sous/wearos",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "echo \"No tests defined\" && exit 0",
+    "build": "echo 'No build for wearos (Kotlin)'",
+    "typecheck": "echo 'No typecheck for wearos (Kotlin)'",
+    "lint": "echo 'No lint for wearos (Kotlin)'"
+  }
+}

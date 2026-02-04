@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: sous-api-staging
+    env: node
+    plan: free
+    region: ohio
+    buildCommand: pnpm install && turbo run build --filter=@sous/api
+    startCommand: pnpm --filter=@sous/api run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: staging
+      - fromGroup: sous-shared-secrets
+
+  - type: web
+    name: sous-api-production
+    env: node
+    plan: free
+    region: ohio
+    buildCommand: pnpm install && turbo run build --filter=@sous/api
+    startCommand: pnpm --filter=@sous/api run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - fromGroup: sous-shared-secrets

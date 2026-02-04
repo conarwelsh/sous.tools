@@ -61,3 +61,17 @@ To prevent confusion, **App Icons** must change color based on the active enviro
   - **Control:** Self-hosted runners allow unlimited build minutes for complex native compilations.
 - **Negative:**
   - **Complexity:** managing credentials across different providers (Redis Cloud vs Upstash) requires careful config management via `@sous/config` and Infisical.
+
+## Research & Implementation Plan
+
+### Research
+- **Vercel/Render/Supabase:** Selected for their best-in-class DX and generous free tiers.
+- **GitHub Self-Hosted Runners:** Evaluated as the cost-effective solution for heavy ARM64/Native builds that exceed free CI limits.
+
+### Implementation Plan
+1. **Infrastructure as Code:** Document the manual setup of each service until we scale to needing Terraform/Pulumi.
+2. **Environment Synchronization:** Use the Infisical CLI to sync secrets between Vercel, Render, and Supabase.
+3. **CI/CD Workflows:** Create GitHub Actions for:
+    - Web/API deployment (Vercel/Render).
+    - Native build artifact generation (Android/iOS/AppImage).
+4. **Branding Assets:** Create a script in `@sous/ui` that generates environment-specific icons/colors for all apps.

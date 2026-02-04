@@ -1,4 +1,28 @@
-# History\n\n## 2026-02-03
+# History
+
+## 2026-02-04
+- Refactored `scripts/dev-orchestrator.ts` to use absolute `pnpm` paths and avoid `shell: true` issues, fixing `ENOENT` errors during app startup.
+- Fixed Zellij `dev.kdl` to properly show the tab bar and ensure all service logs are piped to the "God View".
+- Updated root `.idea` configuration to use `#GRADLE_LOCAL_JAVA_HOME` for better WSL compatibility in Android Studio.
+- Switched to `includeBuild` in the root `settings.gradle.kts` for Tauri-based projects.
+- Fixed a Gradle sync error in the `apps/native` subproject by removing the redundant `allprojects` repository block.
+- Fixed Android Studio "Invalid Gradle JDK" warnings by switching to `#PROJECT_SDK` and defining a clean `17` JavaSDK in `.idea/misc.xml`.
+- Configured monorepo for "Single Window" Android Studio support by adding root `settings.gradle.kts` and `build.gradle.kts`.
+- Updated `dev-device-installation.md` with physical device setup and monorepo IDE instructions.
+- Fixed `@sous/config` package by implementing a proper build step with `tsup`. This resolved a `SyntaxError: Named export 'localConfig' not found` in Vite.
+- Improved `scripts/install-dev.sh` to support ZSH, use correct Android SDK paths, and export `TAURI_DEV_HOST`.
+- Fixed missing `unzip` dependency and added automatic ARM64 `apt` source fixing in `scripts/install-dev.sh`.
+- Verified `@sous/docs` and `@sous/web` functionality.
+- Configured development environment with non-conflicting ports:
+  - API: 4000
+  - Web: 3000
+  - Docs: 3001
+  - Native Apps (Vite): 1421-1424
+- Fixed `@sous/native*` application identifiers in `tauri.conf.json` to avoid reserved keywords (e.g., changed `com.conar.native` to `com.sous.nativeapp`).
+- Successfully started all core services and native app dev servers.
+- Verified all services are responding via curl.
+
+## 2026-02-03
 - Initial scaffolding of the project structure.
 - Created apps: web, api, cli.
 - Created packages: client-sdk, config, eslint-config, logger, typescript-config, ui.
@@ -13,4 +37,41 @@
 - Created ADR 008: CLI Orchestrator Strategy (@sous/cli).
 - Created ADR 009: Security, Authentication, and Authorization Strategy.
 - Added Global Mandate: All infrastructure must operate within service **Free Tiers**.
-- Created ADR 010: Backend API Architecture & Communication Strategy (REST, GQL, WS, BullMQ, Resend).
+- Created ADR 010: Backend API Architecture & Communication Strategy (REST, GQL, WS, BullMQ, Resend, Cron, Drizzle ORM).
+- Selected **Drizzle ORM** as the primary data access layer for the platform.
+- Created ADR 011: Native Bridge Strategy (@sous/native-bridge - BLE Gateway, Offline Caching).
+- Created ADR 012: Headless Kiosk Strategy (@sous/native-headless).
+- Created ADR 013: Kitchen Display System (KDS) Strategy (@sous/native-kds).
+- Created ADR 014: Point of Sale (POS) Strategy (@sous/native-pos).
+- Created ADR 015: Universal Platform Application Strategy (@sous/web & @sous/native).
+- Created ADR 016: Documentation Platform & Branding Lab (@sous/docs).
+- Created ADR 017: Hardware Domain Strategy (Supersedes/Refines IoT Domain).
+- Created ADR 018: Recipes Domain Strategy (AI Ingestion, Advanced Scaling).
+- Created ADR 019: Invoices Domain Strategy (AI Extraction, Price History).
+- Created ADR 020: Ingredients Domain Strategy (Market Intelligence, Price Wars).
+- Created ADR 021: SuperAdmin Domain Strategy (Platform Oversight, Tenant Management).
+- Created ADR 022: Tenant Admin Domain Strategy (Organization & Location Management).
+- Created ADR 023: Layout Manager Domain Strategy (Visual WYSIWYG Editor).
+- Created ADR 024: Displays Domain Strategy (Content Assignment & Orchestration).
+- Created ADR 025: Labels Domain Strategy (Visual Label Design & Printing).
+- Created ADR 026: Accounting & Financial Intelligence Domain Strategy.
+- Created ADR 027: Third-Party Integrations Strategy (Driver/Adapter Pattern).
+- Created ADR 028: Virtual Inventory & Order Management Strategy.
+- Created ADR 029: Order Manager Strategy (Vendor Optimization & Reconciliation).
+- Created ADR 030: Wear OS Application Strategy (@sous/wearos).
+- Defined Phased Rollout Plan in `.gemini/phased-rollout.md`.
+- Added Mandate 7: Server-Side Data Fetching (Next.js Server Components & Actions).
+- Added Mandate 8: Local Development Branch (Mandatory `development` branch for local work).
+- Added Mandate 6: Automated Documentation (READMEs) for all packages and apps.
+- Implemented `sous logs tail` and `sous logs wipe` commands in `@sous/cli`.
+- Fixed `@sous/config` and `@sous/cli` Infisical integration to use SDK v4.
+- Added `sous config add` command for upserting secrets.
+- Refactored `@sous/cli` folder structure to follow DDD principles (grouped by command in `src/commands/`).
+- Added Mandate 11: Feature-Based Folder Structure (Mandatory grouping by feature/domain).
+- Stabilized Build: Enabled Webpack for `@sous/cli` to handle monorepo path aliases correctly.
+- Verified `sous dev` and `sous logs tail` functionality.
+- Implemented `sous test` (runs turbo test) and `sous check` (runs lint, typecheck, test, build).
+- Implemented `sous housekeep` to deep clean build artifacts from the monorepo root.
+- Verified `@sous/docs` and `@sous/web` load correctly in the development environment.
+- Created `dev.kdl` for Zellij-based orchestration of all services and apps.
+- Updated `sous dev` plan to include native apps (Native, Headless, KDS, POS) with focus on Android emulator.

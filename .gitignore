@@ -1,5 +1,31 @@
+# Dependencies
 node_modules
-.turbo
+.pnpm-debug.log*
+
+# Build artifacts
 dist
 .next
+.turbo
+build
+out
+*.log
+api.log
 
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Temporary files
+.csm_setup_*
+/tmp

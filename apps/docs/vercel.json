@@ -1,0 +1,5 @@
+{
+  "buildCommand": "pnpm install && turbo run build --filter=@sous/docs",
+  "outputDirectory": ".next",
+  "framework": "nextjs"
+}

@@ -3,12 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "test": "echo \"No tests defined\" && exit 0",
+    "dev": "pnpm dlx tsx ../../scripts/dev-orchestrator.ts web",
     "build": "next build",
+    "typecheck": "tsc --noEmit",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
+    "@sous/config": "workspace:*",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"

@@ -78,3 +78,18 @@ Wherever possible, the CLI will not reimplement logic. It will invoke the corres
 - **Negative:**
     - **Multiplexer Dependency:** Requires users to have Zellij or Tmux installed on their local machine.
     - **Process Management Complexity:** Ensuring 100% cleanup of ghost processes across different OS environments can be challenging.
+
+## Research & Implementation Plan
+
+### Research
+- **Nest Commander:** Provides a familiar NestJS dependency injection system for building CLI commands.
+- **Zellij/Tmux:** Evaluated Zellij as the modern, Rust-based alternative for terminal multiplexing in dev.
+
+### Implementation Plan
+1. **Core CLI:** Initialize `@sous/cli` with `nest-commander`.
+2. **Orchestrator Command:** Implement `sous dev` which:
+    - Checks for dependencies (Docker, Zellij).
+    - Starts the backend infra (Postgres, Redis).
+    - Launches a Zellij session with tabbed panes for each app.
+3. **Housekeeping:** Implement cleanup commands for `node_modules` and caches.
+4. **Interactive DB Tools:** Create the `sous db` command suite for migrations and seeding.
