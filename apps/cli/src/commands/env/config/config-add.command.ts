@@ -1,3 +1,4 @@
+import { logger } from '@sous/logger';
 import { SubCommand, CommandRunner, Option } from 'nest-commander';
 import { InfisicalSDK } from '@infisical/sdk';
 import * as process from 'process';
@@ -20,7 +21,7 @@ export class ConfigAddCommand extends CommandRunner {
     const { key, value, env: envs } = options;
 
     if (!key || !value) {
-      console.error('❌ Error: --key and --value are required');
+      logger.error('❌ Error: --key and --value are required');
       process.exit(1);
     }
 
@@ -29,7 +30,7 @@ export class ConfigAddCommand extends CommandRunner {
     const projectId = process.env.INFISICAL_PROJECT_ID;
 
     if (!clientId || !clientSecret || !projectId) {
-      console.error('❌ Error: Missing Infisical credentials (INFISICAL_CLIENT_ID, INFISICAL_CLIENT_SECRET, INFISICAL_PROJECT_ID)');
+      logger.error('❌ Error: Missing Infisical credentials (INFISICAL_CLIENT_ID, INFISICAL_CLIENT_SECRET, INFISICAL_PROJECT_ID)');
       process.exit(1);
     }
 
@@ -43,7 +44,7 @@ export class ConfigAddCommand extends CommandRunner {
 
     for (const env of targetEnvs) {
       const infisicalEnv = env === 'development' ? 'dev' : env === 'staging' ? 'staging' : 'prod';
-      console.log(`🚀 Upserting ${key} to ${env} (${infisicalEnv})...`);
+      logger.info(`🚀 Upserting ${key} to ${env} (${infisicalEnv})...`);
       
       try {
         // Try to get secret first
@@ -61,7 +62,7 @@ export class ConfigAddCommand extends CommandRunner {
             secretPath: '/',
             type: 'shared' as any, // Cast to any or import SecretType if strictly checked
           });
-          console.log(`✅ Updated ${key} in ${env}`);
+          logger.info(`✅ Updated ${key} in ${env}`);
         } catch (e) {
           // If not found (assuming error means not found), create
           await client.secrets().createSecret(key, {
@@ -71,10 +72,10 @@ export class ConfigAddCommand extends CommandRunner {
             secretPath: '/',
             type: 'shared' as any,
           });
-          console.log(`✅ Created ${key} in ${env}`);
+          logger.info(`✅ Created ${key} in ${env}`);
         }
       } catch (error) {
-        console.error(`❌ Failed for ${env}:`, error instanceof Error ? error.message : error);
+        logger.error(error, `❌ Failed for ${env}`);
       }
     }
   }

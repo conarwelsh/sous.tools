@@ -1,3 +1,4 @@
+import { logger } from '@sous/logger';
 import { SubCommand, CommandRunner, Option } from 'nest-commander';
 import { spawn } from 'child_process';
 import * as path from 'path';
@@ -14,7 +15,7 @@ export class TestCommand extends CommandRunner {
       args.push('--filter', options.filter);
     }
     
-    console.log(`> turbo ${args.join(' ')}`);
+    logger.info(`> turbo ${args.join(' ')}`);
 
     // Execute from the root of the monorepo (2 levels up from apps/cli)
     // process.cwd() is apps/cli when running via "pnpm sous"
@@ -37,7 +38,7 @@ export class TestCommand extends CommandRunner {
       });
       
       child.on('error', (err) => {
-        console.error(err);
+        logger.error(err);
         reject(err);
       });
     });

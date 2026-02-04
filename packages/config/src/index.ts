@@ -1,6 +1,7 @@
 import { config as loadDotenv } from 'dotenv';
 import { InfisicalSDK } from '@infisical/sdk';
 import { configSchema, type Config } from './schema';
+import { logger } from '@sous/logger';
 
 loadDotenv();
 
@@ -75,7 +76,7 @@ export async function getConfig(envOverride?: string): Promise<Config> {
         [secret.secretKey]: secret.secretValue,
       }), {});
     } catch (error) {
-      console.warn(`Failed to load secrets from Infisical for ${env}, falling back to process.env`, error);
+      logger.warn(`Failed to load secrets from Infisical for ${env}, falling back to process.env`, error);
     }
   }
 
@@ -117,7 +118,7 @@ export async function getConfig(envOverride?: string): Promise<Config> {
   const parsed = configSchema.safeParse(mergedConfig);
 
   if (!parsed.success) {
-    console.error(`❌ Invalid configuration for ${env}:`, parsed.error.format());
+    logger.error(`❌ Invalid configuration for ${env}:`, parsed.error.format());
     process.exit(1);
   }
 

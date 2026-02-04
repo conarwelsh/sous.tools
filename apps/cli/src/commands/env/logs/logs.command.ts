@@ -1,3 +1,4 @@
+import { logger } from '@sous/logger';
 import { SubCommand, CommandRunner } from 'nest-commander';
 import { LogsTailCommand } from './logs-tail.command.js';
 import { LogsWipeCommand } from './logs-wipe.command.js';
@@ -12,6 +13,6 @@ export class LogsCommand extends CommandRunner {
     if (passedParam.length > 0 && ['tail', 'wipe'].includes(passedParam[0])) {
       return;
     }
-    console.log('Please specify a subcommand: tail, wipe');
+    logger.info('Please specify a subcommand: tail, wipe');
   }
 }

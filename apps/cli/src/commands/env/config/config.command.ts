@@ -1,3 +1,4 @@
+import { logger } from '@sous/logger';
 import { SubCommand, CommandRunner, Option } from 'nest-commander';
 import { getConfig } from '@sous/config';
 import { ConfigAddCommand } from './config-add.command.js';
@@ -17,13 +18,13 @@ export class ConfigCommand extends CommandRunner {
     options?: ConfigOptions,
   ): Promise<void> {
     const env = options?.env || 'development';
-    console.log(`🔍 Fetching configuration for environment: ${env}...`);
+    logger.info(`🔍 Fetching configuration for environment: ${env}...`);
 
     try {
       const config = await getConfig(env);
-      console.log(JSON.stringify(config, null, 2));
+      logger.info(JSON.stringify(config, null, 2));
     } catch (error) {
-      console.error(`❌ Failed to fetch configuration for ${env}:`, error.message);
+      logger.error(error, `❌ Failed to fetch configuration for ${env}`);
     }
   }
 

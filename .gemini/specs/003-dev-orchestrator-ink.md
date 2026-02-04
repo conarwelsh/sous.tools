@@ -4,12 +4,13 @@
 Implement a robust, interactive Terminal User Interface (TUI) for the `sous dev` command using **React Ink**. This replaces the fragile Zellij/Tmux orchestration with a centrally managed, auto-restarting, and interactive dashboard.
 
 ## Features
-- **Central Process Management:** Start, stop, and restart apps (`web`, `api`, `native`, `docs`) from one view.
-- **Docker Orchestration:** Real-time status indicators and start/stop controls for Docker Compose services (Postgres, Redis, etc.).
-- **RPi Edge Integration:** One-click "Sync and Start" for Raspberry Pi nodes on the local network, including SSH-based log aggregation.
-- **Interactive Hotkeys:** 
-...
-### 1. The `ProcessManager` Service
+- **Fullscreen Dashboard:** Occupies the entire terminal buffer (alt-screen) for a clean, distraction-free view.
+- **Central Process Management:** Start, stop, and restart all 8 apps (`web`, `api`, `docs`, `native`, `headless`, `kds`, `pos`, `wearos`).
+- **Auto-Start Core:** `api`, `web`, and `docs` start automatically on launch.
+- **Docker Orchestration:** Real-time status indicators and start/stop controls for Docker Compose services.
+- **Interactive Terminal Panel:** A dedicated area for running one-off shell commands without leaving the orchestrator.
+- **Visual Status "Traffic Lights":** Use brand-aligned icons (●) with OKLCH-mapped colors (Green/Red/Yellow).
+- **RPi Edge Integration:** One-click "Sync and Start" for Raspberry Pi nodes.
 A core TypeScript class in `@sous/cli` that:
 - Uses `tree-kill` to ensure process groups are terminated.
 - Uses the `docker-compose` Node.js wrapper to query and control local infrastructure.

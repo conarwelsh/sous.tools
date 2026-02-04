@@ -1,3 +1,4 @@
+import { logger } from '@sous/logger';
 import { SubCommand, CommandRunner, Option } from 'nest-commander';
 import { spawn } from 'child_process';
 import * as path from 'path';
@@ -13,13 +14,13 @@ export class HousekeepCommand extends CommandRunner {
     if (!options.yes) {
       const confirmed = await this.confirmAction();
       if (!confirmed) {
-        console.log('❌ Operation cancelled.');
+        logger.info('❌ Operation cancelled.');
         return;
       }
     }
 
     const rootDir = path.resolve(process.cwd(), '../../');
-    console.log(`🧹 Cleaning up artifacts in ${rootDir}...`);
+    logger.info(`🧹 Cleaning up artifacts in ${rootDir}...`);
 
     // Using 'find' is efficient for deep cleaning.
     // We'll target common build and dependency directories.
@@ -32,7 +33,7 @@ export class HousekeepCommand extends CommandRunner {
     const findExpression = targets.map(t => `-name "${t}"`).join(' -o ');
     const command = `find . -type d \( ${findExpression} \) -prune -exec rm -rf {} +`;
 
-    console.log(`> ${command}`);
+    logger.info(`> ${command}`);
 
     const child = spawn(command, { 
       stdio: 'inherit', 
@@ -43,7 +44,7 @@ export class HousekeepCommand extends CommandRunner {
     return new Promise((resolve, reject) => {
       child.on('exit', (code) => {
         if (code === 0) {
-          console.log('✨ Housekeeping complete! Run "pnpm install" to rehydrate.');
+          logger.info('✨ Housekeeping complete! Run "pnpm install" to rehydrate.');
           resolve();
         } else {
           process.exit(code ?? 1);
@@ -51,7 +52,7 @@ export class HousekeepCommand extends CommandRunner {
       });
       
       child.on('error', (err) => {
-        console.error(err);
+        logger.error(err);
         reject(err);
       });
     });

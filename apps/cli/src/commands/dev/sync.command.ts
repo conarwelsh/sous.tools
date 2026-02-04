@@ -1,3 +1,4 @@
+import { logger } from '@sous/logger';
 import { SubCommand, CommandRunner } from 'nest-commander';
 import { execSync } from 'child_process';
 
@@ -15,20 +16,20 @@ export class SyncCommand extends CommandRunner {
     passedParam: string[],
     options?: Record<string, any>,
   ): Promise<void> {
-    console.log('🔄 Synchronizing development environment across reachable devices...');
+    logger.info('🔄 Synchronizing development environment across reachable devices...');
     
     for (const ip of this.targetDevices) {
-      console.log(`\n📡 Checking device: ${ip}...`);
+      logger.info(`\n📡 Checking device: ${ip}...`);
       try {
         // Ping or SSH check
         execSync(`ssh -o ConnectTimeout=2 -o BatchMode=yes ${ip} exit`, { stdio: 'ignore' });
-        console.log(`✅ ${ip} is ONLINE. Running sync...`);
+        logger.info(`✅ ${ip} is ONLINE. Running sync...`);
         execSync(`pnpm sous dev install ${ip}`, { stdio: 'inherit' });
       } catch (error) {
-        console.warn(`⚠️  ${ip} is OFFLINE. Skipping.`);
+        logger.warn(`⚠️  ${ip} is OFFLINE. Skipping.`);
       }
     }
     
-    console.log('\n✅ Cross-device sync process finished.');
+    logger.info('\n✅ Cross-device sync process finished.');
   }
 }

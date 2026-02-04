@@ -1,6 +1,7 @@
 import { Command, CommandRunner } from 'nest-commander';
 import { ConfigCommand } from './config/config.command.js';
 import { LogsCommand } from './logs/logs.command.js';
+import { logger } from '@sous/logger';
 
 @Command({
   name: 'env',
@@ -12,6 +13,6 @@ export class EnvCommand extends CommandRunner {
     if (passedParam.length > 0 && ['config', 'logs'].includes(passedParam[0])) {
       return;
     }
-    console.log('Please specify a subcommand: config, logs');
+    logger.info('Please specify a subcommand: config, logs');
   }
 }

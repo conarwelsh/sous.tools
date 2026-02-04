@@ -33,17 +33,24 @@ This is a monorepo managed by **TurboRepo** and **pnpm workspaces**.
 - Docker (for local infra)
 - Infisical CLI (for secrets)
 
-### 2. Installation
+### 2. Secrets & Configuration
+The platform uses **Infisical** for secret management. You must provide the bootstrap credentials in a root `.env` file (copied from `.env.example`):
 ```bash
-pnpm install
-pnpm sous install
+cp .env.example .env
+# Edit .env with your INFISICAL_CLIENT_ID, etc.
 ```
 
-### 3. Development
+### 3. Installation
+```bash
+pnpm install
+pnpm sous dev install
+```
+
+### 4. Development
 ```bash
 pnpm sous dev
 ```
-This will launch a Zellij session with the API, Web, and Docs servers running.
+This will launch the **Ink TUI Dashboard** with the API, Web, and Docs servers running.
 
 ## Architecture & Mandates
 The project is governed by strict mandates found in [.gemini/GEMINI.md](./.gemini/GEMINI.md).

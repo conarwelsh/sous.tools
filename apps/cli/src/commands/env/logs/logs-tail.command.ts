@@ -1,3 +1,4 @@
+import { logger } from '@sous/logger';
 import { SubCommand, CommandRunner, Option } from 'nest-commander';
 import { spawn } from 'child_process';
 import * as path from 'path';
@@ -18,8 +19,8 @@ export class LogsTailCommand extends CommandRunner {
     if (env === 'development') {
       await this.tailLocalLogs();
     } else {
-      console.log(`⚠️  Tailing remote logs for '${env}' is not yet implemented.`);
-      console.log('Please check your Better Stack dashboard.');
+      logger.info(`⚠️  Tailing remote logs for '${env}' is not yet implemented.`);
+      logger.info('Please check your Better Stack dashboard.');
     }
   }
 
@@ -28,17 +29,17 @@ export class LogsTailCommand extends CommandRunner {
     const logFile = path.join(homeDir, '.sous', 'logs', 'combined.log');
 
     if (!fs.existsSync(logFile)) {
-      console.error(`❌ Log file not found at: ${logFile}`);
-      console.log('Run "sous dev" to generate logs.');
+      logger.error(`❌ Log file not found at: ${logFile}`);
+      logger.info('Run "sous dev" to generate logs.');
       return;
     }
 
-    console.log(`📄 Tailing local logs from ${logFile}...`);
+    logger.info(`📄 Tailing local logs from ${logFile}...`);
     
     const tail = spawn('tail', ['-f', logFile], { stdio: 'inherit' });
 
     tail.on('error', (err) => {
-      console.error('Failed to start tail process:', err);
+      logger.error(err, 'Failed to start tail process');
     });
 
     // Handle clean exit
