@@ -1,1 +1,7 @@
-branch=$(git branch --show-current)\nif [ "$branch" = "development" ]; then\n  echo "Pushing to development branch, bypassing checks."\n  exit 0\nfi\npnpm run lint && pnpm run typecheck && pnpm run build
+#!/bin/sh
+branch=$(git branch --show-current)
+if [ "$branch" = "development" ]; then
+  echo "Pushing to development branch, bypassing checks."
+  exit 0
+fi
+pnpm run lint && pnpm run typecheck && pnpm run build
