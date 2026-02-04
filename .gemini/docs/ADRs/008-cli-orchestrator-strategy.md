@@ -20,10 +20,7 @@ As a complex monorepo with multiple apps (Web, API, CLI, Native) and shared pack
 ### 1. Framework & Structure
 - **Core:** Built using **NestJS** + **nest-commander** to maintain consistency with the rest of the backend stack.
 - **Pattern:** Deeply nested subcommands following a DDD approach.
-    - `sous db [wipe|migrate|seed|reset]`
-    - `sous dev [--multiplexer=zellij|tmux]`
-    - `sous logs [--env=prod|staging|dev]` (Reference ADR 003)
-    - `sous cloud [deploy|status]`
+- **Mandate: Command Aggregation:** Every operational task defined in any package or app's `package.json` MUST be aggregated here. `@sous/cli` serves as the single source of truth for developer operations.
 - **Delegation:** The CLI will act as a wrapper around `pnpm` workspace commands. 
     - *Example:* `sous db wipe` executes `pnpm --filter @sous/api run db:wipe`.
 
@@ -40,10 +37,12 @@ As a complex monorepo with multiple apps (Web, API, CLI, Native) and shared pack
 ### 4. Planned Command List (Brainstorming)
 This is a living list of commands to be implemented in `@sous/cli`.
 
-#### **General**
-- `sous`: Displays the brand ASCII banner and a welcome message.
-- `sous housekeeping`: Deep cleans the monorepo by deleting all `node_modules`, `.next`, `dist`, and `.turbo` folders.
-- `sous cache clear`: Clears all TurboRepo and package manager caches.
+#### **Maintenance (`sous maintenance`)**
+- `sous maintenance housekeep`: Deep cleans the monorepo by deleting all `node_modules`, `.next`, `dist`, and `.turbo` folders.
+- `sous maintenance cache-clear`: Clears all TurboRepo and package manager caches.
+- `sous maintenance dead-code`: Scans the monorepo for unused exports and files.
+- `sous maintenance unused-packages`: Scans `package.json` files for dependencies that are not imported anywhere in the code.
+- `sous maintenance unused-css`: Scans for CSS classes or styles that are defined but never applied in components.
 
 #### **Development (`sous dev`)**
 - `sous dev`: Starts the multiplexed (Zellij/Tmux) development environment.

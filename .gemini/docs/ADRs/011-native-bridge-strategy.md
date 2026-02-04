@@ -44,6 +44,12 @@ We will create a specialized package, **`@sous/native-bridge`**, to serve as the
 - Expose typed TypeScript bindings for all Rust commands to ensure end-to-end type safety.
 - The bridge will be a package within the `packages/` directory of the monorepo.
 
+### 4. Safety Mode (Local SQLite Fallback)
+As the POS and KDS are mission-critical, the bridge will implement a **Safety Mode**:
+- **Persistence:** When the device is offline, incoming orders (POS) and telemetry (KDS) are saved to a local SQLite database (`rusqlite`).
+- **Sync Orchestrator:** A background thread in the bridge periodically attempts to "Flush" these local records to the `@sous/api` once connectivity is restored.
+- **Conflict Resolution:** The API will implement a "Last-Write-Wins" or "Idempotent Upsert" strategy for these delayed records.
+
 ## Consequences
 - **Positive:**
   - **Code Reuse:** Logic for complex hardware protocols is written once in Rust and shared across all native apps.

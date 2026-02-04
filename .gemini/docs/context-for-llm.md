@@ -19,7 +19,8 @@ This is a monorepo for the `@sous` suite of tools, managed using TurboRepo. It c
 - **`packages/`**
   - `@sous/config`: **CRITICAL**. The only place allowed to access `process.env`.
   - `@sous/logger`: **CRITICAL**. The only allowed logger (no `console.log`).
-  - `@sous/ui`: Shared UI components.
+  - `@sous/ui`: Shared UI components (Universal via React Native Reusables & NativeWind).
+  - `@sous/features`: Shared "Organisms" and business logic (The Shell Pattern).
   - `@sous/client-sdk`: Generated API client.
   - `@sous/eslint-config`: Shared linting rules.
   - `@sous/typescript-config`: Shared TSConfig.
@@ -30,28 +31,44 @@ This is a monorepo for the `@sous` suite of tools, managed using TurboRepo. It c
 3.  **Namespace:** All internal packages are scoped under `@sous/` (e.g., `@sous/ui`).
 4.  **Documentation:** The `.gemini/docs/` folder tracks features, architecture, and ADRs.
 5.  **Free Tier:** ALL infrastructure must run on service free tiers.
+6.  **"use client" Directive:** Only use `"use client"` in components that interact with the DOM or Browser APIs; always prefer Server Components.
+7.  **Nested DDD:** Use strategic umbrella folders (e.g., `src/domains/procurement/invoices/`) to group related features.
+8.  **The Shell Pattern:** Apps like `@sous/web` and `@sous/native` are thin shells; all feature logic and views live in `@sous/features`.
+9.  **CLI Command Aggregation:** All operational scripts in `package.json` files must be aggregated into and accessible via `@sous/cli`.
+10. **Build Exclusion:** Internal docs and `@.gemini/` files must be excluded from all production build artifacts.
 
 ## Platform Domain Model (ADR 005)
 The application is a **Multi-Tenant SaaS** for restaurant management.
 - **Tenancy:** Row-level security via `Organization` (Tenant) and `Location` (Store).
 - **Core Domains:**
-  - **IAM:** Users, Roles, Auth, Organizations.
-  - **Catalog:** Ingredients, Vendors, Invoices (Supply Chain).
-  - **Culinary:** Recipes, Menus, Costing (The "Product").
-  - **IoT:** BLE Thermometers, Digital Menu Screens.
+  - **IAM:** Identity, Roles, Organizations.
+  - **Procurement:** Suppliers, Invoices, Price Tracking, Order Management.
+  - **Culinary:** Recipes, Menus, Prep.
+  - **Inventory:** Stock, Wastage, Purchase Orders.
+  - **Intelligence:** Real-time costing engine, price trends, margin analysis, data pruning.
+  - **Accounting:** Historical financial ledger, statutory reporting, P&L, COGS.
+  - **Hardware:** Devices (BLE, Printers), Telemetry, Offline Safety Mode.
+  - **Presentation:** Digital Screens, Layouts, Labels, Media Management.
+  - **Integrations:** Third-party ecosystem (POS, Drive).
 
-## Deployment & Infrastructure (ADR 007)
-- **Production:** `https://sous.tools` (Vercel, Render, Supabase, Upstash).
-- **Staging:** `https://staging.sous.tools` (Vercel, Render, Supabase, Redis Cloud).
-- **Visual Mandate:** App Icons MUST match the environment color:
-  - **Dev:** Success (Green)
-  - **Staging:** Warning (Orange)
-  - **Prod:** Primary (Brand)
+## Infrastructure & Constraints (ADRs 007, 028, 029, 034, 035)
+- **Free Tier:** ALL infrastructure must run on service free tiers.
+- **Local Cloud:** Docker Compose mocks for Postgres, Redis, MailDev (Resend), and Minio (Supabase Storage).
+- **Media:** Stateless management via Supabase Storage (1GB) with grayscale/WebP downsampling.
+- **Retention:** Mandatory pruning of telemetry (7 days) and job history (48h).
+- **Safety:** Offline-first capability for POS/KDS via local SQLite bridge.
+- **Efficiency:** Real-time data throttling (60s batching) to stay within Upstash limits.
 
-## CLI Orchestrator (ADR 008)
+## Branding & UI (brand-identity.md)
+- **Visuals:** High-contrast, industrial minimal, deep kitchen slate background.
+- **I18n:** Global-ready with code-split translations and RTL/LTR support.
+- **Quality:** Multi-layered pyramid (Unit, RTL, E2E, HITL Simulation).
+
+## CLI Orchestrator (ADR 008, 037, 038)
 - **Entry Point:** `sous` command.
-- **Pattern:** DDD-based subcommands (e.g., `sous db wipe`, `sous logs --env=prod`).
-- **Dev Workflow:** `sous dev` manages a Zellij/Tmux session with dedicated panels for API, Web, and Gemini-CLI.
+- **Pattern:** DDD-based subcommands (e.g., `sous db wipe`, `sous env dashboard`).
+- **Dev Workflow:** `sous dev` manages a custom Ink TUI with dedicated panels for local apps and Docker infra.
+- **Monitoring:** `sous env dashboard` provides animated, real-time platform metrics across environments.
 - **Safety:** Interactive prompts for destructive actions unless `-y` is passed.
 
 ## Security & Auth (ADR 009)

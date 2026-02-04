@@ -31,12 +31,21 @@ We will adopt a **Universal UI** architecture based on **React Native Web** and 
     - Matches the "Shadcn" developer experience (`className="..."`).
     - Handles platform-specific styling logic automatically.
 
-3.  **Headless Primitives: `@rn-primitives`**
-    - To satisfy the "Shadcn" requirement (which relies on Radix UI), we will use **@rn-primitives** (or similar libraries like `gluestack-ui` primitives if preferred).
-    - These provide accessible, unstyled components (Dialog, Accordion, Checkbox) that work universally, mimicking the Radix UI API but compatible with Native.
+3.  **Headless Primitives & Component Kit: React Native Reusables (RNR)**
+    - To satisfy the "Shadcn" requirement without the labor of manual conversion, we will use **React Native Reusables**.
+    - RNR provides a CLI-based, copy-paste workflow identical to Shadcn but built on top of **@rn-primitives** and **NativeWind v4**.
+    - This ensures our components are accessible and universal (supporting both Web and Native) out of the box.
 
 4.  **Icons: `lucide-react-native`**
     - Universal icon set that works on both platforms with consistent SVGs.
+
+### 4. Required Atomic Components (Phase 1 Baseline)
+To match the feature requirements of the platform, `@sous/ui` will implement the following universal atoms:
+- **Navigation:** Tabs, Sheet (Drawer), Accordion.
+- **Form:** Button, Input, Textarea, Label, Checkbox, Switch, Select, Slider.
+- **Display:** Card, Badge, Separator, Table, Progress, Skeleton.
+- **Overlay:** Dialog (Modal), Popover, Tooltip, Dropdown Menu.
+- **Layout:** View, Text, ScrollArea.
 
 ### Component Structure
 All components in `@sous/ui` will follow this pattern:

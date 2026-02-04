@@ -21,7 +21,52 @@
 - Fixed `@sous/native*` application identifiers in `tauri.conf.json` to avoid reserved keywords (e.g., changed `com.conar.native` to `com.sous.nativeapp`).
 - Successfully started all core services and native app dev servers.
 - Verified all services are responding via curl.
-
+- Updated ADR 004: Added mandate for strict `"use client"` directive usage (DOM/Browser API interaction only).
+- Added Mandate 13: Strict `"use client"` usage (only when DOM/Browser APIs are required).
+- Updated ADR 005: Refined domain boundaries, introduced the **Intelligence** domain for asynchronous costing, and renamed "Catalog" to "Procurement" and "IoT" to "Hardware".
+- Converted `@sous/ui` to Universal Architecture using **NativeWind v4**, **React Native Web**, and **React Native Reusables** pattern.
+- **Branding Migration:**
+    - Migrated **Neon Lettermark/Wordmark** from the legacy project.
+    - Converted SVG branding components to **`react-native-svg`** for universal cross-platform support.
+    - Added 3 new scalability-focused lettermark variants: **`plate`**, **`link`**, and **`dot`**.
+    - Updated **`brand-identity.md`** with professional `oklch` theme tokens.
+    - Established **.gemini/specs/005-documentation-hub.md** for a pixel-perfect Branding Lab with persistence and a CDD playground.
+    - Expanded **ADR 006** with a comprehensive baseline of required UI atoms (Button, Input, Card, Dialog, etc.).
+- **Architectural Refinement:**
+    - Re-indexed all ADRs (001-030) for proper logical/dependency ordering.
+    - Merged **Admin Domains** (SuperAdmin + TenantAdmin) into ADR 021.
+    - Merged **Visual Domains** (Layouts + Displays + Labels) into ADR 022 (Presentation).
+    - Created **ADR 028: Media Management Strategy** (Supabase + Cloudinary).
+    - Created **ADR 029: Data Retention & Pruning Strategy** (Free-tier row management).
+    - Updated **ADR 011: Native Bridge** with **Offline Safety Mode** (Local SQLite).
+    - Refined ADR 022: Defined the two-tier layout system (Structural Templates vs. Specialized Content Assignment).
+    - **Final Strategic Refinements:**
+        - Differentiated **Intelligence** (Real-time) vs. **Accounting** (Historical) domains.
+        - Created **ADR 032: I18n Strategy** (Type-safe, code-split translations).
+        - Created **ADR 033: Testing Strategy** (HITL simulation + Universal UI testing).
+- Created ADR 034: Real-time Throttling (60s batching for free-tier sustainability).
+- Created **ADR 035: Docker Infrastructure Strategy** (Local Cloud Mocks: Postgres, Redis, MailDev, Minio).
+- Created **ADR 036: Shared Features & Shell Pattern Strategy** (Maximizing reuse via `@sous/features`).
+- Created **ADR 037: Robust Dev Orchestrator Strategy** (Replacing Zellij with custom React Ink TUI).
+- Created **ADR 038: CLI Infrastructure Dashboard Strategy** (Animated TUI for platform metrics).
+- Established **.gemini/specs/004-cli-infra-dashboard.md** for the real-time reporting tool.
+- Integrated **Docker Compose management** (Status, Start/Stop, Logs) into the Dev Orchestrator plan.
+- Added **RPi Edge Integration** to Dev Orchestrator (SSH log tailing, one-click Sync+Start).
+- Expanded **`sous maintenance`** brainstorming with `dead-code`, `unused-packages`, and `unused-css` commands.
+- Added **`ubuntu-sandbox` image** to ADR 035 for ephemeral testing of installation scripts.
+- Added **Mandate 17: Build Artifact Exclusion** (Ensuring @.gemini is excluded from production).
+- Scaffolded **`@sous/features`** package for domain-specific "Organisms" and logic.
+- Added **Mandate 15: The Shell Pattern** (Apps are thin shells; logic lives in `@sous/features`).
+- Added **Mandate 16: CLI Command Aggregation** (All `package.json` scripts must be aggregated into `@sous/cli`).
+- **Phase Rollout Plan Realignment:**
+    - Prioritized "Phase 1.5: Production Readiness" to ensure all native apps build/deploy successfully.
+    - Elevated "Phase 2: Signage MVP" to high priority for immediate restaurant usage.
+    - Reorganized Culinary domains to focus on "Data Entry" before "Intelligence."
+    - Deprioritized KDS and POS to the final phase.
+- Established **.gemini/docs/brand-identity.md** for visual and stylistic principles.
+        - Updated **ADR 028** with strict Grayscale/WebP mandate for Invoice storage.
+        - Renamed ADR 030 to **ADR 031: Android Dev Workflow**.
+    - Established `.gemini/specs/` directory for implementation planning.
 ## 2026-02-03
 - Initial scaffolding of the project structure.
 - Created apps: web, api, cli.

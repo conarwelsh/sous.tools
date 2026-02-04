@@ -66,6 +66,40 @@
   - **Pipeline:** Ensure all tests pass via `turbo run test` before considering a task complete.
 - **Goal:** Zero regressions and high code confidence.
 
+### 13. Strict "use client" Usage (MANDATE)
+**Rule:** The `"use client"` directive MUST ONLY be used when a component requires DOM/Browser APIs or React hooks.
+- **Action:** Prioritize Next.js Server Components. Only add `"use client"` if the component uses `useState`, `useEffect`, `useContext`, or interacts with browser globals like `window` or `document`.
+- Goal: Reduce client-side bundle size and leverage server-side rendering benefits.
+
+### 14. Nested Domain-Driven Design (MANDATE)
+**Rule:** Applications MUST organize source code using "Strategic Umbrellas" within a `domains/` directory.
+- **Action:** Instead of flat folders, group related tactical features under strategic themes (e.g., `src/domains/procurement/invoices/`).
+- File Types: Each tactical folder should contain its own `.module.ts`, `.service.ts`, `.controller.ts`, and `.schema.ts` (Drizzle).
+- **Goal:** Improve code discoverability, encapsulation, and scalability as the platform grows.
+
+### 15. The Shell Pattern & Shared Features (MANDATE)
+**Rule:** High-level applications (`@sous/web`, `@sous/native`) MUST be treated as thin "Shells."
+- **Action:** 
+    - Move all complex UI ("Organisms"), business logic (Hooks), and Server Actions into the `@sous/features` package.
+    - Organize `@sous/features` using the Nested DDD mandate.
+    - Apps should only contain Routing, Platform-specific Glue, and Initialization logic.
+- **Goal:** Achieve 90%+ code reuse and maintain feature parity across platforms.
+
+### 16. CLI Command Aggregation (MANDATE)
+**Rule:** ALL management, maintenance, and operational scripts MUST be provided in the respective `package.json` of apps/packages and aggregated into `@sous/cli`.
+- **Action:** 
+    - Apps and packages must define granular scripts (e.g., `db:migrate`, `cache:clear`).
+    - `@sous/cli` must provide a corresponding subcommand that acts as a wrapper for these granular scripts using `pnpm --filter`.
+- **Goal:** Provide a single entry point (`sous`) for all developer operations and ensure all tasks are documented and accessible via the CLI.
+
+### 17. Build Artifact Exclusion (MANDATE)
+**Rule:** Documentation, context files, and internal development tools (specifically `@.gemini/**`) MUST be excluded from all production build artifacts, Docker images, and published packages.
+- **Action:**
+    - Maintain `.dockerignore` files to exclude `@.gemini/` and `.git/`.
+    - Use the `files` field in `package.json` to explicitly white-list only necessary runtime files.
+    - Ensure CI/CD pipelines do not bundle these directories into deployable units.
+- **Goal:** Minimize artifact size and prevent the leakage of internal architectural context or developer "memories" to production.
+
 ## Documentation Index
 - `docs/ADRs/`: Folder containing Architectural Decision Records (one file per decision).
 - `docs/architecture.md`: High-level system architecture.

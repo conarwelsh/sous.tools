@@ -15,13 +15,18 @@ As the codebase grows, organizing code purely by technical role (e.g., all contr
 We will adopt **Domain-Driven Design (DDD)** principles for project structure and the **Controller-View (Container-Presentational)** pattern for frontend development.
 
 ### 1. Domain-Driven Design (Global)
-Code will be organized by **Business Domain** rather than technical type.
-- **Backend (`@sous/api`):** Modules should represent domains (e.g., `UserModule`, `BillingModule`, `AuthModule`) containing their own controllers, services, and entities.
-- **Frontend (`@sous/web`):** Features should be grouped by domain directories (e.g., `features/dashboard`, `features/profile`) containing all necessary logic and specific components for that feature.
+Code will be organized by **Business Domain** using a **Nested Strategic Umbrella** structure rather than technical type.
+- **Backend (`@sous/api`):** Source code must live in `src/domains/[strategic-group]/[tactical-feature]/`.
+    - *Example:* `src/domains/procurement/invoices/` and `src/domains/procurement/suppliers/`.
+- **Frontend (`@sous/web`):** Features should be grouped similarly in `src/features/[strategic-group]/[tactical-feature]/` containing all necessary logic and specific components for that feature.
 - **Packages:** Shared logic should be extracted into domain-specific packages where appropriate.
 
 ### 2. Frontend Architecture: Controller-View Pattern
 For `@sous/web` (and other UI apps), we strictly separate **Logic** from **Rendering**.
+
+#### **Mandate: "use client" Directive Usage**
+- **Explicit Requirement:** Any component that interacts with the DOM, Browser APIs (e.g., `window`, `document`), or uses React hooks (e.g., `useState`, `useEffect`, `useContext`) MUST include the `"use client"` directive at the top of the file.
+- **Strict Necessity:** The `"use client"` directive MUST ONLY be added if the component or file actually requires client-side execution. We must default to Server Components to minimize client-side bundle size.
 
 #### A. The Controller (Container)
 - **Role:** Handles data fetching, state management, and side effects.

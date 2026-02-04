@@ -27,12 +27,14 @@ We will treat `@sous/web` and `@sous/native` as two distributions of the same **
     - **@sous/web:** Next.js 16 utilizing `react-native-web` for rendering.
     - **@sous/native:** React Native for iOS and Android.
 
-2.  **Code Sharing Strategy**
-    - **Shared Views:** All domain-specific views (e.g., `InventoryView`, `RecipeDetailView`) will be written using React Native primitives and housed in a shared location (or within `@sous/ui` features) to be imported by both apps.
+2.  **Code Sharing Strategy: The Shell Pattern**
+    - **@sous/features:** All domain-specific "Organisms" (Views) and logic (Hooks/Controllers) will be housed in this centralized package.
+    - **Thin Shells:** `@sous/web` and `@sous/native` will act as thin "Shells" whose primary responsibility is routing and platform-specific initialization.
+    - **Shared Views:** All domain-specific views (e.g., `InventoryView`, `RecipeDetailView`) will be written using React Native primitives within `@sous/features`.
     - **Shared Logic:** Data fetching and business logic will be encapsulated in shared hooks that utilize `@sous/client-sdk`.
     - **Routing:** 
-        - Web uses Next.js App Router.
-        - Native uses React Navigation (or Expo Router).
+        - Web uses Next.js App Router (Shell).
+        - Native uses React Navigation or Expo Router (Shell).
         - A light abstraction layer will be used to handle navigation across platforms.
 
 3.  **PWA Configuration (`@sous/web`)**
