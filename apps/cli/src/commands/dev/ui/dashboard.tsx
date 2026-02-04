@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Box, Text, useInput, useApp } from 'ink';
 import TextInput from 'ink-text-input';
-import { ProcessManager, ManagedProcess } from '../process-manager.service.js';
+import { ProcessManager, ManagedProcess, ManagedLog } from '../process-manager.service.js';
 import { exec } from 'child_process';
 
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
 
 type ViewMode = 'services' | 'god-view' | 'infra' | 'rpi';
 
-const BRAND_BLUE = '#0ea5e9'; // Azure Blue
+const BRAND_BLUE = '#0ea5e9'; 
 const BRAND_GRAY = '#9ca3af';
 const DARK_GRAY = '#374151';
 
@@ -32,39 +32,55 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
 
   useEffect(() => {
     const onResize = () => {
-      setTerminalSize({ 
-        columns: process.stdout.columns, 
-        rows: process.stdout.rows 
-      });
+        setTerminalSize({ columns: process.stdout.columns, rows: process.stdout.rows });
     };
     process.stdout.on('resize', onResize);
     return () => {
-      process.stdout.off('resize', onResize);
+        process.stdout.off('resize', onResize);
     };
   }, []);
 
   useEffect(() => {
     if (!manager) return;
     const handleUpdate = () => {
-      setProcesses([...manager.getProcesses()]);
+        setProcesses([...manager.getProcesses()]);
     };
-
     manager.on('update', handleUpdate);
     return () => {
-      manager.off('update', handleUpdate);
+        manager.off('update', handleUpdate);
     };
   }, [manager]);
 
+  // Enable mouse reporting for scroll support
+  useEffect(() => {
+    process.stdout.write('\x1b[?1000h'); // Enable mouse reporting
+    process.stdout.write('\x1b[?1006h'); // SGR mode
+    return () => {
+        process.stdout.write('\x1b[?1000l');
+        process.stdout.write('\x1b[?1006l');
+    };
+  }, []);
+
   useInput((input, key) => {
+    // Handle Mouse Wheel (SGR Mode)
+    if (input.startsWith('\x1b[<64')) {
+        setScrollOffset(prev => prev + 3);
+        return;
+    }
+    if (input.startsWith('\x1b[<65')) {
+        setScrollOffset(prev => Math.max(0, prev - 3));
+        return;
+    }
+
     if (isCommandMode || isFilterMode) return;
 
     if (input === 'q') exit();
-    if (input === ':') setIsCommandMode(true);
+    if (input === ':') { setIsCommandMode(true); setScrollOffset(0); }
     if (input === '/') { setIsFilterMode(true); setScrollOffset(0); }
 
     // Navigation
     if (key.tab) {
-        const modes: ViewMode[] = ['services', 'god-view', 'infra', 'rpi'] as const;
+        const modes: ViewMode[] = ['services', 'god-view', 'infra', 'rpi'];
         const currentIdx = modes.indexOf(activeTab);
         if (key.shift) {
             const nextIdx = (currentIdx - 1 + modes.length) % modes.length;
@@ -100,10 +116,10 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
         setCommand('');
         return;
     }
-    setTerminalOutput(prev => [...prev.slice(-3), `> ${value}`]);
+    setTerminalOutput(prev => [...prev.slice(-2), `> ${value}`]);
     exec(value, (error, stdout, stderr) => {
-        if (stdout) setTerminalOutput(prev => [...prev.slice(-3), stdout.trim().split('\n')[0]]);
-        if (stderr) setTerminalOutput(prev => [...prev.slice(-3), `ERR: ${stderr.trim().split('\n')[0]}`]);
+        if (stdout) setTerminalOutput(prev => [...prev.slice(-2), stdout.trim().split('\n')[0].slice(0, 50)]);
+        if (stderr) setTerminalOutput(prev => [...prev.slice(-2), `ERR: ${stderr.trim().split('\n')[0].slice(0, 50)}`]);
         setCommand('');
     });
   };
@@ -122,6 +138,9 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
   const godLogs = useMemo(() => filter 
     ? allGodLogs.filter(l => l.message.toLowerCase().includes(filter.toLowerCase()) || l.name.toLowerCase().includes(filter.toLowerCase()))
     : allGodLogs, [allGodLogs, filter]);
+
+  const sidebarWidth = 18;
+  const mainViewHeight = terminalSize.rows - 3 - 6 - 2;
 
   return (
     <Box flexDirection="column" width={terminalSize.columns} height={terminalSize.rows} paddingX={1} paddingY={0}>
@@ -150,28 +169,42 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
       {/* Main Body */}
       <Box flexGrow={1}>
         {/* Left Sidebar - Always Visible Traffic Lights */}
-        <Box flexDirection="column" width={15} borderStyle="round" borderColor={DARK_GRAY} paddingX={1}>
-            <Box marginBottom={1}>
-                <Text bold color={BRAND_GRAY}>STATUS</Text>
-            </Box>
-            {processes.map(p => (
+        <Box flexDirection="column" width={sidebarWidth} borderStyle="round" borderColor={DARK_GRAY} paddingX={1}>
+            <Box marginBottom={1}><Text bold color={BRAND_GRAY}>STATUS</Text></Box>
+            {processes.map((p, idx) => (
                 <Box key={p.id} justifyContent="space-between">
-                    <Text color={p.type === 'docker' ? '#6366f1' : 'white'} dimColor={p.type === 'docker'}>{p.name.slice(0, 8)}</Text>
+                    <Text 
+                        color={(activeTab === 'services' && idx === selectedIdx) ? BRAND_BLUE : (p.type === 'docker' ? '#6366f1' : 'white')} 
+                        bold={activeTab === 'services' && idx === selectedIdx}
+                        dimColor={p.type === 'docker' && !(activeTab === 'services' && idx === selectedIdx)}
+                    >
+                        {p.name.slice(0, 10)}
+                    </Text>
                     {getStatusIcon(p.status)}
                 </Box>
             ))}
         </Box>
 
         {/* Main View Area */}
-        <Box flexDirection="column" flexGrow={1} marginLeft={1} borderStyle="round" borderColor={DARK_GRAY} paddingX={1}>
+        <Box 
+            flexDirection="column" 
+            flexGrow={1} 
+            marginLeft={1} 
+            borderStyle="round" 
+            borderColor={activeTab === 'services' && selectedApp?.status === 'error' ? BRAND_BLUE : DARK_GRAY} 
+            paddingX={1}
+        >
             {activeTab === 'services' && (
-                <Box flexDirection="column" flexGrow={1}>
+                <Box flexDirection="column" flexGrow={1} height={mainViewHeight}>
                     <Box justifyContent="space-between" marginBottom={1}>
                         <Text bold color={BRAND_BLUE}>LOGS: {selectedApp?.name.toUpperCase()}</Text>
                         <Text color="gray">{selectedApp?.status.toUpperCase()}</Text>
                     </Box>
-                    <Box flexDirection="column" flexGrow={1}>
-                        {selectedApp?.logs.slice(-(15 + scrollOffset), selectedApp.logs.length - scrollOffset).map((l, i) => (
+                    <Box flexDirection="column" flexGrow={1} overflow="hidden">
+                        {selectedApp?.logs.slice(
+                            Math.max(0, selectedApp.logs.length - (mainViewHeight - 2) - scrollOffset), 
+                            Math.max(0, selectedApp.logs.length - scrollOffset)
+                        ).map((l, i) => (
                             <Text key={i} wrap="truncate-end" color="#d1d5db">{l.message}</Text>
                         ))}
                     </Box>
@@ -179,7 +212,7 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
             )}
 
             {activeTab === 'god-view' && (
-                <Box flexDirection="column" flexGrow={1}>
+                <Box flexDirection="column" flexGrow={1} height={mainViewHeight}>
                     <Box justifyContent="space-between" marginBottom={1}>
                         <Text bold color={BRAND_BLUE}>GOD VIEW</Text>
                         {isFilterMode ? (
@@ -188,8 +221,11 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
                             <Text color="gray" dimColor>{filter ? `Filter: ${filter}` : 'Press [/] to filter'}</Text>
                         )}
                     </Box>
-                    <Box flexDirection="column" flexGrow={1}>
-                        {godLogs.slice(-(20 + scrollOffset), godLogs.length - scrollOffset).map((l, i) => (
+                    <Box flexDirection="column" flexGrow={1} overflow="hidden">
+                        {godLogs.slice(
+                            Math.max(0, godLogs.length - (mainViewHeight - 2) - scrollOffset), 
+                            Math.max(0, godLogs.length - scrollOffset)
+                        ).map((l, i) => (
                             <Box key={i}>
                                 <Text color="gray" dimColor>[{l.timestamp.toLocaleTimeString([], { hour12: false })}] </Text>
                                 <Text color={BRAND_BLUE} bold>{l.name.padEnd(8)} </Text>

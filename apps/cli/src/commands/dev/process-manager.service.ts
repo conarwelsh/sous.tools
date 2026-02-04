@@ -1,5 +1,5 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
-import { spawn, ChildProcess } from 'child_process';
+import { spawn, ChildProcess, execSync } from 'child_process';
 import treeKill from 'tree-kill';
 import { localConfig } from '@sous/config';
 import { EventEmitter } from 'events';
@@ -30,10 +30,20 @@ export interface ManagedProcess {
 export class ProcessManager extends EventEmitter implements OnModuleDestroy {
   private processes: Map<string, ManagedProcess> = new Map();
   private godViewLogs: ManagedLog[] = [];
+  private pnpmPath: string = 'pnpm';
 
   constructor() {
     super();
+    this.resolvePnpm();
     this.initProcesses();
+  }
+
+  private resolvePnpm() {
+    try {
+      this.pnpmPath = execSync('which pnpm').toString().trim();
+    } catch (e) {
+      this.pnpmPath = 'pnpm';
+    }
   }
 
   async onModuleDestroy() {
@@ -85,7 +95,7 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
     proc.status = 'starting';
     this.emit('update');
 
-    const child = spawn('pnpm', ['--filter', `@sous/${id}`, 'run', 'dev'], {
+    const child = spawn(this.pnpmPath, ['--filter', `@sous/${id}`, 'run', 'dev'], {
       shell: true,
       env: { ...process.env, PORT: proc.port?.toString() },
     });
