@@ -97,7 +97,12 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
 
     const child = spawn(this.pnpmPath, ['--filter', `@sous/${id}`, 'run', 'dev'], {
       shell: true,
-      env: { ...process.env, PORT: proc.port?.toString() },
+      env: { 
+        ...process.env, 
+        PORT: proc.port?.toString(),
+        SOUS_JSON_LOGS: 'true',
+        FORCE_COLOR: '1'
+      },
     });
 
     proc.child = child;
@@ -157,28 +162,61 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
     await this.startProcess(id);
   }
 
-  private addLog(id: string, message: string, level: 'info' | 'error' | 'warn') {
+  private addLog(id: string, rawMessage: string, defaultLevel: 'info' | 'error' | 'warn') {
     const proc = this.processes.get(id);
     if (!proc) return;
 
-    const cleanMessage = message.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '').trim();
-    if (!cleanMessage) return;
+    const lines = rawMessage.split('\n');
+    
+    for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
 
-    const logEntry: ManagedLog = {
-      id,
-      name: proc.name,
-      message: cleanMessage,
-      timestamp: new Date(),
-      level,
-    };
+        let message = trimmed;
+        let level = defaultLevel;
+        let timestamp = new Date();
+        let name = proc.name;
 
-    proc.logs.push(logEntry);
-    if (proc.logs.length > 1000) proc.logs.shift();
+        // Try to parse as JSON log
+        try {
+            if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+                const json = JSON.parse(trimmed);
+                message = json.msg || json.message || trimmed;
+                level = this.mapPinoLevel(json.level) || defaultLevel;
+                if (json.time) timestamp = new Date(json.time);
+                if (json.name) name = json.name.replace('@sous/', '').toUpperCase();
+            } else {
+                // Strip ANSI escape codes for cleaner non-JSON logs
+                message = trimmed.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
+            }
+        } catch (e) {
+            message = trimmed.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
+        }
 
-    this.godViewLogs.push(logEntry);
-    if (this.godViewLogs.length > 2000) this.godViewLogs.shift();
+        const logEntry: ManagedLog = { id, name, message, timestamp, level };
 
-    this.emit('logs', logEntry);
+        proc.logs.push(logEntry);
+        if (proc.logs.length > 1000) proc.logs.shift();
+
+        this.godViewLogs.push(logEntry);
+        if (this.godViewLogs.length > 2000) this.godViewLogs.shift();
+    }
+
     this.emit('update');
+  }
+
+  private mapPinoLevel(level: number | string): 'info' | 'error' | 'warn' | undefined {
+    if (typeof level === 'number') {
+        if (level >= 50) return 'error';
+        if (level >= 40) return 'warn';
+        if (level >= 30) return 'info';
+    }
+    if (typeof level === 'string') {
+        const l = level.toLowerCase();
+        if (l.includes('err')) return 'error';
+        if (l.includes('warn')) return 'warn';
+        if (l.includes('info')) return 'info';
+    }
+    return undefined;
   }
 }

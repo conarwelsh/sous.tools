@@ -5,12 +5,13 @@ import { AsyncLocalStorage } from 'async_hooks';
 export const loggerStorage = new AsyncLocalStorage<Map<string, any>>();
 
 const isDev = process.env.NODE_ENV === 'development';
+const useJson = process.env.SOUS_JSON_LOGS === 'true';
 
 export function createLogger(options: { name: string }) {
   const transports: any[] = [];
 
-  // 1. Local Development Pretty Printing
-  if (isDev) {
+  // 1. Local Development Pretty Printing (unless JSON is requested by orchestrator)
+  if (isDev && !useJson) {
     transports.push({
       target: 'pino-pretty',
       options: {
@@ -43,7 +44,7 @@ export function createLogger(options: { name: string }) {
         return {};
       },
     },
-    pino.transport({ targets: transports.length > 0 ? transports : [{ target: 'pino/file', options: { destination: 1 } }] })
+    transports.length > 0 ? pino.transport({ targets: transports }) : undefined
   );
 
   return baseLogger;
