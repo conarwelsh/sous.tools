@@ -3,7 +3,26 @@ import { Box, Text, useInput, useApp } from 'ink';
 import TextInput from 'ink-text-input';
 import { ProcessManager, ManagedProcess, ManagedLog } from '../process-manager.service.js';
 import { exec } from 'child_process';
-import { Tabs, Tab } from 'ink-tab';
+
+// Simple tab implementation to avoid deprecation warnings from external libs
+const CustomTabs: React.FC<{ active: string, onChange: (v: string) => void }> = ({ active, onChange }) => {
+    const tabs = ['services', 'god-view', 'infra', 'rpi'];
+    return (
+        <Box>
+            {tabs.map((t, i) => (
+                <Box key={t} marginLeft={i === 0 ? 0 : 2}>
+                    <Text 
+                        bold={active === t} 
+                        color={active === t ? "#ec4899" : "#9ca3af"}
+                        underline={active === t}
+                    >
+                        {t.replace('-', ' ').toUpperCase()}
+                    </Text>
+                </Box>
+            ))}
+        </Box>
+    );
+};
 
 interface Props {
   manager: ProcessManager;
@@ -11,13 +30,12 @@ interface Props {
 
 type ViewMode = 'services' | 'god-view' | 'infra' | 'rpi';
 
-const WORDMARK = `
-   _____  ____  _    _  _____ 
-  / ____|/ __ \\| |  | |/ ____|
- | (___ | |  | | |  | | (___  
-  \\___ \\| |  | | |  | |\\___ \\ 
-  ____) | |__| | |__| |____) |
- |_____/ \\____/ \\____/|_____/ 
+// Smaller, cleaner ASCII wordmark
+const WORDMARK_SOUS = `
+ ___ ___  _   _ ___ 
+/ __/ _ \\| | | / __|
+\\__ \\ (_) | |_| \\__ \\
+|___/\\___/ \\___/|___/
 `.trim();
 
 export const Dashboard: React.FC<Props> = ({ manager }) => {
@@ -30,6 +48,23 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
   const [isCommandMode, setIsCommandMode] = useState(false);
   const [filter, setFilter] = useState('');
   const [isFilterMode, setIsFilterMode] = useState(false);
+  const [terminalSize, setTerminalSize] = useState({ 
+    columns: process.stdout.columns || 80, 
+    rows: process.stdout.rows || 24 
+  });
+
+  useEffect(() => {
+    const onResize = () => {
+      setTerminalSize({ 
+        columns: process.stdout.columns, 
+        rows: process.stdout.rows 
+      });
+    };
+    process.stdout.on('resize', onResize);
+    return () => {
+      process.stdout.off('resize', onResize);
+    };
+  }, []);
 
   useEffect(() => {
     if (!manager) return;
@@ -45,8 +80,8 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
 
   // Enable mouse support
   useEffect(() => {
-    process.stdout.write('\x1b[?1000h'); // Enable mouse reporting
-    process.stdout.write('\x1b[?1006h'); // SGR mode
+    process.stdout.write('\x1b[?1000h');
+    process.stdout.write('\x1b[?1006h');
     return () => {
         process.stdout.write('\x1b[?1000l');
         process.stdout.write('\x1b[?1006l');
@@ -116,7 +151,7 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
     return (
         <Box flexDirection="row" flexGrow={1}>
             {/* Sidebar: App List */}
-            <Box flexDirection="column" width="30%" borderStyle="round" paddingX={1} borderColor="#374151">
+            <Box flexDirection="column" width="25%" borderStyle="round" paddingX={1} borderColor="#374151">
                 <Box marginBottom={1}>
                     <Text bold color="#9ca3af">SERVICES</Text>
                 </Box>
@@ -147,7 +182,7 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
                     {selectedApp?.logs.length === 0 ? (
                         <Text color="gray" italic>Waiting for logs...</Text>
                     ) : (
-                        selectedApp?.logs.slice(-18).map((log, i) => (
+                        selectedApp?.logs.slice(-(terminalSize.rows - 15)).map((log, i) => (
                             <Text key={i} wrap="truncate-end" color="#d1d5db">{log.message}</Text>
                         ))
                     )}
@@ -177,7 +212,7 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
                 )}
             </Box>
             <Box flexDirection="column" flexGrow={1}>
-                {filteredLogs.slice(-25).map((log, i) => (
+                {filteredLogs.slice(-(terminalSize.rows - 12)).map((log, i) => (
                     <Box key={i}>
                         <Text color="gray" dimColor>[{log.timestamp.toLocaleTimeString()}] </Text>
                         <Text color="#06b6d4" bold>{log.name.padEnd(10)} </Text>
@@ -190,24 +225,22 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
   };
 
   return (
-    <Box flexDirection="column" padding={1} flexGrow={1}>
-      {/* Header & Tabs */}
-      <Box paddingX={1} justifyContent="space-between" alignItems="flex-end">
-        <Box flexDirection="column">
-            <Text bold color="#06b6d4">{WORDMARK}</Text>
-            <Box marginTop={1}>
-                <Tabs onChange={(v) => setActiveTab(v as ViewMode)}>
-                    <Tab name="services">Services</Tab>
-                    <Tab name="god-view">God View</Tab>
-                    <Tab name="infra">Infra</Tab>
-                    <Tab name="rpi">RPi</Tab>
-                </Tabs>
+    <Box flexDirection="column" padding={1} width={terminalSize.columns} height={terminalSize.rows}>
+      {/* Header */}
+      <Box paddingX={1} justifyContent="space-between" alignItems="center">
+        <Box alignItems="flex-end">
+            <Text bold color="#06b6d4">{WORDMARK_SOUS}</Text>
+            <Box marginBottom={1} marginLeft={1}>
+                <Text bold color="#9ca3af" dimColor>.tools</Text>
             </Box>
+        </Box>
+        <Box marginBottom={1}>
+            <CustomTabs active={activeTab} onChange={(v) => setActiveTab(v as ViewMode)} />
         </Box>
       </Box>
 
       {/* Main Content */}
-      <Box flexGrow={1} marginTop={1}>
+      <Box flexGrow={1} marginTop={0}>
         {activeTab === 'services' && renderServices()}
         {activeTab === 'god-view' && renderGodView()}
         {activeTab === 'infra' && (
@@ -223,20 +256,16 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
       </Box>
 
       {/* Terminal Panel */}
-      <Box flexDirection="column" height={8} borderStyle="round" marginTop={0} paddingX={1} borderColor={isCommandMode ? "#ec4899" : "#374151"}>
+      <Box flexDirection="column" height={7} borderStyle="round" marginTop={0} paddingX={1} borderColor={isCommandMode ? "#ec4899" : "#374151"}>
         <Box justifyContent="space-between">
             <Text bold color={isCommandMode ? "#ec4899" : "#9ca3af"}>COMMAND PANEL</Text>
-            {isCommandMode ? (
-                <Text color="#ec4899" bold italic> COMMAND MODE ACTIVE </Text>
-            ) : (
-                <Text color="gray" dimColor> Press [:] to type command </Text>
-            )}
+            {isCommandMode && <Text color="#ec4899" bold italic> COMMAND MODE ACTIVE </Text>}
         </Box>
-        <Box flexDirection="column" flexGrow={1} marginTop={1}>
+        <Box flexDirection="column" flexGrow={1}>
           {terminalOutput.map((line, i) => (
             <Text key={i} color="gray" dimColor>  {line}</Text>
           ))}
-          <Box marginTop={1}>
+          <Box>
             <Text color={isCommandMode ? "#ec4899" : "gray"}>  $ </Text>
             {isCommandMode ? (
                 <TextInput value={command} onChange={setCommand} onSubmit={handleCommandSubmit} />
@@ -247,7 +276,7 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
         </Box>
       </Box>
 
-      {/* Footer / Shortcuts */}
+      {/* Footer */}
       <Box marginTop={0} justifyContent="space-between" paddingX={1}>
         <Box>
           <Text dimColor color="gray">Navigate </Text>
