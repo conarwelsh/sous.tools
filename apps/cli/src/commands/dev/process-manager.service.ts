@@ -4,7 +4,7 @@ import treeKill from 'tree-kill';
 import { localConfig } from '@sous/config';
 import { EventEmitter } from 'events';
 
-export type ProcessStatus = 'stopped' | 'starting' | 'running' | 'error' | 'restarting';
+export type ProcessStatus = 'running' | 'starting' | 'stopped' | 'error';
 
 export interface ManagedLog {
   id: string;
@@ -17,7 +17,7 @@ export interface ManagedLog {
 export interface ManagedProcess {
   id: string;
   name: string;
-  group: 'core' | 'native' | 'infra';
+  type: 'app' | 'docker';
   status: ProcessStatus;
   port?: number;
   logs: ManagedLog[];
@@ -42,20 +42,22 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
 
   private initProcesses() {
     const apps: Partial<ManagedProcess>[] = [
-      { id: 'api', name: 'API', group: 'core', port: localConfig.api.port as number, autoStart: true },
-      { id: 'web', name: 'Web', group: 'core', port: localConfig.web.port as number, autoStart: true },
-      { id: 'docs', name: 'Docs', group: 'core', port: localConfig.docs.port as number, autoStart: true },
-      { id: 'native', name: 'Native App', group: 'native', port: localConfig.native.port as number },
-      { id: 'native-headless', name: 'Signage (Headless)', group: 'native', port: localConfig.headless.port as number },
-      { id: 'native-kds', name: 'KDS Terminal', group: 'native', port: localConfig.kds.port as number },
-      { id: 'native-pos', name: 'POS Terminal', group: 'native', port: localConfig.pos.port as number },
-      { id: 'wearos', name: 'Wear OS', group: 'native' },
+      { id: 'api', name: 'API', type: 'app', port: localConfig.api.port as number, autoStart: true },
+      { id: 'web', name: 'Web', type: 'app', port: localConfig.web.port as number, autoStart: true },
+      { id: 'docs', name: 'Docs', type: 'app', port: localConfig.docs.port as number, autoStart: true },
+      { id: 'native', name: 'Native', type: 'app', port: localConfig.native.port as number },
+      { id: 'headless', name: 'Signage', type: 'app', port: localConfig.headless.port as number },
+      { id: 'kds', name: 'KDS', type: 'app', port: localConfig.kds.port as number },
+      { id: 'pos', name: 'POS', type: 'app', port: localConfig.pos.port as number },
+      { id: 'wearos', name: 'WearOS', type: 'app' },
+      { id: 'db', name: 'Postgres', type: 'docker', status: 'running' },
+      { id: 'redis', name: 'Redis', type: 'docker', status: 'running' },
     ];
 
     for (const app of apps) {
       this.processes.set(app.id!, {
         ...app,
-        status: 'stopped',
+        status: app.status || 'stopped',
         logs: [],
       } as ManagedProcess);
     }
@@ -78,7 +80,7 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
 
   async startProcess(id: string) {
     const proc = this.processes.get(id);
-    if (!proc || proc.status === 'running' || proc.status === 'starting') return;
+    if (!proc || proc.status === 'running' || proc.status === 'starting' || proc.type === 'docker') return;
 
     proc.status = 'starting';
     this.emit('update');
@@ -105,7 +107,6 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
       this.emit('update');
     });
 
-    // Simulated health check
     proc.timeout = setTimeout(() => {
       if (proc.status === 'starting') {
         proc.status = 'running';
@@ -116,7 +117,7 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
 
   async stopProcess(id: string) {
     const proc = this.processes.get(id);
-    if (!proc) return;
+    if (!proc || proc.type === 'docker') return;
     
     if (proc.timeout) clearTimeout(proc.timeout);
 
@@ -137,7 +138,7 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
   }
 
   async stopAll() {
-    const procs = this.getProcesses();
+    const procs = this.getProcesses().filter(p => p.type === 'app');
     await Promise.all(procs.map(p => this.stopProcess(p.id)));
   }
 
@@ -162,10 +163,10 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
     };
 
     proc.logs.push(logEntry);
-    if (proc.logs.length > 500) proc.logs.shift();
+    if (proc.logs.length > 1000) proc.logs.shift();
 
     this.godViewLogs.push(logEntry);
-    if (this.godViewLogs.length > 1000) this.godViewLogs.shift();
+    if (this.godViewLogs.length > 2000) this.godViewLogs.shift();
 
     this.emit('logs', logEntry);
     this.emit('update');

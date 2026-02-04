@@ -1,28 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Box, Text, useInput, useApp } from 'ink';
 import TextInput from 'ink-text-input';
-import { ProcessManager, ManagedProcess, ManagedLog } from '../process-manager.service.js';
+import { ProcessManager, ManagedProcess } from '../process-manager.service.js';
 import { exec } from 'child_process';
-
-// Simple tab implementation to avoid deprecation warnings from external libs
-const CustomTabs: React.FC<{ active: string, onChange: (v: string) => void }> = ({ active, onChange }) => {
-    const tabs = ['services', 'god-view', 'infra', 'rpi'];
-    return (
-        <Box>
-            {tabs.map((t, i) => (
-                <Box key={t} marginLeft={i === 0 ? 0 : 2}>
-                    <Text 
-                        bold={active === t} 
-                        color={active === t ? "#ec4899" : "#9ca3af"}
-                        underline={active === t}
-                    >
-                        {t.replace('-', ' ').toUpperCase()}
-                    </Text>
-                </Box>
-            ))}
-        </Box>
-    );
-};
 
 interface Props {
   manager: ProcessManager;
@@ -30,24 +10,21 @@ interface Props {
 
 type ViewMode = 'services' | 'god-view' | 'infra' | 'rpi';
 
-// Smaller, cleaner ASCII wordmark
-const WORDMARK_SOUS = `
- ___ ___  _   _ ___ 
-/ __/ _ \\| | | / __|
-\\__ \\ (_) | |_| \\__ \\
-|___/\\___/ \\___/|___/
-`.trim();
+const BRAND_BLUE = '#0ea5e9'; // Azure Blue
+const BRAND_GRAY = '#9ca3af';
+const DARK_GRAY = '#374151';
 
 export const Dashboard: React.FC<Props> = ({ manager }) => {
   const { exit } = useApp();
   const [activeTab, setActiveTab] = useState<ViewMode>('services');
   const [processes, setProcesses] = useState<ManagedProcess[]>(manager?.getProcesses() || []);
-  const [selectedProcIdx, setSelectedIdx] = useState(0);
+  const [selectedIdx, setSelectedIdx] = useState(0);
   const [command, setCommand] = useState('');
-  const [terminalOutput, setTerminalOutput] = useState<string[]>(['Ready for commands...']);
+  const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
   const [isCommandMode, setIsCommandMode] = useState(false);
   const [filter, setFilter] = useState('');
   const [isFilterMode, setIsFilterMode] = useState(false);
+  const [scrollOffset, setScrollOffset] = useState(0);
   const [terminalSize, setTerminalSize] = useState({ 
     columns: process.stdout.columns || 80, 
     rows: process.stdout.rows || 24 
@@ -78,48 +55,43 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
     };
   }, [manager]);
 
-  // Enable mouse support
-  useEffect(() => {
-    process.stdout.write('\x1b[?1000h');
-    process.stdout.write('\x1b[?1006h');
-    return () => {
-        process.stdout.write('\x1b[?1000l');
-        process.stdout.write('\x1b[?1006l');
-    };
-  }, []);
-
   useInput((input, key) => {
     if (isCommandMode || isFilterMode) return;
 
-    if (input === 'q') {
-      exit();
-    }
+    if (input === 'q') exit();
+    if (input === ':') setIsCommandMode(true);
+    if (input === '/') { setIsFilterMode(true); setScrollOffset(0); }
 
-    if (input === ':') {
-      setIsCommandMode(true);
-    }
-
-    if (input === '/') {
-        setIsFilterMode(true);
-    }
-
+    // Navigation
     if (key.tab) {
-        const modes: ViewMode[] = ['services', 'god-view', 'infra', 'rpi'];
-        const nextIdx = (modes.indexOf(activeTab) + 1) % modes.length;
-        setActiveTab(modes[nextIdx]);
+        const modes: ViewMode[] = ['services', 'god-view', 'infra', 'rpi'] as const;
+        const currentIdx = modes.indexOf(activeTab);
+        if (key.shift) {
+            const nextIdx = (currentIdx - 1 + modes.length) % modes.length;
+            setActiveTab(modes[nextIdx]);
+        } else {
+            const nextIdx = (currentIdx + 1) % modes.length;
+            setActiveTab(modes[nextIdx]);
+        }
+        setScrollOffset(0);
     }
 
-    // Service Navigation
-    if (activeTab === 'services') {
-        if (key.upArrow) setSelectedIdx(Math.max(0, selectedProcIdx - 1));
-        if (key.downArrow) setSelectedIdx(Math.min(processes.length - 1, selectedProcIdx + 1));
-        if (key.return) {
-            const selected = processes[selectedProcIdx];
-            if (selected.status === 'stopped' || selected.status === 'error') manager.startProcess(selected.id);
-            else manager.stopProcess(selected.id);
-        }
-        if (input === 'r') manager.restartProcess(processes[selectedProcIdx].id);
+    if (key.upArrow) {
+        if (activeTab === 'services') setSelectedIdx(Math.max(0, selectedIdx - 1));
+        else setScrollOffset(prev => prev + 1);
     }
+    if (key.downArrow) {
+        if (activeTab === 'services') setSelectedIdx(Math.min(processes.length - 1, selectedIdx + 1));
+        else setScrollOffset(prev => Math.max(0, prev - 1));
+    }
+
+    if (key.return && activeTab === 'services') {
+        const selected = processes[selectedIdx];
+        if (selected.status === 'stopped' || selected.status === 'error') manager.startProcess(selected.id);
+        else manager.stopProcess(selected.id);
+    }
+
+    if (input === 'r' && activeTab === 'services') manager.restartProcess(processes[selectedIdx].id);
   });
 
   const handleCommandSubmit = (value: string) => {
@@ -128,11 +100,10 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
         setCommand('');
         return;
     }
-
-    setTerminalOutput(prev => [...prev.slice(-4), `> ${value}`]);
+    setTerminalOutput(prev => [...prev.slice(-3), `> ${value}`]);
     exec(value, (error, stdout, stderr) => {
-        if (stdout) setTerminalOutput(prev => [...prev.slice(-4), stdout.trim().split('\n')[0]]);
-        if (stderr) setTerminalOutput(prev => [...prev.slice(-4), `ERR: ${stderr.trim().split('\n')[0]}`]);
+        if (stdout) setTerminalOutput(prev => [...prev.slice(-3), stdout.trim().split('\n')[0]]);
+        if (stderr) setTerminalOutput(prev => [...prev.slice(-3), `ERR: ${stderr.trim().split('\n')[0]}`]);
         setCommand('');
     });
   };
@@ -146,160 +117,116 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
     }
   };
 
-  const renderServices = () => {
-    const selectedApp = processes[selectedProcIdx];
-    return (
-        <Box flexDirection="row" flexGrow={1}>
-            {/* Sidebar: App List */}
-            <Box flexDirection="column" width="25%" borderStyle="round" paddingX={1} borderColor="#374151">
-                <Box marginBottom={1}>
-                    <Text bold color="#9ca3af">SERVICES</Text>
-                </Box>
-                {processes.map((proc, idx) => (
-                    <Box key={proc.id} paddingLeft={idx === selectedProcIdx ? 0 : 2}>
-                        {idx === selectedProcIdx && <Text color="#ec4899">❯ </Text>}
-                        <Box flexGrow={1}>
-                            <Text color={idx === selectedProcIdx ? "white" : "gray"}>{proc.name}</Text>
-                        </Box>
-                        <Box width={3} justifyContent="flex-end">
-                            {getStatusIcon(proc.status)}
-                        </Box>
-                    </Box>
-                ))}
-            </Box>
-
-            {/* Log Viewer */}
-            <Box flexDirection="column" flexGrow={1} borderStyle="round" paddingX={1} marginLeft={1} borderColor="#374151">
-                <Box marginBottom={1} justifyContent="space-between">
-                    <Text bold color="#9ca3af">LOGS: {selectedApp?.name.toUpperCase()}</Text>
-                    <Box>
-                        <Text color="gray">[</Text>
-                        <Text color={selectedApp?.status === 'running' ? "#10b981" : "gray"}>{selectedApp?.status.toUpperCase()}</Text>
-                        <Text color="gray">]</Text>
-                    </Box>
-                </Box>
-                <Box flexDirection="column" flexGrow={1}>
-                    {selectedApp?.logs.length === 0 ? (
-                        <Text color="gray" italic>Waiting for logs...</Text>
-                    ) : (
-                        selectedApp?.logs.slice(-(terminalSize.rows - 15)).map((log, i) => (
-                            <Text key={i} wrap="truncate-end" color="#d1d5db">{log.message}</Text>
-                        ))
-                    )}
-                </Box>
-            </Box>
-        </Box>
-    );
-  };
-
-  const renderGodView = () => {
-    const allLogs = manager.getGodViewLogs();
-    const filteredLogs = filter 
-        ? allLogs.filter(l => l.message.toLowerCase().includes(filter.toLowerCase()) || l.name.toLowerCase().includes(filter.toLowerCase()))
-        : allLogs;
-
-    return (
-        <Box flexDirection="column" flexGrow={1} borderStyle="round" paddingX={1} borderColor="#374151">
-            <Box marginBottom={1} justifyContent="space-between">
-                <Text bold color="#9ca3af">GOD VIEW - AGGREGATED STREAM</Text>
-                {isFilterMode ? (
-                    <Box>
-                        <Text color="#ec4899">FILTER: </Text>
-                        <TextInput value={filter} onChange={setFilter} onSubmit={() => setIsFilterMode(false)} />
-                    </Box>
-                ) : (
-                    <Text color="gray" dimColor>{filter ? `Filtering: ${filter}` : 'Press [/] to filter'}</Text>
-                )}
-            </Box>
-            <Box flexDirection="column" flexGrow={1}>
-                {filteredLogs.slice(-(terminalSize.rows - 12)).map((log, i) => (
-                    <Box key={i}>
-                        <Text color="gray" dimColor>[{log.timestamp.toLocaleTimeString()}] </Text>
-                        <Text color="#06b6d4" bold>{log.name.padEnd(10)} </Text>
-                        <Text color={log.level === 'error' ? '#ef4444' : '#d1d5db'}>{log.message}</Text>
-                    </Box>
-                ))}
-            </Box>
-        </Box>
-    );
-  };
+  const selectedApp = processes[selectedIdx];
+  const allGodLogs = manager.getGodViewLogs();
+  const godLogs = useMemo(() => filter 
+    ? allGodLogs.filter(l => l.message.toLowerCase().includes(filter.toLowerCase()) || l.name.toLowerCase().includes(filter.toLowerCase()))
+    : allGodLogs, [allGodLogs, filter]);
 
   return (
-    <Box flexDirection="column" padding={1} width={terminalSize.columns} height={terminalSize.rows}>
-      {/* Header */}
-      <Box paddingX={1} justifyContent="space-between" alignItems="center">
-        <Box alignItems="flex-end">
-            <Text bold color="#06b6d4">{WORDMARK_SOUS}</Text>
-            <Box marginBottom={1} marginLeft={1}>
-                <Text bold color="#9ca3af" dimColor>.tools</Text>
+    <Box flexDirection="column" width={terminalSize.columns} height={terminalSize.rows} paddingX={1} paddingY={0}>
+      {/* Top Header Section */}
+      <Box height={3} alignItems="center" justifyContent="space-between">
+        <Box alignItems="center">
+            <Text bold color={BRAND_BLUE}>SOUS</Text>
+            <Text color={BRAND_GRAY}>.tools</Text>
+            <Box marginLeft={4}>
+                {(['services', 'god-view', 'infra', 'rpi'] as const).map((t) => (
+                    <Box key={t} marginLeft={2}>
+                        <Text 
+                            bold={activeTab === t} 
+                            color={activeTab === t ? BRAND_BLUE : BRAND_GRAY}
+                            underline={activeTab === t}
+                        >
+                            {t.replace('-', ' ').toUpperCase()}
+                        </Text>
+                    </Box>
+                ))}
             </Box>
         </Box>
-        <Box marginBottom={1}>
-            <CustomTabs active={activeTab} onChange={(v) => setActiveTab(v as ViewMode)} />
-        </Box>
+        <Text color="gray">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
       </Box>
 
-      {/* Main Content */}
-      <Box flexGrow={1} marginTop={0}>
-        {activeTab === 'services' && renderServices()}
-        {activeTab === 'god-view' && renderGodView()}
-        {activeTab === 'infra' && (
-            <Box flexGrow={1} borderStyle="round" borderColor="#374151" padding={1} alignItems="center" justifyContent="center">
-                <Text color="gray">Docker Infrastructure Management - Coming Soon</Text>
+      {/* Main Body */}
+      <Box flexGrow={1}>
+        {/* Left Sidebar - Always Visible Traffic Lights */}
+        <Box flexDirection="column" width={15} borderStyle="round" borderColor={DARK_GRAY} paddingX={1}>
+            <Box marginBottom={1}>
+                <Text bold color={BRAND_GRAY}>STATUS</Text>
             </Box>
-        )}
-        {activeTab === 'rpi' && (
-            <Box flexGrow={1} borderStyle="round" borderColor="#374151" padding={1} alignItems="center" justifyContent="center">
-                <Text color="gray">Remote RPi Nodes - Coming Soon</Text>
-            </Box>
-        )}
-      </Box>
-
-      {/* Terminal Panel */}
-      <Box flexDirection="column" height={7} borderStyle="round" marginTop={0} paddingX={1} borderColor={isCommandMode ? "#ec4899" : "#374151"}>
-        <Box justifyContent="space-between">
-            <Text bold color={isCommandMode ? "#ec4899" : "#9ca3af"}>COMMAND PANEL</Text>
-            {isCommandMode && <Text color="#ec4899" bold italic> COMMAND MODE ACTIVE </Text>}
+            {processes.map(p => (
+                <Box key={p.id} justifyContent="space-between">
+                    <Text color={p.type === 'docker' ? '#6366f1' : 'white'} dimColor={p.type === 'docker'}>{p.name.slice(0, 8)}</Text>
+                    {getStatusIcon(p.status)}
+                </Box>
+            ))}
         </Box>
-        <Box flexDirection="column" flexGrow={1}>
-          {terminalOutput.map((line, i) => (
-            <Text key={i} color="gray" dimColor>  {line}</Text>
-          ))}
-          <Box>
-            <Text color={isCommandMode ? "#ec4899" : "gray"}>  $ </Text>
-            {isCommandMode ? (
-                <TextInput value={command} onChange={setCommand} onSubmit={handleCommandSubmit} />
-            ) : (
-                <Text color="#374151">...</Text>
+
+        {/* Main View Area */}
+        <Box flexDirection="column" flexGrow={1} marginLeft={1} borderStyle="round" borderColor={DARK_GRAY} paddingX={1}>
+            {activeTab === 'services' && (
+                <Box flexDirection="column" flexGrow={1}>
+                    <Box justifyContent="space-between" marginBottom={1}>
+                        <Text bold color={BRAND_BLUE}>LOGS: {selectedApp?.name.toUpperCase()}</Text>
+                        <Text color="gray">{selectedApp?.status.toUpperCase()}</Text>
+                    </Box>
+                    <Box flexDirection="column" flexGrow={1}>
+                        {selectedApp?.logs.slice(-(15 + scrollOffset), selectedApp.logs.length - scrollOffset).map((l, i) => (
+                            <Text key={i} wrap="truncate-end" color="#d1d5db">{l.message}</Text>
+                        ))}
+                    </Box>
+                </Box>
             )}
-          </Box>
+
+            {activeTab === 'god-view' && (
+                <Box flexDirection="column" flexGrow={1}>
+                    <Box justifyContent="space-between" marginBottom={1}>
+                        <Text bold color={BRAND_BLUE}>GOD VIEW</Text>
+                        {isFilterMode ? (
+                            <Box><Text color={BRAND_BLUE}>/</Text><TextInput value={filter} onChange={setFilter} onSubmit={() => setIsFilterMode(false)} /></Box>
+                        ) : (
+                            <Text color="gray" dimColor>{filter ? `Filter: ${filter}` : 'Press [/] to filter'}</Text>
+                        )}
+                    </Box>
+                    <Box flexDirection="column" flexGrow={1}>
+                        {godLogs.slice(-(20 + scrollOffset), godLogs.length - scrollOffset).map((l, i) => (
+                            <Box key={i}>
+                                <Text color="gray" dimColor>[{l.timestamp.toLocaleTimeString([], { hour12: false })}] </Text>
+                                <Text color={BRAND_BLUE} bold>{l.name.padEnd(8)} </Text>
+                                <Text color={l.level === 'error' ? '#ef4444' : '#d1d5db'}>{l.message}</Text>
+                            </Box>
+                        ))}
+                    </Box>
+                </Box>
+            )}
+
+            {(activeTab === 'infra' || activeTab === 'rpi') && (
+                <Box flexGrow={1} alignItems="center" justifyContent="center">
+                    <Text color="gray">Section Under Construction</Text>
+                </Box>
+            )}
         </Box>
       </Box>
 
-      {/* Footer */}
-      <Box marginTop={0} justifyContent="space-between" paddingX={1}>
-        <Box>
-          <Text dimColor color="gray">Navigate </Text>
-          <Text color="#06b6d4">[↑/↓] </Text>
-          <Box marginLeft={2}>
-            <Text dimColor color="gray">View </Text>
-            <Text color="#06b6d4">[Tab] </Text>
-          </Box>
-          <Box marginLeft={2}>
-            <Text dimColor color="gray">Toggle </Text>
-            <Text color="#06b6d4">[Enter] </Text>
-          </Box>
-          <Box marginLeft={2}>
-            <Text dimColor color="gray">Search </Text>
-            <Text color="#06b6d4">[/] </Text>
-          </Box>
-          <Box marginLeft={2}>
-            <Text dimColor color="gray">Shell </Text>
-            <Text color="#ec4899">[:] </Text>
-          </Box>
+      {/* Bottom Command & Footer */}
+      <Box flexDirection="column" height={6} marginTop={0}>
+        <Box borderStyle="round" borderColor={isCommandMode ? BRAND_BLUE : DARK_GRAY} paddingX={1} flexGrow={1}>
+            <Box justifyContent="space-between">
+                <Text bold color={isCommandMode ? BRAND_BLUE : BRAND_GRAY}>COMMAND</Text>
+                {isCommandMode && <Text color={BRAND_BLUE} italic>ACTIVE</Text>}
+            </Box>
+            <Box flexDirection="column" marginTop={0}>
+                {terminalOutput.map((line, i) => <Text key={i} color="gray" dimColor>  {line}</Text>)}
+                <Box>
+                    <Text color={isCommandMode ? BRAND_BLUE : "gray"}>  $ </Text>
+                    {isCommandMode ? <TextInput value={command} onChange={setCommand} onSubmit={handleCommandSubmit} /> : <Text color={DARK_GRAY}>...</Text>}
+                </Box>
+            </Box>
         </Box>
-        <Box>
-          <Text color="#ef4444" bold>[q] QUIT</Text>
+        <Box justifyContent="space-between" paddingX={1}>
+            <Text color="gray" dimColor>
+                [Tab] Tabs  [Shift+Tab] Back  [↑/↓] Nav/Scroll  [Enter] Start/Stop  [r] Restart  [/] Filter  [:] Cmd  [q] Quit
+            </Text>
         </Box>
       </Box>
     </Box>
