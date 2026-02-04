@@ -1,16 +1,28 @@
 # @sous/docs
 
-Documentation platform and branding lab for the SOUS platform.
+The centralized documentation hub and design lab for the `sous.tools` ecosystem.
 
-## Features
-- Technical documentation for all @sous packages and apps.
-- Design system and branding guidelines.
+## Responsibilities
+- **Knowledge Base**: Project documentation, mandates, and architecture guides.
+- **Branding Lab**: Living style guide for the `@sous/ui` component library.
+- **API Reference**: Aggregated Swagger and GraphiQL playgrounds.
+
+## Functionality List
+- [x] Project mandated ADR and feature tracking.
+- [ ] Interactive UI component playground.
+- [ ] Developer onboarding guides.
+
+## Installation & Setup
+1. Run `pnpm install` from the root.
+2. Build the package: `pnpm --filter @sous/docs build`.
 
 ## Development
-- Port: `3001`
-- Command: `pnpm run dev`
+- **Start**: `pnpm run dev` (Port 3001)
 
 ## Tech Stack
 - Next.js 16
-- React
-- TypeScript
+- Tailwind CSS
+- `@sous/ui`
+
+## Related ADRs
+- [ADR 016: Documentation Platform](../../.gemini/docs/ADRs/016-documentation-strategy.md)

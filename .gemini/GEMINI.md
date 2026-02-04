@@ -26,15 +26,15 @@
 - Use `turbo run lint` and `turbo run build` to verify changes.
 
 ### 6. Automated Documentation (READMEs)
-**Rule:** Every package and app MUST maintain a comprehensive `README.md` that is updated automatically with any code change.
-- **Action:** When making changes to functionality, dependencies, or setup procedures, you MUST update the corresponding `README.md` immediately.
+**Rule:** Every package and app MUST maintain a comprehensive `README.md` that is updated **autonomously** with any code change.
+- **Action:** When making changes to functionality, dependencies, or setup procedures, you MUST update the corresponding `README.md` immediately and without being prompted by the user.
 - **Content Requirements:**
   - Description & Responsibilities.
   - Installation & Setup (including 3rd party platforms).
   - Functionality List.
   - Tech Stack/Tools used.
   - Links to related ADRs/docs.
-- **Trigger:** Any "update docs" request or any code modification that affects the above categories.
+- **Trigger:** Any code modification that affects the above categories.
 
 ### 7. Server-Side Data Fetching (MANDATE)
 **Rule:** Applications MUST prioritize server-side data fetching and processing.

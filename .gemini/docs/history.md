@@ -1,6 +1,11 @@
 # History
 
 ## 2026-02-04
+- Comprehensive README overhaul: Created/Updated `README.md` for all 9 apps and 8 packages, adhering to **Mandate 6** (Responsibilities, Setup, Tech Stack, ADR links).
+- Refined **ADR 039: CLI-Driven ZSH Customization** to include a robust set of productivity aliases (`sous`, `c`, `ls`, `sd`, `sl`, etc.).
+- Rewrote `@sous/cli` README.md to accurately reflect the tool's capabilities and document the upcoming shell customization features.
+- Created **ADR 039: CLI-Driven ZSH Customization** to improve Developer Experience with brand-aligned prompts and infrastructure status indicators.
+- Updated `phase-rollout-plan.md` to include ZSH customization in Phase 1.2.
 - Refactored `scripts/dev-orchestrator.ts` to use absolute `pnpm` paths and avoid `shell: true` issues, fixing `ENOENT` errors during app startup.
 - Fixed Zellij `dev.kdl` to properly show the tab bar and ensure all service logs are piped to the "God View".
 - Updated root `.idea` configuration to use `#GRADLE_LOCAL_JAVA_HOME` for better WSL compatibility in Android Studio.
