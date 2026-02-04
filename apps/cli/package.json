@@ -31,6 +31,8 @@
     "chalk": "^5.6.2",
     "concurrently": "^9.2.1",
     "ink": "^6.6.0",
+    "ink-select-input": "^6.2.0",
+    "ink-tab": "^5.2.0",
     "ink-text-input": "^6.0.0",
     "nest-commander": "^3.20.1",
     "react": "^19.2.4",

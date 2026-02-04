@@ -1,11 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { spawn, ChildProcess } from 'child_process';
 import treeKill from 'tree-kill';
 import { localConfig } from '@sous/config';
 import { EventEmitter } from 'events';
-import { logger } from '@sous/logger';
 
 export type ProcessStatus = 'stopped' | 'starting' | 'running' | 'error' | 'restarting';
+
+export interface ManagedLog {
+  id: string;
+  name: string;
+  message: string;
+  timestamp: Date;
+  level: 'info' | 'error' | 'warn';
+}
 
 export interface ManagedProcess {
   id: string;
@@ -13,18 +20,24 @@ export interface ManagedProcess {
   group: 'core' | 'native' | 'infra';
   status: ProcessStatus;
   port?: number;
-  logs: string[];
+  logs: ManagedLog[];
   child?: ChildProcess;
   autoStart?: boolean;
+  timeout?: NodeJS.Timeout;
 }
 
 @Injectable()
-export class ProcessManager extends EventEmitter {
+export class ProcessManager extends EventEmitter implements OnModuleDestroy {
   private processes: Map<string, ManagedProcess> = new Map();
+  private godViewLogs: ManagedLog[] = [];
 
   constructor() {
     super();
     this.initProcesses();
+  }
+
+  async onModuleDestroy() {
+    await this.stopAll();
   }
 
   private initProcesses() {
@@ -52,6 +65,10 @@ export class ProcessManager extends EventEmitter {
     return Array.from(this.processes.values());
   }
 
+  getGodViewLogs() {
+    return this.godViewLogs;
+  }
+
   async autoStartCore() {
     const coreApps = this.getProcesses().filter(p => p.autoStart);
     for (const app of coreApps) {
@@ -66,7 +83,6 @@ export class ProcessManager extends EventEmitter {
     proc.status = 'starting';
     this.emit('update');
 
-    // We use absolute paths and pnpm from the root
     const child = spawn('pnpm', ['--filter', `@sous/${id}`, 'run', 'dev'], {
       shell: true,
       env: { ...process.env, PORT: proc.port?.toString() },
@@ -75,21 +91,22 @@ export class ProcessManager extends EventEmitter {
     proc.child = child;
 
     child.stdout?.on('data', (data) => {
-      this.addLog(id, data.toString());
+      this.addLog(id, data.toString(), 'info');
     });
 
     child.stderr?.on('data', (data) => {
-      this.addLog(id, `ERROR: ${data.toString()}`);
+      this.addLog(id, data.toString(), 'error');
     });
 
     child.on('exit', (code) => {
+      if (proc.timeout) clearTimeout(proc.timeout);
       proc.status = code === 0 ? 'stopped' : 'error';
       proc.child = undefined;
       this.emit('update');
     });
 
-    // Simple health check simulation - real world would probe the port
-    setTimeout(() => {
+    // Simulated health check
+    proc.timeout = setTimeout(() => {
       if (proc.status === 'starting') {
         proc.status = 'running';
         this.emit('update');
@@ -101,6 +118,8 @@ export class ProcessManager extends EventEmitter {
     const proc = this.processes.get(id);
     if (!proc) return;
     
+    if (proc.timeout) clearTimeout(proc.timeout);
+
     if (!proc.child || !proc.child.pid) {
         proc.status = 'stopped';
         this.emit('update');
@@ -108,7 +127,7 @@ export class ProcessManager extends EventEmitter {
     }
 
     return new Promise<void>((resolve) => {
-      treeKill(proc.child!.pid!, 'SIGTERM', () => {
+      treeKill(proc.child!.pid!, 'SIGKILL', () => {
         proc.status = 'stopped';
         proc.child = undefined;
         this.emit('update');
@@ -117,21 +136,38 @@ export class ProcessManager extends EventEmitter {
     });
   }
 
+  async stopAll() {
+    const procs = this.getProcesses();
+    await Promise.all(procs.map(p => this.stopProcess(p.id)));
+  }
+
   async restartProcess(id: string) {
     await this.stopProcess(id);
     await this.startProcess(id);
   }
 
-  private addLog(id: string, message: string) {
+  private addLog(id: string, message: string, level: 'info' | 'error' | 'warn') {
     const proc = this.processes.get(id);
     if (!proc) return;
 
-    // Clean up terminal escape codes from sub-processes for cleaner TUI viewing
-    const cleanMessage = message.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
-    
-    proc.logs.push(cleanMessage);
+    const cleanMessage = message.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '').trim();
+    if (!cleanMessage) return;
+
+    const logEntry: ManagedLog = {
+      id,
+      name: proc.name,
+      message: cleanMessage,
+      timestamp: new Date(),
+      level,
+    };
+
+    proc.logs.push(logEntry);
     if (proc.logs.length > 500) proc.logs.shift();
-    this.emit('logs', { id, message: cleanMessage });
+
+    this.godViewLogs.push(logEntry);
+    if (this.godViewLogs.length > 1000) this.godViewLogs.shift();
+
+    this.emit('logs', logEntry);
     this.emit('update');
   }
 }

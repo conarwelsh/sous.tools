@@ -44,7 +44,7 @@ export class DevCommand extends CommandRunner {
     }
 
     if (!options?.sync && !options?.android && !options?.ios) {
-      // Clear screen and enter alt buffer for a clean experience
+      // Clear screen and enter alt buffer
       process.stdout.write('\x1b[?1049h');
       process.stdout.write('\x1b[2J\x1b[0f');
 
@@ -56,17 +56,18 @@ export class DevCommand extends CommandRunner {
       // Render the Ink TUI
       const { waitUntilExit } = render(React.createElement(Dashboard, { manager: this.manager }));
 
-      await waitUntilExit();
-      
-      // Cleanup all managed processes on exit
-      const procs = this.manager.getProcesses();
-      for (const p of procs) {
-          await this.manager.stopProcess(p.id);
+      try {
+        await waitUntilExit();
+      } finally {
+        // Restore terminal buffer immediately before cleanup logs
+        process.stdout.write('\x1b[?1049l');
+        
+        logger.info('👋 Shutting down managed processes...');
+        await this.manager.stopAll();
+        
+        logger.info('✅ Cleanup complete. Goodbye!');
+        process.exit(0); // Force exit to prevent hanging from lingering emitters/timers
       }
-
-      // Exit alt buffer
-      process.stdout.write('\x1b[?1049l');
-      logger.info('👋 Orchestrator exited and processes cleaned up.');
     }
   }
 

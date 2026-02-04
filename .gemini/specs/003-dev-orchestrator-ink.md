@@ -4,13 +4,17 @@
 Implement a robust, interactive Terminal User Interface (TUI) for the `sous dev` command using **React Ink**. This replaces the fragile Zellij/Tmux orchestration with a centrally managed, auto-restarting, and interactive dashboard.
 
 ## Features
-- **Fullscreen Dashboard:** Occupies the entire terminal buffer (alt-screen) for a clean, distraction-free view.
-- **Central Process Management:** Start, stop, and restart all 8 apps (`web`, `api`, `docs`, `native`, `headless`, `kds`, `pos`, `wearos`).
-- **Auto-Start Core:** `api`, `web`, and `docs` start automatically on launch.
-- **Docker Orchestration:** Real-time status indicators and start/stop controls for Docker Compose services.
-- **Interactive Terminal Panel:** A dedicated area for running one-off shell commands without leaving the orchestrator.
-- **Visual Status "Traffic Lights":** Use brand-aligned icons (●) with OKLCH-mapped colors (Green/Red/Yellow).
-- **RPi Edge Integration:** One-click "Sync and Start" for Raspberry Pi nodes.
+- **Fullscreen Dashboard:** Occupies the entire terminal buffer (alt-screen).
+- **Tabbed Navigation:** Use `Tab` or Mouse Click to switch between views:
+    - **Dashboard (Apps):** Individual service status and logs.
+    - **God View:** Aggregated, real-time log stream from ALL services (Apps + Docker).
+    - **Infra:** Docker Compose service management (Postgres, Redis, etc.).
+    - **RPi:** Remote Raspberry Pi node management and log tailing.
+- **Filterable God View:** Press `/` to search/filter the aggregated log stream in real-time.
+- **Mouse Interaction:** Support clicking on Tabs and Panels to focus or select.
+- **Central Process Management:** Start, stop, and restart all 8 apps.
+- **Interactive Terminal Panel:** Dedicated area for one-off commands (Cmd + K or `:`).
+- **Visual "Traffic Lights":** OKLCH-mapped status icons (●).
 A core TypeScript class in `@sous/cli` that:
 - Uses `tree-kill` to ensure process groups are terminated.
 - Uses the `docker-compose` Node.js wrapper to query and control local infrastructure.
