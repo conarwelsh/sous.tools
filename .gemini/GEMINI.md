@@ -98,7 +98,14 @@
     - Maintain `.dockerignore` files to exclude `@.gemini/` and `.git/`.
     - Use the `files` field in `package.json` to explicitly white-list only necessary runtime files.
     - Ensure CI/CD pipelines do not bundle these directories into deployable units.
-- **Goal:** Minimize artifact size and prevent the leakage of internal architectural context or developer "memories" to production.
+- Goal: Minimize artifact size and prevent the leakage of internal architectural context or developer "memories" to production.
+
+### 18. Development Branch Isolation (MANDATE)
+**Rule:** The `development` branch MUST NEVER be deployed to any cloud providers (Vercel, Render, Supabase, etc.) for staging or production.
+- **Action:** 
+    - Configure cloud provider settings to ONLY trigger builds from `main` or `staging` branches.
+    - Development work should be merged into `staging` or `main` only after full local verification.
+- **Goal:** Conserve build minutes and prevent unstable code from interrupting staging or production workflows.
 
 ## Documentation Index
 - `docs/ADRs/`: Folder containing Architectural Decision Records (one file per decision).

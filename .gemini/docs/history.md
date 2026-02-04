@@ -55,6 +55,8 @@
 - Expanded **`sous maintenance`** brainstorming with `dead-code`, `unused-packages`, and `unused-css` commands.
 - Added **`ubuntu-sandbox` image** to ADR 035 for ephemeral testing of installation scripts.
 - Added **Mandate 17: Build Artifact Exclusion** (Ensuring @.gemini is excluded from production).
+- Added **Mandate 18: Development Branch Isolation** (No cloud deployments for `development`).
+- Configured **Husky** to skip all checks (commit and push) when on the `development` branch.
 - Scaffolded **`@sous/features`** package for domain-specific "Organisms" and logic.
 - Added **Mandate 15: The Shell Pattern** (Apps are thin shells; logic lives in `@sous/features`).
 - Added **Mandate 16: CLI Command Aggregation** (All `package.json` scripts must be aggregated into `@sous/cli`).

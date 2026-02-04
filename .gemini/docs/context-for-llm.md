@@ -36,6 +36,7 @@ This is a monorepo for the `@sous` suite of tools, managed using TurboRepo. It c
 8.  **The Shell Pattern:** Apps like `@sous/web` and `@sous/native` are thin shells; all feature logic and views live in `@sous/features`.
 9.  **CLI Command Aggregation:** All operational scripts in `package.json` files must be aggregated into and accessible via `@sous/cli`.
 10. **Build Exclusion:** Internal docs and `@.gemini/` files must be excluded from all production build artifacts.
+11. **Dev Isolation:** The `development` branch must never be deployed to cloud providers.
 
 ## Platform Domain Model (ADR 005)
 The application is a **Multi-Tenant SaaS** for restaurant management.

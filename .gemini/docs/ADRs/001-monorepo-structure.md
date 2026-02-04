@@ -30,8 +30,8 @@ We have decided to use a Monorepo structure managed by **TurboRepo**.
 ### Git Hooks & CI/CD:
 - **Husky:** Used to manage git hooks for local quality enforcement.
 - **Branch Strategy:** 
-  - **`main` / `staging`:** Strict enforcement of `lint`, `typecheck`, and `build` on push/PR.
-  - **`development`:** All quality checks (lint, build, typecheck) are BYPASSED during push to allow for rapid iteration.
+  - **`main` / `staging`:** Strict enforcement of `lint`, `typecheck`, and `build` on push/PR. These are the ONLY branches allowed to deploy to cloud providers.
+  - **`development`:** All quality checks (lint, build, typecheck) are BYPASSED during commit/push to allow for rapid iteration and machine syncing. Deployment to cloud providers is STRICTLY FORBIDDEN.
 
 ## Consequences
 - **Positive:** centralized dependency management, shared code reuse, unified build pipeline, enforced architectural constraints (config/logging).
