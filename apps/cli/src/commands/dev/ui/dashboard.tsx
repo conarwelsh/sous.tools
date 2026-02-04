@@ -8,7 +8,7 @@ interface Props {
   manager: ProcessManager;
 }
 
-type ViewMode = 'services' | 'omni-stream' | 'infra' | 'rpi';
+type ViewMode = 'services' | 'combined' | 'infra' | 'rpi' | 'terminal';
 
 const BRAND_BLUE = '#0ea5e9'; 
 const BRAND_GRAY = '#9ca3af';
@@ -44,24 +44,18 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
   }, [manager]);
 
   const selectedApp = processes[selectedIdx];
-  const allOmniLogs = manager.getOmniLogs();
-  const omniLogs = useMemo(() => filter 
-    ? allOmniLogs.filter(l => l.message.toLowerCase().includes(filter.toLowerCase()) || l.name.toLowerCase().includes(filter.toLowerCase()))
-    : allOmniLogs, [allOmniLogs, filter]);
+  const allCombinedLogs = manager.getCombinedLogs();
+  const combinedLogs = useMemo(() => filter 
+    ? allCombinedLogs.filter(l => l.message.toLowerCase().includes(filter.toLowerCase()) || l.name.toLowerCase().includes(filter.toLowerCase()))
+    : allCombinedLogs, [allCombinedLogs, filter]);
 
   const mainViewHeight = terminalSize.rows - 3 - 6 - 2;
-  const visibleLines = activeTab === 'services' ? mainViewHeight - 2 : mainViewHeight - 2;
+  const visibleLines = mainViewHeight - 2;
 
   useInput((input, key) => {
-    // Handle Mouse Wheel (SGR Mode)
-    if (input.startsWith('\x1b[<64')) { 
-        setScrollOffset(prev => prev + 3); 
-        return; 
-    }
-    if (input.startsWith('\x1b[<65')) { 
-        setScrollOffset(prev => Math.max(0, prev - 3)); 
-        return; 
-    }
+    // Basic mouse wheel parsing (SGR Mode)
+    if (input.startsWith('\x1b[<64')) { setScrollOffset(prev => prev + 3); return; }
+    if (input.startsWith('\x1b[<65')) { setScrollOffset(prev => Math.max(0, prev - 3)); return; }
 
     if (isCommandMode || isFilterMode) return;
 
@@ -70,7 +64,7 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
     if (input === '/') { setIsFilterMode(true); setScrollOffset(0); }
 
     if (key.tab) {
-        const modes: ViewMode[] = ['services', 'omni-stream', 'infra', 'rpi'];
+        const modes: ViewMode[] = ['services', 'combined', 'infra', 'rpi', 'terminal'];
         const currentIdx = modes.indexOf(activeTab);
         const nextIdx = key.shift ? (currentIdx - 1 + modes.length) % modes.length : (currentIdx + 1) % modes.length;
         setActiveTab(modes[nextIdx]);
@@ -80,7 +74,8 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
     if (key.upArrow) {
         if (activeTab === 'services') setSelectedIdx(Math.max(0, selectedIdx - 1));
         else {
-            const maxScroll = Math.max(0, omniLogs.length - visibleLines);
+            const currentLogs = activeTab === 'combined' ? combinedLogs : (activeTab === 'terminal' ? terminalOutput : []);
+            const maxScroll = Math.max(0, currentLogs.length - visibleLines);
             setScrollOffset(prev => Math.min(maxScroll, prev + 1));
         }
     }
@@ -100,19 +95,34 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
 
   // Ensure scroll offset is always valid when logs update
   useEffect(() => {
-    const currentLogs = activeTab === 'services' ? selectedApp?.logs || [] : omniLogs;
+    const currentLogs = activeTab === 'services' ? selectedApp?.logs || [] : (activeTab === 'combined' ? combinedLogs : terminalOutput);
     const maxScroll = Math.max(0, currentLogs.length - visibleLines);
     if (scrollOffset > maxScroll) {
         setScrollOffset(maxScroll);
     }
-  }, [selectedApp?.logs.length, omniLogs.length, activeTab, visibleLines]);
+  }, [selectedApp?.logs.length, combinedLogs.length, terminalOutput.length, activeTab, visibleLines]);
 
   const handleCommandSubmit = (value: string) => {
     if (value === 'exit' || value === 'q' || value === '') { setIsCommandMode(false); setCommand(''); return; }
-    setTerminalOutput(prev => [...prev.slice(-2), `> ${value}`]);
+    
+    setTerminalOutput(prev => [...prev, `> ${value}`]);
+    
+    // Switch to terminal view to see output
+    setActiveTab('terminal');
+    setScrollOffset(0);
+
     exec(value, (error, stdout, stderr) => {
-        if (stdout) setTerminalOutput(prev => [...prev.slice(-2), stdout.trim().split('\n')[0].slice(0, 50)]);
-        if (stderr) setTerminalOutput(prev => [...prev.slice(-2), `ERR: ${stderr.trim().split('\n')[0].slice(0, 50)}`]);
+        if (stdout) {
+            const lines = stdout.trim().split('\n');
+            setTerminalOutput(prev => [...prev, ...lines]);
+        }
+        if (stderr) {
+            const lines = stderr.trim().split('\n').map(l => `ERR: ${l}`);
+            setTerminalOutput(prev => [...prev, ...lines]);
+        }
+        if (error) {
+            setTerminalOutput(prev => [...prev, `FAIL: ${error.message}`]);
+        }
         setCommand('');
     });
   };
@@ -134,7 +144,7 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
             <Text bold color={BRAND_BLUE}>SOUS</Text>
             <Text color={BRAND_GRAY}>.tools</Text>
             <Box marginLeft={4}>
-                {(['services', 'omni-stream', 'infra', 'rpi'] as const).map((t) => (
+                {(['services', 'combined', 'infra', 'rpi', 'terminal'] as const).map((t) => (
                     <Box key={t} marginLeft={2}>
                         <Text bold={activeTab === t} color={activeTab === t ? BRAND_BLUE : BRAND_GRAY} underline={activeTab === t}>
                             {t.replace('-', ' ').toUpperCase()}
@@ -180,10 +190,10 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
                 </Box>
             )}
 
-            {activeTab === 'omni-stream' && (
+            {activeTab === 'combined' && (
                 <Box flexDirection="column" flexGrow={1}>
                     <Box justifyContent="space-between" marginBottom={1}>
-                        <Text bold color={BRAND_BLUE}>OMNI STREAM</Text>
+                        <Text bold color={BRAND_BLUE}>COMBINED STREAM</Text>
                         {isFilterMode ? (
                             <Box><Text color={BRAND_BLUE}>/</Text><TextInput value={filter} onChange={setFilter} onSubmit={() => setIsFilterMode(false)} /></Box>
                         ) : (
@@ -191,9 +201,9 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
                         )}
                     </Box>
                     <Box flexDirection="column" flexGrow={1} overflow="hidden">
-                        {omniLogs.slice(
-                            Math.max(0, omniLogs.length - visibleLines - scrollOffset), 
-                            Math.max(0, omniLogs.length - scrollOffset)
+                        {combinedLogs.slice(
+                            Math.max(0, combinedLogs.length - visibleLines - scrollOffset), 
+                            Math.max(0, combinedLogs.length - scrollOffset)
                         ).map((l, i) => (
                             <Box key={i}>
                                 <Text color="gray" dimColor>[{l.timestamp.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}] </Text>
@@ -202,6 +212,26 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
                             </Box>
                         ))}
                     </Box>
+                </Box>
+            )}
+
+            {activeTab === 'terminal' && (
+                <Box flexDirection="column" flexGrow={1}>
+                    <Box marginBottom={1}><Text bold color={BRAND_BLUE}>TERMINAL OUTPUT</Text></Box>
+                    <Box flexDirection="column" flexGrow={1} overflow="hidden">
+                        {terminalOutput.slice(
+                            Math.max(0, terminalOutput.length - visibleLines - scrollOffset), 
+                            Math.max(0, terminalOutput.length - scrollOffset)
+                        ).map((line, i) => (
+                            <Text key={i} color="#d1d5db">{line}</Text>
+                        ))}
+                    </Box>
+                </Box>
+            )}
+
+            {(activeTab === 'infra' || activeTab === 'rpi') && (
+                <Box flexGrow={1} alignItems="center" justifyContent="center">
+                    <Text color="gray">Section Under Construction</Text>
                 </Box>
             )}
         </Box>
@@ -215,7 +245,6 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
                 {isCommandMode && <Text color={BRAND_BLUE} italic>ACTIVE</Text>}
             </Box>
             <Box flexDirection="column">
-                {terminalOutput.map((line, i) => <Text key={i} color="gray" dimColor>  {line}</Text>)}
                 <Box><Text color={isCommandMode ? BRAND_BLUE : "gray"}>  $ </Text>{isCommandMode ? <TextInput value={command} onChange={setCommand} onSubmit={handleCommandSubmit} /> : <Text color={DARK_GRAY}>...</Text>}</Box>
             </Box>
         </Box>

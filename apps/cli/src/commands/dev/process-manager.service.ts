@@ -29,7 +29,7 @@ export interface ManagedProcess {
 @Injectable()
 export class ProcessManager extends EventEmitter implements OnModuleDestroy {
   private processes: Map<string, ManagedProcess> = new Map();
-  private omniLogs: ManagedLog[] = [];
+  private combinedLogs: ManagedLog[] = [];
   private pnpmPath: string = 'pnpm';
 
   constructor() {
@@ -77,8 +77,8 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
     return Array.from(this.processes.values());
   }
 
-  getOmniLogs() {
-    return this.omniLogs;
+  getCombinedLogs() {
+    return this.combinedLogs;
   }
 
   async autoStartCore() {
@@ -196,8 +196,8 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
         proc.logs.push(logEntry);
         if (proc.logs.length > 1000) proc.logs.shift();
 
-        this.omniLogs.push(logEntry);
-        if (this.omniLogs.length > 2000) this.omniLogs.shift();
+        this.combinedLogs.push(logEntry);
+        if (this.combinedLogs.length > 2000) this.combinedLogs.shift();
     }
 
     this.emit('update');
