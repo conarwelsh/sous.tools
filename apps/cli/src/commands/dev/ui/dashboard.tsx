@@ -8,7 +8,7 @@ interface Props {
   manager: ProcessManager;
 }
 
-type ViewMode = 'services' | 'god-view' | 'infra' | 'rpi';
+type ViewMode = 'services' | 'omni-stream' | 'infra' | 'rpi';
 
 const BRAND_BLUE = '#0ea5e9'; 
 const BRAND_GRAY = '#9ca3af';
@@ -43,10 +43,25 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
     return () => { manager.off('update', handleUpdate); };
   }, [manager]);
 
+  const selectedApp = processes[selectedIdx];
+  const allOmniLogs = manager.getOmniLogs();
+  const omniLogs = useMemo(() => filter 
+    ? allOmniLogs.filter(l => l.message.toLowerCase().includes(filter.toLowerCase()) || l.name.toLowerCase().includes(filter.toLowerCase()))
+    : allOmniLogs, [allOmniLogs, filter]);
+
+  const mainViewHeight = terminalSize.rows - 3 - 6 - 2;
+  const visibleLines = activeTab === 'services' ? mainViewHeight - 2 : mainViewHeight - 2;
+
   useInput((input, key) => {
-    // Basic mouse wheel parsing (SGR Mode)
-    if (input.startsWith('\x1b[<64')) { setScrollOffset(prev => prev + 3); return; }
-    if (input.startsWith('\x1b[<65')) { setScrollOffset(prev => Math.max(0, prev - 3)); return; }
+    // Handle Mouse Wheel (SGR Mode)
+    if (input.startsWith('\x1b[<64')) { 
+        setScrollOffset(prev => prev + 3); 
+        return; 
+    }
+    if (input.startsWith('\x1b[<65')) { 
+        setScrollOffset(prev => Math.max(0, prev - 3)); 
+        return; 
+    }
 
     if (isCommandMode || isFilterMode) return;
 
@@ -55,7 +70,7 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
     if (input === '/') { setIsFilterMode(true); setScrollOffset(0); }
 
     if (key.tab) {
-        const modes: ViewMode[] = ['services', 'god-view', 'infra', 'rpi'];
+        const modes: ViewMode[] = ['services', 'omni-stream', 'infra', 'rpi'];
         const currentIdx = modes.indexOf(activeTab);
         const nextIdx = key.shift ? (currentIdx - 1 + modes.length) % modes.length : (currentIdx + 1) % modes.length;
         setActiveTab(modes[nextIdx]);
@@ -64,7 +79,10 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
 
     if (key.upArrow) {
         if (activeTab === 'services') setSelectedIdx(Math.max(0, selectedIdx - 1));
-        else setScrollOffset(prev => prev + 1);
+        else {
+            const maxScroll = Math.max(0, omniLogs.length - visibleLines);
+            setScrollOffset(prev => Math.min(maxScroll, prev + 1));
+        }
     }
     if (key.downArrow) {
         if (activeTab === 'services') setSelectedIdx(Math.min(processes.length - 1, selectedIdx + 1));
@@ -79,6 +97,15 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
 
     if (input === 'r' && activeTab === 'services') manager.restartProcess(processes[selectedIdx].id);
   });
+
+  // Ensure scroll offset is always valid when logs update
+  useEffect(() => {
+    const currentLogs = activeTab === 'services' ? selectedApp?.logs || [] : omniLogs;
+    const maxScroll = Math.max(0, currentLogs.length - visibleLines);
+    if (scrollOffset > maxScroll) {
+        setScrollOffset(maxScroll);
+    }
+  }, [selectedApp?.logs.length, omniLogs.length, activeTab, visibleLines]);
 
   const handleCommandSubmit = (value: string) => {
     if (value === 'exit' || value === 'q' || value === '') { setIsCommandMode(false); setCommand(''); return; }
@@ -99,14 +126,6 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
     }
   };
 
-  const selectedApp = processes[selectedIdx];
-  const allGodLogs = manager.getGodViewLogs();
-  const godLogs = useMemo(() => filter 
-    ? allGodLogs.filter(l => l.message.toLowerCase().includes(filter.toLowerCase()) || l.name.toLowerCase().includes(filter.toLowerCase()))
-    : allGodLogs, [allGodLogs, filter]);
-
-  const mainViewHeight = terminalSize.rows - 3 - 6 - 2;
-
   return (
     <Box flexDirection="column" width={terminalSize.columns} height={terminalSize.rows} paddingX={1}>
       {/* Header */}
@@ -115,7 +134,7 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
             <Text bold color={BRAND_BLUE}>SOUS</Text>
             <Text color={BRAND_GRAY}>.tools</Text>
             <Box marginLeft={4}>
-                {(['services', 'god-view', 'infra', 'rpi'] as const).map((t) => (
+                {(['services', 'omni-stream', 'infra', 'rpi'] as const).map((t) => (
                     <Box key={t} marginLeft={2}>
                         <Text bold={activeTab === t} color={activeTab === t ? BRAND_BLUE : BRAND_GRAY} underline={activeTab === t}>
                             {t.replace('-', ' ').toUpperCase()}
@@ -151,23 +170,20 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
                         <Text color="gray">{selectedApp?.status.toUpperCase()}</Text>
                     </Box>
                     <Box flexDirection="column" flexGrow={1} overflow="hidden">
-                        {selectedApp?.logs.slice(
-                            Math.max(0, selectedApp.logs.length - (mainViewHeight - 2) - scrollOffset), 
-                            Math.max(0, selectedApp.logs.length - scrollOffset)
+                        {(selectedApp?.logs || []).slice(
+                            Math.max(0, (selectedApp?.logs.length || 0) - visibleLines - scrollOffset), 
+                            Math.max(0, (selectedApp?.logs.length || 0) - scrollOffset)
                         ).map((l, i) => (
-                            <Box key={i}>
-                                <Text color="gray" dimColor>[{l.timestamp.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}] </Text>
-                                <Text color={l.level === 'error' ? '#ef4444' : '#d1d5db'}>{l.message}</Text>
-                            </Box>
+                            <Text key={i} wrap="truncate-end" color="#d1d5db">{l.message}</Text>
                         ))}
                     </Box>
                 </Box>
             )}
 
-            {activeTab === 'god-view' && (
+            {activeTab === 'omni-stream' && (
                 <Box flexDirection="column" flexGrow={1}>
                     <Box justifyContent="space-between" marginBottom={1}>
-                        <Text bold color={BRAND_BLUE}>GOD VIEW</Text>
+                        <Text bold color={BRAND_BLUE}>OMNI STREAM</Text>
                         {isFilterMode ? (
                             <Box><Text color={BRAND_BLUE}>/</Text><TextInput value={filter} onChange={setFilter} onSubmit={() => setIsFilterMode(false)} /></Box>
                         ) : (
@@ -175,9 +191,9 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
                         )}
                     </Box>
                     <Box flexDirection="column" flexGrow={1} overflow="hidden">
-                        {godLogs.slice(
-                            Math.max(0, godLogs.length - (mainViewHeight - 2) - scrollOffset), 
-                            Math.max(0, godLogs.length - scrollOffset)
+                        {omniLogs.slice(
+                            Math.max(0, omniLogs.length - visibleLines - scrollOffset), 
+                            Math.max(0, omniLogs.length - scrollOffset)
                         ).map((l, i) => (
                             <Box key={i}>
                                 <Text color="gray" dimColor>[{l.timestamp.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}] </Text>

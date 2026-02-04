@@ -29,7 +29,7 @@ export interface ManagedProcess {
 @Injectable()
 export class ProcessManager extends EventEmitter implements OnModuleDestroy {
   private processes: Map<string, ManagedProcess> = new Map();
-  private godViewLogs: ManagedLog[] = [];
+  private omniLogs: ManagedLog[] = [];
   private pnpmPath: string = 'pnpm';
 
   constructor() {
@@ -77,8 +77,8 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
     return Array.from(this.processes.values());
   }
 
-  getGodViewLogs() {
-    return this.godViewLogs;
+  getOmniLogs() {
+    return this.omniLogs;
   }
 
   async autoStartCore() {
@@ -177,7 +177,6 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
         let timestamp = new Date();
         let name = proc.name;
 
-        // Try to parse as JSON log
         try {
             if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
                 const json = JSON.parse(trimmed);
@@ -186,7 +185,6 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
                 if (json.time) timestamp = new Date(json.time);
                 if (json.name) name = json.name.replace('@sous/', '').toUpperCase();
             } else {
-                // Strip ANSI escape codes for cleaner non-JSON logs
                 message = trimmed.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
             }
         } catch (e) {
@@ -198,8 +196,8 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
         proc.logs.push(logEntry);
         if (proc.logs.length > 1000) proc.logs.shift();
 
-        this.godViewLogs.push(logEntry);
-        if (this.godViewLogs.length > 2000) this.godViewLogs.shift();
+        this.omniLogs.push(logEntry);
+        if (this.omniLogs.length > 2000) this.omniLogs.shift();
     }
 
     this.emit('update');
