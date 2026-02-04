@@ -107,6 +107,11 @@
     - Development work should be merged into `staging` or `main` only after full local verification.
 - **Goal:** Conserve build minutes and prevent unstable code from interrupting staging or production workflows.
 
+### 19. Specification & ADR Adherence (MANDATE)
+**Rule:** Implementations MUST strictly adhere to the technical specifications and Architectural Decision Records (ADRs) defined in the project.
+- **Action:** Before starting any implementation, verify the presence of a corresponding spec file in `.gemini/specs/` and any relevant ADRs in `.gemini/docs/ADRs/`. The final code must closely reflect the logic, structure, and constraints outlined in these documents.
+- **Goal:** Maintain architectural integrity and ensure that high-level designs are correctly translated into code.
+
 ## Documentation Index
 - `docs/ADRs/`: Folder containing Architectural Decision Records (one file per decision).
 - `docs/architecture.md`: High-level system architecture.
