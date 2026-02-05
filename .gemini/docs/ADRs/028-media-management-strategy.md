@@ -1,7 +1,7 @@
 # ADR 028: Media Management Strategy (Stateless & Cost-Efficient)
 
 ## Status
-Proposed
+Decided
 
 ## Date
 2026-02-04

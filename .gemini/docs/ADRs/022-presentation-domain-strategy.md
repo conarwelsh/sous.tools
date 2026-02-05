@@ -1,7 +1,7 @@
 # ADR 022: Presentation Domain Strategy (Visuals & Output)
 
 ## Status
-Proposed
+Decided
 
 ## Date
 2026-02-04 (Merged)

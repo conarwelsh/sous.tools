@@ -1,1 +1,51 @@
-{"name": "@sous/features", "version": "0.0.0", "main": "./dist/index.js", "module": "./dist/index.mjs", "types": "./dist/index.d.ts", "files": ["dist"], "scripts": {"build": "tsup src/index.ts --format cjs,esm --dts", "dev": "tsup src/index.ts --format cjs,esm --watch --dts"}, "dependencies": {"@sous/ui": "workspace:*", "@sous/client-sdk": "workspace:*", "@sous/config": "workspace:*", "react-native": "latest", "nativewind": "latest"}, "devDependencies": {"tsup": "latest", "typescript": "latest"}}
+{
+  "name": "@sous/features",
+  "version": "0.0.0",
+  "main": "./dist/client.js",
+  "module": "./dist/client.mjs",
+  "types": "./dist/client.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.mjs",
+      "require": "./dist/client.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.mjs",
+      "require": "./dist/server.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "dependencies": {
+    "@sous/client-sdk": "workspace:*",
+    "@sous/config": "workspace:*",
+    "@sous/ui": "workspace:*",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.563.0",
+    "lucide-react-native": "^0.474.0",
+    "nativewind": "latest",
+    "react-markdown": "^10.1.0",
+    "react-native": "0.77.3",
+    "remark-gfm": "^4.0.1",
+    "server-only": "^0.0.1",
+    "tailwind-merge": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "tsup": "latest",
+    "typescript": "latest"
+  }
+}

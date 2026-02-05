@@ -21,7 +21,9 @@ interface DevOptions {
   subCommands: [InstallCommand, SyncCommand],
 })
 export class DevCommand extends CommandRunner {
-  constructor(@Inject(ProcessManager) private readonly manager: ProcessManager) {
+  constructor(
+    @Inject(ProcessManager) private readonly manager: ProcessManager,
+  ) {
     super();
   }
 
@@ -33,7 +35,9 @@ export class DevCommand extends CommandRunner {
 
     if (options?.android) {
       logger.info('🤖 Starting Android Development loop for @sous/native...');
-      execSync('pnpm --filter @sous/native run android:dev', { stdio: 'inherit' });
+      execSync('pnpm --filter @sous/native run android:dev', {
+        stdio: 'inherit',
+      });
       return;
     }
 
@@ -54,17 +58,19 @@ export class DevCommand extends CommandRunner {
       this.manager.autoStartCore();
 
       // Render the Ink TUI
-      const { waitUntilExit } = render(React.createElement(Dashboard, { manager: this.manager }));
+      const { waitUntilExit } = render(
+        React.createElement(Dashboard, { manager: this.manager }),
+      );
 
       try {
         await waitUntilExit();
       } finally {
         // Restore terminal buffer immediately before cleanup logs
         process.stdout.write('\x1b[?1049l');
-        
+
         logger.info('👋 Shutting down managed processes...');
         await this.manager.stopAll();
-        
+
         logger.info('✅ Cleanup complete. Goodbye!');
         process.exit(0); // Force exit to prevent hanging from lingering emitters/timers
       }

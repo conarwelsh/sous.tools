@@ -8,23 +8,26 @@ import * as path from 'path';
   description: 'Run tests across the monorepo',
 })
 export class TestCommand extends CommandRunner {
-  async run(passedParam: string[], options: { filter?: string }): Promise<void> {
+  async run(
+    passedParam: string[],
+    options: { filter?: string },
+  ): Promise<void> {
     const args = ['run', 'test'];
-    
+
     if (options.filter) {
       args.push('--filter', options.filter);
     }
-    
+
     logger.info(`> turbo ${args.join(' ')}`);
 
     // Execute from the root of the monorepo (2 levels up from apps/cli)
     // process.cwd() is apps/cli when running via "pnpm sous"
     const rootDir = path.resolve(process.cwd(), '../../');
 
-    const child = spawn('turbo', args, { 
-      stdio: 'inherit', 
+    const child = spawn('turbo', args, {
+      stdio: 'inherit',
       shell: true,
-      cwd: rootDir 
+      cwd: rootDir,
     });
 
     return new Promise((resolve, reject) => {
@@ -36,7 +39,7 @@ export class TestCommand extends CommandRunner {
           process.exit(code ?? 1);
         }
       });
-      
+
       child.on('error', (err) => {
         logger.error(err);
         reject(err);

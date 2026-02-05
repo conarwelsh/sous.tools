@@ -1,7 +1,7 @@
 # ADR 009: Security, Authentication, and Authorization Strategy
 
 ## Status
-Proposed
+Decided
 
 ## Date
 2026-02-03

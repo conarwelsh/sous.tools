@@ -1,7 +1,7 @@
 # ADR 005: Platform Domains & Multi-Tenancy Strategy
 
 ## Status
-Proposed
+Decided
 
 ## Date
 2026-02-04 (Updated)

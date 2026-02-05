@@ -7,16 +7,13 @@ interface ConfigOptions {
   env?: string;
 }
 
-@SubCommand({ 
-  name: 'config', 
+@SubCommand({
+  name: 'config',
   description: 'Manage platform configuration',
-  subCommands: [ConfigAddCommand]
+  subCommands: [ConfigAddCommand],
 })
 export class ConfigCommand extends CommandRunner {
-  async run(
-    passedParam: string[],
-    options?: ConfigOptions,
-  ): Promise<void> {
+  async run(passedParam: string[], options?: ConfigOptions): Promise<void> {
     const env = options?.env || 'development';
     logger.info(`🔍 Fetching configuration for environment: ${env}...`);
 
@@ -30,7 +27,8 @@ export class ConfigCommand extends CommandRunner {
 
   @Option({
     flags: '-e, --env <env>',
-    description: 'Environment to fetch config for (development, staging, production)',
+    description:
+      'Environment to fetch config for (development, staging, production)',
   })
   parseEnv(val: string): string {
     return val;

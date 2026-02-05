@@ -1,0 +1,21 @@
+{
+  "favicon": {
+    "variant": "plate",
+    "size": 32,
+    "props": {}
+  },
+  "android": {
+    "variant": "neon",
+    "size": 512,
+    "props": {
+      "isAnimated": false
+    }
+  },
+  "ios": {
+    "variant": "neon",
+    "size": 1024,
+    "props": {
+      "isAnimated": false
+    }
+  }
+}

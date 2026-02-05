@@ -10,16 +10,15 @@ import * as fs from 'fs';
   description: 'Tail logs from the specified environment',
 })
 export class LogsTailCommand extends CommandRunner {
-  async run(
-    passedParam: string[],
-    options: { env?: string },
-  ): Promise<void> {
+  async run(passedParam: string[], options: { env?: string }): Promise<void> {
     const env = options.env || 'development';
 
     if (env === 'development') {
       await this.tailLocalLogs();
     } else {
-      logger.info(`⚠️  Tailing remote logs for '${env}' is not yet implemented.`);
+      logger.info(
+        `⚠️  Tailing remote logs for '${env}' is not yet implemented.`,
+      );
       logger.info('Please check your Better Stack dashboard.');
     }
   }
@@ -35,7 +34,7 @@ export class LogsTailCommand extends CommandRunner {
     }
 
     logger.info(`📄 Tailing local logs from ${logFile}...`);
-    
+
     const tail = spawn('tail', ['-f', logFile], { stdio: 'inherit' });
 
     tail.on('error', (err) => {
@@ -47,9 +46,9 @@ export class LogsTailCommand extends CommandRunner {
       tail.kill();
       process.exit();
     });
-    
+
     // Keep the process alive to wait for tail
-    await new Promise(() => {}); 
+    await new Promise(() => {});
   }
 
   @Option({

@@ -7,22 +7,19 @@ interface InstallOptions {
   android?: boolean;
 }
 
-@SubCommand({ 
-  name: 'install', 
+@SubCommand({
+  name: 'install',
   description: 'Install dependencies on a remote or local device',
-  subCommands: [ShellInstallCommand]
+  subCommands: [ShellInstallCommand],
 })
 export class InstallCommand extends CommandRunner {
-  async run(
-    passedParam: string[],
-    options?: InstallOptions,
-  ): Promise<void> {
+  async run(passedParam: string[], options?: InstallOptions): Promise<void> {
     if (passedParam.length > 0 && ['shell'].includes(passedParam[0])) {
       return;
     }
 
     const targetIp = passedParam[0];
-    
+
     if (!targetIp) {
       logger.info('Detecting role as Developer Workstation...');
       try {
@@ -37,18 +34,30 @@ export class InstallCommand extends CommandRunner {
       logger.info(`📱 Connecting to Android device at ${targetIp} via ADB...`);
       try {
         // adb connect usually requires the port (default 5555)
-        const connectionString = targetIp.includes(':') ? targetIp : `${targetIp}:5555`;
+        const connectionString = targetIp.includes(':')
+          ? targetIp
+          : `${targetIp}:5555`;
         execSync(`adb connect ${connectionString}`, { stdio: 'inherit' });
-        logger.info('✅ Connected. Ensure you have accepted the "Always allow from this computer" prompt on the device.');
+        logger.info(
+          '✅ Connected. Ensure you have accepted the "Always allow from this computer" prompt on the device.',
+        );
       } catch (error) {
-        logger.error(`❌ Failed to connect to Android device at ${targetIp}. Ensure Wireless Debugging is ON.`);
+        logger.error(
+          `❌ Failed to connect to Android device at ${targetIp}. Ensure Wireless Debugging is ON.`,
+        );
       }
     } else {
-      logger.info(`🚀 Dispatching remote Linux/RPi installation to ${targetIp}...`);
+      logger.info(
+        `🚀 Dispatching remote Linux/RPi installation to ${targetIp}...`,
+      );
       try {
-        execSync(`bash scripts/install-remote.sh ${targetIp}`, { stdio: 'inherit' });
+        execSync(`bash scripts/install-remote.sh ${targetIp}`, {
+          stdio: 'inherit',
+        });
       } catch (error) {
-        logger.error(`❌ Remote installation to ${targetIp} failed. Check network and SSH keys.`);
+        logger.error(
+          `❌ Remote installation to ${targetIp} failed. Check network and SSH keys.`,
+        );
       }
     }
   }

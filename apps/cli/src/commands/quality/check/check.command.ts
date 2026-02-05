@@ -8,7 +8,10 @@ import * as path from 'path';
   description: 'Run comprehensive health check (lint, typecheck, test, build)',
 })
 export class CheckCommand extends CommandRunner {
-  async run(passedParam: string[], options: { filter?: string }): Promise<void> {
+  async run(
+    passedParam: string[],
+    options: { filter?: string },
+  ): Promise<void> {
     const args = ['run', 'lint', 'typecheck', 'test', 'build'];
 
     if (options.filter) {
@@ -21,10 +24,10 @@ export class CheckCommand extends CommandRunner {
     // process.cwd() is apps/cli when running via "pnpm sous"
     const rootDir = path.resolve(process.cwd(), '../../');
 
-    const child = spawn('turbo', args, { 
-      stdio: 'inherit', 
+    const child = spawn('turbo', args, {
+      stdio: 'inherit',
       shell: true,
-      cwd: rootDir
+      cwd: rootDir,
     });
 
     return new Promise((resolve, reject) => {
@@ -32,11 +35,11 @@ export class CheckCommand extends CommandRunner {
         if (code === 0) {
           resolve();
         } else {
-           // Don't reject, just exit process with code to avoid stack trace spam
-           process.exit(code ?? 1);
+          // Don't reject, just exit process with code to avoid stack trace spam
+          process.exit(code ?? 1);
         }
       });
-      
+
       child.on('error', (err) => {
         logger.error(err);
         reject(err);

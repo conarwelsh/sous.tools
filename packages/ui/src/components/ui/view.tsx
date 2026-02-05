@@ -3,6 +3,7 @@ import { cssInterop } from 'react-native-css-interop';
 
 export const View = RNView;
 
+// @ts-ignore
 cssInterop(View, {
   className: 'style',
 });

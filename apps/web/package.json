@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "test": "echo \"No tests defined\" && exit 0",
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
     "typecheck": "tsc --noEmit",
     "start": "next start",
     "lint": "eslint"

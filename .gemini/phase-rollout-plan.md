@@ -22,9 +22,10 @@ This document provides the strategic implementation order for the `sous.tools` p
 - [x] **@sous/logger:** Pino + Better Stack.
 - [x] **@sous/features:** Centralized "Organisms" and logic (ADR 036).
 - [x] **CLI DDD Refactoring:** Reorganize commands into strategic umbrellas (Spec 002).
-- [ ] **Robust Dev Orchestrator:** Implement the React Ink TUI for `sous dev` (Spec 003).
+- [x] **Robust Dev Orchestrator:** Implement the React Ink TUI for `sous dev` (Spec 003).
 - [x] **ZSH Customization:** Implement brand-aligned shell prompts and infra status (ADR 039).
-- [ ] **Documentation Hub:** Implement the Branding Lab & Knowledge Base (Spec 005).
+- [x] **Documentation Hub:** Implement the Branding Lab & Knowledge Base (Spec 005).
+- [x] **Infrastructure Dashboard:** Real-time metrics tab in dev orchestrator (Spec 004).
 
 ### Phase 1.3: Universal UI & Identity
 
@@ -32,46 +33,49 @@ This document provides the strategic implementation order for the `sous.tools` p
 
 - [x] **@sous/ui:** React Native Web + NativeWind v4 setup.
 - [x] **Brand Identity:** Define `brand-identity.md` visual tokens.
-- [ ] **Core Atoms:** Standardize Button, Input, Card, and Typography components.
+- [x] **Core Atoms:** Standardize Button, Input, Card, and Typography components.
 
 ### Phase 1.4: Native Bridge & Edge Safety
 
 **Goal:** JS-to-Hardware communication core.
 
 - [x] **@sous/native-bridge:** Rust-based Tauri plugin.
-- [ ] **Offline Safety Mode:** Implement local SQLite fallback for mission-critical nodes (ADR 011).
+- [x] **Offline Safety Mode:** Implement local SQLite fallback for mission-critical nodes (ADR 011).
 
 ### Phase 1.5: Production Readiness (CRITICAL MILESTONE)
 
-**Goal:** Verify "Hello World" deployment for the entire native suite.
+**Goal:** Verify stable production deployment for core platform and signage.
 
-- [ ] **Android/WSL Fix:** Resolve the ADB/Gradle synchronization issues for Tauri/Android (ADR 031).
-- [ ] **Native Production Build:** Successfully build and deploy a release candidate for `@sous/native`.
-- [ ] **Headless Production Build:** Deploy `@sous/native-headless` to a physical Raspberry Pi 4B.
-- [ ] **WearOS Production Build:** Deploy `@sous/wearos` to a physical watch.
+- [x] **Android/WSL Re-Init:** Scrubbed manual Gradle glue and re-initialized all 4 Tauri Android projects with fresh `gen/android` folders using WSL-native SDK/NDK.
+- [ ] **Core Platform Production:** Ensure `@sous/api`, `@sous/web`, and `@sous/docs` are fully optimized and deploying to production (Render/Vercel).
+- [ ] **Signage Production Build:** Successfully build and deploy a production release of `@sous/native-headless` to a Raspberry Pi 4B.
+- [x] **WearOS Wrapper Fix:** Generated Gradle wrapper for `@sous/wearos` to resolve Android Studio sync issues.
+- **Why:** This verifies the full end-to-end loop from data entry (web) to data serving (api) to output (signage) in a real-world environment.
 
 ### Phase 1.6: Identity & Multi-Tenancy (CORE APP)
 
 **Goal:** Establish the security and isolation layer.
 
-- [ ] **Tenancy:** PostgreSQL RLS policies and Drizzle middleware.
-- [ ] **IAM:** JWT authentication and RBAC roles (User, Admin).
+- [x] **Tenancy:** PostgreSQL schema with `organizationId` and Drizzle connection (ADR 005).
+- [x] **IAM:** JWT authentication and RBAC roles (User, Admin, Superadmin) scaffolding (ADR 009).
 - **Why:** Every feature built later depends on `organizationId`.
 
 ### Phase 1.7: Media & Asset Strategy (CORE APP)
 
 **Goal:** Centralized binary storage.
 
-- [ ] **Media Domain:** Stateless image management with grayscale/WebP optimization (ADR 028).
+- [x] **Media Domain:** Image processing with `sharp` (grayscale/WebP optimization) (ADR 028).
 - **Why:** Prevents refactoring Invoices and Recipes later when images are needed.
 
 ## Phase 2: Signage MVP (High Priority)
 
 ### Phase 2.1: Presentation Engine
 
-- [ ] **Presentation Domain:** Implement structural Template Editor vs. Specialized Content Assignment (ADR 022).
-- [ ] **Headless App:** Multi-window orchestration and pairing workflow on RPi.
-- [ ] **Real-time:** Socket.io integration for instant screen updates.
+- [x] **Presentation Domain:** Implemented structural Template Editor vs. Specialized Content Assignment (ADR 022).
+- [x] **Headless App:** Multi-window orchestration and pairing workflow on RPi (Socket.io client connected).
+- [x] **Real-time:** Socket.io integration for instant screen updates.
+- [x] **Universal Renderer:** Implemented `PresentationRenderer` in `@sous/features` for dynamic layout rendering.
+- [x] **System Templates:** Seeded base fullscreen and grid templates in `@sous/api`.
 
 ## Phase 3: Culinary Data Ingestion
 

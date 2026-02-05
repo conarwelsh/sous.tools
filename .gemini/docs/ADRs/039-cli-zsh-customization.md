@@ -20,7 +20,6 @@ The prompt will be augmented with the following dynamic information:
 - **Active Context:** Current environment (dev/staging/prod) colored by brand logic.
 - **Tenant Context:** Displays the active Organization/Location ID if set via `sous config`.
 - **Infrastructure Health:** A compact indicator (dots/icons) showing if the local API (4000) or Web (3000) servers are responding.
-- **Zellij Status:** Indicator if the current shell is inside a `@sous` dev session.
 
 ### 3. Branding & Styling
 - **Colors:** Use ANSI mappings of the brand tokens defined in `docs/brand-identity.md`.

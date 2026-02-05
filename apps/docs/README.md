@@ -9,7 +9,8 @@ The centralized documentation hub and design lab for the `sous.tools` ecosystem.
 
 ## Functionality List
 - [x] Project mandated ADR and feature tracking.
-- [ ] Interactive UI component playground.
+- [x] **Branding Lab**: Living style guide for the `@sous/ui` component library with interactive wordmark overrides and variant previews.
+- [x] Interactive UI component playground.
 - [ ] Developer onboarding guides.
 
 ## Installation & Setup

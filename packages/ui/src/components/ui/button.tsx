@@ -7,6 +7,7 @@ interface ButtonProps extends React.ComponentPropsWithoutRef<typeof Pressable> {
   size?: 'default' | 'sm' | 'lg' | 'icon';
   label?: string;
   labelClasses?: string;
+  className?: string;
 }
 
 const Button = React.forwardRef<View, ButtonProps>(
@@ -39,6 +40,7 @@ const Button = React.forwardRef<View, ButtonProps>(
     return (
       <Pressable
         ref={ref}
+        // @ts-ignore
         className={cn(
           'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background',
           variants[variant],
@@ -48,6 +50,7 @@ const Button = React.forwardRef<View, ButtonProps>(
         {...props}
       >
         {label ? (
+          // @ts-ignore
           <Text className={cn(textVariants[variant], labelClasses)}>
             {label}
           </Text>

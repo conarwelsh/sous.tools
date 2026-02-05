@@ -71,6 +71,7 @@ if ! command -v cargo &> /dev/null; then
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
   source $HOME/.cargo/env
 fi
+rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
 
 # 9. Android Development (Hybrid WSL2 Bridge)
 echo "🤖 Setting up Android Development environment..."

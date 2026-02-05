@@ -45,10 +45,10 @@ This is a living list of commands to be implemented in `@sous/cli`.
 - `sous maintenance unused-css`: Scans for CSS classes or styles that are defined but never applied in components.
 
 #### **Development (`sous dev`)**
-- `sous dev`: Starts the multiplexed (Zellij/Tmux) development environment.
-  - **Flags:** `--multiplexer=[zellij|tmux]`.
+- `sous dev`: Starts the interactive development dashboard (Ink TUI).
   - **Panels:** `@sous/api`, `@sous/web`, `gemini-cli`.
-  - **Suspended Panels:** `ios`, `android` (opt-in).
+  - **Auto-Restart:** Automatically restarts services on crash or file change.
+  - **Integrated Logs:** Centralized "God View" log aggregation.
 
 #### **Database (`sous db`)**
 - `sous db migrate`: Runs pending migrations.
@@ -75,20 +75,18 @@ Wherever possible, the CLI will not reimplement logic. It will invoke the corres
     - Prevents accidental production data loss.
     - Extremely fast onboarding for new developers (`git clone` -> `pnpm install` -> `sous dev`).
 - **Negative:**
-    - **Multiplexer Dependency:** Requires users to have Zellij or Tmux installed on their local machine.
     - **Process Management Complexity:** Ensuring 100% cleanup of ghost processes across different OS environments can be challenging.
 
 ## Research & Implementation Plan
 
 ### Research
 - **Nest Commander:** Provides a familiar NestJS dependency injection system for building CLI commands.
-- **Zellij/Tmux:** Evaluated Zellij as the modern, Rust-based alternative for terminal multiplexing in dev.
+- **Ink (React):** Evaluated for creating interactive TUI dashboards without external dependencies.
 
 ### Implementation Plan
 1. **Core CLI:** Initialize `@sous/cli` with `nest-commander`.
 2. **Orchestrator Command:** Implement `sous dev` which:
-    - Checks for dependencies (Docker, Zellij).
     - Starts the backend infra (Postgres, Redis).
-    - Launches a Zellij session with tabbed panes for each app.
+    - Launches an interactive Ink-based dashboard with integrated logs and service management.
 3. **Housekeeping:** Implement cleanup commands for `node_modules` and caches.
 4. **Interactive DB Tools:** Create the `sous db` command suite for migrations and seeding.

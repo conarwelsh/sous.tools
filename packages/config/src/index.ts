@@ -1,6 +1,6 @@
 import { config as loadDotenv } from 'dotenv';
 import { InfisicalSDK } from '@infisical/sdk';
-import { configSchema, type Config } from './schema';
+import { configSchema, type Config, brandingConfigSchema, type BrandingConfig } from './schema.js';
 import { logger } from '@sous/logger';
 
 loadDotenv();
@@ -39,11 +39,25 @@ export function getLocalConfig(): Config {
     redis: {
       url: process.env.REDIS_URL,
     },
+    iam: {
+      jwtSecret: process.env.JWT_SECRET || 'sous-secret-key',
+    },
+    storage: {
+      supabase: {
+        url: process.env.SUPABASE_URL,
+        anonKey: process.env.SUPABASE_ANON_KEY,
+        bucket: process.env.SUPABASE_BUCKET || 'media',
+      },
+      cloudinary: {
+        cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+        apiKey: process.env.CLOUDINARY_API_KEY,
+        apiSecret: process.env.CLOUDINARY_API_SECRET,
+      },
+    },
   };
 
   const parsed = configSchema.safeParse(mergedConfig);
   if (!parsed.success) {
-    // During local startup, we might be missing some things, so we passthrough or use defaults
     return mergedConfig as any;
   }
   return parsed.data;
@@ -56,7 +70,6 @@ export async function getConfig(envOverride?: string): Promise<Config> {
   const env = envOverride || process.env.NODE_ENV || 'development';
   const infisicalEnv = env === 'development' ? 'dev' : env === 'staging' ? 'staging' : 'prod';
 
-  // Optional Infisical Integration
   if (process.env.INFISICAL_CLIENT_ID && process.env.INFISICAL_CLIENT_SECRET && process.env.INFISICAL_PROJECT_ID) {
     try {
       const client = new InfisicalSDK();
@@ -76,7 +89,7 @@ export async function getConfig(envOverride?: string): Promise<Config> {
         [secret.secretKey]: secret.secretValue,
       }), {});
     } catch (error) {
-      logger.warn(`Failed to load secrets from Infisical for ${env}, falling back to process.env`, error);
+      logger.warn(`Failed to load secrets from Infisical for ${env}`, error as any);
     }
   }
 
@@ -112,21 +125,34 @@ export async function getConfig(envOverride?: string): Promise<Config> {
     redis: {
       url: process.env.REDIS_URL,
     },
+    iam: {
+      jwtSecret: process.env.JWT_SECRET || 'sous-secret-key',
+    },
+    storage: {
+      supabase: {
+        url: process.env.SUPABASE_URL,
+        anonKey: process.env.SUPABASE_ANON_KEY,
+        bucket: process.env.SUPABASE_BUCKET || 'media',
+      },
+      cloudinary: {
+        cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+        apiKey: process.env.CLOUDINARY_API_KEY,
+        apiSecret: process.env.CLOUDINARY_API_SECRET,
+      },
+    },
     ...remoteConfig,
   };
 
   const parsed = configSchema.safeParse(mergedConfig);
 
   if (!parsed.success) {
-    logger.error(`❌ Invalid configuration for ${env}:`, parsed.error.format());
+    logger.error(`❌ Invalid configuration for ${env}: ${JSON.stringify(parsed.error.format())}`);
     process.exit(1);
   }
 
   return Object.freeze(parsed.data);
 }
 
-// Top-level await is handled by the consumer or an async initializer
 export const configPromise = getConfig();
 
-// For synchronous access where we can't await, we export the schema for manual parsing
-export { configSchema };
+export { configSchema, brandingConfigSchema, type Config, type BrandingConfig };

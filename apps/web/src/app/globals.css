@@ -21,6 +21,21 @@
 }
 
 body {
+
   background: var(--background);
+
   color: var(--foreground);
+
+}
+
+
+
+@keyframes draw {
+
+  0% { stroke-dasharray: 0 100; stroke-dashoffset: 0; }
+
+  50% { stroke-dasharray: 100 0; stroke-dashoffset: 0; }
+
+  100% { stroke-dasharray: 0 100; stroke-dashoffset: -100; }
+
 }

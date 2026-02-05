@@ -9,15 +9,12 @@ interface ConfigAddOptions {
   value: string;
 }
 
-@SubCommand({ 
-  name: 'add', 
-  description: 'Add or update a configuration variable via Infisical' 
+@SubCommand({
+  name: 'add',
+  description: 'Add or update a configuration variable via Infisical',
 })
 export class ConfigAddCommand extends CommandRunner {
-  async run(
-    passedParam: string[],
-    options: ConfigAddOptions,
-  ): Promise<void> {
+  async run(passedParam: string[], options: ConfigAddOptions): Promise<void> {
     const { key, value, env: envs } = options;
 
     if (!key || !value) {
@@ -30,7 +27,9 @@ export class ConfigAddCommand extends CommandRunner {
     const projectId = process.env.INFISICAL_PROJECT_ID;
 
     if (!clientId || !clientSecret || !projectId) {
-      logger.error('❌ Error: Missing Infisical credentials (INFISICAL_CLIENT_ID, INFISICAL_CLIENT_SECRET, INFISICAL_PROJECT_ID)');
+      logger.error(
+        '❌ Error: Missing Infisical credentials (INFISICAL_CLIENT_ID, INFISICAL_CLIENT_SECRET, INFISICAL_PROJECT_ID)',
+      );
       process.exit(1);
     }
 
@@ -43,9 +42,10 @@ export class ConfigAddCommand extends CommandRunner {
     const targetEnvs = envs && envs.length > 0 ? envs : ['development'];
 
     for (const env of targetEnvs) {
-      const infisicalEnv = env === 'development' ? 'dev' : env === 'staging' ? 'staging' : 'prod';
+      const infisicalEnv =
+        env === 'development' ? 'dev' : env === 'staging' ? 'staging' : 'prod';
       logger.info(`🚀 Upserting ${key} to ${env} (${infisicalEnv})...`);
-      
+
       try {
         // Try to get secret first
         try {
@@ -82,7 +82,8 @@ export class ConfigAddCommand extends CommandRunner {
 
   @Option({
     flags: '-e, --env [env...]',
-    description: 'Environments to add the variable to (development, staging, production)',
+    description:
+      'Environments to add the variable to (development, staging, production)',
   })
   parseEnv(val: string, memo: string[] = []): string[] {
     memo.push(val);

@@ -6,7 +6,8 @@ import * as os from 'os';
 
 @SubCommand({
   name: 'shell',
-  description: 'Install brand-aligned ZSH customization and productivity aliases',
+  description:
+    'Install brand-aligned ZSH customization and productivity aliases',
 })
 export class ShellInstallCommand extends CommandRunner {
   async run(): Promise<void> {
@@ -82,23 +83,33 @@ add-zsh-hook precmd sous_prompt
 
       // Cleanup corrupted lines if any
       if (mainContent.includes('${sourceLine}')) {
-        mainContent = mainContent.replace(/\\n# @sous shell initialization\\n\\$\{sourceLine\}/g, '');
+        mainContent = mainContent.replace(
+          /\\n# @sous shell initialization\\n\\$\{sourceLine\}/g,
+          '',
+        );
         fs.writeFileSync(mainZshrc, mainContent);
       }
 
       if (!mainContent.includes('.sous/shell/zshrc')) {
-        fs.appendFileSync(mainZshrc, `
+        fs.appendFileSync(
+          mainZshrc,
+          `
 # @sous shell initialization
 ${sourceLine}
-`);
+`,
+        );
         logger.info('✅ Added initialization to ~/.zshrc');
       } else {
         logger.info('ℹ️  ~/.zshrc already contains @sous initialization');
       }
     } else {
-      logger.info('⚠️  ~/.zshrc not found. Please manually source ~/.sous/shell/zshrc');
+      logger.info(
+        '⚠️  ~/.zshrc not found. Please manually source ~/.sous/shell/zshrc',
+      );
     }
 
-    logger.info('🚀 Shell customization installed. Please run "source ~/.zshrc" to apply changes.');
+    logger.info(
+      '🚀 Shell customization installed. Please run "source ~/.zshrc" to apply changes.',
+    );
   }
 }

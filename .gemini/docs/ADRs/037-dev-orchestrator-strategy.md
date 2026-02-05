@@ -7,7 +7,7 @@ Proposed
 2026-02-04
 
 ## Context
-The current `sous dev` command relies on external terminal multiplexers (Zellij/Tmux) which are difficult to manage programmatically, lead to ghost processes, and lack interactive "dashboard" capabilities (like buttons for common tasks). We need a development environment that is "absurdly robust."
+The current `sous dev` command relies on external terminal multiplexers which are difficult to manage programmatically, lead to ghost processes, and lack interactive "dashboard" capabilities (like buttons for common tasks). We need a development environment that is "absurdly robust."
 
 ## Decision
 We will replace the multiplexer-based orchestration with a custom **TUI (Terminal User Interface) Dashboard** built using **React Ink**.
@@ -40,8 +40,8 @@ To support physical hardware development, the orchestrator will include:
 ## Consequences
 - **Positive:**
     - **Developer Experience:** A single, interactive, and beautiful terminal dashboard.
-    - **Reliability:** No more manual Zellij session cleaning.
+    - **Reliability:** No more manual terminal session cleaning.
     - **Extensibility:** Easy to add new "Buttons" or status checks as the monorepo grows.
 - **Negative:**
-    - **Complexity:** Building a custom TUI requires more upfront development than a Zellij layout file.
+    - **Complexity:** Building a custom TUI requires more upfront development than a layout file.
     - **Performance:** React Ink has a small CPU overhead compared to raw shell scripts.

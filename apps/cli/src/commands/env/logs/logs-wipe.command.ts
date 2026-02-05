@@ -9,17 +9,18 @@ import * as fs from 'fs';
   description: 'Wipe (clear) logs for the specified environment',
 })
 export class LogsWipeCommand extends CommandRunner {
-  async run(
-    passedParam: string[],
-    options: { env?: string },
-  ): Promise<void> {
+  async run(passedParam: string[], options: { env?: string }): Promise<void> {
     const env = options.env || 'development';
 
     if (env === 'development') {
       await this.wipeLocalLogs();
     } else {
-      logger.info(`⚠️  Wiping remote logs for '${env}' is not supported via CLI.`);
-      logger.info('Please manage log retention in your Better Stack dashboard.');
+      logger.info(
+        `⚠️  Wiping remote logs for '${env}' is not supported via CLI.`,
+      );
+      logger.info(
+        'Please manage log retention in your Better Stack dashboard.',
+      );
     }
   }
 

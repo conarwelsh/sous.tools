@@ -12,6 +12,11 @@
   - `@sous/native-pos`: Tauri app for Point of Sale.
   - `@sous/wearos`: Native Wear OS app for hands-free operations.
   - `@sous/docs`: Centralized documentation hub and design lab.
+    - **Responsive Design**: Full mobile support with animated drawer.
+    - **Collapsible Sidebar**: Desktop mini-mode for maximized reading space.
+    - **Structured Navigation**: Automatic categorization of ADRs, Specs, and Guides.
+    - **Prose Optimization**: Custom typography system for technical reading.
+    - **Branding Lab**: Living style guide with interactive variant switching, size controls, and dynamic wordmark overrides (e.g., `sous.api`, `sous.docs`).
 - **Packages**:
   - `@sous/client-sdk`: Generated client-server SDK.
   - `@sous/config`: Centralized configuration (Infisical + Zod).
@@ -22,7 +27,7 @@
   - `@sous/typescript-config`: Shared TypeScript configurations.
 
 ## CLI Capabilities (@sous/cli)
-- **Development**: `sous dev` (Zellij orchestration), `sous install`.
+- **Development**: `sous dev` (Interactive Ink TUI with real-time logs, process management, and `[c]` to clear active panel), `sous install`.
 - **Configuration**: `sous config --env [env]`, `sous config add` (Infisical integration).
 - **Logging**: `sous logs tail` (Local combined logs), `sous logs wipe`.
 - **Sync**: `sous sync` (Database/Schema sync).

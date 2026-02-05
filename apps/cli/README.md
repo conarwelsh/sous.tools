@@ -7,7 +7,7 @@ The CLI is organized into strategic domains following the **Nested DDD** mandate
 
 ### 1. Development (`sous dev`)
 Manages the local development lifecycle and hardware integration.
-- `sous dev`: Launches the multi-service dev environment (Zellij/Ink).
+- `sous dev`: Launches the interactive multi-service dev dashboard (Ink TUI).
 - `sous dev install`: Runs the platform installation wizard.
 - `sous dev sync`: Synchronizes local schemas and hardware state.
 
@@ -24,6 +24,7 @@ Enforces code standards and runs validation suites.
 ### 4. Maintenance (`sous maintenance`)
 Handles system cleanup and workspace health.
 - `sous maintenance housekeep`: Deep cleans build artifacts and caches.
+- `sous maintenance db push`: Pushes schema changes to the database.
 
 ## Installation & Setup
 
@@ -49,6 +50,7 @@ When the `@sous` shell customization is installed, the following aliases are ava
 | `sw` | `sous env logs wipe` | Wipe centralized logs |
 | `sq` | `sous quality check` | Run full health check |
 | `sm` | `sous maintenance housekeep` | Deep clean workspace |
+| `smdb` | `sous maintenance db push` | Push schema to database |
 
 ### Productivity Shortcuts
 | Alias | Command | Description |
@@ -63,8 +65,7 @@ When the `@sous` shell customization is installed, the following aliases are ava
 ## Tech Stack
 - NestJS (Nest Commander)
 - TypeScript
-- Zellij (Multiplexer)
-- Ink (TUI - Planned)
+- Ink (Interactive TUI)
 
 ## Related ADRs
 - [ADR 008: CLI Orchestrator Strategy](../../.gemini/docs/ADRs/008-cli-orchestrator-strategy.md)
