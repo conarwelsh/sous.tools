@@ -1,4 +1,5 @@
 import Database from '@tauri-apps/plugin-sql';
+import { invoke } from '@tauri-apps/api/core';
 
 export interface OfflineAction {
   id: string;
@@ -6,6 +7,20 @@ export interface OfflineAction {
   payload: any;
   timestamp: number;
   retryCount: number;
+}
+
+export interface PrinterDevice {
+  id: string;
+  name: string;
+  type: 'network' | 'usb';
+  address: string;
+}
+
+export interface BLEDevice {
+  id: string;
+  name: string;
+  rssi: number;
+  temperature?: number;
 }
 
 export class NativeBridge {
@@ -34,6 +49,8 @@ export class NativeBridge {
       }
     }
   }
+
+  // --- Offline Queue ---
 
   async queueAction(type: string, payload: any) {
     const action: OfflineAction = {
@@ -79,6 +96,45 @@ export class NativeBridge {
       const filtered = queue.filter((a: any) => a.id !== id);
       localStorage.setItem('sous_offline_queue', JSON.stringify(filtered));
     }
+  }
+
+  // --- Hardware ---
+
+  async scanForPrinters(): Promise<PrinterDevice[]> {
+    if (this.isNative) {
+      return await invoke('scan_printers');
+    }
+    // Web Mock
+    return [
+      { id: 'p1', name: 'Kitchen Printer', type: 'network', address: '192.168.1.50' },
+      { id: 'p2', name: 'Receipt Printer', type: 'network', address: '192.168.1.51' }
+    ];
+  }
+
+  async scanForBLE(): Promise<BLEDevice[]> {
+    if (this.isNative) {
+      return await invoke('scan_ble');
+    }
+    return [
+      { id: 't1', name: 'Sous Temp 1', rssi: -60, temperature: 38.5 },
+      { id: 't2', name: 'Sous Temp 2', rssi: -55, temperature: 4.2 }
+    ];
+  }
+
+  async printReceipt(printerId: string, data: string) {
+    if (this.isNative) {
+      return await invoke('print_escpos', { printerId, data });
+    }
+    console.log(`Printing to ${printerId}:`, data);
+    return true;
+  }
+
+  async printLabel(printerId: string, zpl: string) {
+    if (this.isNative) {
+      return await invoke('print_zpl', { printerId, data: zpl });
+    }
+    console.log(`Printing Label to ${printerId}:`, zpl);
+    return true;
   }
 }
 

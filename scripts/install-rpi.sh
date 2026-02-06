@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # RPi Installation Script
-# Installs dependencies for @sous/native-headless
+# Installs dependencies for @sous/signage
 
 echo "🔧 Installing Raspberry Pi dependencies..."
 sudo apt update
@@ -15,4 +15,4 @@ else
   echo "ℹ️ Monitor config already exists."
 fi
 
-echo "🚀 Setup complete for @sous/native-headless"
+echo "🚀 Setup complete for @sous/signage"

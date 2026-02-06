@@ -9,11 +9,17 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
+    "test:e2e": "playwright test",
+    "check": "turbo run lint build test",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "prepare": "husky",
-    "sous": "pnpm --filter @sous/cli run start --"
+    "sous": "pnpm --filter @sous/cli run start --",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:reset": "pnpm db:down && pnpm db:up && sleep 5 && pnpm --filter @sous/api run db:push"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "husky": "^9.1.7",
     "prettier": "latest",
     "tsup": "^8.5.1",

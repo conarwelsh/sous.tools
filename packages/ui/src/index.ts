@@ -8,3 +8,4 @@ export * from './components/ui/typography';
 export * from './components/ui/view';
 export * from './components/brand';
 export { theme } from './theme/tokens';
+export { default as i18n } from './i18n';

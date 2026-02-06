@@ -1,9 +1,12 @@
-import Image from "next/image";
+import { HomeView, PairingWorkflow, PresentationEditor, LabelEditor } from '@sous/features';
 
 export default function Home() {
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <h1 className="text-4xl font-bold">Hello World from @sous/web</h1>
+    <div className="space-y-12 p-12">
+      <HomeView />
+      <PairingWorkflow />
+      <PresentationEditor />
+      <LabelEditor />
     </div>
   );
 }

@@ -2,8 +2,8 @@
 
 ## Computing & Infrastructure
 - **Primary Development Host**: Windows 11 Pro (WSL2 Ubuntu 22.04).
-- **Kiosk/Headless (Development)**: Raspberry Pi 4B (connected to 2x HDMI displays).
-- **Kiosk/Headless (Production)**: Raspberry Pi 4B.
+- **Signage Node (Development)**: Raspberry Pi 4B (connected to 2x HDMI displays).
+- **Signage Node (Production)**: Raspberry Pi 4B.
 - **Auxiliary Server**: Ubuntu Server (Incoming; intended for system robustness).
 
 ## Specialized Terminals

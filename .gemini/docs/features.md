@@ -7,7 +7,7 @@
   - `@sous/native`: React Native Universal Mobile App (Full suite management).
   - `@sous/api`: NestJS application using **Drizzle ORM**.
   - `@sous/cli`: NestJS CLI tool.
-  - `@sous/native-headless`: Tauri app for digital signage and hardware gateway.
+  - `@sous/signage`: Tauri app for digital signage and hardware gateway.
   - `@sous/native-kds`: Tauri app for Kitchen Display System.
   - `@sous/native-pos`: Tauri app for Point of Sale.
   - `@sous/wearos`: Native Wear OS app for hands-free operations.
@@ -32,6 +32,7 @@
 - **Logging**: `sous logs tail` (Local combined logs), `sous logs wipe`.
 - **Sync**: `sous sync` (Database/Schema sync).
 - **Quality**: `sous test` (Run test suite), `sous check` (Full health check: lint, type, test, build).
+- **E2E Testing**: Playwright integration for critical path flows (e.g. Pairing process).
 - **Maintenance**: `sous housekeep` (Deep clean artifacts: node_modules, .next, dist).
 
 ## Development Status
@@ -41,7 +42,19 @@
 | `@sous/docs` | Web | ✅ Stable | 2026-02-06 |
 | `@sous/api` | NestJS | ✅ Stable | 2026-02-06 |
 | `@sous/native` | Android Emulator | ✅ Stable | 2026-02-06 |
-| `@sous/native-headless` | Linux / WSL2 | ✅ Stable | 2026-02-06 |
-| `@sous/wearos` | Android | 🏗️ Initialized | - |
-| `@sous/native-kds` | Android | 🏗️ Planned | - |
-| `@sous/native-pos` | Android | 🏗️ Planned | - |
+| `@sous/signage` | Linux / WSL2 | ✅ Stable | 2026-02-06 |
+| `@sous/wearos` | Android | ✅ Scaffolded | 2026-02-06 |
+
+## Infrastructure & Domains
+- **Database**: Postgres 16 with Row-Level Security (RLS) policies.
+- **Docker Suite**: Traefik, Postgres (with RLS init), Redis, MailDev, Minio, GitHub Runner, Ubuntu Sandbox.
+- **Core Domains**:
+  - **IAM**: Identity, Roles, Organizations.
+  - **Procurement**: Suppliers, Invoices, Order Manager.
+  - **Culinary**: Recipes, Ingredients.
+  - **Intelligence**: Costing Engine (BullMQ), Price Trends.
+  - **Inventory**: Stock Ledger, Depletion Logic.
+  - **Accounting**: General Ledger, P&L Reports.
+  - **Presentation**: Editor/Renderer, Digital Signage.
+  - **Hardware**: Pairing, Telemetry, Remote Config.
+  - **Integrations**: Driver-based sync (Square/Toast).

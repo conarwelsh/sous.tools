@@ -32,16 +32,16 @@ export const BrandingLab: React.FC = () => {
   };
 
   const updateTarget = (target: string, updates: Partial<BrandingConfig[string]>) => {
-    setConfig(prev => ({
-      ...prev,
-      [target]: {
-        variant: 'neon',
-        size: 64,
-        props: {},
-        ...prev[target],
-        ...updates,
-      }
-    }));
+    setConfig(prev => {
+      const current = prev[target] || { variant: 'neon', size: 64, props: {} };
+      return {
+        ...prev,
+        [target]: {
+          ...current,
+          ...updates,
+        }
+      };
+    });
   };
 
   const updateProp = (target: string, prop: string, value: any) => {
@@ -168,8 +168,8 @@ export const BrandingLab: React.FC = () => {
                                 suffix={tConfig.props?.suffix || 'tools'}
                                 showWordmark={tConfig.props?.showWordmark ?? true}
                                 environment={globalEnvironment}
-                                loading={tConfig.props?.loading}
-                                animate={tConfig.props?.animate}
+                                loading={tConfig.props?.loading ?? false}
+                                animate={tConfig.props?.animate ?? false}
                             />
                         </div>
                     </div>

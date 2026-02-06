@@ -19,6 +19,7 @@ export interface ManagedProcess {
   id: string;
   name: string;
   type: 'app' | 'docker';
+  framework: 'tauri' | 'nextjs' | 'nestjs' | 'native' | 'vite';
   status: ProcessStatus;
   port?: number;
   logs: ManagedLog[];
@@ -59,6 +60,7 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
         id: 'api',
         name: 'API',
         type: 'app',
+        framework: 'nestjs',
         port: localConfig.api.port,
         autoStart: true,
       },
@@ -66,6 +68,7 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
         id: 'web',
         name: 'Web',
         type: 'app',
+        framework: 'nextjs',
         port: localConfig.web.port,
         autoStart: true,
       },
@@ -73,6 +76,7 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
         id: 'docs',
         name: 'Docs',
         type: 'app',
+        framework: 'nextjs',
         port: localConfig.docs.port,
         autoStart: true,
       },
@@ -80,6 +84,7 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
         id: 'native',
         name: 'Native',
         type: 'app',
+        framework: 'tauri',
         port: localConfig.native.port,
         target: 'android',
         emulatorName: 'sdk_gphone64_x86_64',
@@ -88,6 +93,7 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
         id: 'headless',
         name: 'Signage',
         type: 'app',
+        framework: 'tauri',
         port: localConfig.headless.port,
         target: 'linux',
       },
@@ -95,6 +101,7 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
         id: 'kds',
         name: 'KDS',
         type: 'app',
+        framework: 'tauri',
         port: localConfig.kds.port,
         target: 'android',
         emulatorName: 'sdk_gphone64_x86_64',
@@ -103,13 +110,33 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
         id: 'pos',
         name: 'POS',
         type: 'app',
+        framework: 'tauri',
         port: localConfig.pos.port,
         target: 'android',
         emulatorName: 'sdk_gphone64_x86_64',
       },
-      { id: 'wearos', name: 'WearOS', type: 'app', target: 'android' },
-      { id: 'db', name: 'Postgres', type: 'docker', status: 'running' },
-      { id: 'redis', name: 'Redis', type: 'docker', status: 'running' },
+      {
+        id: 'wearos',
+        name: 'WearOS',
+        type: 'app',
+        framework: 'native',
+        target: 'android',
+        emulatorName: 'wear_os_emulator', // Typical name, will be detected if running
+      },
+      {
+        id: 'db',
+        name: 'Postgres',
+        type: 'docker',
+        framework: 'vite', // Placeholder for docker
+        status: 'running',
+      },
+      {
+        id: 'redis',
+        name: 'Redis',
+        type: 'docker',
+        framework: 'vite', // Placeholder for docker
+        status: 'running',
+      },
     ];
 
     for (const app of apps) {
@@ -133,7 +160,7 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
     // 1. Start Docker infra first
     try {
       this.addLog('db', '🐳 Starting Docker infrastructure...', 'info');
-      execSync('docker compose up -d', { stdio: 'ignore' });
+      execSync('pnpm run db:up', { stdio: 'ignore' });
       this.processes.get('db')!.status = 'running';
       this.processes.get('redis')!.status = 'running';
       this.emit('update');
@@ -167,7 +194,7 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
       web: '@sous/web',
       docs: '@sous/docs',
       native: '@sous/native',
-      headless: '@sous/native-headless',
+      headless: '@sous/signage',
       kds: '@sous/native-kds',
       pos: '@sous/native-pos',
       wearos: '@sous/wearos',
@@ -177,11 +204,9 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
 
     // Handle Android-specific requirements (Emulator + Path Sanitization)
     if (proc.target === 'android') {
-      // Run Android setup and wait for it to finish before starting the build
       await this.setupAndroidEnvironment(id, proc);
     }
 
-    // Path sanitization for Android builds to avoid 'Android Studio' directory collision
     const env = { ...process.env };
     if (proc.target === 'android') {
       env.PATH = (process.env.PATH || '')
@@ -192,18 +217,15 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
       env.NDK_HOME = `${env.ANDROID_HOME}/ndk/29.0.13846066`;
     }
 
-    const args = ['--filter', filter, 'run', 'dev'];
-    if (proc.target === 'android') {
-      // For android, we override the standard 'dev' with tauri android dev
-      args[args.length - 1] = 'tauri';
-      args.push('android', 'dev', '--no-dev-server-wait');
-      if (proc.emulatorName) {
-        args.push(proc.emulatorName);
-      }
-    } else if (proc.target === 'linux') {
-      // For linux desktop, we run tauri dev
-      args[args.length - 1] = 'tauri';
-      args.push('dev');
+    let args: string[] = [];
+    
+    if (proc.framework === 'tauri' && proc.target === 'android') {
+      args = ['--filter', filter, 'run', 'tauri', 'android', 'dev', '--no-dev-server-wait'];
+      if (proc.emulatorName) args.push(proc.emulatorName);
+    } else if (proc.framework === 'tauri' && proc.target === 'linux') {
+      args = ['--filter', filter, 'run', 'tauri', 'dev'];
+    } else {
+      args = ['--filter', filter, 'run', 'dev'];
     }
 
     const child = spawn(this.pnpmPath, args, {

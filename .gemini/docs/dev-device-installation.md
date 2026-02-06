@@ -78,7 +78,7 @@ The Wear OS app is a native Kotlin project.
 
 ## 9. WSL2 GUI Rendering Fixes (Mesa/WebKit Overrides)
 
-If you experience "Blank/White Screen" issues or `MESA-LOADER` errors when running Tauri applications (like `@sous/native-headless`) in WSL2, you must apply the following environment variables. These disable hardware acceleration and the WebKit sandbox, which are often incompatible with the WSL2 GPU bridge.
+If you experience "Blank/White Screen" issues or `MESA-LOADER` errors when running Tauri applications (like `@sous/signage`) in WSL2, you must apply the following environment variables. These disable hardware acceleration and the WebKit sandbox, which are often incompatible with the WSL2 GPU bridge.
 
 Add these to your `~/.zshrc` (or they are automatically managed in `~/.sous/shell/zshrc`):
 

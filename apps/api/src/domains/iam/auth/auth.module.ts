@@ -1,19 +1,31 @@
-import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport';
+import { Module, Global } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
-import { UsersService } from '../users/services/users.service.js';
-import { localConfig } from '@sous/config';
+import { AuthController } from './auth.controller.js';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
+import { configPromise } from '@sous/config';
+import { JwtStrategy } from './guards/jwt.strategy.js';
+import { LocalStrategy } from './guards/local.strategy.js';
 
+@Global()
 @Module({
   imports: [
     PassportModule,
-    JwtModule.register({
-      secret: localConfig.iam?.jwtSecret || 'sous-secret-key',
-      signOptions: { expiresIn: '1h' },
+    JwtModule.registerAsync({
+      useFactory: async () => {
+        const config = await configPromise;
+        if (!config.iam) {
+          throw new Error('IAM configuration is missing');
+        }
+        return {
+          secret: config.iam.jwtSecret,
+          signOptions: { expiresIn: '1d' },
+        };
+      },
     }),
   ],
-  providers: [AuthService, UsersService],
-  exports: [AuthService, UsersService, JwtModule],
+  providers: [AuthService, LocalStrategy, JwtStrategy],
+  controllers: [AuthController],
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

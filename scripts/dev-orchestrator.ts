@@ -24,10 +24,10 @@ const appConfigs: Record<string, { port: number; command: string; cwd: string }>
     command: 'vite',
     cwd: 'apps/native',
   },
-  headless: {
+  signage: {
     port: localConfig.headless.port,
     command: 'vite',
-    cwd: 'apps/native-headless',
+    cwd: 'apps/signage',
   },
   kds: {
     port: localConfig.kds.port,

@@ -132,6 +132,18 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
         if (activeTab === 'gemini') setGeminiOutput([]);
         setScrollOffset(0);
     }
+
+    // Custom Shortcut: Ctrl+Shift+R -> DB Reset
+    if (key.ctrl && (input === 'R' || (key.shift && input === 'r'))) {
+        setTerminalOutput(prev => [...prev, '> pnpm sous db reset']);
+        setActiveTab('terminal');
+        setScrollOffset(0);
+        exec('pnpm sous db reset', (error, stdout, stderr) => {
+            if (stdout) setTerminalOutput(prev => [...prev, ...stdout.trim().split('\n')]);
+            if (stderr) setTerminalOutput(prev => [...prev, ...stderr.trim().split('\n').map(l => `ERR: ${l}`)]);
+            if (error) setTerminalOutput(prev => [...prev, `FAIL: ${error.message}`]);
+        });
+    }
   });
 
   useEffect(() => {

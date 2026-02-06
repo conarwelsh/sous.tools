@@ -4,7 +4,7 @@ export default defineConfig([
   {
     entry: { client: 'src/client.ts' },
     format: ['cjs', 'esm'],
-    dts: false,
+    dts: true,
     external: ['react', 'react-dom', 'next/link', 'next/navigation'],
     clean: true,
     bundle: true,
@@ -16,7 +16,7 @@ export default defineConfig([
   {
     entry: { server: 'src/server.ts' },
     format: ['cjs', 'esm'],
-    dts: false,
+    dts: true,
     external: ['fs', 'path', 'server-only', 'react', 'react-dom'],
     bundle: true,
     splitting: false,

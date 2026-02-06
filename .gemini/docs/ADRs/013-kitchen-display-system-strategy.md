@@ -43,7 +43,7 @@ We will implement **`@sous/native-kds`** as a React Native application wrapped i
 ## Consequences
 - **Positive:**
     - **Operational Safety:** Centralizing BLE monitoring directly in the KDS ensures staff are immediately aware of temperature violations.
-    - **Developer Efficiency:** Shares significant code with `@sous/web` and `@sous/native-headless`.
+    - **Developer Efficiency:** Shares significant code with `@sous/web` and `@sous/signage`.
     - **Reliability:** Tauri/Rust provides a stable, low-resource wrapper compared to a standard browser.
 - **Negative:**
     - **UI Complexity:** Designing for touch-first kitchen environments requires rigorous testing and potentially specialized component variants in `@sous/ui`.

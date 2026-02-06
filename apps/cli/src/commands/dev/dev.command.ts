@@ -13,6 +13,7 @@ interface DevOptions {
   sync?: boolean;
   android?: boolean;
   ios?: boolean;
+  wear?: boolean;
 }
 
 @Command({
@@ -31,6 +32,42 @@ export class DevCommand extends CommandRunner {
     if (options?.sync) {
       logger.info('🔄 Syncing hardware before starting...');
       execSync('pnpm sous dev sync', { stdio: 'inherit' });
+    }
+
+    if (options?.wear) {
+      logger.info('⌚ Starting Wear OS Development loop for @sous/wearos...');
+      
+      // Sanitized path for Android build tools
+      const sanitizedPath = process.env.PATH?.split(':')
+        .filter((p) => !p.startsWith('/mnt/c'))
+        .join(':');
+
+      const child = spawn(
+        './gradlew',
+        [':apps:wearos:installDebug'],
+        {
+          stdio: 'inherit',
+          cwd: process.cwd(), // Root of monorepo
+          shell: true,
+          env: {
+            ...process.env,
+            PATH: sanitizedPath,
+            ANDROID_HOME: `${process.env.HOME}/Android/Sdk`,
+          },
+        },
+      );
+
+      child.on('exit', (code) => {
+        if (code === 0) {
+            logger.info('✅ Build successful. Launching on device...');
+            try {
+                execSync('adb shell monkey -p com.sous.wearos -c android.intent.category.LAUNCHER 1', { stdio: 'inherit' });
+            } catch (e) {
+                logger.error('❌ Failed to launch app on device.');
+            }
+        }
+      });
+      return;
     }
 
     if (options?.android) {
@@ -161,6 +198,14 @@ export class DevCommand extends CommandRunner {
     description: 'Start native iOS development',
   })
   parseIos(): boolean {
+    return true;
+  }
+
+  @Option({
+    flags: '-w, --wear',
+    description: 'Start Wear OS development',
+  })
+  parseWear(): boolean {
     return true;
   }
 }

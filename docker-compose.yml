@@ -26,6 +26,7 @@ services:
       POSTGRES_DB: sous_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./scripts/db-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     labels:
       - "traefik.enable=true"
 
@@ -36,6 +37,55 @@ services:
       - "6379:6379"
     labels:
       - "traefik.enable=true"
+
+  maildev:
+    image: maildev/maildev
+    container_name: sous-maildev
+    ports:
+      - "1080:1080" # Web UI
+      - "1025:1025" # SMTP
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.maildev.rule=Host(`mail.sous.localhost`)"
+      - "traefik.http.services.maildev.loadbalancer.server.port=1080"
+
+  minio:
+    image: minio/minio
+    container_name: sous-minio
+    ports:
+      - "9000:9000" # API
+      - "9001:9001" # Console
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.minio.rule=Host(`storage.sous.localhost`)"
+      - "traefik.http.services.minio.loadbalancer.server.port=9001"
+
+  # GitHub Self-Hosted Runner (ADR 007 & ADR 040)
+  github-runner:
+    image: my-github-runner:latest
+    container_name: sous-github-runner
+    build:
+      context: .
+      dockerfile: Dockerfile.runner
+    environment:
+      - REPO_URL=${GITHUB_REPO_URL}
+      - RUNNER_TOKEN=${GITHUB_RUNNER_TOKEN}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+
+  # Ephemeral Ubuntu Sandbox for installation testing (ADR 035)
+  ubuntu-sandbox:
+    image: ubuntu:22.04
+    container_name: sous-ubuntu-sandbox
+    stdin_open: true
+    tty: true
 
   # Infisical - Local Instance (Commented out per ADR 035 / Phase 1.1)
   # infisical:
@@ -48,4 +98,7 @@ services:
   #     - AUTH_SECRET=${AUTH_SECRET}
 
 volumes:
+
   postgres_data:
+
+  minio_data:

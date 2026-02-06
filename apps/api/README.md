@@ -9,10 +9,13 @@ The core intelligence and data gateway for the `sous.tools` platform.
 - **Tenancy**: Enforces strict organization-level isolation.
 
 ## Functionality List
-- [x] Multi-tenant data isolation.
-- [ ] AI-powered recipe and invoice extraction.
-- [ ] Real-time Menuboard/Signage synchronization.
-- [ ] Asynchronous background job processing (BullMQ).
+- [x] Multi-tenant data isolation (RLS).
+- [x] Hybrid API (REST + GraphQL + WebSockets).
+- [x] AI-powered recipe and invoice extraction (Schema & Logic).
+- [x] Real-time Menuboard/Signage synchronization.
+- [x] Asynchronous background job processing (BullMQ).
+- [x] Financial Ledger & P&L generation.
+- [x] Stock Ledger & Depletion logic.
 
 ## Installation & Setup
 1. Ensure the root `@sous/config` is configured with a valid `DATABASE_URL`.

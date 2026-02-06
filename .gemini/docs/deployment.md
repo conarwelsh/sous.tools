@@ -25,7 +25,7 @@ This document outlines the deployment targets and procedures for the core `sous.
 
 ## Signage & Edge Suite
 
-### @sous/native-headless (Signage Node)
+### @sous/signage (Signage Node)
 - **Target:** Raspberry Pi 4B (Linux / labwc)
 - **Framework:** Tauri (Rust/React)
 - **Deployment Method:**

@@ -7,7 +7,7 @@ Proposed
 2026-02-03
 
 ## Context
-Our ecosystem includes multiple desktop and kiosk applications built with **Tauri** (e.g., `@sous/native-headless` for kiosks). These applications share a common set of requirements for low-level system access, hardware interaction, and network operations that are best handled in **Rust** for performance and safety.
+Our ecosystem includes multiple desktop and kiosk applications built with **Tauri** (e.g., `@sous/signage` for kiosks). These applications share a common set of requirements for low-level system access, hardware interaction, and network operations that are best handled in **Rust** for performance and safety.
 
 We need a centralized way to manage:
 - **Hardware Discovery:** Scanning the local network for printers, TVs, and IoT gateways.

@@ -1,12 +1,26 @@
 {
   "name": "@sous/client-sdk",
   "version": "0.1.0",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "test": "echo \"No tests defined\" && exit 0",
-    "typecheck": "echo 'Placeholder'",
-    "build": "echo 'Placeholder'",
-    "lint": "echo 'Placeholder'"
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint src/**/*.ts",
+    "generate": "openapi-typescript http://localhost:4000/reference-json -o src/schema.d.ts"
+  },
+  "dependencies": {
+    "@sous/config": "workspace:*",
+    "socket.io-client": "^4.8.1"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.2",
+    "openapi-typescript": "^7.10.1",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.3"
   }
 }

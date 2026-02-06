@@ -11,7 +11,7 @@ This is a monorepo managed by **TurboRepo** and **pnpm workspaces**.
 - **[@sous/web](./apps/web)**: primary Next.js 16 administrative interface.
 - **[@sous/cli](./apps/cli)**: Command-line orchestrator & developer tools.
 - **[@sous/native](./apps/native)**: Universal mobile app (Tauri).
-- **[@sous/native-headless](./apps/native-headless)**: Kiosk/Signage host (Raspberry Pi).
+- **[@sous/signage](./apps/signage)**: Kiosk/Signage host (Raspberry Pi).
 - **[@sous/native-kds](./apps/native-kds)**: Kitchen Display System touch terminal.
 - **[@sous/native-pos](./apps/native-pos)**: high-speed Point of Sale terminal.
 - **[@sous/wearos](./apps/wearos)**: Native Wear OS companion app.

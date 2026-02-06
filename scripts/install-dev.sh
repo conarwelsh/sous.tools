@@ -22,7 +22,7 @@ EOF
 fi
 
 # 1. Update & Build Tools
-sudo apt update && sudo apt install -y build-essential curl git wget unzip zsh
+sudo apt update && sudo apt install -y build-essential curl git wget unzip zsh pkg-config libwebkit2gtk-4.1-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev
 
 # 1.1 Setup ZSH & Oh My Zsh
 if [ ! -d "$HOME/.oh-my-zsh" ]; then

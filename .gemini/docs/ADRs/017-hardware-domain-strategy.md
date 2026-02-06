@@ -10,7 +10,7 @@ Proposed
 As a platform that bridges software and physical environments (`sous.tools`), managing hardware assets is as critical as managing culinary data. We need a centralized domain to track, configure, and control all physical devices associated with a tenant.
 
 **Managed Assets Include:**
-- **Platform Nodes:** Instances of `@sous/native-headless`, `@sous/native-kds`, `@sous/native-pos`, and `@sous/native`.
+- **Platform Nodes:** Instances of `@sous/signage`, `@sous/native-kds`, `@sous/native-pos`, and `@sous/native`.
 - **Peripherals:** Discovered and paired devices such as BLE thermometers, receipt printers, and scanners.
 - **Infrastructure:** Gateways and host machines (e.g., Raspberry Pis).
 
@@ -24,7 +24,7 @@ We will establish a dedicated **Hardware Domain** within the `@sous/api` and exp
     - Storing metadata: MAC addresses, IP addresses, firmware/app versions, and hardware specifications.
 
 2.  **Configuration & State Management**
-    - **Remote Config:** Pushing settings (e.g., screen assignments for `@sous/native-headless`, printer defaults).
+    - **Remote Config:** Pushing settings (e.g., screen assignments for `@sous/signage`, printer defaults).
     - **State Monitoring:** Real-time visibility into device health (Online/Offline status, CPU temp, connectivity).
 
 3.  **Command & Control**

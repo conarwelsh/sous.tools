@@ -13,7 +13,7 @@ We will use **Self-Hosted GitHub Runners** for architecture-specific native buil
 
 ### 1. Windows Runner
 - **Host:** The developer's primary Windows 11 Pro machine.
-- **Role:** Building `@sous/native`, `@sous/native-headless`, `@sous/native-kds`, and `@sous/native-pos` for the Windows target.
+- **Role:** Building `@sous/native`, `@sous/signage`, `@sous/native-kds`, and `@sous/native-pos` for the Windows target.
 - **Setup:** A GitHub runner agent will be installed on the Windows host, tagged with `label: windows-native`.
 
 ### 2. ARM64 (Linux) Runner

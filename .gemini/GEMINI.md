@@ -112,6 +112,13 @@
 - **Action:** Before starting any implementation, verify the presence of a corresponding spec file in `.gemini/specs/` and any relevant ADRs in `.gemini/docs/ADRs/`. The final code must closely reflect the logic, structure, and constraints outlined in these documents.
 - **Goal:** Maintain architectural integrity and ensure that high-level designs are correctly translated into code.
 
+### 20. App Template Synchronization (MANDATE)
+**Rule:** The application templates (specifically `packages/templates/native-app`) MUST be kept in sync with the canonical implementations (e.g., `@sous/native`).
+- **Action:**
+    - Any time a structural fix, configuration update (e.g., to `tauri.conf.json`), or dependency upgrade is applied to a live app like `@sous/native` that is derived from a template, you MUST apply the same change to the corresponding template in `packages/templates/`.
+    - This ensures that newly generated applications inherit the latest best practices and fixes.
+- **Goal:** Prevent drift between the "ideal" app structure and new apps.
+
 ## Documentation Index
 - `docs/ADRs/`: Folder containing Architectural Decision Records (one file per decision).
 - `docs/architecture.md`: High-level system architecture.

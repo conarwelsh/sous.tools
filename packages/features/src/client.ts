@@ -3,3 +3,7 @@ export * from './domains/knowledge/components/KnowledgeShell';
 export * from './domains/knowledge/components/KnowledgeDocView';
 export * from './domains/knowledge/components/KnowledgeSkeleton';
 export * from './domains/docs/components/PlaygroundController';
+export * from './domains/home/components/HomeView';
+/// <reference path="./types/nativewind.d.ts" />
+export * from './domains/hardware/components/PairingWorkflow';
+export * from './domains/presentation/components/PresentationRenderer';

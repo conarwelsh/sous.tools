@@ -16,6 +16,12 @@ import { MaintenanceCommand } from './commands/maintenance/maintenance.command.j
 import { HousekeepCommand } from './commands/maintenance/housekeep/housekeep.command.js';
 import { DbCommand } from './commands/maintenance/db/db.command.js';
 import { DbPushCommand } from './commands/maintenance/db/db-push.command.js';
+import { DbUpCommand } from './commands/maintenance/db/db-up.command.js';
+import { DbDownCommand } from './commands/maintenance/db/db-down.command.js';
+import { DbResetCommand } from './commands/maintenance/db/db-reset.command.js';
+import { BrandingCommand } from './commands/env/branding/branding.command.js';
+import { GenerateCommand } from './commands/generate/generate.command.js';
+import { AppCommand } from './commands/generate/app.command.js';
 import { ProcessManager } from './commands/dev/process-manager.service.js';
 
 @Module({
@@ -25,12 +31,15 @@ import { ProcessManager } from './commands/dev/process-manager.service.js';
     InstallCommand,
     ShellInstallCommand,
     SyncCommand,
+    GenerateCommand,
+    AppCommand,
     EnvCommand,
     ConfigCommand,
     ConfigAddCommand,
     LogsCommand,
     LogsTailCommand,
     LogsWipeCommand,
+    BrandingCommand,
     QualityCommand,
     TestCommand,
     CheckCommand,
@@ -38,6 +47,9 @@ import { ProcessManager } from './commands/dev/process-manager.service.js';
     HousekeepCommand,
     DbCommand,
     DbPushCommand,
+    DbUpCommand,
+    DbDownCommand,
+    DbResetCommand,
   ],
 })
 export class AppModule {}
