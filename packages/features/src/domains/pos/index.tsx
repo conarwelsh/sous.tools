@@ -24,8 +24,7 @@ export const POSFeature = () => {
     console.log('Processing payment...');
     
     // 2. Print Receipt via Bridge
-    const receiptData = cart.map(i => `${i.name} x${i.quantity}`).join('
-');
+    const receiptData = cart.map(i => `${i.name} x${i.quantity}`).join('\n');
     await bridge.printReceipt('default', receiptData);
 
     // 3. Clear

@@ -30,6 +30,7 @@
   "dependencies": {
     "@sous/client-sdk": "workspace:*",
     "@sous/config": "workspace:*",
+    "@sous/native-bridge": "workspace:*",
     "@sous/ui": "workspace:*",
     "clsx": "^2.1.1",
     "lucide-react": "^0.563.0",

@@ -1,0 +1,14 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type DeviceType {
+  id: ID!
+  name: String!
+  status: String!
+  type: String!
+}
+
+type Query {
+  devices(orgId: String!): [DeviceType!]!
+}

@@ -90,7 +90,7 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
         emulatorName: 'sdk_gphone64_x86_64',
       },
       {
-        id: 'headless',
+        id: 'signage',
         name: 'Signage',
         type: 'app',
         framework: 'tauri',
@@ -194,9 +194,9 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
       web: '@sous/web',
       docs: '@sous/docs',
       native: '@sous/native',
-      headless: '@sous/signage',
-      kds: '@sous/native-kds',
-      pos: '@sous/native-pos',
+      signage: '@sous/signage',
+      kds: '@sous/kds',
+      pos: '@sous/pos',
       wearos: '@sous/wearos',
     };
 

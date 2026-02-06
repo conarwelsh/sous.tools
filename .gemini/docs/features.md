@@ -43,6 +43,8 @@
 | `@sous/api` | NestJS | ✅ Stable | 2026-02-06 |
 | `@sous/native` | Android Emulator | ✅ Stable | 2026-02-06 |
 | `@sous/signage` | Linux / WSL2 | ✅ Stable | 2026-02-06 |
+| `@sous/kds` | Android Emulator | ✅ Stable | 2026-02-06 |
+| `@sous/pos` | Android Emulator | ✅ Stable | 2026-02-06 |
 | `@sous/wearos` | Android | ✅ Scaffolded | 2026-02-06 |
 
 ## Infrastructure & Domains

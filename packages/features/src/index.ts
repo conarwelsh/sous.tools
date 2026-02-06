@@ -14,6 +14,12 @@ export * from './domains/pos/index.js';
 // KDS Domain
 export * from './domains/kds/index.js';
 
+// Home Domain
+export * from './domains/home/components/HomeView.js';
+
+// Hardware Domain
+export * from './domains/hardware/components/PairingWorkflow.js';
+
 // Branding Domain
 // export * from './domains/branding/services/branding.service.js';
 // export * from './domains/branding/components/BrandingLab.js';

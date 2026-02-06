@@ -6,9 +6,7 @@ import { Button, Card } from '@sous/ui';
 import { bridge } from '@sous/native-bridge';
 
 export const LabelEditor = () => {
-  const [content, setContent] = useState('Item: Prep
-Date: 2026-02-06
-Exp: 2026-02-09');
+  const [content, setContent] = useState('Item: Prep\nDate: 2026-02-06\nExp: 2026-02-09');
 
   const handlePrint = async () => {
     // Generate ZPL (Mock)

@@ -119,6 +119,13 @@
     - This ensures that newly generated applications inherit the latest best practices and fixes.
 - **Goal:** Prevent drift between the "ideal" app structure and new apps.
 
+### 21. Log Inspection (MANDATE)
+**Rule:** When asked to "check the logs," you MUST use the centralized logging infrastructure (e.g., `tail ~/.sous/logs/combined.log` or `sous logs`) rather than attempting to start or restart development servers.
+- **Action:** 
+    - Never run commands like `pnpm run dev` or `nest start` just to see output if services are already running.
+    - Use `lsof -i :[port]` or `ps aux` to check if a service is already active before attempting any operation that might cause a port conflict.
+- **Goal:** Maintain development environment stability and avoid disruptive port conflicts.
+
 ## Documentation Index
 - `docs/ADRs/`: Folder containing Architectural Decision Records (one file per decision).
 - `docs/architecture.md`: High-level system architecture.

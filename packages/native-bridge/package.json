@@ -2,18 +2,34 @@
   "name": "@sous/native-bridge",
   "version": "0.1.0",
   "private": true,
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
   "scripts": {
     "test": "echo \"No tests defined\" && exit 0",
-    "build": "echo 'No build for native-bridge (Rust)'",
-    "typecheck": "echo 'No typecheck for native-bridge (Rust)'",
-    "lint": "echo 'No lint for native-bridge (Rust)'"
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "typecheck": "tsc --noEmit",
+    "lint": "echo 'Placeholder'"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2.10.0"
+    "@sous/typescript-config": "workspace:*",
+    "@tauri-apps/cli": "^2.10.0",
+    "@types/node": "^25.2.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.10.1",
     "@tauri-apps/plugin-sql": "^2.3.2",
+    "@types/crypto-js": "^4.2.2",
+    "crypto-js": "^4.2.0",
     "lucide-react-native": "^0.474.0"
   }
 }

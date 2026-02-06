@@ -15,7 +15,7 @@ export default defineConfig(async () => ({
     },
   },
   optimizeDeps: {
-    exclude: ["react-native-safe-area-context"],
+    exclude: ["react-native-safe-area-context", "@sous/features"],
     esbuildOptions: {
       loader: {
         ".js": "jsx",

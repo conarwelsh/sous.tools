@@ -7,3 +7,7 @@ export * from './domains/home/components/HomeView';
 /// <reference path="./types/nativewind.d.ts" />
 export * from './domains/hardware/components/PairingWorkflow';
 export * from './domains/presentation/components/PresentationRenderer';
+export * from './domains/presentation/components/PresentationEditor';
+export * from './domains/presentation/components/LabelEditor';
+export * from './domains/pos/index';
+export * from './domains/kds/index';

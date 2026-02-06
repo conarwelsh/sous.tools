@@ -50,17 +50,21 @@ export const PresentationEditor = () => {
     ? JSON.parse(selectedTemplate.structure) 
     : null;
 
+  const V = View as any;
+  const T = Text as any;
+  const CardAny = Card as any;
+
   return (
     <ScrollView className="flex-1 p-6">
-      <Text className="text-3xl font-bold mb-8">Presentation Editor</Text>
+      <T className="text-3xl font-bold mb-8">Presentation Editor</T>
       
-      <View className="flex-row gap-6">
+      <V className="flex-row gap-6">
         {/* Template List */}
-        <View className="flex-1">
-          <Text className="text-xl font-semibold mb-4">1. Select Template</Text>
-          <View className="gap-4">
+        <V className="flex-1">
+          <T className="text-xl font-semibold mb-4">1. Select Template</T>
+          <V className="gap-4">
             {templates.map(t => (
-              <Card 
+              <CardAny 
                 key={t.id} 
                 className={`p-4 border-2 ${selectedTemplate?.id === t.id ? 'border-primary' : 'border-transparent'}`}
                 onPress={() => {
@@ -68,22 +72,22 @@ export const PresentationEditor = () => {
                   setBindings({});
                 }}
               >
-                <Text className="font-bold">{t.name}</Text>
-              </Card>
+                <T className="font-bold">{t.name}</T>
+              </CardAny>
             ))}
-          </View>
-        </View>
+          </V>
+        </V>
 
         {/* Slot Editor */}
-        <View className="flex-[2]">
-          <Text className="text-xl font-semibold mb-4">2. Assign Content</Text>
+        <V className="flex-[2]">
+          <T className="text-xl font-semibold mb-4">2. Assign Content</T>
           {parsedStructure ? (
             <Card className="p-6">
-              <Text className="text-lg font-medium mb-4">{selectedTemplate?.name}</Text>
-              <View className="gap-6">
+              <T className="text-lg font-medium mb-4">{selectedTemplate?.name}</T>
+              <V className="gap-6">
                 {parsedStructure.slots.map(slot => (
-                  <View key={slot.id}>
-                    <Text className="font-medium mb-2">{slot.name} ({slot.type})</Text>
+                  <V key={slot.id}>
+                    <T className="font-medium mb-2">{slot.name} ({slot.type})</T>
                     <Input 
                       placeholder={`Enter URL or data for ${slot.type}`}
                       value={bindings[slot.id]?.value || ''}
@@ -92,23 +96,23 @@ export const PresentationEditor = () => {
                         [slot.id]: { type: slot.type, value: val }
                       }))}
                     />
-                  </View>
+                  </V>
                 ))}
-              </View>
+              </V>
               
               <Button className="mt-8" onPress={handleSave} disabled={status === 'loading'}>
-                <Text>{status === 'loading' ? 'Saving...' : 'Save Presentation'}</Text>
+                <T>{status === 'loading' ? 'Saving...' : 'Save Presentation'}</T>
               </Button>
               
               {status === 'success' && (
-                <Text className="mt-4 text-success font-medium">✅ Saved successfully!</Text>
+                <T className="mt-4 text-success font-medium">✅ Saved successfully!</T>
               )}
             </Card>
           ) : (
-            <Text className="text-muted-foreground italic">Select a template to begin editing.</Text>
+            <T className="text-muted-foreground italic">Select a template to begin editing.</T>
           )}
-        </View>
-      </View>
+        </V>
+      </V>
     </ScrollView>
   );
 };

@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    sous_headless_lib::run()
+    sous_signage_lib::run()
 }
