@@ -2,6 +2,7 @@ import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { spawn, ChildProcess, execSync } from 'child_process';
 import treeKill from 'tree-kill';
 import { localConfig } from '@sous/config';
+import { logger } from '@sous/logger';
 import { EventEmitter } from 'events';
 
 export type ProcessStatus = 'running' | 'starting' | 'stopped' | 'error';
@@ -24,6 +25,8 @@ export interface ManagedProcess {
   child?: ChildProcess;
   autoStart?: boolean;
   timeout?: NodeJS.Timeout;
+  target?: 'web' | 'android' | 'ios' | 'linux';
+  emulatorName?: string;
 }
 
 @Injectable()
@@ -78,26 +81,33 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
         name: 'Native',
         type: 'app',
         port: localConfig.native.port,
+        target: 'android',
+        emulatorName: 'sdk_gphone64_x86_64',
       },
       {
         id: 'headless',
         name: 'Signage',
         type: 'app',
         port: localConfig.headless.port,
+        target: 'linux',
       },
       {
         id: 'kds',
         name: 'KDS',
         type: 'app',
         port: localConfig.kds.port,
+        target: 'android',
+        emulatorName: 'sdk_gphone64_x86_64',
       },
       {
         id: 'pos',
         name: 'POS',
         type: 'app',
         port: localConfig.pos.port,
+        target: 'android',
+        emulatorName: 'sdk_gphone64_x86_64',
       },
-      { id: 'wearos', name: 'WearOS', type: 'app' },
+      { id: 'wearos', name: 'WearOS', type: 'app', target: 'android' },
       { id: 'db', name: 'Postgres', type: 'docker', status: 'running' },
       { id: 'redis', name: 'Redis', type: 'docker', status: 'running' },
     ];
@@ -120,6 +130,18 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
   }
 
   async autoStartCore() {
+    // 1. Start Docker infra first
+    try {
+      this.addLog('db', '🐳 Starting Docker infrastructure...', 'info');
+      execSync('docker compose up -d', { stdio: 'ignore' });
+      this.processes.get('db')!.status = 'running';
+      this.processes.get('redis')!.status = 'running';
+      this.emit('update');
+    } catch (e) {
+      this.addLog('db', '❌ Failed to start Docker infrastructure', 'error');
+    }
+
+    // 2. Start core apps
     const coreApps = this.getProcesses().filter((p) => p.autoStart);
     for (const app of coreApps) {
       this.startProcess(app.id);
@@ -139,19 +161,65 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
     proc.status = 'starting';
     this.emit('update');
 
-    const child = spawn(
-      this.pnpmPath,
-      ['--filter', `@sous/${id}`, 'run', 'dev'],
-      {
-        shell: true,
-        env: {
-          ...process.env,
-          PORT: proc.port?.toString(),
-          SOUS_JSON_LOGS: 'true',
-          FORCE_COLOR: '1',
-        },
+    // Map internal ID to actual monorepo package names if they differ
+    const packageMap: Record<string, string> = {
+      api: '@sous/api',
+      web: '@sous/web',
+      docs: '@sous/docs',
+      native: '@sous/native',
+      headless: '@sous/native-headless',
+      kds: '@sous/native-kds',
+      pos: '@sous/native-pos',
+      wearos: '@sous/wearos',
+    };
+
+    const filter = packageMap[id] || `@sous/${id}`;
+
+    // Handle Android-specific requirements (Emulator + Path Sanitization)
+    if (proc.target === 'android') {
+      // Run Android setup and wait for it to finish before starting the build
+      await this.setupAndroidEnvironment(id, proc);
+    }
+
+    // Path sanitization for Android builds to avoid 'Android Studio' directory collision
+    const env = { ...process.env };
+    if (proc.target === 'android') {
+      env.PATH = (process.env.PATH || '')
+        .split(':')
+        .filter((p) => !p.startsWith('/mnt/c'))
+        .join(':');
+      env.ANDROID_HOME = `${process.env.HOME}/Android/Sdk`;
+      env.NDK_HOME = `${env.ANDROID_HOME}/ndk/29.0.13846066`;
+    }
+
+    const args = ['--filter', filter, 'run', 'dev'];
+    if (proc.target === 'android') {
+      // For android, we override the standard 'dev' with tauri android dev
+      args[args.length - 1] = 'tauri';
+      args.push('android', 'dev', '--no-dev-server-wait');
+      if (proc.emulatorName) {
+        args.push(proc.emulatorName);
+      }
+    } else if (proc.target === 'linux') {
+      // For linux desktop, we run tauri dev
+      args[args.length - 1] = 'tauri';
+      args.push('dev');
+    }
+
+    const child = spawn(this.pnpmPath, args, {
+      shell: true,
+      env: {
+        ...env,
+        PORT: proc.port?.toString(),
+        SOUS_JSON_LOGS: 'true',
+        FORCE_COLOR: '1',
+        WEBKIT_DISABLE_COMPOSITING_MODE: '1',
+        LIBGL_ALWAYS_SOFTWARE: '1',
+        WEBKIT_FORCE_SANDBOX: '0',
+        GDK_SCALE: '1',
+        GDK_DPI_SCALE: '1',
       },
-    );
+    });
 
     proc.child = child;
 
@@ -176,6 +244,61 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
         this.emit('update');
       }
     }, 3000);
+  }
+
+  private async setupAndroidEnvironment(id: string, proc: ManagedProcess) {
+    try {
+      this.addLog(id, '🔍 Checking Android environment...', 'info');
+
+      // Try to ensure Windows ADB server is running with -a (all interfaces)
+      spawn(
+        'powershell.exe',
+        [
+          '-Command',
+          "Start-Process adb -ArgumentList '-a nodaemon server start' -NoNewWindow -ErrorAction SilentlyContinue",
+        ],
+        { stdio: 'ignore' },
+      );
+
+      // Check for emulator online
+      const { exec } = await import('child_process');
+      const checkDevices = () =>
+        new Promise<string>((resolve) => {
+          exec('adb devices', (_err, stdout) => resolve(stdout));
+        });
+
+      let devices = await checkDevices();
+
+      if (!devices.includes('\tdevice') && proc.emulatorName) {
+        this.addLog(id, `🚀 Launching emulator: ${proc.emulatorName}...`, 'info');
+        const emulatorPath =
+          '/mnt/c/Users/conar/AppData/Local/Android/Sdk/emulator/emulator.exe';
+        spawn(emulatorPath, ['-avd', proc.emulatorName, '-no-snapshot-load'], {
+          detached: true,
+          stdio: 'ignore',
+        }).unref();
+
+        this.addLog(id, '⏳ Waiting for emulator to boot...', 'info');
+        let attempts = 0;
+        while (!devices.includes('\tdevice') && attempts < 30) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          devices = await checkDevices();
+          attempts++;
+        }
+
+        if (devices.includes('\tdevice')) {
+          this.addLog(id, '✅ Emulator is online.', 'info');
+        } else {
+          this.addLog(id, '⚠️ Emulator boot timeout.', 'warn');
+        }
+      }
+    } catch (e) {
+      this.addLog(
+        id,
+        '⚠️ Failed to check/launch emulator automatically.',
+        'warn',
+      );
+    }
   }
 
   async stopProcess(id: string) {
@@ -262,6 +385,13 @@ export class ProcessManager extends EventEmitter implements OnModuleDestroy {
 
       this.combinedLogs.push(logEntry);
       if (this.combinedLogs.length > 2000) this.combinedLogs.shift();
+
+      // Also pipe to the central God View file via @sous/logger
+      // We skip this if the message was already parsed as JSON (since the app itself likely logged it to the file)
+      if (!trimmed.startsWith('{')) {
+        const logFn = (logger as any)[level] || logger.info;
+        logFn.call(logger, { name: `@sous/${id}` }, message);
+      }
     }
 
     this.emit('update');

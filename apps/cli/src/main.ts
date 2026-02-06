@@ -9,8 +9,13 @@ async function bootstrap() {
     originalError(...args);
   };
 
+  // Filter out '--' from process.argv which can be injected by pnpm
+  process.argv = process.argv.filter((arg) => arg !== '--');
+
   // Use 'error' level only to suppress the [Nest] startup logs for a cleaner TUI
-  await CommandFactory.run(AppModule, ['error']);
+  await CommandFactory.run(AppModule, {
+    logger: ['error'],
+  });
 }
 
 bootstrap();

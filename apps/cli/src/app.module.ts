@@ -14,6 +14,8 @@ import { TestCommand } from './commands/quality/test/test.command.js';
 import { CheckCommand } from './commands/quality/check/check.command.js';
 import { MaintenanceCommand } from './commands/maintenance/maintenance.command.js';
 import { HousekeepCommand } from './commands/maintenance/housekeep/housekeep.command.js';
+import { DbCommand } from './commands/maintenance/db/db.command.js';
+import { DbPushCommand } from './commands/maintenance/db/db-push.command.js';
 import { ProcessManager } from './commands/dev/process-manager.service.js';
 
 @Module({
@@ -34,6 +36,8 @@ import { ProcessManager } from './commands/dev/process-manager.service.js';
     CheckCommand,
     MaintenanceCommand,
     HousekeepCommand,
+    DbCommand,
+    DbPushCommand,
   ],
 })
 export class AppModule {}

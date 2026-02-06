@@ -13,21 +13,22 @@ Run the project's install script to set up Java and the Android SDK inside WSL2:
 ./scripts/install-dev.sh
 ```
 
-## 2. ADB Bridge (CRITICAL)
-For WSL2 to "see" your Windows-hosted emulators, you must link the `adb` command to the Windows executable. The `install-dev.sh` script attempts this, but you may need to do it manually:
-```bash
-# Locate your Windows ADB (usually in Android SDK platform-tools)
-sudo ln -sf "/mnt/c/Users/<YOUR_USER>/AppData/Local/Android/Sdk/platform-tools/adb.exe" /usr/local/bin/adb
-```
-Verify with: `adb devices`. You should see `emulator-5554` (if running).
+## 2. ADB Bridge (Automated)
+The platform now handles the ADB bridge automatically. For it to work, you must ensure the Windows ADB server is listening on all interfaces:
 
-## 3. Host Resource Management (.wslconfig)
-Create/Edit `%USERPROFILE%\.wslconfig` in Windows:
-```ini
-[wsl2]
-memory=16GB    # Limit WSL2 RAM so Windows has room for emulators
-processors=8
+**Windows (Command Prompt):**
+```cmd
+adb -a nodaemon server start
 ```
+*Note: You may need to allow this through the Windows Firewall.*
+
+The `@sous/cli` will detect your Windows IP and connect WSL2 to this server via the `ADB_SERVER_SOCKET` environment variable.
+
+## 3. Emulator Management
+The orchestrator (`sous dev`) will automatically launch the preferred emulator if none are detected. You can configure the AVD name in `apps/cli/src/commands/dev/process-manager.service.ts`.
+
+## 4. Path Sanitization
+To avoid collisions with the Windows "Android Studio" directory, the CLI automatically strips `/mnt/c/` from the `$PATH` during Android builds. You do not need to do this manually.
 
 ## 4. Physical Device Setup (Hardware)
 1. On your Android device, go to **Settings > About Phone**.
@@ -74,3 +75,22 @@ The Wear OS app is a native Kotlin project.
 1. Use the **Single Window** approach (Section 6) to access the Wear OS module.
 2. Ensure a "Wear OS" emulator is created in the Windows Device Manager.
 3. Click "Run" in Android Studio and select the `:apps:wearos` module.
+
+## 9. WSL2 GUI Rendering Fixes (Mesa/WebKit Overrides)
+
+If you experience "Blank/White Screen" issues or `MESA-LOADER` errors when running Tauri applications (like `@sous/native-headless`) in WSL2, you must apply the following environment variables. These disable hardware acceleration and the WebKit sandbox, which are often incompatible with the WSL2 GPU bridge.
+
+Add these to your `~/.zshrc` (or they are automatically managed in `~/.sous/shell/zshrc`):
+
+```bash
+# Force software rendering and disable hardware acceleration for WSL2 compatibility
+export WEBKIT_DISABLE_COMPOSITING_MODE=1
+export LIBGL_ALWAYS_SOFTWARE=1
+
+# Disable WebKit Sandbox to prevent startup crashes in containerized environments
+export WEBKIT_FORCE_SANDBOX=0
+
+# High-DPI Fix (Ensures UI isn't tiny on Windows High-DPI displays)
+export GDK_SCALE=1
+export GDK_DPI_SCALE=1
+```

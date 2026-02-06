@@ -33,3 +33,15 @@
 - **Sync**: `sous sync` (Database/Schema sync).
 - **Quality**: `sous test` (Run test suite), `sous check` (Full health check: lint, type, test, build).
 - **Maintenance**: `sous housekeep` (Deep clean artifacts: node_modules, .next, dist).
+
+## Development Status
+| Application | Environment | Status | Verification Date |
+| :--- | :--- | :--- | :--- |
+| `@sous/web` | Web / PWA | ✅ Stable | 2026-02-06 |
+| `@sous/docs` | Web | ✅ Stable | 2026-02-06 |
+| `@sous/api` | NestJS | ✅ Stable | 2026-02-06 |
+| `@sous/native` | Android Emulator | ✅ Stable | 2026-02-06 |
+| `@sous/native-headless` | Linux / WSL2 | ✅ Stable | 2026-02-06 |
+| `@sous/wearos` | Android | 🏗️ Initialized | - |
+| `@sous/native-kds` | Android | 🏗️ Planned | - |
+| `@sous/native-pos` | Android | 🏗️ Planned | - |

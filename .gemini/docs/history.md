@@ -18,8 +18,49 @@
         - Added `moduleNameMapper` to Jest config to resolve `.js` extensions in TypeScript source files.
     - **Dependency Hydration:** Ensured all `apps/native` dependencies are correctly linked and building successfully.
     - **Result:** ACHIEVED 100% PASS RATE across all 43 turbo tasks (lint, typecheck, test, build) for all 13 packages/apps.
+- **Universal Configuration & Logging:**
+    - Refactored **`@sous/config`** and **`@sous/logger`** to be browser-safe, enabling their use in Tauri/Vite environments.
+    - Enhanced **`@sous/config`** to properly fetch and merge **Infisical secrets** into `process.env` and the centralized config object, ensuring remote secrets override local ones.
+    - Resolved `AsyncLocalStorage` and `Top-level await` issues in the logger and config packages for CJS/ESM hybrid compatibility.
+- **Native-Headless Initialization:**
+    - Scaffolded a new **`apps/native-headless`** application using **Tauri v2 + React + TypeScript**.
+    - Configured the app to use port **1422** and integrated it with the monorepo design system and configuration.
+    - **Networking Robustness:** Standardized on `127.0.0.1` for `devUrl` and Vite host to resolve IPv6 mapping issues in WSL2. Updated `TAURI_DEV_HOST` to `localhost`.
+    - **Fixes:** Resolved blank window issue by simplifying the initial `App.tsx` and verifying build pipeline stability.
+- **Android Dev Ops Automation:**
+    - Implemented a permanent fix for WSL2-Windows Android interop issues.
+    - **Automated Emulator Management:** `sous dev --android` now detects, launches, and waits for the Windows Android emulator automatically.
+    - **Automated Device Selection:** The CLI now passes the preferred `emulatorName` directly to the `tauri android dev` command, eliminating interactive prompts.
+    - **Automated ADB Bridge:** The CLI now automatically attempts to start the Windows ADB server with the `-a` flag (listening on all interfaces) via PowerShell, eliminating the need for manual setup on the Windows side.
+    - **Path Sanitization:** The CLI now automatically strips Windows paths from the environment during Android builds to prevent directory collisions with "Android Studio".
+    - **Environment Bridging:** Configured a global ADB bridge (`ADB_SERVER_SOCKET`) managed via `~/.sous/shell/zshrc`.
+    - **Shell Cleanup:** Stripped redundant/duplicate Android configurations from the user's main `~/.zshrc`, consolidating all platform logic into the managed `~/.sous/shell/zshrc` file.
+    - **Universal Shared Packages:** Refactored `@sous/logger` and `@sous/config` to be fully browser-safe and ESM-compatible, resolving `Dynamic require` and `AsyncLocalStorage` issues in universal environments.
+    - **Centralized Logging:** Ensured all platform components append to `~/.sous/logs/combined.log` for a unified "God View" debugging experience.
+- **Robust Dev Installation:**
+    - Fixed **APT 404 errors** in `install-dev.sh` by automatically detecting and configuring `ports.ubuntu.com` mirrors when `arm64` is present as a foreign architecture.
+    - Resolved **EACCES error** in shell customization by switching to `pnpm run sous`.
+    - Automated **ZSH & Oh My Zsh** plugin configuration, ensuring `git`, `syntax-highlighting`, and `autosuggestions` are always present.
+- **Project Infrastructure & Stability:**
+    - **API Recovery:** Fixed `@sous/api` startup crashes by resolving database connection mismatches and explicitly binding to `0.0.0.0`.
+    - **Database Sync:** Standardized local development database credentials and automated schema synchronization via `pnpm run db:push`.
+    - **GUI Rendering Fixes:** Resolved "Blank Window" issues in Tauri apps under WSL2 by injecting software rendering and sandbox deactivation overrides (`WEBKIT_DISABLE_COMPOSITING_MODE=1`, etc.) into the environment.
+    - **Docker Orchestration:** Integrated automatic `docker compose up -d` into the CLI orchestrator to ensure infrastructure is ready before apps attempt to connect.
 
-## 2026-02-04
+## 2026-02-06 (Major Milestone: Core Suite Stabilized)
+
+- **Platform-Wide Dev Environment Parity:**
+    - Achieved full, verified functionality for all core applications: **`@sous/web`**, **`@sous/docs`**, **`@sous/api`**, **`@sous/native`**, and **`@sous/native-headless`**.
+    - Verified cross-platform development workflows (Android Emulator on Windows host vs Linux Desktop GUI in WSL2).
+- **Core Application Stabilization:**
+    - Verified full reachability and functionality for **`@sous/web`** (port 3000), **`@sous/docs`** (port 3001), and **`@sous/api`** (port 4000).
+    - Resolved API reachability issues by fixing database connection failures and ensuring explicit `0.0.0.0` binding.
+    - Confirmed **`@sous/native`** correctly initializes and builds for Android via the automated CLI bridge.
+- **Native-Headless Reconstruction:**
+    - Re-implemented **`@sous/native-headless`** (Signage) by branching from the proven `@sous/native` codebase.
+    - Standardized Linux desktop rendering fixes across all Tauri applications to resolve WSL2 blank screen issues.
+
+## 2026-02-05
 - **Identity & Multi-Tenancy (Phase 1.6):**
     - Established the core Drizzle ORM infrastructure in `@sous/api`.
     - Implemented a multi-tenant database schema with `organizations`, `users`, `locations`, and `media` tables.

@@ -6,14 +6,44 @@
 echo "👨‍💻 Starting Developer Environment Setup..."
 
 # 0. Fix ARM64 Sources if needed
-if [[ $(dpkg --print-architecture) == "arm64" ]] && grep -q "archive.ubuntu.com" /etc/apt/sources.list; then
-  echo "⚠️ Detected arm64 architecture with archive.ubuntu.com sources. Switching to ports.ubuntu.com..."
-  sudo sed -i 's|http://archive.ubuntu.com/ubuntu/|http://ports.ubuntu.com/ubuntu-ports/|g' /etc/apt/sources.list
-  sudo sed -i 's|http://security.ubuntu.com/ubuntu/|http://ports.ubuntu.com/ubuntu-ports/|g' /etc/apt/sources.list
+# Standard mirrors don't have arm64. If arm64 is primary or foreign, we need ports.ubuntu.com
+if dpkg --print-architecture | grep -q "arm64" || dpkg --print-foreign-architectures | grep -q "arm64"; then
+  if ! grep -q "ports.ubuntu.com" /etc/apt/sources.list && ! ls /etc/apt/sources.list.d/*.list 2>/dev/null | xargs grep -q "ports.ubuntu.com"; then
+    echo "⚠️  Detected arm64 architecture but no ports.ubuntu.com sources. Fixing..."
+    sudo tee /etc/apt/sources.list.d/arm64-ports.list << 'EOF'
+deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy main restricted universe multiverse
+deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates main restricted universe multiverse
+deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-security main restricted universe multiverse
+EOF
+    # Also tag existing sources as amd64 to avoid ambiguity (if not already tagged)
+    sudo sed -i 's/deb http/deb [arch=amd64] http/g' /etc/apt/sources.list
+    sudo sed -i 's/\[arch=amd64\] \[arch=amd64\]/\[arch=amd64\]/g' /etc/apt/sources.list
+  fi
 fi
 
 # 1. Update & Build Tools
-sudo apt update && sudo apt install -y build-essential curl git wget unzip
+sudo apt update && sudo apt install -y build-essential curl git wget unzip zsh
+
+# 1.1 Setup ZSH & Oh My Zsh
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+  echo "Installing Oh My Zsh..."
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+fi
+
+# Install custom plugins
+ZSH_CUSTOM=${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}
+if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
+  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $ZSH_CUSTOM/plugins/zsh-syntax-highlighting
+fi
+if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
+  git clone https://github.com/zsh-users/zsh-autosuggestions.git $ZSH_CUSTOM/plugins/zsh-autosuggestions
+fi
+
+# Set ZSH as default shell if not already
+if [ "$SHELL" != "$(which zsh)" ]; then
+  echo "Changing default shell to zsh..."
+  sudo chsh -s $(which zsh) $USER
+fi
 
 # 2. Node.js (via NVM)
 if ! command -v nvm &> /dev/null; then
@@ -91,31 +121,11 @@ if [ ! -d "$ANDROID_HOME/cmdline-tools" ]; then
   rm -rf $ANDROID_HOME/temp /tmp/cmdline-tools.zip
 fi
 
-# ADB Bridge: Link to Windows ADB if available
-WINDOWS_ADB="/mnt/c/platform-tools/adb.exe" # Adjust if custom path
-if [ -f "$WINDOWS_ADB" ]; then
-  echo "Linking WSL adb to Windows adb.exe..."
-  sudo ln -sf "$WINDOWS_ADB" /usr/local/bin/adb
-fi
+# 10. Shell Customization
+echo "🐚 Configuring @sous shell..."
+pnpm run sous dev install shell
 
-# Add to shell config if not present
-setup_shell_config() {
-  local config_file=$1
-  if [ -f "$config_file" ]; then
-    if ! grep -q "ANDROID_HOME" "$config_file"; then
-      echo "Configuring $config_file..."
-      echo 'export ANDROID_HOME=$HOME/Android/Sdk' >> "$config_file"
-      echo 'export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools' >> "$config_file"
-      echo 'export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64' >> "$config_file"
-      echo 'export TAURI_DEV_HOST=0.0.0.0' >> "$config_file"
-    fi
-  fi
-}
-
-setup_shell_config "$HOME/.bashrc"
-setup_shell_config "$HOME/.zshrc"
-
-# 10. IDE Wrappers
+# 11. IDE Wrappers
 echo "🖥️ Setting up Android Studio wrapper..."
 mkdir -p $HOME/.local/bin
 cat > "$HOME/.local/bin/Android Studio" << 'EOF'

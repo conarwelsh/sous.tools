@@ -1,7 +1,7 @@
 import { Command, CommandRunner, Option } from 'nest-commander';
 import { SyncCommand } from './sync.command.js';
 import { InstallCommand } from './install.command.js';
-import { execSync } from 'child_process';
+import { spawn, execSync } from 'child_process';
 import React from 'react';
 import { render } from 'ink';
 import { Dashboard } from './ui/dashboard.js';
@@ -35,10 +35,73 @@ export class DevCommand extends CommandRunner {
 
     if (options?.android) {
       logger.info('🤖 Starting Android Development loop for @sous/native...');
-      execSync('pnpm --filter @sous/native run android:dev', {
-        stdio: 'inherit',
+
+      const avdName = 'sdk_gphone64_x86_64';
+      const emulatorPath =
+        '/mnt/c/Users/conar/AppData/Local/Android/Sdk/emulator/emulator.exe';
+
+      // 1. Check if emulator is running
+      try {
+        const devices = execSync('adb devices').toString();
+        if (!devices.includes('emulator-')) {
+          logger.info(`🚀 No emulator detected. Launching ${avdName}...`);
+          // Launch in background
+          spawn(emulatorPath, ['-avd', avdName, '-no-snapshot-load'], {
+            detached: true,
+            stdio: 'ignore',
+          }).unref();
+
+          logger.info('⏳ Waiting for emulator to boot...');
+          let isOnline = false;
+          while (!isOnline) {
+            try {
+              const check = execSync('adb devices').toString();
+              if (check.includes('\tdevice')) {
+                isOnline = true;
+              } else {
+                await new Promise((resolve) => setTimeout(resolve, 2000));
+              }
+            } catch (e) {
+              await new Promise((resolve) => setTimeout(resolve, 2000));
+            }
+          }
+          logger.info('✅ Emulator is online.');
+        }
+      } catch (e) {
+        logger.warn('⚠️  Could not check/launch emulator automatically.', e as any);
+      }
+
+      // 2. Run path-sanitized build
+      // We strip /mnt/c/ to prevent 'Android Studio' directory collision
+      const sanitizedPath = process.env.PATH?.split(':')
+        .filter((p) => !p.startsWith('/mnt/c'))
+        .join(':');
+
+      logger.info('👨‍🍳 Prepping the kitchen for Android build...');
+
+      const child = spawn(
+        'pnpm',
+        ['--filter', '@sous/native', 'run', 'tauri', 'android', 'dev', '--no-dev-server-wait'],
+        {
+          stdio: 'inherit',
+          shell: true,
+          env: {
+            ...process.env,
+            PATH: sanitizedPath,
+            ANDROID_HOME: `${process.env.HOME}/Android/Sdk`,
+            NDK_HOME: `${process.env.HOME}/Android/Sdk/ndk/29.0.13846066`,
+          },
+        },
+      );
+
+      return new Promise((resolve) => {
+        child.on('exit', (code) => {
+          if (code !== 0) {
+            process.exit(code ?? 1);
+          }
+          resolve();
+        });
       });
-      return;
     }
 
     if (options?.ios) {

@@ -2,6 +2,7 @@ import { logger } from '@sous/logger';
 import { SubCommand, CommandRunner, Option } from 'nest-commander';
 import { execSync } from 'child_process';
 import { ShellInstallCommand } from './shell-install.command.js';
+import * as path from 'path';
 
 interface InstallOptions {
   android?: boolean;
@@ -19,11 +20,13 @@ export class InstallCommand extends CommandRunner {
     }
 
     const targetIp = passedParam[0];
+    const rootDir = path.resolve(process.cwd(), '../../');
 
     if (!targetIp) {
       logger.info('Detecting role as Developer Workstation...');
       try {
-        execSync('bash scripts/install-dev.sh', { stdio: 'inherit' });
+        const scriptPath = path.join(rootDir, 'scripts', 'install-dev.sh');
+        execSync(`bash ${scriptPath}`, { stdio: 'inherit' });
       } catch (error) {
         logger.error('❌ Local installation failed.');
       }
@@ -51,7 +54,8 @@ export class InstallCommand extends CommandRunner {
         `🚀 Dispatching remote Linux/RPi installation to ${targetIp}...`,
       );
       try {
-        execSync(`bash scripts/install-remote.sh ${targetIp}`, {
+        const scriptPath = path.join(rootDir, 'scripts', 'install-remote.sh');
+        execSync(`bash ${scriptPath} ${targetIp}`, {
           stdio: 'inherit',
         });
       } catch (error) {

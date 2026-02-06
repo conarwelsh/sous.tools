@@ -8,7 +8,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   logger.info(`🚀 API starting on port ${config.api.port}...`);
-  await app.listen(config.api.port);
+  await app.listen(config.api.port, '0.0.0.0');
   logger.info(`✅ API is live at http://localhost:${config.api.port}`);
 }
 bootstrap();
