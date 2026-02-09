@@ -1,71 +1,80 @@
-# Spec 009: Device Pairing & Boot Flow
+# Spec 009: App Pairing & Device State
 
 **Status:** Proposed
 **Date:** 2026-02-09
-**Consumers:** @sous/web (KDS/POS/Signage/Tools flavors)
+**Consumers:** KDS App, POS App, Signage App (FullPageOS/Capacitor)
 
 ## Objective
 
-Define a standardized, reusable "Boot & Pair" lifecycle component for all Native/Kiosk applications. This ensures that any device (KDS, POS, Signage) follows the same security and onboarding protocols regardless of its specific function.
+Define a reusable, resilient, and secure pairing workflow for all "Node" applications in the `sous.tools` ecosystem. This component ensures devices can easily attach to an Organization, recover from network failures, and handle configuration changes (like screen reassignment) automatically.
 
-## 1. The Finite State Machine (FSM)
+## Core Component: `<DevicePairingFlow />`
 
-The root of every Kiosk application will be governed by a hook/machine with the following states:
+This component acts as the "Root Gatekeeper" for KDS, POS, and Signage applications. It manages the high-level state of the application.
 
-1.  **`UNPAIRED`**: Device has no valid identity token.
-2.  **`PAIRING`**: Device is generating/displaying a code and polling for confirmation.
-3.  **`PAIRED_IDLE`**: Device is authenticated but has no configuration/content assigned.
-4.  **`ACTIVE`**: Device is authenticated and has a valid configuration (Screen ID, Station ID).
-5.  **`DISCONNECTED`**: Device is authenticated but cannot reach the server (Offline Mode).
+### State Machine
 
-## 2. UI/UX by State
+The component transitions between four primary states:
 
-### A. UNPAIRED / PAIRING (The "Handshake" Screen)
-- **Visuals:** High-contrast brand background. Large, readable 6-character alphanumeric code (e.g., `H7K-9P2`).
-- **Instructions:** "Go to Admin > Hardware > Add Device and enter this code."
-- **Flavor Identity:** Clearly displays the device role (e.g., "Sous KDS", "Sous Signage") so the admin knows what they are pairing.
-- **Logic:**
-  - On mount, generates a random `pairingCode`.
-  - Emits `device:handshake` socket event with `code`, `hardwareSpecs`, and `appFlavor`.
-  - Listens for `device:paired` event containing the `authToken` and `nodeId`.
+1.  **UNPAIRED (Pairing Mode)**
+    - **Trigger:** Initial boot, LocalStorage cleared, or explicit "Unpair" command from server.
+    - **UI:** Shows the Brand Logo, a 6-character alphanumeric **Pairing Code**, and instructions ("Go to sous.tools > Hardware to pair this device").
+    - **Behavior:**
+      - Generates a transient `pairingCode` on mount.
+      - Polls the API (or connects via WebSocket channel `pairing:{code}`) waiting for an Organization to claim it.
+      - *Timeout:* Codes expire every 15 minutes; auto-regenerate if expired.
 
-### B. PAIRED_IDLE (The "Waiting" Screen)
-- **Trigger:** Device has `authToken` but the Hardware Domain reports `assignment: null`.
-- **Visuals:** "Device Paired successfully. Waiting for assignment..."
-- **Action:** A "Refresh" button to manually check for config updates.
-- **Logic:**
-  - Establishes persistent socket connection using `authToken`.
-  - Listens for `config:update` events.
+2.  **PENDING_CONFIG (Paired, No Content)**
+    - **Trigger:** Successfully claimed by an Organization, but no specific `Screen` (Signage) or `Station` (KDS/POS) has been assigned yet.
+    - **UI:** "Device Paired! Waiting for configuration..." with a "Refresh" button.
+    - **Behavior:**
+      - Establishes a persistent authenticated WebSocket connection to the Organization's `hardware` room.
+      - Listens for `device:update` events.
 
-### C. ACTIVE (The Application)
-- **Trigger:** Hardware Domain returns a valid configuration (e.g., `screenId` for Signage, `stationId` for POS).
-- **Visuals:** Renders the specific application view.
-  - **Signage:** Renders the `ScreenRenderer` with the assigned `screenId`.
-  - **KDS:** Renders the `OrderGrid` for the assigned `stationId`.
-- **Logic:**
-  - Maintains heartbeat.
-  - If the server sends a `device:unpaired` event (Admin removed device), transition immediately back to `UNPAIRED`.
+3.  **ACTIVE (Content Render)**
+    - **Trigger:** Device has a valid `deviceId` AND a valid assignment (e.g., `screenId` for Signage, `stationId` for POS).
+    - **UI:** Renders the actual application content (e.g., `<ScreenManagerRenderer />` or `<KDSInterface />`).
+    - **Behavior:**
+      - Injects the configuration data into the child components.
+      - Maintains heartbeat with the server.
 
-## 3. Resilience & Auto-Recovery
+4.  **DISCONNECTED (Error/Recovery)**
+    - **Trigger:** Network loss or WebSocket disconnect.
+    - **UI:** A non-intrusive "Reconnecting..." toast/overlay (or full screen if critical data is missing).
+    - **Behavior:**
+      - Exponential backoff retry strategy.
+      - If Auth Token is rejected (401), auto-transition to **UNPAIRED**.
 
-### Assignment Stealing
-- **Scenario:** Admin reassigns a Screen from Device A to Device B.
-- **Device A Action:** Receives `config:update` -> `assignment: null`. Transitions to **PAIRED_IDLE**.
-- **Device B Action:** Receives `config:update` -> `assignment: { screenId: ... }`. Transitions to **ACTIVE**.
+## Logic & Resilience
 
-### Reset / Wipe
-- **Scenario:** Admin hits "Factory Reset" in Hardware Manager.
-- **Action:** Device clears `localStorage` (tokens, config) and transitions to **UNPAIRED** (generates new code).
+### 1. Persistence
+- **Storage:** `localStorage` (Web) or `SQLite` (Native) stores:
+  - `device_id`: The UUID generated upon successful pairing.
+  - `device_token`: The long-lived JWT for hardware authentication.
+  - `pairing_code`: (Transient)
+- **Boot Check:** On app launch, check for `device_token`.
+  - If present -> Verify API. If valid -> Go to **ACTIVE/PENDING**.
+  - If missing/invalid -> Go to **UNPAIRED**.
 
-## 4. Implementation Details
+### 2. "Steal" & Reassignment Handling
+- **Scenario:** A user in Screen Manager assigns "HDMI 1" to a new Screen, "Lunch Menu".
+- **Event:** Server emits `device:config_update` to the specific `deviceId`.
+- **Action:** The `<DevicePairingFlow />` receives the payload containing the new `screenId`.
+- **Reaction:** It immediately updates the internal state, causing the `ACTIVE` view to re-render with the new content (Hot Swap). No reboot required.
 
-- **Component:** `DeviceBootloader` (Shared Feature).
-- **Storage:** Uses `Capacitor Storage` (or `localStorage` fallback) to persist the `authToken`.
-- **Socket:** Uses the shared `RealtimeClient`.
+### 3. Remote Unpair / Wipe
+- **Scenario:** Admin deletes the device from the Hardware Dashboard.
+- **Event:** Server emits `device:unpair` or returns 401 on Heartbeat.
+- **Action:**
+  - Clear `localStorage`.
+  - Transition immediately to **UNPAIRED**.
+  - Generate new pairing code.
 
-## 5. Hardware Domain Integration
+### 4. Flavor Awareness
+- The Pairing Screen should visually indicate *what* flavor of app is running (e.g., "Sous KDS", "Sous POS", "Sous Signage") to help the Admin identify it during the pairing process in the web dashboard.
 
-When a device connects:
-1. It identifies itself (e.g., "I am a KDS on Android 13").
-2. The Hardware Domain creates a temporary "Pending Device" record.
-3. When Admin enters the code, the record is promoted to "Active Node" and linked to the Organization.
+## Implementation Plan
+
+- **Location:** `@sous/features/hardware/components/DevicePairingFlow.tsx`
+- **Dependencies:** `useHardware` hook (from `@sous/features`), `@sous/ui` atoms.
+- **Integration:** This component will wrap the main routes in the `FlavorGate` (ADR 042).

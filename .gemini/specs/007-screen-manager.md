@@ -2,11 +2,11 @@
 
 **Status:** Proposed
 **Date:** 2026-02-09
-**References:** Spec 006 (Layout Manager), Spec 008 (Presentation Shared Components), Spec 017 (Hardware Domain)
+**References:** Spec 006 (Layout Manager), Spec 008 (Presentation Shared Components), Spec 009 (Device Pairing)
 
 ## Objective
 
-Create a highly intuitive, user-friendly interface for managing Digital Signage Screens. This tool allows users to select a pre-made Layout Template (from Spec 006) and populate its "Content Slots" with real-world data (POS items, Images, Custom JSON) to create dynamic menu boards and promotional displays.
+Create a highly intuitive, user-friendly interface for managing Digital Signage Screens. This tool allows users to select a pre-made Layout Template (from Spec 006), populate its "Content Slots" with real-world data, and assign the resulting screen to physical hardware or web endpoints.
 
 ## Core Features
 
@@ -21,28 +21,13 @@ Create a highly intuitive, user-friendly interface for managing Digital Signage 
 ### 2. Floating Toolbar (Draggable)
 A persistent, draggable tool palette containing global screen settings:
 - **Layout Switcher:** Button to open the `LayoutTemplateSelector` (Spec 008).
+- **Target Assignment:** Button to open the "Display Target Settings" modal (New).
 - **Custom CSS:** Toggle to open a lightweight code editor for injecting overrides.
   - *Context:* Popover showing documentation for targetable classes (e.g., `.menu-item-list`, `.price-tag`).
 - **Assets:** Quick access to the `ImageSelector` (Spec 008) and a dropzone for immediate uploads.
 - **Save/Publish:** Actions to persist the screen configuration.
 
-### 3. Target Assignment (Display Output)
-A section in the Toolbar or a dedicated "Publish" modal to define *where* this screen is shown.
-
-#### A. Hardware Assignment (HDMI)
-- **Discovery:** Queries the **Hardware Domain** for a list of registered Signage Nodes and their available HDMI ports.
-  - *UI:* Dropdown list: "Kitchen Display 1 (HDMI-0)", "Lobby TV (HDMI-1)".
-- **Conflict Resolution:** If a user selects a port that is already assigned to another screen:
-  - Show a warning: "This port is currently showing 'Lunch Menu A'. Assigning it here will override that screen."
-  - Action: "Steal Assignment" (Updates the `displayAssignments` table, clearing the old link and setting the new one).
-
-#### B. URL Access (Headless/Browser)
-- **Authenticated Link:** A direct internal URL (e.g., `https://sous.tools/admin/screens/preview/[id]`) for testing or internal dashboards. Requires Platform Login.
-- **Public/Permalink:** A specialized subdomain route (e.g., `https://[tenant-slug].sous.tools/display/[screen-id]`) or a shortened slug.
-  - *Use Case:* Smart TVs with built-in browsers that cannot run the Native App.
-  - *Security:* Uses the Tenant Slug to scope the request. Optionally secured via a "Display Key" URL parameter if needed.
-
-### 4. Content Assignment Workflow
+### 3. Content Assignment Workflow
 Clicking "Edit" on a slot opens the **Content Configuration Modal**:
 
 #### A. Data Source Selection
@@ -59,13 +44,23 @@ Clicking "Edit" on a slot opens the **Content Configuration Modal**:
   - *Example (Media):* `Image`, `VideoPlayer`, `Slideshow`.
 - **Props Editor:** Simple form controls to tweak component specific props (e.g., `showDescription`, `columns`, `imageSize`).
 
-### 5. Data Merging & Overrides
-- **Runtime Strategy:** The Screen configuration stores *intent* (e.g., "Show Category A, but hide Item X").
-- **Presentation Layer:** When the actual Signage Node renders the screen:
-  1. Fetches live POS data.
-  2. Applies the stored filters/sorts.
-  3. Merges the manual overrides (e.g., "Featured" badge).
-  4. Injects the computed data into the selected Component.
+### 4. Target Assignment (Hardware & Web)
+A dedicated modal/panel for determining *where* this screen is displayed.
+
+#### A. Physical Hardware (HDMI)
+- **Source:** Queries the **Hardware Domain** for a list of active `Device` nodes and their available `Display` ports (e.g., "Kitchen Pi - HDMI 1", "Bar Controller - HDMI 2").
+- **Status Indicators:** Shows if a port is "Available", "Offline", or "Assigned to [Screen Name]".
+- **Assignment Logic:**
+  - Selecting a port links this `ScreenConfig` to that hardware `DisplayId`.
+  - **Steal Strategy:** If the user selects a port already assigned to another screen, a confirmation prompt appears: *"This port is currently showing 'Lunch Menu'. Do you want to overwrite it?"* Confirming updates the database and triggers a real-time refresh on the device.
+
+#### B. Web / Smart TV (URL)
+- **Slug Generation:** User defines a URL-friendly slug (e.g., `bar-menu-vertical`).
+- **Access Control Mode:**
+  - **Authenticated (Private):** Default. The URL requires a valid session or API key to load. Suitable for internal browser sources.
+  - **Public (Subdomain):** Uses the tenant subdomain (e.g., `dtown-cafe.sous.tools/display/bar-menu-vertical`).
+    - *Security:* If public, the endpoint verifies the subdomain matches the tenant ID of the screen configuration.
+- **Copy Link:** Quick action to copy the full URL to the clipboard.
 
 ## Data Model (Schema)
 
@@ -75,13 +70,13 @@ type ScreenConfig = {
   name: string;
   layoutId: string; // Reference to Layout Template
   customCss?: string;
-  // Assignment Data
-  assignments: {
-    hardwareNodeId?: string;
-    hdmiPort?: number;
-    publicSlug?: string;
-  }[];
   slots: Record<string, SlotAssignment>; // Keyed by Slot ID from Layout
+  // Target Configuration
+  assignments: {
+    hardware?: string[]; // Array of Display IDs (HDMI ports)
+    webSlug?: string;    // URL slug
+    isPublic?: boolean;  // Access control
+  }
 };
 
 type SlotAssignment = {
@@ -96,3 +91,14 @@ type SlotAssignment = {
   componentProps: Record<string, any>;
 };
 ```
+
+## User Experience (UX) Flow
+
+1. **Initialization:** User creates a new Screen -> Prompted to select a Layout via `LayoutTemplateSelector`.
+2. **Visual Editor:** User sees the empty skeleton.
+3. **Assignment:** User clicks "Main Column" -> Selects "POS Data" -> Chooses "Burgers" Category -> Selects "MenuItemList" component.
+4. **Targeting:** User clicks "Assign Target".
+   - Selects "Hardware" tab.
+   - Sees "Front Counter Pi" is available.
+   - Clicks "Assign".
+5. **Save:** Configuration is saved. The "Front Counter Pi" immediately refreshes to show the new burger menu.

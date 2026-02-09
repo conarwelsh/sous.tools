@@ -2,76 +2,69 @@
 
 **Status:** Proposed
 **Date:** 2026-02-09
-**References:** ADR 027 (Integrations Strategy)
+**Domain:** Integrations / Admin
 
 ## Objective
 
-Provide a unified dashboard for managing third-party connections (Square, Google, etc.). This page serves as the "Control Center" for external data pipes, ensuring that authentication, status monitoring, and manual synchronization are accessible to the user.
+Create a centralized dashboard for managing third-party connections (Square, Google Drive, Toast, etc.). This interface allows administrators to authenticate with external providers, monitor connection health, and trigger manual data synchronizations.
 
 ## Core Features
 
-### 1. Integration Catalog (Grid View)
-- A visual grid of available integration cards.
-- **Supported Providers:**
-  - **Square:** Point of Sale & Catalog.
-  - **Google:** Drive (for Recipes/Invoices).
-  - *(Future)*: Toast, QuickBooks, etc.
+### 1. Integrations Gallery
+- **Layout:** A grid of cards representing available integration providers.
 - **Card States:**
-  - **Not Connected:** Greyed out logo, "Connect" button.
-  - **Connected:** Full color logo, "Manage" button, "Active" status dot.
-  - **Error:** Red status dot, "Re-auth required" warning (e.g., expired refresh token).
+  - **Not Connected:** "Connect" button (Primary action).
+  - **Connected:** "Manage" or "Disconnect" options. Status indicator (Green Dot = Healthy, Red Dot = Error).
+- **Supported Providers (Phase 1):**
+  - **Square:** Point of Sale & Catalog.
+  - **Google:** Drive (for Recipe ingestion).
 
 ### 2. Connection Workflow (OAuth)
-- **Trigger:** Clicking "Connect" on a provider card.
-- **Flow:**
-  1. Opens a pop-up window or redirects to the provider's OAuth consent screen.
-  2. **Callback Handling:** The provider redirects to `https://api.sous.tools/integrations/callback/[provider]`.
-  3. **Exchange:** The backend exchanges the code for tokens and encrypts them (Infisical/AES).
-  4. **Completion:** Window closes (or redirects back), and the UI updates to "Connected".
+- **Action:** Clicking "Connect" opens a popup or redirects to the provider's OAuth consent screen.
+- **Callback Handling:**
+  - The return URL (`/api/integrations/callback/[provider]`) handles the code exchange.
+  - Upon success, the UI updates to "Connected" state via optimistic UI or real-time event.
+- **Security:** Credentials (Refresh Tokens) are encrypted at rest in the `IntegrationConfiguration` table (ADR 027).
 
-### 3. Management Detail View (Drawer/Modal)
-When a user clicks "Manage" on a connected integration:
+### 3. Management & Sync (Connected State)
+Clicking "Manage" on a connected provider opens a detailed modal/drawer:
 
 #### A. Status & Health
-- **Visuals:** "Connection Healthy", "Last Synced: 5 mins ago".
-- **Logic:** On open, performs a lightweight health check (e.g., fetching the user's profile from the provider) to verify the token is still valid.
+- Shows "Last Synced At" timestamp.
+- Shows current Token status (Active/Expired).
 
-#### B. Provider-Specific Actions
-- **Square:**
-  - **Sync Catalog:** Button to pull Items, Categories, and Modifiers immediately.
-  - **Sync Sales:**
-    - *Quick Action:* "Sync Today".
-    - *Deep Sync:* "Sync Range" (Date Picker) -> Triggers a background BullMQ job.
-    - *UX:* While syncing, show a progress bar or "Sync in Progress" badge. Do not block the UI.
-- **Google Drive:**
-  - **Folder Picker:** Dropdown to select which Drive folder to watch for Recipes/Invoices.
-  - **Scan Now:** Button to trigger an immediate crawl of the watched folder.
+#### B. Manual Sync Actions
+- **Catalog Sync:** "Pull Menu/Items" (Square -> Sous).
+- **Sales Sync:** "Pull Sales Data".
+  - *Date Range Picker:* Option to sync "Last 24h", "Last 7 Days", or "Custom Range".
+  - *Full Sync:* A "Resync All" danger zone button for disaster recovery.
+- **Feedback:** Visual progress indicator during sync jobs (driven by BullMQ job progress events).
 
-#### C. Danger Zone
-- **Disconnect:** A destructive button ("Disconnect & Delete Credentials").
-  - *Warning:* "This will stop all data synchronization. Historical data imported will be preserved."
-  - *Action:* Deletes the `IntegrationConfig` record from the database.
+#### C. Disconnection
+- **"Disconnect" Button:** Destructive action.
+- **Behavior:**
+  - Deletes the `IntegrationConfiguration` row.
+  - Revokes tokens with the provider (if supported).
+  - Does *not* delete historical data imported (Invoices/Sales), but prevents future syncs.
 
-## Technical Considerations
+## Data Model (Schema Reference)
 
-### 1. Background Jobs (BullMQ)
-- "Complete Sync" operations (especially fetching 2 years of Square sales) must be offloaded to the **Integrations Domain** worker queue.
-- The UI should poll (or listen via Socket.io) for job completion status to update the "Last Synced" timestamp.
-
-### 2. OAuth Redirects
-- The `redirect_uri` must be strictly allow-listed in the provider's developer console.
-- **Dev/Prod Parity:** We need separate OAuth apps (Client IDs) for `localhost` development vs. Production `sous.tools`.
-  - *Config:* Managed via `@sous/config` (`SQUARE_CLIENT_ID`, `GOOGLE_CLIENT_ID`).
-
-### 3. Security
-- Tokens must **NEVER** be exposed to the frontend.
-- The "Manage" view should only show metadata (e.g., "Connected as: Conar Welsh"), never the access token itself.
+```typescript
+// IntegrationConfiguration
+{
+  id: string;
+  organizationId: string;
+  provider: 'SQUARE' | 'GOOGLE' | 'TOAST';
+  status: 'ACTIVE' | 'ERROR' | 'EXPIRED';
+  config: EncryptedJSON; // Stores tokens/metadata
+  lastSyncedAt: Date;
+}
+```
 
 ## User Experience (UX) Flow
 
-1. **Discovery:** User visits "Admin > Integrations".
-2. **Connect:** User clicks "Connect" on Square.
-3. **Auth:** User logs in to Square in a popup and grants permissions.
-4. **Success:** Popup closes, Square card turns Green.
-5. **Configuration:** User clicks "Manage" -> Clicks "Sync Catalog" to populate their POS menu in Sous.
-6. **Confirmation:** Toast notification: "Catalog sync started. We'll notify you when it's ready."
+1. **Discovery:** User navigates to Admin > Integrations.
+2. **Connection:** Click "Connect" on Square card -> OAuth Flow -> Success Toast.
+3. **Initial Sync:** User clicks "Manage" -> "Sync Catalog". Progress bar fills.
+4. **Validation:** User navigates to Procurement/Catalog to verify items have appeared.
+5. **Maintenance:** User returns later to "Sync Sales" for a specific missing day if needed.
