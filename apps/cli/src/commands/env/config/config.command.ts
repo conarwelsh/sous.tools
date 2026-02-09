@@ -1,9 +1,6 @@
 import { logger } from '@sous/logger';
 import { SubCommand, CommandRunner, Option } from 'nest-commander';
 import { ConfigAddCommand } from './config-add.command.js';
-import { InfisicalSDK } from '@infisical/sdk';
-import * as path from 'path';
-import * as fs from 'fs';
 
 interface ConfigOptions {
   env?: string;
@@ -20,37 +17,13 @@ export class ConfigCommand extends CommandRunner {
     logger.info(`🔍 Fetching configuration for environment: ${env}...`);
 
     try {
-      const { server: config } = await import('@sous/config');
-      const clientId = process.env.INFISICAL_CLIENT_ID;
-      const clientSecret = process.env.INFISICAL_CLIENT_SECRET;
-      const projectId = process.env.INFISICAL_PROJECT_ID;
+      const { secrets } = await import('@sous/config');
 
-      if (!clientId || !clientSecret || !projectId) {
-        throw new Error(
-          'Missing Infisical bootstrap credentials in @sous/config or .env',
-        );
+      if (!secrets) {
+        throw new Error('Secret manager is only available in server environments');
       }
 
-      const { InfisicalSDK } = await import('@infisical/sdk');
-      const client = new InfisicalSDK();
-      await client.auth().universalAuth.login({ clientId, clientSecret });
-
-      const infisicalEnv =
-        env === 'development' ? 'dev' : env === 'staging' ? 'staging' : 'prod';
-
-      const secrets = await client.secrets().listSecrets({
-        environment: infisicalEnv,
-        projectId,
-      });
-
-      const remoteConfig = secrets.secrets.reduce(
-        (acc: Record<string, string>, s: any) => {
-          acc[s.secretKey] = s.secretValue;
-          return acc;
-        },
-        {},
-      );
-
+      const remoteConfig = await secrets.listSecrets(env);
       logger.info(JSON.stringify(remoteConfig, null, 2));
     } catch (error: any) {
       logger.error(

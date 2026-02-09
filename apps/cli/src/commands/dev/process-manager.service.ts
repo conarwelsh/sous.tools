@@ -8,7 +8,6 @@ import { promisify } from 'util';
 import pm2 from 'pm2';
 import path from 'path';
 import * as fs from 'fs';
-import { InfisicalSDK } from '@infisical/sdk';
 
 const execAsync = promisify(exec);
 

@@ -57,6 +57,11 @@
   - Successfully refactored the core administrative domains in `@sous/web` (Inventory, Procurement, Culinary, Hardware, Presentation) into thin shells.
   - Moved high-fidelity UI logic and dashboard views into the shared **`@sous/features`** package.
   - ACHIEVED Server Component optimization for major route entry points in the web application by offloading client-side hooks and state to Feature components.
+- **Centralized Configuration & Infisical Abstraction (ADR 002):**
+  - Refactored `@sous/config` to act as the exclusive gatekeeper for environment variables and secrets.
+  - Implemented a centralized **`SecretManager`** within `@sous/config` to abstract all interactions with the Infisical SDK.
+  - Removed direct Infisical dependencies from `@sous/cli`, delegating all configuration management (listing and adding secrets) to the config package.
+  - Enforced a clear **Client/Server split** in configuration, ensuring sensitive data never leaks to the frontend.
 - **Shared Ingestion Engine (Spec 013):**
   - Implemented the core components for unstructured data ingestion:
     - **`<DocumentIngestor />`**: Universal multi-source capture interface (Camera/Upload).

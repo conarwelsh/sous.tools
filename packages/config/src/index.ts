@@ -235,4 +235,9 @@ export const getActiveConfig = () => server;
 export const configPromise = Promise.resolve(server);
 export const getConfig = async () => server;
 
+/**
+ * Secret management utility. Only available on server.
+ */
+export const secrets = isServer ? new (require("./secrets.js").SecretManager)() : null;
+
 export { configSchema, brandingConfigSchema, type Config, type BrandingConfig };
