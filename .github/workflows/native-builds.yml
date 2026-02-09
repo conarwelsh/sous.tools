@@ -110,6 +110,7 @@ jobs:
 
   build-os-image:
     needs: build-android-flavors
+    if: false # TODO: Re-enable when KonstaKANG download link is fixed
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
@@ -132,7 +133,7 @@ jobs:
           path: dist/sous-os-rpi4.img
 
   publish-release:
-    needs: [build-wearos, build-android-flavors, build-os-image]
+    needs: [build-wearos, build-android-flavors] # Removed build-os-image dependency
     if: github.ref == 'refs/heads/main'
     runs-on: self-hosted
     steps:
