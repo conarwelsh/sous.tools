@@ -5,7 +5,7 @@ import { ApolloProvider } from "@apollo/client/react";
 import { createApolloClient } from "@sous/client-sdk";
 import { client as config } from "@sous/config";
 
-const apiUrl = config.api.url;
+const apiUrl = config.api.url || "http://localhost:4000";
 console.log("GraphQLProvider: Using API URL:", apiUrl);
 
 const client = createApolloClient({
