@@ -40,6 +40,16 @@ guestfish -a $OUTPUT_IMAGE <<_EOF
   chmod 0644 /system/priv-app/SousSignage/Signage.apk
   # Inject Boot Splash
   upload packages/ui/assets/boot-splash.png /usr/share/plymouth/themes/pix/splash.png
+  
+  # --- WiFi Pre-configuration (Optional) ---
+  # To preset WiFi, we would mount the data partition (usually sda5)
+  # and inject WifiConfigStore.xml or a setup script.
+  # mount /dev/sda5 /data
+  # upload scripts/rpi/WifiConfigStore.xml /data/misc/wifi/WifiConfigStore.xml
+  # chown 1000 1000 /data/misc/wifi/WifiConfigStore.xml
+  # chmod 0600 /data/misc/wifi/WifiConfigStore.xml
+  # umount /data
+
   sync
   umount /
 _EOF
