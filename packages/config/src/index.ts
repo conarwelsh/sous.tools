@@ -37,69 +37,66 @@ function bootstrap() {
 
   try {
     // Only attempt Infisical/Dotenv in local dev where we might have require
-    if (typeof require !== 'undefined') {
+    // This uses a dynamic check to avoid bundler issues in ESM environments
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    if (typeof require !== "undefined") {
       const path = require("path");
       const fs = require("fs");
-      const root = findRoot();
+      
+      // Basic implementation of findRoot since we can't rely on the outer function
+      // recursively in this context without causing potential issues
+      let root = process.cwd(); 
+      // Walk up until we find pnpm-workspace.yaml or hit root
+      // (Simplified for safety in this specific context)
+      while (root !== "/" && !fs.existsSync(path.join(root, "pnpm-workspace.yaml"))) {
+        root = path.dirname(root);
+      }
+      if (root === "/") root = process.cwd(); // Fallback
+
+      // 1. Load bootstrap variables from .env if present
       const envPath = path.join(root, ".env");
       if (fs.existsSync(envPath)) {
         require("dotenv").config({ path: envPath });
       }
-    }
-  } catch (e) {
-    // Ignore bootstrap errors in non-node or restricted environments
-  }
-}
-    
-    // 1. Load bootstrap variables from .env if present
-    const envPath = path.join(root, ".env");
-    if (fs.existsSync(envPath)) {
-      try {
-        _require("dotenv").config({ path: envPath });
-      } catch (e) {
-        // Dotenv might not be available in the runtime (e.g. Next.js server components)
-        // or we are in an environment that doesn't need it.
-      }
-    }
 
-    // 2. Load from Infisical if in development and missing critical keys
-    // We only do this if NOT in a Next.js runtime, as Next handles its own env
-    const isNext = !!process.env.NEXT_RUNTIME;
-    const isDev = process.env.NODE_ENV !== "production";
-    const hasProjectId = !!process.env.INFISICAL_PROJECT_ID;
-    
-    if (!isNext && isDev && !process.env.DATABASE_URL && hasProjectId) {
-      try {
-        const { execSync } = _require("child_process");
-        const projectId = process.env.INFISICAL_PROJECT_ID;
-        const envName = "dev";
-        
-        console.log(`🔐 [@sous/config] Fetching secrets from Infisical (Project: ${projectId}, Env: ${envName})...`);
-        
-        const output = execSync(
-          `infisical export --projectId ${projectId} --env ${envName} --format json`,
-          { 
-            encoding: "utf8", 
-            stdio: ['ignore', 'pipe', 'ignore'],
-            env: { ...process.env }
-          }
-        );
-        
-        const secrets = JSON.parse(output);
-        if (Array.isArray(secrets)) {
-          let count = 0;
-          for (const { key, value } of secrets) {
-            if (!process.env[key]) {
-              process.env[key] = value;
-              count++;
+      // 2. Load from Infisical if in development and missing critical keys
+      // We only do this if NOT in a Next.js runtime, as Next handles its own env
+      const isNext = !!process.env.NEXT_RUNTIME;
+      const hasProjectId = !!process.env.INFISICAL_PROJECT_ID;
+      
+      if (!isNext && !process.env.DATABASE_URL && hasProjectId) {
+        try {
+          const { execSync } = require("child_process");
+          const projectId = process.env.INFISICAL_PROJECT_ID;
+          const envName = "dev";
+          
+          console.log(`🔐 [@sous/config] Fetching secrets from Infisical (Project: ${projectId}, Env: ${envName})...`);
+          
+          const output = execSync(
+            `infisical export --projectId ${projectId} --env ${envName} --format json`,
+            { 
+              encoding: "utf8", 
+              stdio: ["ignore", "pipe", "ignore"],
+              env: { ...process.env }
+            }
+          );
+          
+          const secrets = JSON.parse(output);
+          if (Array.isArray(secrets)) {
+            let count = 0;
+            for (const { key, value } of secrets) {
+              if (!process.env[key]) {
+                process.env[key] = value;
+                count++;
+              }
+            }
+            if (count > 0) {
+              console.log(`✅ [@sous/config] Population complete. Injected ${count} new variables.`);
             }
           }
-          if (count > 0) {
-            console.log(`✅ [@sous/config] Population complete. Injected ${count} new variables.`);
-          }
+        } catch (e) {
+          console.warn("⚠️ [@sous/config] Infisical CLI fetch failed. Ensure CLI is installed and authenticated.");
         }
-      } catch (e: any) {
-        console.warn("⚠️ [@sous/config] Infisical CLI fetch failed. Ensure CLI is installed and authenticated.");
       }
     }
   } catch (e) {
