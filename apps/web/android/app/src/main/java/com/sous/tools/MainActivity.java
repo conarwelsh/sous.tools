@@ -10,6 +10,7 @@ import com.getcapacitor.BridgeWebViewClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import com.sous.tools.SousPresentation;
 
 public class MainActivity extends BridgeActivity {
     @Override
