@@ -30,6 +30,7 @@
   "devDependencies": {
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "4.1.18",
+    "eslint-plugin-console": "^0.0.1",
     "husky": "^9.1.7",
     "prettier": "latest",
     "tailwindcss": "4.1.18",
