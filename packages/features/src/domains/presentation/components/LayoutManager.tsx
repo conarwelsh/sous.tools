@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Card, Button, Input, ScrollView, Logo } from "@sous/ui";
 import { getHttpClient } from "@sous/client-sdk";
-import { LayoutEditor } from "./LayoutEditor";
+import { LayoutDesigner } from "./LayoutDesigner.js";
 
 export const LayoutManager = () => {
   const [templates, setTemplates] = useState<any[]>([]);
@@ -28,13 +28,19 @@ export const LayoutManager = () => {
     fetchTemplates();
   }, []);
 
-  const handleSave = async (data: any) => {
+  const handleSave = async (template: any) => {
     try {
       const http = await getHttpClient();
+      // Ensure we serialize structure back to JSON string for the current API
+      const payload = {
+        ...template,
+        structure: JSON.stringify(template.root)
+      };
+
       if (editingTemplate) {
-        await http.patch(`/presentation/templates/${editingTemplate.id}`, data);
+        await http.patch(`/presentation/templates/${editingTemplate.id}`, payload);
       } else {
-        await http.post("/presentation/templates", data);
+        await http.post("/presentation/templates", payload);
       }
       setEditingTemplate(null);
       setIsCreating(false);
@@ -45,17 +51,22 @@ export const LayoutManager = () => {
   };
 
   if (editingTemplate || isCreating) {
+    const designerTemplate = editingTemplate ? {
+      ...editingTemplate,
+      root: typeof editingTemplate.structure === 'string' 
+        ? JSON.parse(editingTemplate.structure) 
+        : editingTemplate.structure
+    } : undefined;
+
     return (
-      <View className="flex-1 p-6">
-        <LayoutEditor 
-          template={editingTemplate} 
-          onSave={handleSave} 
-          onCancel={() => {
-            setEditingTemplate(null);
-            setIsCreating(false);
-          }} 
-        />
-      </View>
+      <LayoutDesigner 
+        template={designerTemplate} 
+        onSave={handleSave} 
+        onCancel={() => {
+          setEditingTemplate(null);
+          setIsCreating(false);
+        }} 
+      />
     );
   }
 

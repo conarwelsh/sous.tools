@@ -12,11 +12,12 @@ Create a fully functional, user-friendly Drag-and-Drop UI for designing reusable
 
 ### 1. Live Preview Canvas (The Stage)
 
-- **Full Screen Context:** The main editor area occupies the full height/width of its parent container (not necessarily the window).
-- **Root Container:** Always starts with a single "Main Content Area" (Root) that is 100% height/width.
+- **TemplateStage Component:** A shared, standardized container (`<TemplateStage />`) that occupies the full width and height of its parent. It provides the "Full Screen Context" for the LayoutManager, ScreenManager, and LabelManager.
+- **Scroll Awareness:** The stage and all layouts are designed to consume available scrollable space. Containers within the layout can be configured to scroll independently (`overflow: auto`).
 - **Visual WYSIWYG:**
   - Displays the active CSS Grid / Flexbox structure using dashed lines/guides when in "Edit Mode".
-  - **Skeleton Rendering:** Uses the shared `TemplateSkeletonRenderer` logic (Spec 008) to visualize the structure exactly as it will appear in production.
+  - **Skeleton Rendering:** Uses the shared `TemplateSkeletonRenderer` logic (Spec 008) to visualize the structure. 
+  - **Empty States:** When no content is present, the renderer MUST utilize `min-height` and `min-width` (defaulting to sensible values like `100px` or `10%`) to ensure the structure is accurately represented visually.
   - **Interactivity:** Clicking on any container/slot opens a Property Modal/Popover for configuration.
 
 ### 2. Floating Toolbar (Draggable Palette)
