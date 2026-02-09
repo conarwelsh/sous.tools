@@ -159,6 +159,8 @@ jobs:
         run: |
           infisical run --projectId d1c836b9-17fe-49ed-bf45-2966cf2591d2 --env prod -- npx tsx scripts/publish-release.ts
         env:
+          INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
+          INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}
           # Fallback or override if needed, but Infisical should provide them
           CI: true
 
