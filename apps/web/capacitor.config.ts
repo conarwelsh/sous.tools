@@ -19,7 +19,6 @@ const config: CapacitorConfig = {
   appId: "com.sous.tools",
   appName: "sous",
   webDir: "out",
-  bundledWebRuntime: false,
   server: {
     url: serverUrl,
     cleartext: true,

@@ -38,7 +38,6 @@ function AdminContent({ children }: { children: React.ReactNode }) {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    // @ts-expect-error - Necessary for SSR hydration pattern
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
   }, []);

@@ -5,14 +5,17 @@ import { cn } from "../lib/utils";
 
 interface LogoProps extends React.SVGProps<SVGSVGElement> {
   className?: string;
+  size?: number;
 }
 
-export function GoogleDriveLogo({ className, ...props }: LogoProps) {
+export function GoogleDriveLogo({ className, size = 32, ...props }: LogoProps) {
   return (
     <svg
       viewBox="0 0 87.3 78"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("h-8 w-8", className)}
+      width={size}
+      height={size}
+      className={cn(className)}
       {...props}
     >
       <path
@@ -43,12 +46,14 @@ export function GoogleDriveLogo({ className, ...props }: LogoProps) {
   );
 }
 
-export function SquareLogo({ className, ...props }: LogoProps) {
+export function SquareLogo({ className, size = 32, ...props }: LogoProps) {
   return (
     <svg
       viewBox="0 0 100 100"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("h-8 w-8", className)}
+      width={size}
+      height={size}
+      className={cn(className)}
       {...props}
     >
       <path

@@ -10,9 +10,8 @@ try {
   // Fallback
 }
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   distDir: process.env.DIST_DIR || ".next",
-  // @ts-expect-error - Custom property used by dev server
   allowedDevOrigins: [`http://${hostIp}:3000`, `http://localhost:3000`],
   experimental: {
     serverActions: {
@@ -34,7 +33,7 @@ const nextConfig: NextConfig = {
     // Resolve the monorepo root for Turbopack
     root: path.join(__dirname, "../../"),
   },
-  webpack: (config, { isServer }) => {
+  webpack: (config: any, { isServer }: any) => {
     if (!isServer) {
       config.resolve.alias = {
         ...config.resolve.alias,

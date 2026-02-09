@@ -24,16 +24,11 @@ export default function DownloadPage() {
 
   useEffect(() => {
     const ua = window.navigator.userAgent.toLowerCase();
-    // @ts-expect-error - Standard environment detection pattern
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (ua.includes("win")) setUserOS("windows");
-    // @ts-expect-error - Standard environment detection pattern
     else if (ua.includes("mac")) setUserOS("macos");
-    // @ts-expect-error - Standard environment detection pattern
     else if (ua.includes("linux")) setUserOS("linux");
-    // @ts-expect-error - Standard environment detection pattern
     else if (ua.includes("android")) setUserOS("android");
-    // @ts-expect-error - Standard environment detection pattern
     else if (ua.includes("iphone") || ua.includes("ipad")) setUserOS("ios");
   }, []);
 
