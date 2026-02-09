@@ -156,10 +156,9 @@ jobs:
           path: dist/artifacts
 
       - name: Publish to Supabase
-        run: npx tsx scripts/publish-release.ts
+        run: |
+          infisical run --projectId d1c836b9-17fe-49ed-bf45-2966cf2591d2 --env prod -- npx tsx scripts/publish-release.ts
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          # Fallback to dev secrets if not in GitHub Secrets (for local testing/sim)
-          # In prod, ensure these are set in GitHub.
+          # Fallback or override if needed, but Infisical should provide them
+          CI: true
 
