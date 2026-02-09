@@ -18,6 +18,9 @@ importers:
       '@pinojs/redact':
         specifier: ^0.4.0
         version: 0.4.0
+      '@types/mime-types':
+        specifier: ^3.0.1
+        version: 3.0.1
       atomic-sleep:
         specifier: ^1.0.0
         version: 1.0.0
@@ -27,6 +30,9 @@ importers:
       hyphenate-style-name:
         specifier: ^1.1.0
         version: 1.1.0
+      mime-types:
+        specifier: ^3.0.2
+        version: 3.0.2
       on-exit-leak-free:
         specifier: ^2.1.2
         version: 2.1.2
@@ -4900,6 +4906,9 @@ packages:
 
   '@types/methods@1.1.4':
     resolution: {integrity: sha512-ymXWVrDiCxTBE3+RIrrP533E70eA+9qu7zdWoHuOmGujkYtzf4HQF96b8nwHLqhuf4ykX61IGRIB38CC6/sImQ==}
+
+  '@types/mime-types@3.0.1':
+    resolution: {integrity: sha512-xRMsfuQbnRq1Ef+C+RKaENOxXX87Ygl38W1vDfPHRku02TgQr+Qd8iivLtAMcR0KF5/29xlnFihkTlbqFrGOVQ==}
 
   '@types/minimist@1.2.5':
     resolution: {integrity: sha512-hov8bUuiLiyFPGyFPE1lwWhmzYbirOXQNNo40+y3zow8aFVTeyn3VWL0VFFfdNddA8S4Vf0Tc062rzyNr7Paag==}
@@ -17066,6 +17075,8 @@ snapshots:
       '@types/unist': 3.0.3
 
   '@types/methods@1.1.4': {}
+
+  '@types/mime-types@3.0.1': {}
 
   '@types/minimist@1.2.5': {}
 
