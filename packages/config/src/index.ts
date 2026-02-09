@@ -33,12 +33,22 @@ function bootstrap() {
 
   try {
     // Only attempt Infisical/Dotenv in local dev where we might have require
-    // We use a cautious check for require to support both CJS and ESM runtimes
-    if (typeof require !== 'undefined') {
+    // This uses a dynamic check to avoid bundler issues in ESM environments
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    if (typeof require !== "undefined") {
       const path = require("path");
       const fs = require("fs");
-      const root = findRoot();
       
+      // Basic implementation of findRoot since we can't rely on the outer function
+      // recursively in this context without causing potential issues
+      let root = process.cwd(); 
+      // Walk up until we find pnpm-workspace.yaml or hit root
+      // (Simplified for safety in this specific context)
+      while (root !== "/" && !fs.existsSync(path.join(root, "pnpm-workspace.yaml"))) {
+        root = path.dirname(root);
+      }
+      if (root === "/") root = process.cwd(); // Fallback
+
       // 1. Load bootstrap variables from .env if present
       const envPath = path.join(root, ".env");
       if (fs.existsSync(envPath)) {
@@ -46,6 +56,7 @@ function bootstrap() {
       }
 
       // 2. Load from Infisical if in development and missing critical keys
+      // We only do this if NOT in a Next.js runtime, as Next handles its own env
       const isNext = !!process.env.NEXT_RUNTIME;
       const hasProjectId = !!process.env.INFISICAL_PROJECT_ID;
       
@@ -61,7 +72,7 @@ function bootstrap() {
             `infisical export --projectId ${projectId} --env ${envName} --format json`,
             { 
               encoding: "utf8", 
-              stdio: ['ignore', 'pipe', 'ignore'],
+              stdio: ["ignore", "pipe", "ignore"],
               env: { ...process.env }
             }
           );
@@ -79,7 +90,7 @@ function bootstrap() {
               console.log(`✅ [@sous/config] Population complete. Injected ${count} new variables.`);
             }
           }
-        } catch (e: any) {
+        } catch (e) {
           console.warn("⚠️ [@sous/config] Infisical CLI fetch failed. Ensure CLI is installed and authenticated.");
         }
       }
