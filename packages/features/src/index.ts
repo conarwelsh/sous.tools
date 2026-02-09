@@ -11,11 +11,7 @@ export * from "./domains/knowledge/components/KnowledgeSkeleton.js";
 export * from "./domains/knowledge/types.js";
 
 // Presentation Domain
-export * from "./domains/presentation/components/PresentationRenderer.js";
-export * from "./domains/presentation/components/PresentationEditor.js";
-export * from "./domains/presentation/components/LayoutManager.js";
-export * from "./domains/presentation/components/KioskManager.js";
-export * from "./domains/presentation/components/LabelEditor.js";
+export * from "./domains/presentation/index.js";
 export * from "./domains/presentation/types/presentation.types.js";
 
 // POS Domain
@@ -27,9 +23,19 @@ export * from "./domains/kds/index.js";
 // Home Domain
 export * from "./domains/home/components/HomeView.js";
 
+// Culinary Domain
+export * from "./domains/culinary/index.js";
+
+// Procurement Domain
+export * from "./domains/procurement/index.js";
+
+// Inventory Domain
+export * from "./domains/inventory/index.js";
+
 // Hardware Domain
 export * from "./domains/hardware/components/PairingWorkflow.js";
 export * from "./domains/hardware/components/HardwareManager.js";
+export * from "./domains/hardware/components/AddHardwareView.js";
 export * from "./domains/hardware/hooks/useHardware.js";
 
 // Branding Domain
