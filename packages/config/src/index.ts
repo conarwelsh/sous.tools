@@ -14,23 +14,13 @@ function findRoot(): string {
   if (!isServer) return "";
   
   try {
-    // Use eval('require') to prevent bundlers from trying to bundle Node.js modules
-    const _require = eval("require");
-    const path = _require("path");
-    const fs = _require("fs");
-    
-    let current = process.cwd();
-    // Try to go up a few levels to find the monorepo root
-    for (let i = 0; i < 5; i++) {
-      if (fs.existsSync(path.join(current, "pnpm-workspace.yaml"))) return current;
-      const parent = path.dirname(current);
-      if (parent === current) break;
-      current = parent;
-    }
+    const current = process.cwd();
+    // In Node.js, we can use dynamic imports or check the environment
+    // For synchronous root finding, we'll try to use process.cwd() and known patterns
+    return current;
   } catch (e) {
-    // Fallback
+    return "";
   }
-  return process.cwd();
 }
 
 /**
@@ -40,11 +30,26 @@ function findRoot(): string {
 function bootstrap() {
   if (!isServer) return;
 
+  // We'll skip complex bootstrap logic if we can't safely get require
+  // Most production environments (Render/Vercel) provide env vars directly
+  const isDev = process.env.NODE_ENV !== "production";
+  if (!isDev) return;
+
   try {
-    const _require = eval("require");
-    const path = _require("path");
-    const fs = _require("fs");
-    const root = findRoot();
+    // Only attempt Infisical/Dotenv in local dev where we might have require
+    if (typeof require !== 'undefined') {
+      const path = require("path");
+      const fs = require("fs");
+      const root = findRoot();
+      const envPath = path.join(root, ".env");
+      if (fs.existsSync(envPath)) {
+        require("dotenv").config({ path: envPath });
+      }
+    }
+  } catch (e) {
+    // Ignore bootstrap errors in non-node or restricted environments
+  }
+}
     
     // 1. Load bootstrap variables from .env if present
     const envPath = path.join(root, ".env");

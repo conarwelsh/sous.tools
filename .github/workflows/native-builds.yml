@@ -20,7 +20,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -81,7 +81,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -103,7 +103,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wearos-apk
-          path: apps/wearos/build/outputs/apk/debug/apps-wearos-debug.apk
+          path: apps/wearos/build/outputs/apk/debug/wearos-debug.apk
 
   build-os-image:
     needs: build-android-flavors

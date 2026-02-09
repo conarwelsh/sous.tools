@@ -4,8 +4,8 @@ services:
     env: node
     plan: free
     region: ohio
-    buildCommand: pnpm install && turbo run build --filter=@sous/api
-    startCommand: pnpm --filter=@sous/api run start:prod
+    buildCommand: pnpm install && pnpm turbo run build --filter=@sous/api...
+    startCommand: pnpm --filter @sous/api run db:push --force && pnpm --filter @sous/api run start:prod
     envVars:
       - key: NODE_ENV
         value: staging
@@ -16,8 +16,8 @@ services:
     env: node
     plan: free
     region: ohio
-    buildCommand: pnpm install && turbo run build --filter=@sous/api
-    startCommand: pnpm --filter=@sous/api run start:prod
+    buildCommand: pnpm install && pnpm turbo run build --filter=@sous/api...
+    startCommand: pnpm --filter @sous/api run start:prod
     envVars:
       - key: NODE_ENV
         value: production
