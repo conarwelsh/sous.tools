@@ -14,10 +14,13 @@ import {
   ShieldAlert
 } from "lucide-react";
 
+const RELEASES_URL = "https://your-supabase-project.supabase.co/storage/v1/object/public/media/releases/latest/manifest.json"; // Placeholder, needs actual URL
+
 export default function DownloadPage() {
   const [userOS, setUserOS] = useState<
     "windows" | "macos" | "linux" | "android" | "ios" | "unknown"
   >("linux");
+  const [manifest, setManifest] = useState<Record<string, string>>({});
 
   // Determine environment (mocked for frontend, ideally would come from config)
   const env = process.env.NEXT_PUBLIC_APP_ENV || "development";
@@ -30,6 +33,11 @@ export default function DownloadPage() {
     else if (ua.includes("linux")) setUserOS("linux");
     else if (ua.includes("android")) setUserOS("android");
     else if (ua.includes("iphone") || ua.includes("ipad")) setUserOS("ios");
+
+    // Fetch manifest
+    // In a real scenario, you'd put the actual Supabase URL here.
+    // For now, I'll use a placeholder logic or try to fetch if URL was known.
+    // fetch(RELEASES_URL).then(r => r.json()).then(setManifest).catch(console.error);
   }, []);
 
   const platforms = [
@@ -38,16 +46,16 @@ export default function DownloadPage() {
       name: "Windows",
       icon: Laptop,
       ext: ".exe",
-      version: "v0.1.0",
-      url: env === "production" ? "https://releases.sous.tools/latest/sous-terminal.exe" : "https://staging.releases.sous.tools/latest/sous-terminal-rc.exe"
+      version: "Latest",
+      url: manifest.tools || "#" // Use manifest
     },
-    { id: "macos", name: "macOS", icon: Apple, ext: ".dmg", version: "v0.1.0", url: "#" },
+    { id: "macos", name: "macOS", icon: Apple, ext: ".dmg", version: "Latest", url: "#" },
     {
       id: "linux",
       name: "Linux",
       icon: Terminal,
       ext: ".AppImage",
-      version: "v0.1.0",
+      version: "Latest",
       url: "#"
     },
     {
@@ -55,8 +63,8 @@ export default function DownloadPage() {
       name: "Android",
       icon: Smartphone,
       ext: ".apk",
-      version: "v0.1.0",
-      url: env === "production" ? "https://releases.sous.tools/latest/sous-mobile.apk" : "https://staging.releases.sous.tools/latest/sous-mobile-rc.apk"
+      version: "Latest",
+      url: manifest.signage || "#" // Default to signage or specific flavor
     },
   ];
 

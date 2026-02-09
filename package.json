@@ -41,9 +41,11 @@
   "dependencies": {
     "@babel/runtime": "^7.28.6",
     "@pinojs/redact": "^0.4.0",
+    "@types/mime-types": "^3.0.1",
     "atomic-sleep": "^1.0.0",
     "css-in-js-utils": "^3.1.0",
     "hyphenate-style-name": "^1.1.0",
+    "mime-types": "^3.0.2",
     "on-exit-leak-free": "^2.1.2",
     "pino-std-serializers": "^7.1.0",
     "postcss-value-parser": "^4.2.0",

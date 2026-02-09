@@ -120,11 +120,6 @@ jobs:
           name: signage-apk
           path: apps/web/android/app/build/outputs/apk/signage/debug/
 
-      - name: Install Build Tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libguestfs-tools qemu-utils
-
       - name: Build RPi OS Image
         run: ./scripts/build-rpi-os.sh
         env:
@@ -135,3 +130,35 @@ jobs:
         with:
           name: sous-os-rpi4
           path: dist/sous-os-rpi4.img
+
+  publish-release:
+    needs: [build-wearos, build-android-flavors, build-os-image]
+    if: github.ref == 'refs/heads/main'
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist/artifacts
+
+      - name: Publish to Supabase
+        run: npx tsx scripts/publish-release.ts
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          # Fallback to dev secrets if not in GitHub Secrets (for local testing/sim)
+          # In prod, ensure these are set in GitHub.
+
