@@ -5,8 +5,8 @@
   "packageManager": "pnpm@10.27.0",
   "pnpm": {
     "overrides": {
-      "react": "19.2.3",
-      "react-dom": "19.2.3"
+      "react": "^19.2.3",
+      "react-dom": "^19.2.3"
     },
     "onlyBuiltDependencies": [
       "sharp"
