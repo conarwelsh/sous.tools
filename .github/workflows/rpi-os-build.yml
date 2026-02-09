@@ -8,6 +8,7 @@ on:
       - "apps/web/**"
       - "packages/**"
       - "scripts/build-rpi-os.sh"
+      - ".github/workflows/**"
 
 jobs:
   build-signage-apk:
