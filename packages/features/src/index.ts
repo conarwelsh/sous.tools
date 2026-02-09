@@ -26,6 +26,9 @@ export * from "./domains/home/components/HomeView.js";
 // Culinary Domain
 export * from "./domains/culinary/index.js";
 
+// Ingestion Domain
+export * from "./domains/ingestion/index.js";
+
 // Procurement Domain
 export * from "./domains/procurement/index.js";
 
