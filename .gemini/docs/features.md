@@ -16,6 +16,10 @@
   - `@sous/logger`: Centralized logging (Pino).
   - `@sous/ui`: Standard React UI component library (Shadcn pattern).
   - `@sous/features`: Shared business logic and "Organisms".
+- **Shared Ingestion Engine (Spec 013)**:
+  - **Document Capture**: Multi-source support (Camera/Upload) with pre-processing.
+  - **Smart Mapping**: Fuzzy-matching and automated alias learning for catalog items.
+  - **Verification Flow**: Split-screen reviewer for AI extraction results.
 
 ## CLI Capabilities (@sous/cli)
 

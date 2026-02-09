@@ -23,7 +23,7 @@ Instead of using fragile cross-platform bridges like React Native Web, the platf
 
 ## Domains
 
-The platform is organized by **Business Domain** using Nested Strategic Umbrellas:
+The platform is organized by **Business Domain** using Nested Strategic Umbrellas. Following Mandate 14, each domain maintains its own **`.schema.ts`** definition, ensuring strict isolation and modularity.
 
 - **IAM**: Identity, Authentication (JWT), and Multi-tenancy.
 - **Procurement**: Suppliers, Invoices, and Order Management.
@@ -33,6 +33,13 @@ The platform is organized by **Business Domain** using Nested Strategic Umbrella
 - **Presentation**: Digital Menus (Signage), Label Templates, and Layout Editor.
 - **Hardware**: Node Registry, Telemetry, and Remote Configuration.
 - **Integrations**: Adapter-based syncing with third-party providers.
+
+## Component Strategy (The Shell Pattern)
+
+High-level applications (`@sous/web`, `@sous/native`) are treated as thin **Shells** (Mandate 15). All business logic, hooks, and complex UI "Organisms" reside in the **`@sous/features`** package. Apps are responsible only for:
+- Routing and Platform-specific initialization.
+- Mapping Feature components to routes.
+- Handling native platform capabilities (via Capacitor).
 
 ## Constraints
 

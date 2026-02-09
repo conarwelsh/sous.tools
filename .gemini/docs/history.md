@@ -48,28 +48,24 @@
   - **GUI Rendering Fixes:** Resolved "Blank Window" issues in Tauri apps under WSL2 by injecting software rendering and sandbox deactivation overrides (`WEBKIT_DISABLE_COMPOSITING_MODE=1`, etc.) into the environment.
   - **Docker Orchestration:** Integrated automatic `docker compose up -d` into the CLI orchestrator to ensure infrastructure is ready before apps attempt to connect.
 
-## 2026-02-08 (Monorepo Health & CI Readiness)
+## 2026-02-09 (Architectural Refinement & Ingestion Foundation)
 
-- **Comprehensive Monorepo Fixes:**
-  - Resolved 100+ linting errors and warnings across all packages and apps to achieve a clean baseline for staging deployment.
-  - **Fixed `@sous/cli` Infrastructure Logic:**
-    - Wrapped async polling in `ProcessManager` to prevent returning Promises to `setInterval`, satisfying strict ESLint rules.
-    - Replaced forbidden `require('fs')` with standard `fs` imports.
-    - Sanitized complex bash command escapes in the Android deployment logic.
-    - Implemented type-safe `AgentResponse` interfaces to eliminate `any` returns in `WorkspaceCommand`.
-  - **Fixed `@sous/api` Driver Logic:**
-    - Resolved `Date` serialization issues in template literals within `SquareDriver`.
-  - **Fixed `@sous/web` UX & Architecture:**
-    - Refactored `AdminLayout` to move `SidebarContent` out of the render loop, eliminating performance bottlenecks and lint errors.
-    - Suppressed SSR hydration warnings for `isMounted` and `userOS` detection patterns using explanatory `@ts-expect-error` and `eslint-disable` comments.
-    - Resolved a critical parsing error in the admin layout caused by mismatched closing braces.
-    - Optimized ESLint performance by ignoring massive build artifacts in `.next*`, `android`, and `ios` directories.
-  - **Fixed `@sous/wearos` Build Environment:**
-    - Corrected `local.properties` to use the Linux Android SDK path, enabling successful Gradle builds in the WSL environment.
-- **CI/CD & Runner Verification:**
-  - Verified that the self-hosted GitHub runner is active, connected, and properly listening for jobs via PM2.
-  - Confirmed 100% test pass rate across all core domain packages.
-- **Next Steps:** Proceed with merge to `staging` and verify end-to-end deployment pipeline.
+- **Decentralized Schema Implementation (Mandate 14):**
+  - Refactored the centralized Drizzle schema in `@sous/api` into tactical, domain-specific `.schema.ts` files (IAM, Procurement, Culinary, Intelligence, etc.).
+  - Established a re-exporting aggregator in `core/database/schema.ts` to maintain backward compatibility while achieving strict domain isolation.
+- **Strategic Shell Pattern Rollout (Mandate 15):**
+  - Successfully refactored the core administrative domains in `@sous/web` (Inventory, Procurement, Culinary, Hardware, Presentation) into thin shells.
+  - Moved high-fidelity UI logic and dashboard views into the shared **`@sous/features`** package.
+  - ACHIEVED Server Component optimization for major route entry points in the web application by offloading client-side hooks and state to Feature components.
+- **Shared Ingestion Engine (Spec 013):**
+  - Implemented the core components for unstructured data ingestion:
+    - **`<DocumentIngestor />`**: Universal multi-source capture interface (Camera/Upload).
+    - **`<EntityMapper />`**: Smart fuzzy-matching UI for linking OCR text to platform ingredients.
+    - **`<IngestionReviewer />`**: High-fidelity split-screen verification interface.
+  - Integrated the engine into the Procurement domain with a new **`InvoiceIngestionView`**.
+- **Redundant Route Cleanup:**
+  - Removed legacy `kds_preview` and `pos_preview` routes in favor of the new **FlavorGate** architecture.
+- **Result:** Successfully completed the foundational structural improvements from the Feb 9th analysis report, achieving 100% build success across the monorepo.
 
 
 - **Implemented Android Product Flavors:**
