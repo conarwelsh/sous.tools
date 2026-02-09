@@ -11,7 +11,10 @@ import { logger } from '@sous/logger';
 })
 export class EnvCommand extends CommandRunner {
   async run(passedParam: string[]): Promise<void> {
-    if (passedParam.length > 0 && ['config', 'logs', 'branding'].includes(passedParam[0])) {
+    if (
+      passedParam.length > 0 &&
+      ['config', 'logs', 'branding'].includes(passedParam[0])
+    ) {
       return;
     }
     logger.info('Please specify a subcommand: config, logs, branding');

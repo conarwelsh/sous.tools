@@ -9,7 +9,10 @@ export class IntelligenceController {
 
   @Post('recalculate-cost')
   async recalculate(@Body() body: { recipeId: string }, @Req() req: any) {
-    await this.intelligenceService.queueRecipeCosting(body.recipeId, req.user.orgId);
+    await this.intelligenceService.queueRecipeCosting(
+      body.recipeId,
+      req.user.orgId,
+    );
     return { status: 'queued' };
   }
 }

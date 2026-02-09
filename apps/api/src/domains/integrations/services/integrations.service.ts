@@ -1,22 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { DatabaseService } from '../../core/database/database.service.js';
 import { integrationConfigs } from '../../core/database/schema.js';
 import { eq, and } from 'drizzle-orm';
+import { DriverFactory } from '../drivers/driver.factory.js';
 
 @Injectable()
 export class IntegrationsService {
-  constructor(private readonly dbService: DatabaseService) {}
+  constructor(
+    @Inject(DatabaseService) private readonly dbService: DatabaseService,
+    private readonly driverFactory: DriverFactory,
+  ) {}
 
   async getIntegration(organizationId: string, provider: string) {
     return this.dbService.db.query.integrationConfigs.findFirst({
-      where: (ic) => and(eq(ic.organizationId, organizationId), eq(ic.provider, provider)),
+      where: (ic) =>
+        and(eq(ic.organizationId, organizationId), eq(ic.provider, provider)),
     });
   }
 
   async connect(organizationId: string, provider: string, credentials: any) {
     // Encrypt credentials here (Mocking for now)
-    const encrypted = JSON.stringify(credentials); 
-    
+    const encrypted = JSON.stringify(credentials);
+
     await this.dbService.db.insert(integrationConfigs).values({
       organizationId,
       provider,
@@ -29,15 +34,17 @@ export class IntegrationsService {
     const config = await this.getIntegration(organizationId, provider);
     if (!config) throw new Error('Integration not found');
 
-    // Factory Logic
-    if (provider === 'square') {
-      return this.syncSquare(config);
-    }
-    return { status: 'unknown_provider' };
-  }
+    const credentials = JSON.parse(config.encryptedCredentials);
+    const driver = this.driverFactory.getPOSDriver(provider, credentials);
 
-  private async syncSquare(config: any) {
-    // Mock Square Driver
-    return { status: 'synced', sales: 100 };
+    if (provider === 'square') {
+      const sales = await driver.fetchSales(
+        new Date(Date.now() - 24 * 60 * 60 * 1000),
+        new Date(),
+      );
+      return { status: 'synced', salesCount: sales.length };
+    }
+
+    return { status: 'unknown_provider' };
   }
 }

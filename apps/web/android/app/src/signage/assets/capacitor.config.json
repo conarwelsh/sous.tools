@@ -1,0 +1,9 @@
+{
+	"appId": "com.sous.tools",
+	"appName": "sous",
+	"webDir": "out",
+	"server": {
+		"url": "http://localhost:3000/signage/default",
+		"cleartext": true
+	}
+}

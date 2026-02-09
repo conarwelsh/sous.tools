@@ -30,7 +30,7 @@ export class CulinaryController {
     const { ingredients, ...recipeData } = body;
     return this.culinaryService.createRecipe(
       { ...recipeData, organizationId: req.user.organizationId },
-      ingredients || []
+      ingredients || [],
     );
   }
 }

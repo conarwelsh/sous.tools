@@ -1,24 +1,13 @@
-@import "tailwindcss";
+@import "../../../../packages/ui/src/styles.css";
 @plugin "@tailwindcss/typography";
 
-@source "../../../..";
+@source "../../../../packages/features/src/**/*.{ts,tsx}";
+@source "../../../../packages/ui/src/**/*.{ts,tsx}";
 
 @theme {
   --font-brand: var(--font-brand);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
-}
-
-:root {
-  --background: #09090b;
-  --foreground: #fafafa;
-}
-
-body {
-  background-color: #09090b;
-  color: #fafafa;
-  margin: 0;
-  padding: 0;
 }
 
 @keyframes draw {

@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "version": "1.0",
+  "name": "sous.tools - Dev Theme",
+  "theme": {
+    "images": {
+      "theme_frame": "images/theme_frame.png",
+      "theme_toolbar": "images/theme_toolbar.png",
+      "theme_tab_background": "images/theme_tab_background.png",
+      "theme_ntp_background": "images/theme_ntp_background.png"
+    },
+    "colors": {
+      "frame": [10, 10, 10],
+      "toolbar": [23, 23, 23],
+      "ntp_text": [255, 255, 255],
+      "ntp_link": [14, 165, 233],
+      "ntp_section": [23, 23, 23],
+      "button_background": [14, 165, 233],
+      "ntp_background": [10, 10, 10],
+      "frame_inactive": [23, 23, 23],
+      "frame_incognito": [10, 10, 10],
+      "frame_incognito_inactive": [23, 23, 23],
+      "background_tab": [23, 23, 23],
+      "background_tab_inactive": [10, 10, 10],
+      "background_tab_incognito": [23, 23, 23],
+      "background_tab_incognito_inactive": [10, 10, 10],
+      "tab_text": [255, 255, 255],
+      "tab_background_text": [156, 163, 175],
+      "bookmark_text": [255, 255, 255]
+    },
+    "tints": {
+      "buttons": [0.6, 0.5, 0.5]
+    },
+    "properties": {
+      "ntp_background_alignment": "bottom",
+      "ntp_background_repeat": "no-repeat"
+    }
+  }
+}

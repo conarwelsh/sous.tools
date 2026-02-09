@@ -1,0 +1,15 @@
+themes {
+    sous-tools {
+        fg "#4cc9f0"
+        bg "#0f172a"
+        black "#1e293b"
+        red "#f43f5e"
+        green "#10b981"
+        yellow "#f59e0b"
+        blue "#2563eb"
+        magenta "#f72585"
+        cyan "#4cc9f0"
+        white "#f8fafc"
+        orange "#f97316"
+    }
+}

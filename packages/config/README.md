@@ -3,25 +3,34 @@
 The centralized configuration and environment management package.
 
 ## Responsibilities
+
 - **Single Source of Truth**: Sole package allowed to access `process.env`.
 - **Validation**: Enforces runtime safety using Zod schemas.
-- **Secret Management**: Integrates with Infisical for secure variable injection.
+- **Environment Driven**: Relies on external injection (Infisical, Vercel, etc.) rather than manual fetching.
 
 ## Functionality List
+
 - [x] Zod-validated configuration schema.
-- [x] Environment-specific defaults (dev, test, production).
-- [x] Infisical SDK v4 integration.
+- [x] Static exports for `server` (secrets) and `client` (public only).
+- [x] Zero-dependency runtime (no manual SDK fetching).
 
 ## Installation & Setup
-1. Requires Infisical CLI for secret injection.
+
+1. Requires secrets to be injected into the environment (e.g., via `infisical run`).
 2. `pnpm install`.
-3. Use `sous config` to manage values.
 
 ## Usage
+
 ```typescript
-import { localConfig } from '@sous/config';
-console.log(localConfig.api.port); // Type-safe access
+// Server-side (includes secrets)
+import { server } from "@sous/config";
+console.log(server.db.url);
+
+// Client-side (public variables only)
+import { client } from "@sous/config";
+console.log(client.api.url);
 ```
 
 ## Related ADRs
+
 - [ADR 002: Centralized Configuration Strategy](../../.gemini/docs/ADRs/002-config-package-strategy.md)

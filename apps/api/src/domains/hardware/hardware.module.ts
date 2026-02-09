@@ -5,10 +5,19 @@ import { HardwareController } from './controllers/hardware.controller.js';
 import { HardwareResolver } from './resolvers/hardware.resolver.js';
 import { CoreModule } from '../core/core.module.js';
 import { RealtimeModule } from '../realtime/realtime.module.js';
+import { PubSub } from 'graphql-subscriptions';
 
 @Module({
   imports: [CoreModule, RealtimeModule],
-  providers: [HardwareService, RemoteConfigService, HardwareResolver],
+  providers: [
+    HardwareService,
+    RemoteConfigService,
+    HardwareResolver,
+    {
+      provide: 'PUB_SUB',
+      useValue: new PubSub(),
+    },
+  ],
   controllers: [HardwareController],
   exports: [HardwareService, RemoteConfigService],
 })

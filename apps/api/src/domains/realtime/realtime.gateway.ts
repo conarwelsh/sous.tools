@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -34,13 +35,13 @@ export class RealtimeGateway
   async handleConnection(client: Socket) {
     try {
       const auth = client.handshake.auth;
-      
+
       // 1. Hardware Connection
       if (auth.hardwareId) {
         client.data.hardwareId = auth.hardwareId;
         await client.join(`hardware:${auth.hardwareId}`);
         logger.info(`📟 Hardware node connected: ${auth.hardwareId}`);
-        
+
         // Push current assignment if exists
         await this.pushCurrentAssignment(auth.hardwareId);
         return;
@@ -76,73 +77,37 @@ export class RealtimeGateway
     this.server.to(`org:${orgId}`).emit(event, data);
   }
 
-    emitToHardware(hardwareId: string, event: string, data: any) {
-
-      this.server.to(`hardware:${hardwareId}`).emit(event, data);
-
-    }
-
-  
-
-      private async pushCurrentAssignment(hardwareId: string) {
-
-  
-
-        // 1. Find display for this hardware
-
-  
-
-        const display = await this.dbService.db.query.displays.findFirst({
-
-  
-
-          where: eq(displays.hardwareId, hardwareId),
-
-  
-
-        });
-
-  
-
-    
-
-  
-
-        if (!display) return;
-
-  
-
-    
-
-  
-
-        // 2. Find active assignment with template
-
-  
-
-        const assignment = await this.dbService.db.query.displayAssignments.findFirst({
-          where: eq(displayAssignments.displayId, display.id),
-          orderBy: (assignments: any, { desc }: any) => [desc(assignments.createdAt)],
-          with: {
-            template: true,
-          },
-        }) as any;
-
-        if (assignment) {
-          this.emitToHardware(hardwareId, 'presentation:update', {
-            structure: JSON.parse(assignment.template.structure),
-            content: JSON.parse(assignment.content),
-          });
-        }
-
-  
-
-      }
-
-  
-
-    
-
+  emitToHardware(hardwareId: string, event: string, data: any) {
+    this.server.to(`hardware:${hardwareId}`).emit(event, data);
   }
 
-  
+  private async pushCurrentAssignment(hardwareId: string) {
+    // 1. Find display for this hardware
+
+    const display = await this.dbService.db.query.displays.findFirst({
+      where: eq(displays.hardwareId, hardwareId),
+    });
+
+    if (!display) return;
+
+    // 2. Find active assignment with template
+
+    const assignment =
+      (await this.dbService.db.query.displayAssignments.findFirst({
+        where: eq(displayAssignments.displayId, display.id),
+
+        orderBy: (assignments: any, { desc }: any) =>
+          [desc(assignments.createdAt)] as any,
+        with: {
+          template: true,
+        },
+      })) as any;
+
+    if (assignment) {
+      this.emitToHardware(hardwareId, 'presentation:update', {
+        structure: JSON.parse(assignment.template.structure),
+        content: JSON.parse(assignment.content),
+      });
+    }
+  }
+}

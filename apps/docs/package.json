@@ -4,24 +4,25 @@
   "private": true,
   "scripts": {
     "test": "echo \"No tests defined\" && exit 0",
-    "dev": "next dev --webpack",
+    "dev": "next dev --webpack -H 0.0.0.0 -p ${PORT:-3001}",
     "build": "next build --webpack",
     "typecheck": "tsc --noEmit",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.2.4",
     "@sous/config": "workspace:*",
     "@sous/features": "workspace:*",
-    "@tailwindcss/typography": "^0.5.19",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "lucide-react": "^0.563.0",
-    "lucide-react-native": "^0.474.0",
     "next": "16.1.6",
+    "radix-ui": "^1.4.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "react-native-safe-area-context": "^5.6.2",
-    "react-native-svg": "^15.15.2",
-    "react-native-web": "^0.19.13"
+    "tailwind-merge": "^2.6.1",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
@@ -31,7 +32,8 @@
     "@babel/preset-env": "^7.29.0",
     "@babel/preset-flow": "^7.27.1",
     "@babel/preset-react": "^7.28.5",
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/postcss": "^4.1.18",
+    "@tailwindcss/typography": "^0.5.19",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -39,7 +41,7 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
-    "tailwindcss": "^4",
+    "tailwindcss": "^4.1.18",
     "typescript": "^5"
   }
 }

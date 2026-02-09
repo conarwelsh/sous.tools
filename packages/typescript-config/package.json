@@ -8,5 +8,9 @@
     "typecheck": "echo 'Placeholder'",
     "build": "echo 'Placeholder'",
     "lint": "echo 'Placeholder'"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.1.18",
+    "tailwindcss": "4.1.18"
   }
 }

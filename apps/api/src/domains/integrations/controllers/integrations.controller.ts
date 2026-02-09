@@ -8,8 +8,15 @@ export class IntegrationsController {
   constructor(private readonly integrationsService: IntegrationsService) {}
 
   @Post('connect')
-  async connect(@Body() body: { provider: string; credentials: any }, @Req() req: any) {
-    await this.integrationsService.connect(req.user.orgId, body.provider, body.credentials);
+  async connect(
+    @Body() body: { provider: string; credentials: any },
+    @Req() req: any,
+  ) {
+    await this.integrationsService.connect(
+      req.user.orgId,
+      body.provider,
+      body.credentials,
+    );
     return { status: 'connected' };
   }
 

@@ -2,6 +2,9 @@ services:
   traefik:
     image: traefik:v3.1
     container_name: sous-proxy
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
@@ -18,8 +21,9 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: sous-postgres
+    restart: unless-stopped
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       POSTGRES_USER: sous_user
       POSTGRES_PASSWORD: sous_password
@@ -33,14 +37,16 @@ services:
   redis:
     image: redis:7-alpine
     container_name: sous-redis
+    restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "6380:6379"
     labels:
       - "traefik.enable=true"
 
   maildev:
     image: maildev/maildev
     container_name: sous-maildev
+    restart: unless-stopped
     ports:
       - "1080:1080" # Web UI
       - "1025:1025" # SMTP
@@ -52,6 +58,7 @@ services:
   minio:
     image: minio/minio
     container_name: sous-minio
+    restart: unless-stopped
     ports:
       - "9000:9000" # API
       - "9001:9001" # Console
@@ -66,39 +73,43 @@ services:
       - "traefik.http.routers.minio.rule=Host(`storage.sous.localhost`)"
       - "traefik.http.services.minio.loadbalancer.server.port=9001"
 
-  # GitHub Self-Hosted Runner (ADR 007 & ADR 040)
+  adminer:
+    image: adminer:latest
+    container_name: sous-adminer
+    restart: unless-stopped
+    ports:
+      - "8083:8080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.adminer.rule=Host(`db.sous.localhost`)"
+      - "traefik.http.services.adminer.loadbalancer.server.port=8080"
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: sous-redisinsight
+    restart: unless-stopped
+    ports:
+      - "5540:5540"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.redisinsight.rule=Host(`redis.sous.localhost`)"
+      - "traefik.http.services.redisinsight.loadbalancer.server.port=5540"
+
+  # GitHub Self-Hosted Runner
   github-runner:
     image: my-github-runner:latest
     container_name: sous-github-runner
+    restart: unless-stopped
     build:
       context: .
       dockerfile: Dockerfile.runner
     environment:
-      - REPO_URL=${GITHUB_REPO_URL}
-      - RUNNER_TOKEN=${GITHUB_RUNNER_TOKEN}
+      - REPO_URL=${GITHUB_REPO_URL:-}
+      - RUNNER_TOKEN=${GITHUB_RUNNER_TOKEN:-}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    restart: always
-
-  # Ephemeral Ubuntu Sandbox for installation testing (ADR 035)
-  ubuntu-sandbox:
-    image: ubuntu:22.04
-    container_name: sous-ubuntu-sandbox
-    stdin_open: true
-    tty: true
-
-  # Infisical - Local Instance (Commented out per ADR 035 / Phase 1.1)
-  # infisical:
-  #   image: infisical/infisical:latest
-  #   container_name: sous-infisical
-  #   ports:
-  #     - "8081:8080"
-  #   environment:
-  #     - ENCRYPTION_KEY=${ENCRYPTION_KEY}
-  #     - AUTH_SECRET=${AUTH_SECRET}
 
 volumes:
-
   postgres_data:
-
   minio_data:
+  signage_data:

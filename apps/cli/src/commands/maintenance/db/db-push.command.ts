@@ -1,8 +1,8 @@
-import { Command, CommandRunner } from 'nest-commander';
+import { SubCommand, CommandRunner } from 'nest-commander';
 import { execSync } from 'child_process';
 import { logger } from '@sous/logger';
 
-@Command({
+@SubCommand({
   name: 'push',
   description: 'Push schema changes to the database',
 })

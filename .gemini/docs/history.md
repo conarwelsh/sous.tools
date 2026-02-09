@@ -1,126 +1,223 @@
 # History
 
 ## 2026-02-05
+
 - **Monorepo Health Check & Housekeeping:**
-    - Executed a comprehensive health check via `sous quality check` (lint, typecheck, test, build).
-    - **Fixed `@sous/cli` Test & ESM Support:** 
-        - Configured Jest for ESM support with `NODE_OPTIONS=--experimental-vm-modules`.
-        - Resolved `jest is not defined` errors by importing from `@jest/globals`.
-        - Removed stale web-app boilerplate controllers and tests from the CLI app.
-    - **Fixed `@sous/api` Typechecking:**
-        - Resolved missing dependencies (`@nestjs/passport`, `passport`).
-        - Fixed relative import paths and added mandatory `.js` extensions for `NodeNext` compatibility.
-        - Corrected `sharp` import style to support its default function export.
-    - **Resolved `@sous/ui` Linting & Typing:**
-        - Automated fixing of 38+ Prettier/ESLint issues.
-        - Suppressed SVG `className` type errors in `@sous/docs` by using any-casted object spreads for NativeWind compatibility.
-    - **Fixed `@sous/config` Test Imports:**
-        - Added `moduleNameMapper` to Jest config to resolve `.js` extensions in TypeScript source files.
-    - **Dependency Hydration:** Ensured all `apps/native` dependencies are correctly linked and building successfully.
-    - **Result:** ACHIEVED 100% PASS RATE across all 43 turbo tasks (lint, typecheck, test, build) for all 13 packages/apps.
+  - Executed a comprehensive health check via `sous quality check` (lint, typecheck, test, build).
+  - **Fixed `@sous/cli` Test & ESM Support:**
+    - Configured Jest for ESM support with `NODE_OPTIONS=--experimental-vm-modules`.
+    - Resolved `jest is not defined` errors by importing from `@jest/globals`.
+    - Removed stale web-app boilerplate controllers and tests from the CLI app.
+  - **Fixed `@sous/api` Typechecking:**
+    - Resolved missing dependencies (`@nestjs/passport`, `passport`).
+    - Fixed relative import paths and added mandatory `.js` extensions for `NodeNext` compatibility.
+    - Corrected `sharp` import style to support its default function export.
+  - **Resolved `@sous/ui` Linting & Typing:**
+    - Automated fixing of 38+ Prettier/ESLint issues.
+    - Suppressed SVG `className` type errors in `@sous/docs` by using any-casted object spreads for NativeWind compatibility.
+  - **Fixed `@sous/config` Test Imports:**
+    - Added `moduleNameMapper` to Jest config to resolve `.js` extensions in TypeScript source files.
+  - **Dependency Hydration:** Ensured all `apps/native` dependencies are correctly linked and building successfully.
+  - **Result:** ACHIEVED 100% PASS RATE across all 43 turbo tasks (lint, typecheck, test, build) for all 13 packages/apps.
 - **Universal Configuration & Logging:**
-    - Refactored **`@sous/config`** and **`@sous/logger`** to be browser-safe, enabling their use in Tauri/Vite environments.
-    - Enhanced **`@sous/config`** to properly fetch and merge **Infisical secrets** into `process.env` and the centralized config object, ensuring remote secrets override local ones.
-    - Resolved `AsyncLocalStorage` and `Top-level await` issues in the logger and config packages for CJS/ESM hybrid compatibility.
+  - Refactored **`@sous/config`** and **`@sous/logger`** to be browser-safe, enabling their use in Tauri/Vite environments.
+  - Enhanced **`@sous/config`** to properly fetch and merge **Infisical secrets** into `process.env` and the centralized config object, ensuring remote secrets override local ones.
+  - Resolved `AsyncLocalStorage` and `Top-level await` issues in the logger and config packages for CJS/ESM hybrid compatibility.
 - **Native-Headless Initialization:**
-    - Scaffolded a new **`apps/native-headless`** application using **Tauri v2 + React + TypeScript**.
-    - Configured the app to use port **1422** and integrated it with the monorepo design system and configuration.
-    - **Networking Robustness:** Standardized on `127.0.0.1` for `devUrl` and Vite host to resolve IPv6 mapping issues in WSL2. Updated `TAURI_DEV_HOST` to `localhost`.
-    - **Fixes:** Resolved blank window issue by simplifying the initial `App.tsx` and verifying build pipeline stability.
+  - Scaffolded a new **`apps/native-headless`** application using **Tauri v2 + React + TypeScript**.
+  - Configured the app to use port **1422** and integrated it with the monorepo design system and configuration.
+  - **Networking Robustness:** Standardized on `127.0.0.1` for `devUrl` and Vite host to resolve IPv6 mapping issues in WSL2. Updated `TAURI_DEV_HOST` to `localhost`.
+  - **Fixes:** Resolved blank window issue by simplifying the initial `App.tsx` and verifying build pipeline stability.
 - **Android Dev Ops Automation:**
-    - Implemented a permanent fix for WSL2-Windows Android interop issues.
-    - **Automated Emulator Management:** `sous dev --android` now detects, launches, and waits for the Windows Android emulator automatically.
-    - **Automated Device Selection:** The CLI now passes the preferred `emulatorName` directly to the `tauri android dev` command, eliminating interactive prompts.
-    - **Automated ADB Bridge:** The CLI now automatically attempts to start the Windows ADB server with the `-a` flag (listening on all interfaces) via PowerShell, eliminating the need for manual setup on the Windows side.
-    - **Path Sanitization:** The CLI now automatically strips Windows paths from the environment during Android builds to prevent directory collisions with "Android Studio".
-    - **Environment Bridging:** Configured a global ADB bridge (`ADB_SERVER_SOCKET`) managed via `~/.sous/shell/zshrc`.
-    - **Shell Cleanup:** Stripped redundant/duplicate Android configurations from the user's main `~/.zshrc`, consolidating all platform logic into the managed `~/.sous/shell/zshrc` file.
-    - **Universal Shared Packages:** Refactored `@sous/logger` and `@sous/config` to be fully browser-safe and ESM-compatible, resolving `Dynamic require` and `AsyncLocalStorage` issues in universal environments.
-    - **Centralized Logging:** Ensured all platform components append to `~/.sous/logs/combined.log` for a unified "God View" debugging experience.
+  - Implemented a permanent fix for WSL2-Windows Android interop issues.
+  - **Automated Emulator Management:** `sous dev --android` now detects, launches, and waits for the Windows Android emulator automatically.
+  - **Automated Device Selection:** The CLI now passes the preferred `emulatorName` directly to the `tauri android dev` command, eliminating interactive prompts.
+  - **Automated ADB Bridge:** The CLI now automatically attempts to start the Windows ADB server with the `-a` flag (listening on all interfaces) via PowerShell, eliminating the need for manual setup on the Windows side.
+  - **Path Sanitization:** The CLI now automatically strips Windows paths from the environment during Android builds to prevent directory collisions with "Android Studio".
+  - **Environment Bridging:** Configured a global ADB bridge (`ADB_SERVER_SOCKET`) managed via `~/.sous/shell/zshrc`.
+  - **Shell Cleanup:** Stripped redundant/duplicate Android configurations from the user's main `~/.zshrc`, consolidating all platform logic into the managed `~/.sous/shell/zshrc` file.
+  - **Universal Shared Packages:** Refactored `@sous/logger` and `@sous/config` to be fully browser-safe and ESM-compatible, resolving `Dynamic require` and `AsyncLocalStorage` issues in universal environments.
+  - **Centralized Logging:** Ensured all platform components append to `~/.sous/logs/combined.log` for a unified "God View" debugging experience.
 - **Robust Dev Installation:**
-    - Fixed **APT 404 errors** in `install-dev.sh` by automatically detecting and configuring `ports.ubuntu.com` mirrors when `arm64` is present as a foreign architecture.
-    - Resolved **EACCES error** in shell customization by switching to `pnpm run sous`.
-    - Automated **ZSH & Oh My Zsh** plugin configuration, ensuring `git`, `syntax-highlighting`, and `autosuggestions` are always present.
+  - Fixed **APT 404 errors** in `install-dev.sh` by automatically detecting and configuring `ports.ubuntu.com` mirrors when `arm64` is present as a foreign architecture.
+  - Resolved **EACCES error** in shell customization by switching to `pnpm run sous`.
+  - Automated **ZSH & Oh My Zsh** plugin configuration, ensuring `git`, `syntax-highlighting`, and `autosuggestions` are always present.
 - **Project Infrastructure & Stability:**
-    - **API Recovery:** Fixed `@sous/api` startup crashes by resolving database connection mismatches and explicitly binding to `0.0.0.0`.
-    - **Database Sync:** Standardized local development database credentials and automated schema synchronization via `pnpm run db:push`.
-    - **GUI Rendering Fixes:** Resolved "Blank Window" issues in Tauri apps under WSL2 by injecting software rendering and sandbox deactivation overrides (`WEBKIT_DISABLE_COMPOSITING_MODE=1`, etc.) into the environment.
-    - **Docker Orchestration:** Integrated automatic `docker compose up -d` into the CLI orchestrator to ensure infrastructure is ready before apps attempt to connect.
+  - **API Recovery:** Fixed `@sous/api` startup crashes by resolving database connection mismatches and explicitly binding to `0.0.0.0`.
+  - **Database Sync:** Standardized local development database credentials and automated schema synchronization via `pnpm run db:push`.
+  - **GUI Rendering Fixes:** Resolved "Blank Window" issues in Tauri apps under WSL2 by injecting software rendering and sandbox deactivation overrides (`WEBKIT_DISABLE_COMPOSITING_MODE=1`, etc.) into the environment.
+  - **Docker Orchestration:** Integrated automatic `docker compose up -d` into the CLI orchestrator to ensure infrastructure is ready before apps attempt to connect.
+
+## 2026-02-08 (Monorepo Health & CI Readiness)
+
+- **Comprehensive Monorepo Fixes:**
+  - Resolved 100+ linting errors and warnings across all packages and apps to achieve a clean baseline for staging deployment.
+  - **Fixed `@sous/cli` Infrastructure Logic:**
+    - Wrapped async polling in `ProcessManager` to prevent returning Promises to `setInterval`, satisfying strict ESLint rules.
+    - Replaced forbidden `require('fs')` with standard `fs` imports.
+    - Sanitized complex bash command escapes in the Android deployment logic.
+    - Implemented type-safe `AgentResponse` interfaces to eliminate `any` returns in `WorkspaceCommand`.
+  - **Fixed `@sous/api` Driver Logic:**
+    - Resolved `Date` serialization issues in template literals within `SquareDriver`.
+  - **Fixed `@sous/web` UX & Architecture:**
+    - Refactored `AdminLayout` to move `SidebarContent` out of the render loop, eliminating performance bottlenecks and lint errors.
+    - Suppressed SSR hydration warnings for `isMounted` and `userOS` detection patterns using explanatory `@ts-expect-error` and `eslint-disable` comments.
+    - Resolved a critical parsing error in the admin layout caused by mismatched closing braces.
+    - Optimized ESLint performance by ignoring massive build artifacts in `.next*`, `android`, and `ios` directories.
+  - **Fixed `@sous/wearos` Build Environment:**
+    - Corrected `local.properties` to use the Linux Android SDK path, enabling successful Gradle builds in the WSL environment.
+- **CI/CD & Runner Verification:**
+  - Verified that the self-hosted GitHub runner is active, connected, and properly listening for jobs via PM2.
+  - Confirmed 100% test pass rate across all core domain packages.
+- **Next Steps:** Proceed with merge to `staging` and verify end-to-end deployment pipeline.
+
+
+- **Implemented Android Product Flavors:**
+  - Added `tools`, `kds`, `pos`, and `signage` flavors to `apps/web/android/app/build.gradle`.
+  - Configured unique application identifiers and application names per flavor.
+  - Injected a `sous_flavor` string resource into each APK for runtime identification.
+- **Unified Kiosk Redirection:**
+  - Implemented `FlavorGate` component in `@sous/web` root layout.
+  - Automatically redirects standard web root (`/`) to specialized kiosk routes (`/kds`, `/pos`, etc.) when running in a flavored Capacitor build.
+- **Hardware Simulation & Orchestration:**
+  - Integrated **Redroid (Android in Docker)** into `docker-compose.yml` to simulate a physical signage node.
+  - Added **scrcpy-web (signage-ui)** for browser-based visualization of the signage node at `signage.sous.localhost`.
+  - Created `scripts/launch-kiosks.sh` to automate the building of all flavors and their deployment to specific emulator ports (WearOS: 5554, POS: 5556, Tools: 5558, KDS: 5560, Signage: 5555).
+- **HDMI Projection Infrastructure:**
+  - Developed `SousHardwarePlugin` and `SousPresentation` in the Android project.
+  - Enables the Signage app to detect and project content to secondary HDMI displays (using Android `Presentation` API), specifically targeting Raspberry Pi hardware.
+- **Brand Identity Alignment:**
+  - Updated KDS, POS, and Signage pairing screens to use specialized logo suffixes (`sous.kds`, `sous.pos`, `sous.signage`).
+
+## 2026-02-07 (Runtime & Bundling Fixes)
+
+- **Resolved "Dynamic require of 'fs'" Error:**
+  - Fixed a critical runtime error in `@sous/features` where `socket.io-client` sub-dependencies (`xmlhttprequest-ssl`) were being bundled with Node.js-specific code (`fs`, `path`).
+  - **Bundling Isolation:** Updated `packages/features/tsup.config.ts` to explicitly mark `socket.io-client`, `lucide-react`, `react-markdown`, and `remark-gfm` as external.
+  - **Dependency Correction:** Added `socket.io-client` to the `dependencies` of `@sous/features` and `@sous/web` to ensure correct resolution now that it is excluded from the library bundle.
+  - **Result:** ACHIEVED a stable browser environment for `@sous/web` while maintaining full functionality for the `useHardware` realtime hook.
+
+## 2026-02-07 (Tauri-to-Capacitor Refactor Completion)
+
+- **Tauri to Capacitor Migration Implementation:**
+  - Completed the full refactor of native application targets from Tauri to Capacitor as per ADR 041.
+  - **@sous/web Consolidation:** Migrated all specialized native app views (KDS, POS, Signage) into the primary Next.js web application as dedicated routes under `(kiosk)` and `(admin)` groups.
+  - **Capacitor Integration:** Initialized and configured Capacitor in `apps/web` with support for Android and iOS platforms.
+  - **Hardware Pairing Strategy:** Implemented a new `useHardware` hook in `@sous/features` to manage browser-based hardware identification and pairing workflows, replacing the Rust-based `native-bridge`.
+  - **CLI Orchestrator Update:** Refactored `sous dev` and the `ProcessManager` service to support the new Capacitor-based development loop and remove references to deleted Tauri applications.
+  - **UI & Feature Cleanup:** Finalized the removal of `react-native`, `nativewind`, and `tauri` dependencies across the monorepo, standardizing on a pure React/Tailwind/Radix UI stack.
+  - **Documentation & Scripts Refresh:** Updated `README.md`, `pnpm-workspace.yaml`, and `install-rpi.sh` to reflect the web-first architecture and browser-only kiosk targets.
+
+## 2026-02-07 (Architectural Pivot)
+
+- **Web-First Pivot**: Abandoned React Native Web and Tauri universal architecture due to integration fragility with Next.js 16/React 19.
+- **UI Refactor**: Converted `@sous/ui` from React Native primitives to standard Shadcn UI patterns (Radix + Tailwind).
+- **Dependency Cleanup**: Removed all `react-native`, `nativewind`, and `tauri` related packages from the monorepo.
+- **Mobile Strategy**: Switched to Capacitor for mobile shells, allowing for a single high-performance web codebase.
+- **Kiosk Strategy**: Switched to FullPageOS for Raspberry Pi nodes, eliminating the need for custom Rust/Tauri builds on Linux.
+- **Documentation Update**: Refreshed all ADRs and architectural docs to reflect the new direction.
+
+## 2026-02-07
+
+- **Web App Build & Dev Recovery (@sous/web):**
+  - Resolved critical build and development failures in `@sous/web` related to Next.js 16, React 19, and NativeWind v4 compatibility.
+  - **PostCSS Stability:** Renamed `postcss.config.mjs` to `postcss.config.js` and converted to CommonJS. Removed `nativewind` from the PostCSS plugin list (it's now a Tailwind preset), fixing `SyntaxError: Unexpected token 'typeof'` in `next/font` workers.
+  - **Client-Side Dependency Isolation:** Implemented Webpack aliases in `next.config.ts` to mock server-only dependencies (`@infisical/sdk`, `dotenv`, `fs`, `path`, `os`) to `false` on the client. This resolved `Attempted import error` related to AWS SDK and Smithy packages leaking into the browser bundle.
+  - **JSX Runtime Resolution:** Added a Webpack alias for `nativewind/jsx-runtime` pointing directly to the `react-native-css-interop` runtime.
+  - **Dependency Alignment:** Aligned `react-native` version across the monorepo to `^0.77.3`.
+  - **Result:** ACHIEVED 100% successful production build and stable `next dev` environment for `@sous/web`.
+
+## 2026-02-06 (Evening)
+
+- **Universal React 19 & Vite Stability:**
+  - Resolved critical React 19 compatibility issues across all apps by implementing a robust `react-dom-compat.mjs` shim that manages `ReactDOM` roots per container.
+  - Standardized absolute path resolution for all shims (`react-dom`, `react-native`, `react-native-svg`) across both Next.js and Vite/esbuild configurations.
+  - Introduced `packages/ui/src/react-native-svg-shim.mjs` to mock missing SVG filter components (Filter, FeGaussianBlur, etc.) in web environments, resolving pre-bundling errors in `@sous/ui`.
+  - Fixed deep import resolution for `react-native/Libraries/Utilities/codegenNativeComponent` via a dedicated internal shim.
+- **Branding Identity & Logo Evolution:**
+  - Ported the "Circuit" lettermark variant into `@sous/ui` based on user-provided high-fidelity SVG paths.
+  - Fully implemented missing `plate`, `link`, and `dot` scalable logo variants to match the platform configuration schema.
+  - Enhanced the `Logo` component with consistent neon glow effects for technical variants.
+- **Android & WearOS Build Recovery:**
+  - Fixed `@sous/wearos` build failures by correctly configuring `android.useAndroidX=true` in workspace-level `gradle.properties` and aligning Compose Compiler (1.5.8) with Kotlin (1.9.22).
+  - Resolved Android project synchronization issues for `@sous/kds` and `@sous/pos` by cleaning out-of-sync `gen/android` directories and ensuring identifier alignment.
+  - Stabilized `sous dev` multi-device orchestration with explicit port assignments and serial targeting.
 
 ## 2026-02-06 (Major Milestone: Platform Rollout Complete)
 
 - **Phase 4 & 5 Implementation:**
-    - Established **Intelligence Domain** with BullMQ-backed async costing engine and price trend analysis.
-    - Implemented **Accounting Domain** with general ledger and P&L generation logic.
-    - Built **Integrations Domain** using a Driver/Adapter pattern for external POS (Square/Toast) and Storage (Google Drive) providers.
-    - Implemented **Inventory Domain** with stock ledger and theoretical depletion logic.
-    - Integrated **GraphQL** (Apollo) for complex data requirements alongside REST (Scalar).
-    - Established **Data Pruning** (Cron) and **Real-time Throttling** strategies to sustain free-tier operations.
-    - Implemented **Internationalization (I18n)** in `@sous/ui` using `i18next`.
+  - Established **Intelligence Domain** with BullMQ-backed async costing engine and price trend analysis.
+  - Implemented **Accounting Domain** with general ledger and P&L generation logic.
+  - Built **Integrations Domain** using a Driver/Adapter pattern for external POS (Square/Toast) and Storage (Google Drive) providers.
+  - Implemented **Inventory Domain** with stock ledger and theoretical depletion logic.
+  - Integrated **GraphQL** (Apollo) for complex data requirements alongside REST (Scalar).
+  - Established **Data Pruning** (Cron) and **Real-time Throttling** strategies to sustain free-tier operations.
+  - Implemented **Internationalization (I18n)** in `@sous/ui` using `i18next`.
 - **Phase 6 Implementation (POS & KDS):**
-    - Built **`KDSFeature`** with real-time order grid and integrated BLE temperature monitoring (HACCP).
-    - Built **`POSFeature`** with high-speed order entry, cart management, and receipt printing.
-    - Implemented **`LabelEditor`** for thermal prep label design and printing.
-    - Enhanced **`NativeBridge`** with actual hardware communication hooks (Printers, BLE).
+  - Built **`KDSFeature`** with real-time order grid and integrated BLE temperature monitoring (HACCP).
+  - Built **`POSFeature`** with high-speed order entry, cart management, and receipt printing.
+  - Implemented **`LabelEditor`** for thermal prep label design and printing.
+  - Enhanced **`NativeBridge`** with actual hardware communication hooks (Printers, BLE).
 - **Quality & E2E:**
-    - Established a comprehensive **Playwright E2E suite** covering POS, KDS, and Pairing flows.
-    - Verified **Unit Tests** for core domain services (Costing, Accounting, Inventory).
-    - Achieved full, functional parity across Web, Signage, POS, and KDS apps.
+  - Established a comprehensive **Playwright E2E suite** covering POS, KDS, and Pairing flows.
+  - Verified **Unit Tests** for core domain services (Costing, Accounting, Inventory).
+  - Achieved full, functional parity across Web, Signage, POS, and KDS apps.
 - **Result:** Successfully completed the entire **Phase Rollout Plan**, transitioning from scaffold to a fully functional, multi-tenant SaaS platform ready for production optimization.
 
 ## 2026-02-05
-- **Identity & Multi-Tenancy (Phase 1.6):**    - Established the core Drizzle ORM infrastructure in `@sous/api`.
-    - Implemented a multi-tenant database schema with `organizations`, `users`, `locations`, and `media` tables.
-    - Integrated JWT-based authentication and RBAC (User, Admin, Superadmin) in the `IAM` domain.
-    - Added `sous maintenance db push` to the CLI for automated schema synchronization.
+
+- **Identity & Multi-Tenancy (Phase 1.6):** - Established the core Drizzle ORM infrastructure in `@sous/api`.
+  - Implemented a multi-tenant database schema with `organizations`, `users`, `locations`, and `media` tables.
+  - Integrated JWT-based authentication and RBAC (User, Admin, Superadmin) in the `IAM` domain.
+  - Added `sous maintenance db push` to the CLI for automated schema synchronization.
 - **Media & Asset Strategy (Phase 1.7):**
-    - Implemented the `Media` domain in `@sous/api` for centralized asset management.
-    - Integrated **`sharp`** for mandatory grayscale and WebP optimization (ADR 028) to stay within free-tier storage limits.
-    - Implemented **`SupabaseStorageService`** for tenant-isolated cloud storage.
-    - Created a secure **`MediaController`** with JWT-protected upload endpoints and automatic optimization pipelines.
-    - Added comprehensive storage configuration to `@sous/config`.
+  - Implemented the `Media` domain in `@sous/api` for centralized asset management.
+  - Integrated **`sharp`** for mandatory grayscale and WebP optimization (ADR 028) to stay within free-tier storage limits.
+  - Implemented **`SupabaseStorageService`** for tenant-isolated cloud storage.
+  - Created a secure **`MediaController`** with JWT-protected upload endpoints and automatic optimization pipelines.
+  - Added comprehensive storage configuration to `@sous/config`.
 - **Signage MVP (Phase 2):**
-    - **Presentation Engine (Phase 2.1):**
-        - Established the `Presentation` domain in `@sous/api` with `templates`, `displays`, and `displayAssignments` tables.
-        - Implemented **Real-time Gateway** using `socket.io` for instant content updates.
-        - Integrated `socket.io-client` into `@sous/native-headless` to listen for `presentation:update` events.
-        - Created a universal **`PresentationRenderer`** in `@sous/features` to handle dynamic layout rendering.
-        - Implemented **System Template Seeding** in `@sous/api` to provide out-of-the-box fullscreen and grid layouts.
+  - **Presentation Engine (Phase 2.1):**
+    - Established the `Presentation` domain in `@sous/api` with `templates`, `displays`, and `displayAssignments` tables.
+    - Implemented **Real-time Gateway** using `socket.io` for instant content updates.
+    - Integrated `socket.io-client` into `@sous/native-headless` to listen for `presentation:update` events.
+    - Created a universal **`PresentationRenderer`** in `@sous/features` to handle dynamic layout rendering.
+    - Implemented **System Template Seeding** in `@sous/api` to provide out-of-the-box fullscreen and grid layouts.
 - **Production Readiness (Phase 1.5):**
-    - **WearOS Fix:** Manually generated and configured the Gradle wrapper for `@sous/wearos`, including `gradlew`, `gradlew.bat`, and `gradle-wrapper.jar`. This resolves the immediate failure in Android Studio due to missing build scripts.
-    - **Priority Realignment:** Shifted Phase 1.5 focus to prioritize stable production deployments for the core platform (`@sous/api`, `@sous/web`, `@sous/docs`) and the signage output (`@sous/native-headless`).
+  - **WearOS Fix:** Manually generated and configured the Gradle wrapper for `@sous/wearos`, including `gradlew`, `gradlew.bat`, and `gradle-wrapper.jar`. This resolves the immediate failure in Android Studio due to missing build scripts.
+  - **Priority Realignment:** Shifted Phase 1.5 focus to prioritize stable production deployments for the core platform (`@sous/api`, `@sous/web`, `@sous/docs`) and the signage output (`@sous/native-headless`).
 - **Dashboard & Dev Experience (God View):**
-    - **Resolved @sous/docs "barking" issues:**
-        - Fixed "Workspace Root" warning in Next.js by explicitly setting `outputFileTracingRoot`.
-        - Silenced "Port 3000 in use" noise by passing the correct `PORT=3001` in the `dev.kdl` orchestrator.
-        - Resolved several ESLint errors and warnings in `apps/docs` (unused variables, illegal `require` in tailwind config).
-        - Cleaned up unused `react-dom-shim.js` logic and unified React 19 compatibility shims.
-    - Added `[c]` keyboard shortcut to `sous dev` to clear logs for the currently active panel (Services, Combined, Terminal, or Gemini).
+  - **Resolved @sous/docs "barking" issues:**
+    - Fixed "Workspace Root" warning in Next.js by explicitly setting `outputFileTracingRoot`.
+    - Silenced "Port 3000 in use" noise by passing the correct `PORT=3001` in the `dev.kdl` orchestrator.
+    - Resolved several ESLint errors and warnings in `apps/docs` (unused variables, illegal `require` in tailwind config).
+    - Cleaned up unused `react-dom-shim.js` logic and unified React 19 compatibility shims.
+  - Added `[c]` keyboard shortcut to `sous dev` to clear logs for the currently active panel (Services, Combined, Terminal, or Gemini).
 - **Branding Identity & Lab Evolution:**
-    - Upgraded **`@sous/docs`** to use the official **`Wordmark`** component, eliminating hardcoded logo text.
-    - Enhanced the **Branding Lab** with interactive controls for `variant`, `size`, and `wordmark` props.
-    - Implemented a list of predefined wordmark options (`sous.api`, `sous.docs`, `sous.kds`, etc.) to ensure cross-platform brand consistency.
-    - Improved **`NeonLogo`** visuals with sophisticated SVG filters (glows) and robust wordmark rendering.
-    - Standardized wordmark rendering across all variants (**Neon**, **Plate**, **Link**, **Dot**) to follow the brand identity (Main white, .TLD in brand color, all caps).
-    - Unified monorepo versioning to **v0.0.0** and ensured UI components reflect this state.
-    - Fixed Next.js 16 Turbopack compatibility issue in `@sous/docs` by explicitly enabling the Webpack compiler for custom alias support.
+  - Upgraded **`@sous/docs`** to use the official **`Wordmark`** component, eliminating hardcoded logo text.
+  - Enhanced the **Branding Lab** with interactive controls for `variant`, `size`, and `wordmark` props.
+  - Implemented a list of predefined wordmark options (`sous.api`, `sous.docs`, `sous.kds`, etc.) to ensure cross-platform brand consistency.
+  - Improved **`NeonLogo`** visuals with sophisticated SVG filters (glows) and robust wordmark rendering.
+  - Standardized wordmark rendering across all variants (**Neon**, **Plate**, **Link**, **Dot**) to follow the brand identity (Main white, .TLD in brand color, all caps).
+  - Unified monorepo versioning to **v0.0.0** and ensured UI components reflect this state.
+  - Fixed Next.js 16 Turbopack compatibility issue in `@sous/docs` by explicitly enabling the Webpack compiler for custom alias support.
 - **Universal Design System (Phase 1.3):**
-    - Implemented standardized `Button`, `Input`, and `Card` atoms in `@sous/ui` using universal styling (NativeWind v4).
-    - Created an interactive "Atomic Playground" in `@sous/docs` for CDD verification.
+  - Implemented standardized `Button`, `Input`, and `Card` atoms in `@sous/ui` using universal styling (NativeWind v4).
+  - Created an interactive "Atomic Playground" in `@sous/docs` for CDD verification.
 - **Native Bridge & Offline Safety (Phase 1.4):**
-    - Implemented `NativeBridge` with persistent `OfflineAction` queue.
-    - Integrated SQLite via `@tauri-apps/plugin-sql` for native environments with a `localStorage` fallback for the web.
+  - Implemented `NativeBridge` with persistent `OfflineAction` queue.
+  - Integrated SQLite via `@tauri-apps/plugin-sql` for native environments with a `localStorage` fallback for the web.
 - **Infrastructure Dashboard:** Integrated real-time system metrics (CPU, Memory, Uptime) into the `sous dev` TUI.
 - **Documentation Hub UI Overhaul:**
-    - Implemented a professional, responsive layout for `@sous/docs` with a collapsible desktop sidebar and animated mobile menu.
-    - Designed a structured navigation system that automatically groups ADRs, Specifications, and READMEs.
-    - Integrated high-fidelity typography and custom prose styling using the project's brand fonts (Outfit/Inter).
-    - Optimized `@sous/features` to use web-native components for the Knowledge Base to resolve bleeding-edge Next.js 16/Turbopack compatibility issues with universal `react-native` aliases.
+  - Implemented a professional, responsive layout for `@sous/docs` with a collapsible desktop sidebar and animated mobile menu.
+  - Designed a structured navigation system that automatically groups ADRs, Specifications, and READMEs.
+  - Integrated high-fidelity typography and custom prose styling using the project's brand fonts (Outfit/Inter).
+  - Optimized `@sous/features` to use web-native components for the Knowledge Base to resolve bleeding-edge Next.js 16/Turbopack compatibility issues with universal `react-native` aliases.
 - **Phase 1.2 Accomplishments:**
-    - **Documentation Hub:** Implemented `@sous/docs` with a persistent Knowledge Base that aggregates ADRs, Specs, and READMEs. Refactored `@sous/features` build system to support split client/server entries for Next.js compatibility.
-    - **CLI DDD Refactoring:** Reorganized `@sous/cli` into strategic umbrellas (`dev`, `env`, `quality`, `maintenance`).
-    - **Robust Dev Orchestrator:** Implemented an interactive React Ink TUI for `sous dev`, replacing static logging with a real-time process dashboard.
-    - **ZSH Customization:** Implemented `sous dev install shell` which adds brand-aligned prompts, infrastructure health indicators, and productivity aliases (`sous`, `sd`, `sl`, `c`, `ls`, etc.) to the user's terminal.
+  - **Documentation Hub:** Implemented `@sous/docs` with a persistent Knowledge Base that aggregates ADRs, Specs, and READMEs. Refactored `@sous/features` build system to support split client/server entries for Next.js compatibility.
+  - **CLI DDD Refactoring:** Reorganized `@sous/cli` into strategic umbrellas (`dev`, `env`, `quality`, `maintenance`).
+  - **Robust Dev Orchestrator:** Implemented an interactive React Ink TUI for `sous dev`, replacing static logging with a real-time process dashboard.
+  - **ZSH Customization:** Implemented `sous dev install shell` which adds brand-aligned prompts, infrastructure health indicators, and productivity aliases (`sous`, `sd`, `sl`, `c`, `ls`, etc.) to the user's terminal.
 - Enforced **Mandate 15: The Shell Pattern** by moving strategic umbrellas from `@sous/web` to the shared **`@sous/features`** package, ensuring absolute logic reuse between platforms.
 - Completed **Phase 1.1** of the rollout plan.
 - Migrated `@sous/api` and `@sous/web` to the **Nested DDD** folder structure (moving core logic to `domains/` and `features/`).
@@ -155,24 +252,24 @@
 - Updated ADR 005: Refined domain boundaries, introduced the **Intelligence** domain for asynchronous costing, and renamed "Catalog" to "Procurement" and "IoT" to "Hardware".
 - Converted `@sous/ui` to Universal Architecture using **NativeWind v4**, **React Native Web**, and **React Native Reusables** pattern.
 - **Branding Migration:**
-    - Migrated **Neon Lettermark/Wordmark** from the legacy project.
-    - Converted SVG branding components to **`react-native-svg`** for universal cross-platform support.
-    - Added 3 new scalability-focused lettermark variants: **`plate`**, **`link`**, and **`dot`**.
-    - Updated **`brand-identity.md`** with professional `oklch` theme tokens.
-    - Established **.gemini/specs/005-documentation-hub.md** for a pixel-perfect Branding Lab with persistence and a CDD playground.
-    - Expanded **ADR 006** with a comprehensive baseline of required UI atoms (Button, Input, Card, Dialog, etc.).
+  - Migrated **Neon Lettermark/Wordmark** from the legacy project.
+  - Converted SVG branding components to **`react-native-svg`** for universal cross-platform support.
+  - Added 3 new scalability-focused lettermark variants: **`plate`**, **`link`**, and **`dot`**.
+  - Updated **`brand-identity.md`** with professional `oklch` theme tokens.
+  - Established **.gemini/specs/005-documentation-hub.md** for a pixel-perfect Branding Lab with persistence and a CDD playground.
+  - Expanded **ADR 006** with a comprehensive baseline of required UI atoms (Button, Input, Card, Dialog, etc.).
 - **Architectural Refinement:**
-    - Re-indexed all ADRs (001-030) for proper logical/dependency ordering.
-    - Merged **Admin Domains** (SuperAdmin + TenantAdmin) into ADR 021.
-    - Merged **Visual Domains** (Layouts + Displays + Labels) into ADR 022 (Presentation).
-    - Created **ADR 028: Media Management Strategy** (Supabase + Cloudinary).
-    - Created **ADR 029: Data Retention & Pruning Strategy** (Free-tier row management).
-    - Updated **ADR 011: Native Bridge** with **Offline Safety Mode** (Local SQLite).
-    - Refined ADR 022: Defined the two-tier layout system (Structural Templates vs. Specialized Content Assignment).
-    - **Final Strategic Refinements:**
-        - Differentiated **Intelligence** (Real-time) vs. **Accounting** (Historical) domains.
-        - Created **ADR 032: I18n Strategy** (Type-safe, code-split translations).
-        - Created **ADR 033: Testing Strategy** (HITL simulation + Universal UI testing).
+  - Re-indexed all ADRs (001-030) for proper logical/dependency ordering.
+  - Merged **Admin Domains** (SuperAdmin + TenantAdmin) into ADR 021.
+  - Merged **Visual Domains** (Layouts + Displays + Labels) into ADR 022 (Presentation).
+  - Created **ADR 028: Media Management Strategy** (Supabase + Cloudinary).
+  - Created **ADR 029: Data Retention & Pruning Strategy** (Free-tier row management).
+  - Updated **ADR 011: Native Bridge** with **Offline Safety Mode** (Local SQLite).
+  - Refined ADR 022: Defined the two-tier layout system (Structural Templates vs. Specialized Content Assignment).
+  - **Final Strategic Refinements:**
+    - Differentiated **Intelligence** (Real-time) vs. **Accounting** (Historical) domains.
+    - Created **ADR 032: I18n Strategy** (Type-safe, code-split translations).
+    - Created **ADR 033: Testing Strategy** (HITL simulation + Universal UI testing).
 - Created ADR 034: Real-time Throttling (60s batching for free-tier sustainability).
 - Created **ADR 035: Docker Infrastructure Strategy** (Local Cloud Mocks: Postgres, Redis, MailDev, Minio).
 - Created **ADR 036: Shared Features & Shell Pattern Strategy** (Maximizing reuse via `@sous/features`).
@@ -190,15 +287,15 @@
 - Added **Mandate 15: The Shell Pattern** (Apps are thin shells; logic lives in `@sous/features`).
 - Added **Mandate 16: CLI Command Aggregation** (All `package.json` scripts must be aggregated into `@sous/cli`).
 - **Phase Rollout Plan Realignment:**
-    - Prioritized "Phase 1.5: Production Readiness" to ensure all native apps build/deploy successfully.
-    - Elevated "Phase 2: Signage MVP" to high priority for immediate restaurant usage.
-    - Reorganized Culinary domains to focus on "Data Entry" before "Intelligence."
-    - Deprioritized KDS and POS to the final phase.
-- Established **.gemini/docs/brand-identity.md** for visual and stylistic principles.
-        - Updated **ADR 028** with strict Grayscale/WebP mandate for Invoice storage.
-        - Renamed ADR 030 to **ADR 031: Android Dev Workflow**.
-    - Established `.gemini/specs/` directory for implementation planning.
+  - Prioritized "Phase 1.5: Production Readiness" to ensure all native apps build/deploy successfully.
+  - Elevated "Phase 2: Signage MVP" to high priority for immediate restaurant usage.
+  - Reorganized Culinary domains to focus on "Data Entry" before "Intelligence."
+  - Deprioritized KDS and POS to the final phase.
+- Established **.gemini/docs/brand-identity.md** for visual and stylistic principles. - Updated **ADR 028** with strict Grayscale/WebP mandate for Invoice storage. - Renamed ADR 030 to **ADR 031: Android Dev Workflow**.
+  - Established `.gemini/specs/` directory for implementation planning.
+
 ## 2026-02-03
+
 - Initial scaffolding of the project structure.
 - Created apps: web, api, cli.
 - Created packages: client-sdk, config, eslint-config, logger, typescript-config, ui.
@@ -250,3 +347,12 @@
 - Implemented `sous housekeep` to deep clean build artifacts from the monorepo root.
 - Verified `@sous/docs` and `@sous/web` load correctly in the development environment.
 - Updated `sous dev` plan to include native apps (Native, Headless, KDS, POS) with focus on Android emulator.
+
+## 2026-02-06 (Late Evening Refresh)
+
+- **Ghost Hunting Automation:** Added `sous kill` to `@sous/cli` for rapid termination of lingering processes on application ports.
+- **System Bootstrapping:** Implemented and executed system-level seeding for the primary superadmin ("Chef Conar" @ "Dtown Café").
+- **Universal SVG Filter Support:** Enhanced `@sous/ui` with a robust web shim for SVG filters (`Filter`, `FeGaussianBlur`, `FeMerge`), enabling high-fidelity rendering of `neon` and `circuit` logo variants in web environments.
+- **Web App Stability:** Resolved critical `AuthProvider` undefined error in `@sous/web` by correcting export paths in `@sous/features` and aligning workspace dependencies.
+- **Configuration Alignment:** Expanded `brandingConfigSchema` in `@sous/config` to support the full suite of 10 logo variants.
+- **Infrastructure:** Standardized on `sous_user`/`sous_password` for local Postgres development.

@@ -1,9 +1,15 @@
-import { Text as RNText } from 'react-native';
-import { cssInterop } from 'react-native-css-interop';
+import * as React from "react";
+import { cn } from "../../lib/utils";
 
-export const Text = RNText;
+export interface TextProps extends React.HTMLAttributes<HTMLSpanElement> {
+  asChild?: boolean;
+}
 
-// @ts-ignore
-cssInterop(Text, {
-  className: 'style',
-});
+const Text = React.forwardRef<HTMLSpanElement, TextProps>(
+  ({ className, ...props }, ref) => {
+    return <span ref={ref} className={cn("", className)} {...props} />;
+  },
+);
+Text.displayName = "Text";
+
+export { Text };

@@ -1,35 +1,14 @@
--- Enable RLS on all tenant-specific tables
-ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE locations ENABLE ROW LEVEL SECURITY;
-ALTER TABLE media ENABLE ROW LEVEL SECURITY;
-ALTER TABLE templates ENABLE ROW LEVEL SECURITY;
-ALTER TABLE displays ENABLE ROW LEVEL SECURITY;
-ALTER TABLE display_assignments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE devices ENABLE ROW LEVEL SECURITY;
-ALTER TABLE telemetry ENABLE ROW LEVEL SECURITY;
-ALTER TABLE reports ENABLE ROW LEVEL SECURITY;
+-- Initial database setup
+-- This script runs when the Postgres container is first created.
 
--- Create policies for Organization isolation
--- These policies assume a session variable 'app.current_org_id' is set by the API
--- Or we use the organization_id column directly if the user is bound to an org.
+-- Add any necessary extensions here
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- For simplicity in development, we'll create policies that check the current_setting('app.current_org_id')
--- The API will need to execute `SET LOCAL app.current_org_id = '...'` in a transaction.
+-- The tables themselves are created by Drizzle via `db:push` or `db:migrate`.
+-- We should NOT attempt to ALTER tables that don't exist yet.
+-- RLS enablement should move to Drizzle or a migration that runs AFTER table creation.
 
-DO $$ 
-DECLARE 
-    t text;
-BEGIN
-    FOR t IN 
-        SELECT table_name 
-        FROM information_schema.columns 
-        WHERE column_name = 'organization_id' 
-        AND table_schema = 'public'
-    LOOP
-        EXECUTE format('CREATE POLICY tenant_isolation_policy ON %I USING (organization_id = (current_setting(''app.current_org_id'', true))::uuid)', t);
-    END LOOP;
-END $$;
-
--- Organizations table special case (id is the org_id)
-CREATE POLICY organization_isolation_policy ON organizations USING (id = (current_setting('app.current_org_id', true))::uuid);
+-- However, if we need to create the 'organizations' table early for some reason (rare with ORMs), we would do it here.
+-- For now, we will leave this empty of schema modifications to prevent the startup crash.
+-- The application code or migrations should handle RLS enablement.

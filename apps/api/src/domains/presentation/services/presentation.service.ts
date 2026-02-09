@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  OnModuleInit,
+  Inject,
+} from '@nestjs/common';
 import { DatabaseService } from '../../core/database/database.service.js';
 import {
   templates,
@@ -11,76 +16,55 @@ import { logger } from '@sous/logger';
 import { RealtimeGateway } from '../../realtime/realtime.gateway.js';
 
 @Injectable()
-export class PresentationService implements OnModuleInit {
+export class PresentationService {
   constructor(
-    private readonly dbService: DatabaseService,
-    private readonly realtimeGateway: RealtimeGateway,
+    @Inject(DatabaseService) private readonly dbService: DatabaseService,
+    @Inject(RealtimeGateway) private readonly realtimeGateway: RealtimeGateway,
   ) {}
 
-  async onModuleInit() {
-    await this.seedSystemTemplates();
+  async seedSystem(orgId: string) {
+    console.log('🌱 Seeding Presentation System Templates...');
+    const systemTemplates = [
+      {
+        name: 'Fullscreen Content',
+        structure: JSON.stringify({
+          layout: 'fullscreen',
+          slots: [{ id: 'main', type: 'any' }],
+        }),
+        isSystem: true,
+        organizationId: orgId,
+      },
+      {
+        name: 'Two Column Grid',
+        structure: JSON.stringify({
+          layout: 'grid-2',
+          slots: [
+            { id: 'left', type: 'any' },
+            { id: 'right', type: 'any' },
+          ],
+        }),
+        isSystem: true,
+        organizationId: orgId,
+      },
+    ];
+
+    for (const t of systemTemplates) {
+      console.log('DEBUG: Inserting template:', t.name);
+      await this.dbService.db.insert(templates).values(t).onConflictDoNothing();
+      console.log('DEBUG: Template inserted.');
+    }
   }
 
-  private async seedSystemTemplates() {
-    // We need a platform-level organization or just a null org for system templates.
-    // For now, we'll just check if any system templates exist.
-    const existing = await this.dbService.db
-      .select()
-      .from(templates)
-      .where(eq(templates.isSystem, true))
-      .limit(1);
-
-    if (existing.length === 0) {
-      logger.info('🌱 Seeding system presentation templates...');
-
-      // Find or create a 'system' organization
-      let systemOrg = await this.dbService.db
-        .select()
-        .from(organizations)
-        .where(eq(organizations.slug, 'system'))
-        .limit(1);
-
-      if (systemOrg.length === 0) {
-        const result = await this.dbService.db
-          .insert(organizations)
-          .values({
-            name: 'System',
-            slug: 'system',
-          })
-          .returning();
-        systemOrg = [result[0]];
-      }
-
-      await this.dbService.db.insert(templates).values([
-        {
-          organizationId: systemOrg[0].id,
-          name: 'Fullscreen Single',
-          description: 'A single fullscreen content slot.',
-          isSystem: true,
-          structure: JSON.stringify({
-            layout: 'fullscreen',
-            config: {},
-            slots: [{ id: 'main', name: 'Main Content', type: 'image' }],
-          }),
-        },
-        {
-          organizationId: systemOrg[0].id,
-          name: 'Two Column Grid',
-          description: 'Side-by-side content slots.',
-          isSystem: true,
-          structure: JSON.stringify({
-            layout: 'grid',
-            config: { columns: 2 },
-            slots: [
-              { id: 'left', name: 'Left Column', type: 'image' },
-              { id: 'right', name: 'Right Column', type: 'menu_list' },
-            ],
-          }),
-        },
-      ]);
-
-      logger.info('✅ System templates seeded');
-    }
+  async seedSample(orgId: string) {
+    logger.info('  └─ Seeding Presentation Sample Data...');
+    // Add sample displays if needed
+    await this.dbService.db
+      .insert(displays)
+      .values({
+        name: 'Main Entrance TV',
+        organizationId: orgId,
+      })
+      .onConflictDoNothing();
   }
 
   // --- Templates ---

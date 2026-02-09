@@ -36,11 +36,12 @@ SOUS_GRAY=$'\\x1b[38;5;244m'
 SOUS_RESET=$'\\x1b[0m'
 
 # Android Environment Bridge (WSL2 -> Windows)
-export WIN_IP=\$(ip route show default | awk '{print \$3}')
-export ADB_SERVER_SOCKET=tcp:\$WIN_IP:5037
-export ANDROID_HOME="\$HOME/Android/Sdk"
-export NDK_HOME="\$ANDROID_HOME/ndk/29.0.13846066"
-export JAVA_HOME="/usr/lib/jvm/java-1.17.0-openjdk-amd64"
+export WIN_IP=$(ip route show default | awk '{print $3}')
+export ADBHOST=$WIN_IP
+export ADB_SERVER_SOCKET=tcp:$WIN_IP:5037
+export ANDROID_HOME="$HOME/Android/Sdk"
+export NDK_HOME="$ANDROID_HOME/ndk/28.0.12674011"
+export JAVA_HOME="/usr/lib/jvm/java-21-openjdk-amd64"
 export TAURI_DEV_HOST=localhost
 
 # WSL2 GUI Rendering Fixes (MESA/WebKit Overrides)
@@ -49,7 +50,7 @@ export LIBGL_ALWAYS_SOFTWARE=1
 export WEBKIT_FORCE_SANDBOX=0
 
 # Extended PATH for Android Tools
-export PATH="\$PATH:\$ANDROID_HOME/emulator:\$ANDROID_HOME/platform-tools:\$ANDROID_HOME/cmdline-tools/latest/bin:\$ANDROID_HOME/build-tools/35.0.0"
+export PATH="$PATH:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/build-tools/35.0.0"
 
 # Productivity Aliases
 alias sous="pnpm -w sous"
@@ -112,7 +113,11 @@ add-zsh-hook precmd sous_prompt
         let updatedPlugins = false;
 
         requiredPlugins.forEach((plugin) => {
-          if (!mainContent.match(new RegExp(`\\s${plugin}(\\s|\\))|'${plugin}'|"${plugin}"`))) {
+          if (
+            !mainContent.match(
+              new RegExp(`\\s${plugin}(\\s|\\))|'${plugin}'|"${plugin}"`),
+            )
+          ) {
             mainContent = mainContent.replace(
               /plugins=\(([^)]*)\)/,
               `plugins=($1 ${plugin})`,

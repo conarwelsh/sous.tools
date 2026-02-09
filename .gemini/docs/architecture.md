@@ -1,18 +1,31 @@
 # Architecture
 
 ## Overview
-This project is a monorepo managed by TurboRepo.
+
+This project is a monorepo managed by TurboRepo, following a **"Web-First"** architecture.
 
 ## Components
-- **Frontend**: Next.js (@sous/web), React Native (@sous/native), Tauri (@sous/signage, @sous/kds, @sous/pos).
+
+- **Frontend**: Next.js (@sous/web) - The primary application serving all targets (Web, Mobile via Capacitor, and Kiosk via FullPageOS).
+- **Documentation**: Next.js (@sous/docs) - Centralized intelligence hub and component lab.
 - **Backend**: NestJS (@sous/api) - Hybrid REST (Scalar) and GraphQL (Apollo) architecture.
-- **CLI**: NestJS (@sous/cli)
-- **Shared Libraries**: Located in `packages/`.
-- **Templates**: Located in `packages/templates/`. Specifically, `packages/templates/native-app` is the source of truth for all Tauri-based native applications.
+- **CLI**: NestJS (@sous/cli) - Operational orchestrator.
+- **Watch**: Native Wear OS (@sous/wearos) - Specialized hands-free extension.
+- **Shared Libraries**: Standard React/TypeScript packages in `packages/`.
+
+## The "Universal Web" Strategy
+
+Instead of using fragile cross-platform bridges like React Native Web, the platform utilizes a single, high-performance web codebase:
+
+1.  **Web**: Standard Next.js deployment.
+2.  **Mobile**: Capacitor shell wrapping the `@sous/web` build, providing access to native APIs.
+3.  **Kiosk/Signage**: Raspberry Pi nodes running **Android (Emteria/AOSP)**. Development uses **Redroid** in Docker. The app is a specialized Capacitor flavor of `@sous/web`.
 
 ## Domains
+
 The platform is organized by **Business Domain** using Nested Strategic Umbrellas:
-- **IAM**: Identity, Authentication (JWT/Bcrypt), and Multi-tenancy.
+
+- **IAM**: Identity, Authentication (JWT), and Multi-tenancy.
 - **Procurement**: Suppliers, Invoices, and Order Management.
 - **Culinary**: Recipes, Ingredients, and Unit Conversions.
 - **Intelligence**: Async Costing (BullMQ), Price Trends, and Data Pruning.
@@ -22,9 +35,7 @@ The platform is organized by **Business Domain** using Nested Strategic Umbrella
 - **Integrations**: Adapter-based syncing with third-party providers.
 
 ## Constraints
-- **Environment Variables**: Only `@sous/config` can access `process.env`. The use of `.env` files in applications is strictly forbidden; all config (including ports) must be resolved via `@sous/config`.
-- **Logging**: All logging must use `@sous/logger`.
 
-## Application Templates
-- **Native App Template**: The directory `packages/templates/native-app` contains the canonical implementation of a `@sous` native application (Tauri + React).
-    - **Mandate**: Any structural bug fixes, configuration updates, or dependency changes applied to `@sous/native` or derived apps MUST also be applied to this template to ensure future applications inherit these improvements.
+- **Environment Variables**: Only `@sous/config` can access `process.env`. The use of `.env` files in applications is strictly forbidden.
+- **Logging**: All logging must use `@sous/logger`.
+- **UI Architecture**: Standard Shadcn UI patterns (Radix UI + Tailwind CSS).

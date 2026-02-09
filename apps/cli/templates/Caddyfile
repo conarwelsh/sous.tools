@@ -1,0 +1,18 @@
+{
+    email admin@sous.tools
+}
+
+# Web App
+sous.localhost {
+    reverse_proxy localhost:3000
+}
+
+# API
+api.sous.localhost {
+    reverse_proxy localhost:3002
+}
+
+# Docs
+docs.sous.localhost {
+    reverse_proxy localhost:3001
+}

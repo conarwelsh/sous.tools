@@ -18,16 +18,18 @@ export class PruningService {
       const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
 
       // 1. Telemetry Logs (7 days)
-      const telemetryResult = await this.dbService.db.delete(telemetry)
+      const telemetryResult = await this.dbService.db
+        .delete(telemetry)
         .where(lt(telemetry.createdAt, sevenDaysAgo));
-      
+
       // 2. Historical Reports (90 days)
-      const reportsResult = await this.dbService.db.delete(reports)
+      const reportsResult = await this.dbService.db
+        .delete(reports)
         .where(lt(reports.createdAt, ninetyDaysAgo));
 
       logger.info('✅ Data pruning complete.');
     } catch (error) {
-      logger.error('❌ Data pruning failed', error as any);
+      logger.error('❌ Data pruning failed', error);
     }
   }
 }

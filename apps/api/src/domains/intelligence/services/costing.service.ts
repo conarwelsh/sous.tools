@@ -16,8 +16,11 @@ export class CostingService {
   async calculateRecipeCost(recipeId: string, organizationId: string) {
     logger.info(`Calculating cost for recipe ${recipeId}`);
 
-    const recipe = await this.dbService.db.query.recipes.findFirst({
-      where: and(eq(recipes.id, recipeId), eq(recipes.organizationId, organizationId)),
+    const recipe = (await this.dbService.db.query.recipes.findFirst({
+      where: and(
+        eq(recipes.id, recipeId),
+        eq(recipes.organizationId, organizationId),
+      ),
       with: {
         ingredients: {
           with: {
@@ -25,7 +28,7 @@ export class CostingService {
           },
         },
       },
-    }) as any;
+    })) as any;
 
     if (!recipe) {
       throw new Error(`Recipe ${recipeId} not found`);
@@ -36,14 +39,19 @@ export class CostingService {
     for (const ri of recipe.ingredients) {
       const ingredient = ri.ingredient;
       if (!ingredient.currentPrice) {
-        logger.warn(`Ingredient ${ingredient.name} has no price. Skipping in cost calc.`);
+        logger.warn(
+          `Ingredient ${ingredient.name} has no price. Skipping in cost calc.`,
+        );
         continue;
       }
 
       // Detailed Unit Conversion (ADR 018)
-      const conversionFactor = this.getConversionFactor(ri.unit, ingredient.baseUnit);
+      const conversionFactor = this.getConversionFactor(
+        ri.unit,
+        ingredient.baseUnit,
+      );
       const normalizedAmount = ri.amount * conversionFactor;
-      
+
       totalCost += normalizedAmount * ingredient.currentPrice;
     }
 
@@ -63,22 +71,24 @@ export class CostingService {
     if (fromUnit === toUnit) return 1;
 
     const units: Record<string, number> = {
-      'g': 1,
-      'kg': 1000,
-      'oz': 28.35,
-      'lb': 453.59,
-      'ml': 1,
-      'l': 1000,
-      'tsp': 5,
-      'tbsp': 15,
-      'cup': 240,
+      g: 1,
+      kg: 1000,
+      oz: 28.35,
+      lb: 453.59,
+      ml: 1,
+      l: 1000,
+      tsp: 5,
+      tbsp: 15,
+      cup: 240,
     };
 
     const fromFactor = units[fromUnit.toLowerCase()];
     const toFactor = units[toUnit.toLowerCase()];
 
     if (!fromFactor || !toFactor) {
-      logger.warn(`Unknown units for conversion: ${fromUnit} -> ${toUnit}. Assuming 1:1.`);
+      logger.warn(
+        `Unknown units for conversion: ${fromUnit} -> ${toUnit}. Assuming 1:1.`,
+      );
       return 1;
     }
 

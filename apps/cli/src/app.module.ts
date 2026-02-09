@@ -19,9 +19,11 @@ import { DbPushCommand } from './commands/maintenance/db/db-push.command.js';
 import { DbUpCommand } from './commands/maintenance/db/db-up.command.js';
 import { DbDownCommand } from './commands/maintenance/db/db-down.command.js';
 import { DbResetCommand } from './commands/maintenance/db/db-reset.command.js';
+import { SeedCommand } from './commands/maintenance/db/seed.command.js';
 import { BrandingCommand } from './commands/env/branding/branding.command.js';
 import { GenerateCommand } from './commands/generate/generate.command.js';
 import { AppCommand } from './commands/generate/app.command.js';
+import { WorkspaceCommand } from './commands/workspace.command.js';
 import { ProcessManager } from './commands/dev/process-manager.service.js';
 
 @Module({
@@ -50,6 +52,8 @@ import { ProcessManager } from './commands/dev/process-manager.service.js';
     DbUpCommand,
     DbDownCommand,
     DbResetCommand,
+    SeedCommand,
+    WorkspaceCommand,
   ],
 })
 export class AppModule {}

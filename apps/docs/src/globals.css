@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Apply global styles and font variables */
+html {
+  box-sizing: border-box;
+  font-family: var(--font-sans); /* Default to sans-serif font */
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  /* These are set in layout.tsx, but good to have here as well */
+  background-color: var(--bg-zinc-950, #0a0a0a); /* Fallback color */
+  color: var(--text-white, #ffffff); /* Fallback color */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* You can add more global styles here if needed */
+/* For example, specific styles for headings, links, etc. */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-brand); /* Apply brand font to headings */
+}
+
+code, pre {
+  font-family: var(--font-mono); /* Apply monospace font to code */
+}

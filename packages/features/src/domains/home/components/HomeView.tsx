@@ -1,22 +1,25 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Button, View, Text } from '@sous/ui';
+import React from "react";
+import { Button } from "@sous/ui";
 
 export const HomeView = () => {
-  const V = View as any;
-  const T = Text as any;
   return (
-    <V className="flex-1 items-center justify-center bg-background">
-      <T className="text-4xl font-bold text-foreground mb-4">
+    <div className="flex-1 flex flex-col items-center justify-center bg-[#0a0a0a] min-h-screen">
+      <h1 className="text-4xl font-black text-white uppercase tracking-tighter mb-4">
         Welcome to Sous
-      </T>
-      <T className="text-xl text-muted-foreground mb-8">
+      </h1>
+      <p className="text-xl text-zinc-500 mb-8 max-w-md text-center">
         The mission-critical platform for modern kitchens.
-      </T>
-      <Button onPress={() => console.log('Get Started pressed')}>
-        <T>Get Started</T>
+      </p>
+      <Button
+        onClick={() => console.log("Get Started pressed")}
+        className="h-12 px-8 bg-primary"
+      >
+        <span className="text-primary-foreground font-bold uppercase tracking-widest">
+          Get Started
+        </span>
       </Button>
-    </V>
+    </div>
   );
 };

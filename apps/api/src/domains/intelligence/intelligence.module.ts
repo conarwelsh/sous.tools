@@ -24,7 +24,13 @@ import { configPromise } from '@sous/config';
       name: 'intelligence',
     }),
   ],
-  providers: [IntelligenceService, CostingService, PriceTrendService, DataPruningService, IntelligenceProcessor],
+  providers: [
+    IntelligenceService,
+    CostingService,
+    PriceTrendService,
+    DataPruningService,
+    IntelligenceProcessor,
+  ],
   controllers: [IntelligenceController],
   exports: [IntelligenceService, CostingService, PriceTrendService],
 })

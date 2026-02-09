@@ -1,51 +1,147 @@
-import { configSchema, type Config, brandingConfigSchema, type BrandingConfig } from './schema.js';
-import { logger } from '@sous/logger';
-import { config as loadDotenvSync } from 'dotenv';
-import * as path from 'path';
+import {
+  configSchema,
+  type Config,
+  brandingConfigSchema,
+  type BrandingConfig,
+} from "./schema.js";
 
-const isServer = typeof window === 'undefined';
+const isServer = typeof window === "undefined";
 
-// Helper to safely access environment variables in both Node and Browser
-const getEnv = () => {
+/**
+ * Robustly finds the project root by looking for pnpm-workspace.yaml
+ */
+function findRoot(): string {
+  if (!isServer) return "";
+  
+  try {
+    // Use eval('require') to prevent bundlers from trying to bundle Node.js modules
+    const _require = eval("require");
+    const path = _require("path");
+    const fs = _require("fs");
+    
+    let current = process.cwd();
+    // Try to go up a few levels to find the monorepo root
+    for (let i = 0; i < 5; i++) {
+      if (fs.existsSync(path.join(current, "pnpm-workspace.yaml"))) return current;
+      const parent = path.dirname(current);
+      if (parent === current) break;
+      current = parent;
+    }
+  } catch (e) {
+    // Fallback
+  }
+  return process.cwd();
+}
+
+/**
+ * Synchronously loads environment variables from .env and Infisical.
+ * This runs ONLY on the server during module initialization.
+ */
+function bootstrap() {
+  if (!isServer) return;
+
+  try {
+    const _require = eval("require");
+    const path = _require("path");
+    const fs = _require("fs");
+    const root = findRoot();
+    
+    // 1. Load bootstrap variables from .env if present
+    const envPath = path.join(root, ".env");
+    if (fs.existsSync(envPath)) {
+      try {
+        _require("dotenv").config({ path: envPath });
+      } catch (e) {
+        // Dotenv might not be available in the runtime (e.g. Next.js server components)
+        // or we are in an environment that doesn't need it.
+      }
+    }
+
+    // 2. Load from Infisical if in development and missing critical keys
+    // We only do this if NOT in a Next.js runtime, as Next handles its own env
+    const isNext = !!process.env.NEXT_RUNTIME;
+    const isDev = process.env.NODE_ENV !== "production";
+    const hasProjectId = !!process.env.INFISICAL_PROJECT_ID;
+    
+    if (!isNext && isDev && !process.env.DATABASE_URL && hasProjectId) {
+      try {
+        const { execSync } = _require("child_process");
+        const projectId = process.env.INFISICAL_PROJECT_ID;
+        const envName = "dev";
+        
+        console.log(`🔐 [@sous/config] Fetching secrets from Infisical (Project: ${projectId}, Env: ${envName})...`);
+        
+        const output = execSync(
+          `infisical export --projectId ${projectId} --env ${envName} --format json`,
+          { 
+            encoding: "utf8", 
+            stdio: ['ignore', 'pipe', 'ignore'],
+            env: { ...process.env }
+          }
+        );
+        
+        const secrets = JSON.parse(output);
+        if (Array.isArray(secrets)) {
+          let count = 0;
+          for (const { key, value } of secrets) {
+            if (!process.env[key]) {
+              process.env[key] = value;
+              count++;
+            }
+          }
+          if (count > 0) {
+            console.log(`✅ [@sous/config] Population complete. Injected ${count} new variables.`);
+          }
+        }
+      } catch (e: any) {
+        console.warn("⚠️ [@sous/config] Infisical CLI fetch failed. Ensure CLI is installed and authenticated.");
+      }
+    }
+  } catch (e) {
+    console.error("❌ [@sous/config] Critical error during bootstrap:", e);
+  }
+}
+
+/**
+ * Normalizes environment variables from process.env or globalThis.
+ */
+const getEnvVars = () => {
   if (isServer) return process.env;
-  return (globalThis as any).process?.env || {};
+  return (globalThis as any).process?.env || (globalThis as any).__SOUS_ENV__ || {};
 };
 
-export function getLocalConfig(): Config {
-  // Load .env synchronously on server to ensure local overrides work for sync getters
-  if (isServer) {
-    const envPath = path.resolve(process.cwd(), '.env');
-    loadDotenvSync({ path: envPath });
-  }
+/**
+ * Builds the configuration object from current environment variables.
+ */
+function buildConfig(): Config {
+  const envVars = getEnvVars();
+  const env = envVars.NODE_ENV || (envVars as any).MODE || "development";
 
-  const envVars = getEnv();
-  const env = envVars.NODE_ENV || (envVars as any).MODE || 'development';
-  
-  const mergedConfig = {
+  const rawConfig = {
     env,
     api: {
-      port: envVars.API_PORT || (envVars as any).VITE_API_PORT || 4000,
-      url: envVars.API_URL || (envVars as any).VITE_API_URL,
+      port: Number(envVars.PORT_API || envVars.API_PORT || 4000),
+      url: envVars.NEXT_PUBLIC_API_URL || envVars.API_URL || `http://localhost:${envVars.PORT_API || 4000}`,
     },
     web: {
-      port: envVars.WEB_PORT || (envVars as any).VITE_WEB_PORT || 3000,
-      url: envVars.WEB_URL || (envVars as any).VITE_WEB_URL,
+      port: Number(envVars.PORT_WEB || envVars.WEB_PORT || 3000),
+      url: envVars.NEXT_PUBLIC_WEB_URL || envVars.WEB_URL || `http://localhost:${envVars.PORT_WEB || 3000}`,
     },
     docs: {
-      port: envVars.DOCS_PORT || (envVars as any).VITE_DOCS_PORT || 3001,
-      url: envVars.DOCS_URL || (envVars as any).VITE_DOCS_URL,
+      port: Number(envVars.PORT_DOCS || envVars.DOCS_PORT || 3001),
+      url: envVars.DOCS_URL || `http://localhost:${envVars.PORT_DOCS || 3001}`,
     },
     native: {
-      port: envVars.NATIVE_PORT || (envVars as any).VITE_NATIVE_PORT || 1421,
+      port: Number(envVars.NATIVE_PORT || 1421),
     },
     headless: {
-      port: envVars.HEADLESS_PORT || (envVars as any).VITE_HEADLESS_PORT || 1422,
+      port: Number(envVars.HEADLESS_PORT || 1422),
     },
     kds: {
-      port: envVars.KDS_PORT || (envVars as any).VITE_KDS_PORT || 1423,
+      port: Number(envVars.KDS_PORT || 1423),
     },
     pos: {
-      port: envVars.POS_PORT || (envVars as any).VITE_POS_PORT || 1424,
+      port: Number(envVars.POS_PORT || 1424),
     },
     db: {
       url: envVars.DATABASE_URL,
@@ -54,141 +150,74 @@ export function getLocalConfig(): Config {
       url: envVars.REDIS_URL,
     },
     iam: {
-      jwtSecret: envVars.JWT_SECRET || (envVars as any).VITE_JWT_SECRET || 'sous-secret-key',
+      jwtSecret: envVars.JWT_SECRET || "sous-secret-key",
     },
     storage: {
       supabase: {
-        url: envVars.SUPABASE_URL || (envVars as any).VITE_SUPABASE_URL,
-        anonKey: envVars.SUPABASE_ANON_KEY || (envVars as any).VITE_SUPABASE_ANON_KEY,
-        bucket: envVars.SUPABASE_BUCKET || (envVars as any).VITE_SUPABASE_BUCKET || 'media',
+        url: envVars.SUPABASE_URL,
+        anonKey: envVars.SUPABASE_ANON_KEY,
+        bucket: envVars.SUPABASE_BUCKET || "media",
       },
       cloudinary: {
-        cloudName: envVars.CLOUDINARY_CLOUD_NAME || (envVars as any).VITE_CLOUDINARY_CLOUD_NAME,
-        apiKey: envVars.CLOUDINARY_API_KEY || (envVars as any).VITE_CLOUDINARY_API_KEY,
+        cloudName: envVars.CLOUDINARY_CLOUD_NAME,
+        apiKey: envVars.CLOUDINARY_API_KEY,
         apiSecret: envVars.CLOUDINARY_API_SECRET,
       },
     },
   };
 
-  const parsed = configSchema.safeParse(mergedConfig);
+  const parsed = configSchema.safeParse(rawConfig);
+  
   if (!parsed.success) {
-    return mergedConfig as any;
+    if (isServer) {
+      console.error("❌ [@sous/config] Invalid configuration structure:", JSON.stringify(parsed.error.format(), null, 2));
+    }
+    return rawConfig as any;
   }
+
   return parsed.data;
 }
 
-export function getActiveConfig(): Config {
-  return getLocalConfig();
+// 1. Run bootstrap immediately on import (Server only)
+if (isServer) {
+  bootstrap();
 }
 
-export const localConfig = getLocalConfig();
+/**
+ * Server-side configuration. Contains all secrets.
+ * NEVER use this in client-side code.
+ */
+export const server = buildConfig();
 
-export async function getConfig(envOverride?: string): Promise<Config> {
-  const envVars = getEnv();
-  const env = envOverride || envVars.NODE_ENV || (envVars as any).MODE || 'development';
-  const infisicalEnv = env === 'development' ? 'dev' : env === 'staging' ? 'staging' : 'prod';
-  let remoteConfig = {};
-
-  if (isServer && process.env.INFISICAL_CLIENT_ID && process.env.INFISICAL_CLIENT_SECRET && process.env.INFISICAL_PROJECT_ID) {
-    try {
-      const { InfisicalSDK } = await import('@infisical/sdk');
-      const { config: loadDotenv } = await import('dotenv');
-      loadDotenv();
-
-      const client = new InfisicalSDK();
-      
-      await client.auth().universalAuth.login({
-        clientId: process.env.INFISICAL_CLIENT_ID,
-        clientSecret: process.env.INFISICAL_CLIENT_SECRET,
-      });
-      
-      const response = await client.secrets().listSecrets({
-        environment: infisicalEnv,
-        projectId: process.env.INFISICAL_PROJECT_ID,
-      });
-
-      remoteConfig = response.secrets.reduce((acc, secret) => ({
-        ...acc,
-        [secret.secretKey]: secret.secretValue,
-      }), {});
-
-      // Inject secrets into process.env only if not already set (allow local overrides)
-      for (const secret of response.secrets) {
-        if (!process.env[secret.secretKey]) {
-          process.env[secret.secretKey] = secret.secretValue;
-        }
-      }
-
-      logger.info(`🔐 Successfully loaded ${response.secrets.length} secrets from Infisical for ${env}`);
-    } catch (error) {
-      logger.warn(`Failed to load secrets from Infisical for ${env}`, error as any);
+/**
+ * Client-side configuration. Filtered to only include public variables.
+ */
+export const client = (() => {
+  const fullConfig = server;
+  const envVars = getEnvVars();
+  
+  // Extract all keys starting with NEXT_PUBLIC_ or VITE_
+  const publicEnv: Record<string, string> = {};
+  for (const key in envVars) {
+    if (key.startsWith("NEXT_PUBLIC_") || key.startsWith("VITE_")) {
+      publicEnv[key] = envVars[key]!;
     }
   }
 
-  // Re-read env vars in case Infisical injected some
-  const updatedEnvVars = getEnv();
+  // Merge the structured public parts of the config
+  return {
+    env: fullConfig.env,
+    api: fullConfig.api,
+    web: fullConfig.web,
+    docs: fullConfig.docs,
+    ...publicEnv,
+  } as const;
+})();
 
-  const mergedConfig = {
-    env,
-    api: {
-      port: updatedEnvVars.API_PORT || (updatedEnvVars as any).VITE_API_PORT || 4000,
-      url: updatedEnvVars.API_URL || (updatedEnvVars as any).VITE_API_URL,
-    },
-    web: {
-      port: updatedEnvVars.WEB_PORT || (updatedEnvVars as any).VITE_WEB_PORT || 3000,
-      url: updatedEnvVars.WEB_URL || (updatedEnvVars as any).VITE_WEB_URL,
-    },
-    docs: {
-      port: updatedEnvVars.DOCS_PORT || (updatedEnvVars as any).VITE_DOCS_PORT || 3001,
-      url: updatedEnvVars.DOCS_URL || (updatedEnvVars as any).VITE_DOCS_URL,
-    },
-    native: {
-      port: updatedEnvVars.NATIVE_PORT || (updatedEnvVars as any).VITE_NATIVE_PORT || 1421,
-    },
-    headless: {
-      port: updatedEnvVars.HEADLESS_PORT || (updatedEnvVars as any).VITE_HEADLESS_PORT || 1422,
-    },
-    kds: {
-      port: updatedEnvVars.KDS_PORT || (updatedEnvVars as any).VITE_KDS_PORT || 1423,
-    },
-    pos: {
-      port: updatedEnvVars.POS_PORT || (updatedEnvVars as any).VITE_POS_PORT || 1424,
-    },
-    db: {
-      url: updatedEnvVars.DATABASE_URL,
-    },
-    redis: {
-      url: updatedEnvVars.REDIS_URL,
-    },
-    iam: {
-      jwtSecret: updatedEnvVars.JWT_SECRET || (updatedEnvVars as any).VITE_JWT_SECRET || 'sous-secret-key',
-    },
-    storage: {
-      supabase: {
-        url: updatedEnvVars.SUPABASE_URL || (updatedEnvVars as any).VITE_SUPABASE_URL,
-        anonKey: updatedEnvVars.SUPABASE_ANON_KEY || (updatedEnvVars as any).VITE_SUPABASE_ANON_KEY,
-        bucket: updatedEnvVars.SUPABASE_BUCKET || (updatedEnvVars as any).VITE_SUPABASE_BUCKET || 'media',
-      },
-      cloudinary: {
-        cloudName: updatedEnvVars.CLOUDINARY_CLOUD_NAME || (updatedEnvVars as any).VITE_CLOUDINARY_CLOUD_NAME,
-        apiKey: updatedEnvVars.CLOUDINARY_API_KEY || (updatedEnvVars as any).VITE_CLOUDINARY_API_KEY,
-        apiSecret: updatedEnvVars.CLOUDINARY_API_SECRET,
-      },
-    },
-    ...remoteConfig,
-  };
-
-  const parsed = configSchema.safeParse(mergedConfig);
-
-  if (!parsed.success) {
-    logger.error(`❌ Invalid configuration for ${env}: ${JSON.stringify(parsed.error.format())}`);
-    if (isServer) process.exit(1);
-    return mergedConfig as any;
-  }
-
-  return parsed.data;
-}
-
-export const configPromise = getConfig();
+// Helper exports
+export const localConfig = server;
+export const getActiveConfig = () => server;
+export const configPromise = Promise.resolve(server);
+export const getConfig = async () => server;
 
 export { configSchema, brandingConfigSchema, type Config, type BrandingConfig };

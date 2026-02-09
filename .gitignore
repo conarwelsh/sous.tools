@@ -5,11 +5,18 @@ node_modules
 # Build artifacts
 dist
 .next
+.next-*
 .turbo
 build
 out
 *.log
 api.log
+.gradle/
+local.properties
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
 
 # IDEs
 .idea/
@@ -29,3 +36,6 @@ Thumbs.db
 # Temporary files
 .csm_setup_*
 /tmp
+
+
+sous/

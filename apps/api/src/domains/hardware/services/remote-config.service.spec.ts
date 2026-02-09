@@ -36,7 +36,7 @@ describe('RemoteConfigService', () => {
     expect(mockGateway.emitToHardware).toHaveBeenCalledWith(
       'hw1',
       'config:update',
-      { brightness: 100 }
+      { brightness: 100 },
     );
   });
 });

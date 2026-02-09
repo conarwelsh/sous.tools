@@ -1,13 +1,17 @@
 # ADR 007: Deployment & Environment Strategy
 
 ## Status
+
 Proposed
 
 ## Date
+
 2026-02-03
 
 ## Context
+
 We need a clear path from local development to production deployment for the `sous.tools` platform.
+
 - **Domains:**
   - Production: `https://sous.tools`
   - Staging: `https://staging.sous.tools`
@@ -17,6 +21,7 @@ We need a clear path from local development to production deployment for the `so
 ## Decision
 
 ### 1. Development Environment (Local)
+
 - **Goal:** Fast feedback loop, complete local replication of the stack.
 - **Orchestration:** Managed via `@sous/cli` (command: `sous dev`).
 - **Core Stack:**
@@ -28,6 +33,7 @@ We need a clear path from local development to production deployment for the `so
   - **Opt-in:** Native apps (iOS/Android) and auxiliary services are only started if explicitly requested to save resources.
 
 ### 2. Staging Environment
+
 - **Domain:** `https://staging.sous.tools`
 - **Hosting:**
   - **Frontend:** Vercel (`@sous/web`).
@@ -39,6 +45,7 @@ We need a clear path from local development to production deployment for the `so
   - **Release Candidates:** Full native app builds occur here.
 
 ### 3. Production Environment
+
 - **Domain:** `https://sous.tools`
 - **Hosting:**
   - **Frontend:** Vercel.
@@ -47,14 +54,17 @@ We need a clear path from local development to production deployment for the `so
   - **Cache:** Upstash (Serverless Redis).
 
 ### 4. Visual Environment Indicators (MANDATE)
+
 To prevent confusion, **App Icons** must change color based on the active environment.
+
 - **Development:** **Success Color** (Green)
 - **Staging:** **Warning Color** (Yellow/Orange)
 - **Production:** **Brand/Primary Color** (Blue/Theme Default)
 
-*This applies to all applications (Web Favicons, Mobile App Icons, Desktop Tray Icons).*
+_This applies to all applications (Web Favicons, Mobile App Icons, Desktop Tray Icons)._
 
 ## Consequences
+
 - **Positive:**
   - **Safety:** Impossible to mistake Production for Staging due to color coding.
   - **Cost/Performance:** Using specialized providers (Upstash for Prod serverless, Redis Cloud for Staging) optimizes for the specific needs of each environment.
@@ -65,13 +75,15 @@ To prevent confusion, **App Icons** must change color based on the active enviro
 ## Research & Implementation Plan
 
 ### Research
+
 - **Vercel/Render/Supabase:** Selected for their best-in-class DX and generous free tiers.
 - **GitHub Self-Hosted Runners:** Evaluated as the cost-effective solution for heavy ARM64/Native builds that exceed free CI limits.
 
 ### Implementation Plan
+
 1. **Infrastructure as Code:** Document the manual setup of each service until we scale to needing Terraform/Pulumi.
 2. **Environment Synchronization:** Use the Infisical CLI to sync secrets between Vercel, Render, and Supabase.
 3. **CI/CD Workflows:** Create GitHub Actions for:
-    - Web/API deployment (Vercel/Render).
-    - Native build artifact generation (Android/iOS/AppImage).
+   - Web/API deployment (Vercel/Render).
+   - Native build artifact generation (Android/iOS/AppImage).
 4. **Branding Assets:** Create a script in `@sous/ui` that generates environment-specific icons/colors for all apps.

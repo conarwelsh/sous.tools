@@ -30,7 +30,7 @@ export class ProcurementController {
     const { items, ...invoiceData } = body;
     return this.procurementService.createInvoice(
       { ...invoiceData, organizationId: req.user.organizationId },
-      items || []
+      items || [],
     );
   }
 }

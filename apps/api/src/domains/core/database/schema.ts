@@ -129,6 +129,7 @@ export const devices = pgTable('devices', {
   hardwareId: varchar('hardware_id', { length: 255 }).notNull().unique(), // Unique identifier from hardware
   ipAddress: varchar('ip_address', { length: 50 }),
   status: varchar('status', { length: 50 }).default('offline').notNull(),
+  requiredVersion: varchar('required_version', { length: 50 }),
   lastHeartbeat: timestamp('last_heartbeat'),
   metadata: text('metadata'), // JSON string: CPU, Mem, OS details
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -168,7 +169,9 @@ export const reports = pgTable('reports', {
 // 9. Procurement Domain (Phase 3.1)
 export const suppliers = pgTable('suppliers', {
   id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id').references(() => organizations.id).notNull(),
+  organizationId: uuid('organization_id')
+    .references(() => organizations.id)
+    .notNull(),
   name: varchar('name', { length: 255 }).notNull(),
   contactEmail: varchar('contact_email', { length: 255 }),
   contactPhone: varchar('contact_phone', { length: 50 }),
@@ -179,8 +182,12 @@ export const suppliers = pgTable('suppliers', {
 
 export const invoices = pgTable('invoices', {
   id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id').references(() => organizations.id).notNull(),
-  supplierId: uuid('supplier_id').references(() => suppliers.id).notNull(),
+  organizationId: uuid('organization_id')
+    .references(() => organizations.id)
+    .notNull(),
+  supplierId: uuid('supplier_id')
+    .references(() => suppliers.id)
+    .notNull(),
   invoiceNumber: varchar('invoice_number', { length: 100 }).notNull(),
   date: timestamp('date').notNull(),
   totalAmount: integer('total_amount').notNull(), // In cents
@@ -193,7 +200,9 @@ export const invoices = pgTable('invoices', {
 
 export const invoiceItems = pgTable('invoice_items', {
   id: uuid('id').primaryKey().defaultRandom(),
-  invoiceId: uuid('invoice_id').references(() => invoices.id).notNull(),
+  invoiceId: uuid('invoice_id')
+    .references(() => invoices.id)
+    .notNull(),
   description: text('description').notNull(),
   quantity: integer('quantity').notNull(),
   unit: varchar('unit', { length: 50 }).notNull(),
@@ -205,7 +214,9 @@ export const invoiceItems = pgTable('invoice_items', {
 // 10. Culinary Domain (Phase 3.2)
 export const ingredients = pgTable('ingredients', {
   id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id').references(() => organizations.id).notNull(),
+  organizationId: uuid('organization_id')
+    .references(() => organizations.id)
+    .notNull(),
   name: varchar('name', { length: 255 }).notNull(),
   description: text('description'),
   baseUnit: varchar('base_unit', { length: 50 }).notNull(), // e.g. "g", "ml", "each"
@@ -217,7 +228,9 @@ export const ingredients = pgTable('ingredients', {
 
 export const recipes = pgTable('recipes', {
   id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id').references(() => organizations.id).notNull(),
+  organizationId: uuid('organization_id')
+    .references(() => organizations.id)
+    .notNull(),
   name: varchar('name', { length: 255 }).notNull(),
   description: text('description'),
   instructions: text('instructions'),
@@ -230,8 +243,12 @@ export const recipes = pgTable('recipes', {
 
 export const recipeIngredients = pgTable('recipe_ingredients', {
   id: uuid('id').primaryKey().defaultRandom(),
-  recipeId: uuid('recipe_id').references(() => recipes.id).notNull(),
-  ingredientId: uuid('ingredient_id').references(() => ingredients.id).notNull(),
+  recipeId: uuid('recipe_id')
+    .references(() => recipes.id)
+    .notNull(),
+  ingredientId: uuid('ingredient_id')
+    .references(() => ingredients.id)
+    .notNull(),
   amount: integer('amount').notNull(),
   unit: varchar('unit', { length: 50 }).notNull(),
   isBase: boolean('is_base').default(false).notNull(), // For bakers percentages
@@ -240,9 +257,15 @@ export const recipeIngredients = pgTable('recipe_ingredients', {
 // 11. Inventory Domain (Phase 4.2)
 export const stockLedger = pgTable('stock_ledger', {
   id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id').references(() => organizations.id).notNull(),
-  locationId: uuid('location_id').references(() => locations.id).notNull(),
-  ingredientId: uuid('ingredient_id').references(() => ingredients.id).notNull(),
+  organizationId: uuid('organization_id')
+    .references(() => organizations.id)
+    .notNull(),
+  locationId: uuid('location_id')
+    .references(() => locations.id)
+    .notNull(),
+  ingredientId: uuid('ingredient_id')
+    .references(() => ingredients.id)
+    .notNull(),
   amount: integer('amount').notNull(), // Positive for stock-in, negative for stock-out
   type: varchar('type', { length: 50 }).notNull(), // "invoice", "sale", "waste", "adjustment"
   referenceId: uuid('reference_id'), // Link to Invoice ID, Order ID, etc.
@@ -252,8 +275,12 @@ export const stockLedger = pgTable('stock_ledger', {
 // 12. Intelligence Domain (Phase 4.1)
 export const costingSnapshots = pgTable('costing_snapshots', {
   id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id').references(() => organizations.id).notNull(),
-  recipeId: uuid('recipe_id').references(() => recipes.id).notNull(),
+  organizationId: uuid('organization_id')
+    .references(() => organizations.id)
+    .notNull(),
+  recipeId: uuid('recipe_id')
+    .references(() => recipes.id)
+    .notNull(),
   cost: integer('cost').notNull(), // Total cost in cents
   margin: decimal('margin', { precision: 5, scale: 2 }), // Profit margin %
   date: timestamp('date').defaultNow().notNull(),
@@ -261,8 +288,12 @@ export const costingSnapshots = pgTable('costing_snapshots', {
 
 export const priceTrends = pgTable('price_trends', {
   id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id').references(() => organizations.id).notNull(),
-  ingredientId: uuid('ingredient_id').references(() => ingredients.id).notNull(),
+  organizationId: uuid('organization_id')
+    .references(() => organizations.id)
+    .notNull(),
+  ingredientId: uuid('ingredient_id')
+    .references(() => ingredients.id)
+    .notNull(),
   trend: varchar('trend', { length: 20 }).notNull(), // "up", "down", "stable"
   volatilityScore: decimal('volatility_score', { precision: 5, scale: 2 }),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -271,7 +302,9 @@ export const priceTrends = pgTable('price_trends', {
 // 13. Accounting Domain (Phase 4.1)
 export const generalLedger = pgTable('general_ledger', {
   id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id').references(() => organizations.id).notNull(),
+  organizationId: uuid('organization_id')
+    .references(() => organizations.id)
+    .notNull(),
   date: timestamp('date').notNull(),
   type: varchar('type', { length: 50 }).notNull(), // "debit", "credit"
   account: varchar('account', { length: 100 }).notNull(), // "COGS", "Revenue", "Inventory"
@@ -284,7 +317,9 @@ export const generalLedger = pgTable('general_ledger', {
 // 14. Integrations Domain (Phase 5.1)
 export const integrationConfigs = pgTable('integration_configs', {
   id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id').references(() => organizations.id).notNull(),
+  organizationId: uuid('organization_id')
+    .references(() => organizations.id)
+    .notNull(),
   provider: varchar('provider', { length: 50 }).notNull(), // "square", "toast", "google_drive"
   encryptedCredentials: text('encrypted_credentials').notNull(),
   settings: text('settings'), // JSON string
@@ -316,28 +351,34 @@ export const templatesRelations = relations(templates, ({ many }) => ({
   assignments: many(displayAssignments),
 }));
 
-export const displayAssignmentsRelations = relations(displayAssignments, ({ one }) => ({
-  display: one(displays, {
-    fields: [displayAssignments.displayId],
-    references: [displays.id],
+export const displayAssignmentsRelations = relations(
+  displayAssignments,
+  ({ one }) => ({
+    display: one(displays, {
+      fields: [displayAssignments.displayId],
+      references: [displays.id],
+    }),
+    template: one(templates, {
+      fields: [displayAssignments.templateId],
+      references: [templates.id],
+    }),
   }),
-  template: one(templates, {
-    fields: [displayAssignments.templateId],
-    references: [templates.id],
-  }),
-}));
+);
 
 export const recipesRelations = relations(recipes, ({ many }) => ({
   ingredients: many(recipeIngredients),
 }));
 
-export const recipeIngredientsRelations = relations(recipeIngredients, ({ one }) => ({
-  recipe: one(recipes, {
-    fields: [recipeIngredients.recipeId],
-    references: [recipes.id],
+export const recipeIngredientsRelations = relations(
+  recipeIngredients,
+  ({ one }) => ({
+    recipe: one(recipes, {
+      fields: [recipeIngredients.recipeId],
+      references: [recipes.id],
+    }),
+    ingredient: one(ingredients, {
+      fields: [recipeIngredients.ingredientId],
+      references: [ingredients.id],
+    }),
   }),
-  ingredient: one(ingredients, {
-    fields: [recipeIngredients.ingredientId],
-    references: [ingredients.id],
-  }),
-}));
+);

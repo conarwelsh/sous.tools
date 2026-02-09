@@ -22,6 +22,9 @@ export class ConfigAddCommand extends CommandRunner {
       process.exit(1);
     }
 
+    // Use @sous/config to ensure environment is bootstrapped
+    const { server: config } = await import('@sous/config');
+
     const clientId = process.env.INFISICAL_CLIENT_ID;
     const clientSecret = process.env.INFISICAL_CLIENT_SECRET;
     const projectId = process.env.INFISICAL_PROJECT_ID;
@@ -33,6 +36,7 @@ export class ConfigAddCommand extends CommandRunner {
       process.exit(1);
     }
 
+    const { InfisicalSDK } = await import('@infisical/sdk');
     const client = new InfisicalSDK();
     await client.auth().universalAuth.login({
       clientId,
@@ -47,24 +51,26 @@ export class ConfigAddCommand extends CommandRunner {
       logger.info(`🚀 Upserting ${key} to ${env} (${infisicalEnv})...`);
 
       try {
-        // Try to get secret first
         try {
+          // Check if secret exists
           await client.secrets().getSecret({
             environment: infisicalEnv,
             projectId,
             secretName: key,
+            secretPath: '/',
+            type: 'shared' as any,
           });
-          // If found, update
+          // Update existing secret
           await client.secrets().updateSecret(key, {
             environment: infisicalEnv,
             projectId,
             secretValue: value,
             secretPath: '/',
-            type: 'shared' as any, // Cast to any or import SecretType if strictly checked
+            type: 'shared' as any,
           });
           logger.info(`✅ Updated ${key} in ${env}`);
         } catch (e) {
-          // If not found (assuming error means not found), create
+          // Create new secret if not found
           await client.secrets().createSecret(key, {
             environment: infisicalEnv,
             projectId,
@@ -75,9 +81,12 @@ export class ConfigAddCommand extends CommandRunner {
           logger.info(`✅ Created ${key} in ${env}`);
         }
       } catch (error) {
-        logger.error(error, `❌ Failed for ${env}`);
+        logger.error(`❌ Failed for ${env}: ${error}`);
       }
     }
+
+    // Force exit to prevent hanging
+    process.exit(0);
   }
 
   @Option({

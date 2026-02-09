@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { Book, Lightbulb, FileText } from 'lucide-react';
-import { type DocFile } from '../services/knowledge.service';
+import React from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Book, Lightbulb, FileText } from "lucide-react";
+import { type DocFile } from "../types.js";
 
 interface Props {
   doc: DocFile;
@@ -12,9 +12,9 @@ interface Props {
 
 export const KnowledgeDocView: React.FC<Props> = ({ doc }) => {
   const categories = {
-    readme: { icon: Book, label: 'Documentation' },
-    adr: { icon: Lightbulb, label: 'Architectural Decisions' },
-    spec: { icon: FileText, label: 'Specifications' },
+    readme: { icon: Book, label: "Documentation" },
+    adr: { icon: Lightbulb, label: "Architectural Decisions" },
+    spec: { icon: FileText, label: "Specifications" },
   } as any;
 
   const Icon = categories[doc.category]?.icon || Book;
@@ -28,16 +28,19 @@ export const KnowledgeDocView: React.FC<Props> = ({ doc }) => {
             <Icon size={20} />
           </div>
           <span className="text-[11px] font-black uppercase tracking-[0.3em]">
-            {categories[doc.category]?.label || 'General'}
+            {categories[doc.category]?.label || "General"}
           </span>
         </div>
         <h1 className="text-5xl md:text-7xl font-brand font-black tracking-tighter text-white mb-6 leading-[0.9]">
           {doc.title}
         </h1>
-        <p className="text-zinc-500 font-medium tracking-tight">System Document • v0.0.0</p>
+        <p className="text-zinc-500 font-medium tracking-tight">
+          System Document • v0.0.0
+        </p>
       </div>
-      
-      <div className="prose prose-invert prose-sky max-w-none 
+
+      <div
+        className="prose prose-invert prose-sky max-w-none 
         prose-headings:font-brand prose-headings:font-black prose-headings:tracking-tighter prose-headings:text-white
         prose-h2:text-3xl prose-h2:mt-16 prose-h2:mb-8 prose-h2:pb-4 prose-h2:border-b prose-h2:border-zinc-800
         prose-p:text-zinc-400 prose-p:text-lg prose-p:leading-relaxed
@@ -48,10 +51,9 @@ export const KnowledgeDocView: React.FC<Props> = ({ doc }) => {
         prose-ul:list-none prose-ul:pl-0
         prose-li:text-zinc-400 prose-li:relative prose-li:pl-8 prose-li:mb-4
         prose-li:before:content-[''] prose-li:before:absolute prose-li:before:left-0 prose-li:before:top-[0.6em] prose-li:before:w-2 prose-li:before:h-2 prose-li:before:bg-sky-500/30 prose-li:before:rounded-full
-        prose-hr:border-zinc-800 prose-hr:my-16">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-          {doc.content}
-        </ReactMarkdown>
+        prose-hr:border-zinc-800 prose-hr:my-16"
+      >
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{doc.content}</ReactMarkdown>
       </div>
     </article>
   );

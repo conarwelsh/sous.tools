@@ -1,35 +1,59 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Inject,
+} from '@nestjs/common';
 import { DatabaseService } from '../../core/database/database.service.js';
 import { devices, pairingCodes } from '../../core/database/schema.js';
 import { eq, and, gt } from 'drizzle-orm';
 import { logger } from '@sous/logger';
 import { RealtimeGateway } from '../../realtime/realtime.gateway.js';
+import { PubSub } from 'graphql-subscriptions';
 
 @Injectable()
 export class HardwareService {
   constructor(
     private readonly dbService: DatabaseService,
     private readonly realtimeGateway: RealtimeGateway,
+    @Inject('PUB_SUB') private readonly pubSub: PubSub,
   ) {}
 
-  async generatePairingCode(hardwareId: string, deviceType: any, metadata?: any) {
-    // 1. Generate random 6-digit alphanumeric code
-    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  async generatePairingCode(
+    hardwareId: string,
+    deviceType: any,
+    metadata?: any,
+  ) {
+    try {
+      // Clean device type (e.g. 'signage:primary' -> 'signage')
+      const sanitizedType = String(deviceType).split(':')[0];
 
-    // 2. Clear old codes for this hardware
-    await this.dbService.db.delete(pairingCodes).where(eq(pairingCodes.hardwareId, hardwareId));
+      // 1. Generate random 6-digit alphanumeric code
+      const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    // 3. Save new code
-    const result = await this.dbService.db.insert(pairingCodes).values({
-      code,
-      deviceType,
-      hardwareId,
-      metadata: JSON.stringify(metadata || {}),
-      expiresAt,
-    }).returning();
+      // 2. Clear old codes for this hardware
+      await this.dbService.db
+        .delete(pairingCodes)
+        .where(eq(pairingCodes.hardwareId, hardwareId));
 
-    return result[0];
+      // 3. Save new code
+      const result = await this.dbService.db
+        .insert(pairingCodes)
+        .values({
+          code,
+          deviceType: sanitizedType as any,
+          hardwareId,
+          metadata: JSON.stringify(metadata || {}),
+          expiresAt,
+        })
+        .returning();
+
+      return result[0];
+    } catch (e) {
+      console.error('❌ Failed to generate pairing code:', e);
+      throw e;
+    }
   }
 
   async pairDevice(code: string, organizationId: string, locationId?: string) {
@@ -37,7 +61,7 @@ export class HardwareService {
     const record = await this.dbService.db.query.pairingCodes.findFirst({
       where: and(
         eq(pairingCodes.code, code.toUpperCase()),
-        gt(pairingCodes.expiresAt, new Date())
+        gt(pairingCodes.expiresAt, new Date()),
       ),
     });
 
@@ -50,19 +74,27 @@ export class HardwareService {
       where: eq(devices.hardwareId, record.hardwareId),
     });
 
-    const device = existingDevice 
-      ? (await this.dbService.db.update(devices)
-          .set({ organizationId, locationId, updatedAt: new Date() })
-          .where(eq(devices.id, existingDevice.id))
-          .returning())[0]
-      : (await this.dbService.db.insert(devices).values({
-          organizationId,
-          locationId,
-          hardwareId: record.hardwareId,
-          type: record.deviceType,
-          name: `${record.deviceType.toUpperCase()} Device`,
-          metadata: record.metadata,
-        }).returning())[0];
+    const device = existingDevice
+      ? (
+          await this.dbService.db
+            .update(devices)
+            .set({ organizationId, locationId, updatedAt: new Date() })
+            .where(eq(devices.id, existingDevice.id))
+            .returning()
+        )[0]
+      : (
+          await this.dbService.db
+            .insert(devices)
+            .values({
+              organizationId,
+              locationId,
+              hardwareId: record.hardwareId,
+              type: record.deviceType,
+              name: `${record.deviceType.toUpperCase()} Device`,
+              metadata: record.metadata,
+            })
+            .returning()
+        )[0];
 
     // 3. Notify Hardware
     this.realtimeGateway.emitToHardware(record.hardwareId, 'pairing:success', {
@@ -70,20 +102,43 @@ export class HardwareService {
       locationId,
     });
 
+    // 4. Notify UI via GraphQL Subscription
+    this.pubSub.publish('deviceUpdated', { deviceUpdated: device });
+
     return device;
   }
 
   async heartbeat(hardwareId: string, metadata?: any) {
-    return await this.dbService.db.update(devices)
-      .set({ 
-        lastHeartbeat: new Date(), 
+    const result = await this.dbService.db
+      .update(devices)
+      .set({
+        lastHeartbeat: new Date(),
         status: 'online',
-        metadata: metadata ? JSON.stringify(metadata) : undefined 
+        metadata: metadata ? JSON.stringify(metadata) : undefined,
       })
-      .where(eq(devices.hardwareId, hardwareId));
+      .where(eq(devices.hardwareId, hardwareId))
+      .returning();
+
+    if (!result.length) {
+      throw new NotFoundException(
+        `Device with hardwareId ${hardwareId} not found`,
+      );
+    }
+
+    const device = result[0];
+    // Publish update
+    this.pubSub.publish('deviceUpdated', { deviceUpdated: device });
+
+    return {
+      success: true,
+      requiredVersion: device.requiredVersion,
+    };
   }
 
   async getDevicesByOrg(organizationId: string) {
-    return await this.dbService.db.select().from(devices).where(eq(devices.organizationId, organizationId));
+    return await this.dbService.db
+      .select()
+      .from(devices)
+      .where(eq(devices.organizationId, organizationId));
   }
 }

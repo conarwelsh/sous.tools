@@ -1,0 +1,78 @@
+name: Build RPi OS Image
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [staging, main]
+    paths:
+      - "apps/web/**"
+      - "packages/**"
+      - "scripts/build-rpi-os.sh"
+
+jobs:
+  build-signage-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build Web Assets
+        run: pnpm --filter @sous/web build
+
+      - name: Sync Capacitor Android
+        run: npx cap sync android
+        working-directory: apps/web
+
+      - name: Build Signage APK
+        run: ./gradlew assembleSignageDebug
+        working-directory: apps/web/android
+
+      - name: Upload Signage APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: signage-apk
+          path: apps/web/android/app/build/outputs/apk/signage/debug/app-signage-debug.apk
+
+  build-os-image:
+    needs: build-signage-apk
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download Signage APK
+        uses: actions/download-artifact@v4
+        with:
+          name: signage-apk
+          path: apps/web/android/app/build/outputs/apk/signage/debug/
+
+      - name: Install Build Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libguestfs-tools qemu-utils
+
+      - name: Build RPi OS Image
+        run: ./scripts/build-rpi-os.sh
+        env:
+          LIBGUESTFS_BACKEND: direct # Required for running guestfish in some CI environments
+
+      - name: Upload OS Image
+        uses: actions/upload-artifact@v4
+        with:
+          name: sous-os-rpi4
+          path: dist/sous-os-rpi4.img

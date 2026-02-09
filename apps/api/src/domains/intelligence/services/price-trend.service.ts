@@ -9,7 +9,8 @@ export class PriceTrendService {
 
   async analyzeTrend(ingredientId: string, organizationId: string) {
     // Mock Trend Analysis: Randomly assign Up/Down/Stable
-    const trend = Math.random() > 0.6 ? 'up' : Math.random() > 0.3 ? 'down' : 'stable';
+    const trend =
+      Math.random() > 0.6 ? 'up' : Math.random() > 0.3 ? 'down' : 'stable';
     const score = (Math.random() * 10).toFixed(2);
 
     await this.dbService.db.insert(priceTrends).values({

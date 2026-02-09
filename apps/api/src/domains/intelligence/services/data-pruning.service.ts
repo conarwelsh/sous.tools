@@ -13,11 +13,11 @@ export class DataPruningService {
   async pruneTelemetry() {
     logger.info('🧹 Pruning old telemetry data...');
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    
+
     const result = await this.dbService.db
       .delete(telemetry)
       .where(lt(telemetry.createdAt, sevenDaysAgo));
-    
+
     logger.info(`✅ Pruned telemetry records.`);
   }
 

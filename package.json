@@ -3,6 +3,15 @@
   "version": "0.0.0",
   "private": true,
   "packageManager": "pnpm@10.27.0",
+  "pnpm": {
+    "overrides": {
+      "react": "19.2.3",
+      "react-dom": "19.2.3"
+    },
+    "onlyBuiltDependencies": [
+      "sharp"
+    ]
+  },
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -13,17 +22,33 @@
     "check": "turbo run lint build test",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "prepare": "husky",
-    "sous": "pnpm --filter @sous/cli run start --",
+    "sous": "infisical run --env=dev --path=/ --projectId=d1c836b9-17fe-49ed-bf45-2966cf2591d2 -- pnpm --filter @sous/cli run start --",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
-    "db:reset": "pnpm db:down && pnpm db:up && sleep 5 && pnpm --filter @sous/api run db:push"
+    "db:reset": "pnpm sous db reset"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
+    "@tailwindcss/postcss": "4.1.18",
     "husky": "^9.1.7",
     "prettier": "latest",
+    "tailwindcss": "4.1.18",
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
     "turbo": "latest"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.28.6",
+    "@pinojs/redact": "^0.4.0",
+    "atomic-sleep": "^1.0.0",
+    "css-in-js-utils": "^3.1.0",
+    "hyphenate-style-name": "^1.1.0",
+    "on-exit-leak-free": "^2.1.2",
+    "pino-std-serializers": "^7.1.0",
+    "postcss-value-parser": "^4.2.0",
+    "quick-format-unescaped": "^4.0.4",
+    "safe-stable-stringify": "^2.5.0",
+    "sonic-boom": "^4.2.0",
+    "thread-stream": "^4.0.0"
   }
 }

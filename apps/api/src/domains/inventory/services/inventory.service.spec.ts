@@ -30,7 +30,7 @@ describe('InventoryService', () => {
       expect.objectContaining({
         amount: -50,
         type: 'sale',
-      })
+      }),
     );
   });
 });

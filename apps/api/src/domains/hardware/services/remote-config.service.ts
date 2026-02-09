@@ -13,7 +13,8 @@ export class RemoteConfigService {
 
   async updateConfig(hardwareId: string, config: any) {
     // 1. Update DB
-    await this.dbService.db.update(devices)
+    await this.dbService.db
+      .update(devices)
       .set({ metadata: JSON.stringify(config) })
       .where(eq(devices.hardwareId, hardwareId));
 

@@ -6,10 +6,14 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
+import { SessionService } from '../services/session.service.js';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+    private sessionService: SessionService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -21,6 +25,15 @@ export class JwtAuthGuard implements CanActivate {
 
     try {
       const payload = await this.jwtService.verifyAsync(token);
+
+      // Check if token is revoked
+      if (
+        payload.jti &&
+        (await this.sessionService.isTokenRevoked(payload.jti))
+      ) {
+        throw new UnauthorizedException('Token revoked');
+      }
+
       // Assigning the payload to the request object here
       // so that we can access it in our route handlers
       request['user'] = payload;

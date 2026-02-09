@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+// Triggering rebuild
 import { Inter, Outfit, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { KnowledgeShell } from "@sous/features";
+import { KnowledgeShell, type DocFile } from "@sous/features";
 import { getKnowledgeBaseDocs } from "@sous/features/server";
+import { ThemeProvider } from "@sous/ui";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -33,11 +35,14 @@ export default async function RootLayout({
   const docs = await getKnowledgeBaseDocs();
 
   return (
-    <html lang="en" className={`${inter.variable} ${outfit.variable} ${geistMono.variable}`}>
-      <body className="font-sans antialiased bg-zinc-950 text-white">
-        <KnowledgeShell docs={docs}>
-          {children}
-        </KnowledgeShell>
+    <html
+      lang="en"
+      className={`${inter.variable} ${outfit.variable} ${geistMono.variable}`}
+    >
+      <body className="font-sans antialiased bg-background text-foreground">
+        <ThemeProvider>
+          <KnowledgeShell docs={docs as DocFile[]}>{children}</KnowledgeShell>
+        </ThemeProvider>
       </body>
     </html>
   );

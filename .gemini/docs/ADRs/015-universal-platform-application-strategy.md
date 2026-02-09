@@ -1,15 +1,19 @@
-# ADR 015: Universal Platform Application Strategy (@sous/web & @sous/native)
+# ADR 015: Universal Platform Strategy (SUPERSEDED)
 
 ## Status
-Proposed
+
+Superseded by [ADR 041](./041-web-first-pivot.md) - Using standard Web + Capacitor.
 
 ## Date
-2026-02-03
+
+2026-02-03 (Superseded 2026-02-07)
 
 ## Context
+
 The `sous.tools` platform requires a comprehensive suite of tools for restaurant management (Inventory, Culinary, IoT, Identity). While we have specialized apps like `@sous/native-kds` and `@sous/native-pos`, we need a "primary" interface that exposes all platform functionality to administrators and owners.
 
 **Key Requirements:**
+
 - **Feature Parity:** `@sous/web` and `@sous/native` must provide the same features and user experience.
 - **Maximum Reuse:** Minimize development overhead by sharing as much code (Views, Hooks, Logic) as possible.
 - **Web Availability:** A browser-based version (`@sous/web`) for desktop management.
@@ -18,6 +22,7 @@ The `sous.tools` platform requires a comprehensive suite of tools for restaurant
 - **Offline Backup:** The web version must be a Progressive Web App (PWA) to serve as a fallback for the native app.
 
 ## Decision
+
 We will treat `@sous/web` and `@sous/native` as two distributions of the same **Universal Frontend Codebase**.
 
 ### Key Technology Choices
@@ -32,34 +37,38 @@ We will treat `@sous/web` and `@sous/native` as two distributions of the same **
     - **Thin Shells:** `@sous/web` and `@sous/native` will act as thin "Shells" whose primary responsibility is routing and platform-specific initialization.
     - **Shared Views:** All domain-specific views (e.g., `InventoryView`, `RecipeDetailView`) will be written using React Native primitives within `@sous/features`.
     - **Shared Logic:** Data fetching and business logic will be encapsulated in shared hooks that utilize `@sous/client-sdk`.
-    - **Routing:** 
-        - Web uses Next.js App Router (Shell).
-        - Native uses React Navigation or Expo Router (Shell).
-        - A light abstraction layer will be used to handle navigation across platforms.
+    - **Routing:**
+      - Web uses Next.js App Router (Shell).
+      - Native uses React Navigation or Expo Router (Shell).
+      - A light abstraction layer will be used to handle navigation across platforms.
 
 3.  **PWA Configuration (`@sous/web`)**
     - `@sous/web` will be configured with a Service Worker (using `next-pwa` or similar) to allow offline access to cached data and provide an "App-like" experience on mobile browsers.
 
 ### Implementation Details
-- Features will follow the **Controller-View** pattern (ADR 004), allowing the *View* to be 100% shared, while the *Controller* handles platform-specific navigation or deep-linking logic if necessary.
+
+- Features will follow the **Controller-View** pattern (ADR 004), allowing the _View_ to be 100% shared, while the _Controller_ handles platform-specific navigation or deep-linking logic if necessary.
 - Native-specific features (e.g., Push Notifications, Camera/Barcode scanning) will be abstracted so that the Web version can use browser-based fallbacks.
 
 ## Consequences
+
 - **Positive:**
-    - **Single Source of Truth:** A bug fix or feature addition in a shared view instantly updates both Web and Mobile platforms.
-    - **Consistent Branding:** Exact visual parity across all user touchpoints.
-    - **Speed to Market:** Developing one comprehensive frontend for two platforms significantly reduces effort.
+  - **Single Source of Truth:** A bug fix or feature addition in a shared view instantly updates both Web and Mobile platforms.
+  - **Consistent Branding:** Exact visual parity across all user touchpoints.
+  - **Speed to Market:** Developing one comprehensive frontend for two platforms significantly reduces effort.
 - **Negative:**
-    - **Abstraction Overhead:** Some features (like file uploads or complex navigation) require platform-specific implementations that must be carefully managed.
-    - **Bundle Size:** Ensuring the Web app remains lightweight while supporting the React Native ecosystem requires careful build optimization.
+  - **Abstraction Overhead:** Some features (like file uploads or complex navigation) require platform-specific implementations that must be carefully managed.
+  - **Bundle Size:** Ensuring the Web app remains lightweight while supporting the React Native ecosystem requires careful build optimization.
 
 ## Research & Implementation Plan
 
 ### Research
+
 - **React Navigation vs. Expo Router:** Selected Expo Router for its file-based routing that closely mirrors Next.js, simplifying the shared architecture.
 - **PWA Capabilities:** Verified `next-pwa` support for Next.js 16.
 
 ### Implementation Plan
+
 1. **Shared Layouts:** Define the core platform layout (Sidebar, Header, Navigation) in `@sous/ui`.
 2. **Domain Integration:** Implement the primary feature views (Inventory, Culinary, Admin) as shared components.
 3. **Routing Abstraction:** Create a `useAppNavigation` hook that abstracts between Next.js and Expo Router.

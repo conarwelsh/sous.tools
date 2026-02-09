@@ -1,6 +1,5 @@
-import React from 'react';
-import { TouchableOpacity } from 'react-native';
-import { Card, View, Text } from '@sous/ui';
+import React from "react";
+import { Card, View, Text, Button } from "@sous/ui";
 
 interface Props {
   order: any;
@@ -8,28 +7,39 @@ interface Props {
 }
 
 export const OrderTicket = ({ order, onBump }: Props) => {
-  const age = Math.floor((Date.now() - new Date(order.createdAt).getTime()) / 1000 / 60);
-  const bgClass = age > 10 ? 'bg-destructive' : age > 5 ? 'bg-warning' : 'bg-card';
+  const age = Math.floor(
+    (Date.now() - new Date(order.createdAt).getTime()) / 1000 / 60,
+  );
+  const bgClass =
+    age > 10
+      ? "bg-destructive text-destructive-foreground"
+      : age > 5
+        ? "bg-amber-500 text-amber-950"
+        : "bg-card text-card-foreground";
 
   return (
-    <Card className={`w-[250px] m-2 overflow-hidden border-2 ${bgClass}`}>
-      <View className="bg-muted p-2 flex-row justify-between">
-        <Text className="font-bold">#{order.number}</Text>
-        <Text>{age}m</Text>
-      </View>
-      <View className="p-2 gap-2">
+    <Card
+      className={`w-[250px] m-2 overflow-hidden border-2 flex flex-col ${bgClass}`}
+    >
+      <div className="bg-muted p-2 flex flex-row justify-between text-muted-foreground">
+        <span className="font-bold font-mono">#{order.number}</span>
+        <span className="font-mono">{age}m</span>
+      </div>
+      <div className="p-2 flex flex-col gap-2 flex-1">
         {order.items.map((item: any, idx: number) => (
-          <Text key={idx} className="text-lg">
+          <span key={idx} className="text-lg font-bold">
             {item.quantity}x {item.name}
-          </Text>
+          </span>
         ))}
-      </View>
-      <TouchableOpacity 
-        className="bg-primary p-3 items-center" 
-        onPress={() => onBump(order.id)}
+      </div>
+      <Button
+        className="rounded-none h-12 bg-primary hover:bg-primary/90"
+        onClick={() => onBump(order.id)}
       >
-        <Text className="text-primary-foreground font-bold">BUMP</Text>
-      </TouchableOpacity>
+        <span className="text-primary-foreground font-black tracking-widest">
+          BUMP
+        </span>
+      </Button>
     </Card>
   );
 };

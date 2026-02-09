@@ -22,7 +22,7 @@ EOF
 fi
 
 # 1. Update & Build Tools
-sudo apt update && sudo apt install -y build-essential curl git wget unzip zsh pkg-config libwebkit2gtk-4.1-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev
+sudo apt update && sudo apt install -y build-essential curl git wget unzip zsh pkg-config libwebkit2gtk-4.1-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev jq
 
 # 1.1 Setup ZSH & Oh My Zsh
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
@@ -105,7 +105,7 @@ rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-andro
 
 # 9. Android Development (Hybrid WSL2 Bridge)
 echo "🤖 Setting up Android Development environment..."
-sudo apt install -y openjdk-17-jdk
+sudo apt install -y openjdk-21-jdk
 
 # Create Android SDK directory if it doesn't exist
 export ANDROID_HOME=$HOME/Android/Sdk

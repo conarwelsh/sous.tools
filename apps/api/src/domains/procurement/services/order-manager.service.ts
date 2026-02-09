@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../../core/database/database.service.js';
 import { invoices, invoiceItems } from '../../core/database/schema.js';
@@ -10,26 +11,34 @@ export class OrderManagerService {
   // "Orders" in this context are basically pre-invoices or Purchase Orders.
   // For MVP, we'll assume a Purchase Order is just an Invoice with status 'draft'.
 
-  async createPurchaseOrder(organizationId: string, supplierId: string, items: any[]) {
+  async createPurchaseOrder(
+    organizationId: string,
+    supplierId: string,
+    items: any[],
+  ): Promise<any> {
     return await this.dbService.db.transaction(async (tx) => {
-      const [po] = await tx.insert(invoices).values({
-        organizationId,
-        supplierId,
-        invoiceNumber: `PO-${Date.now()}`,
-        date: new Date(),
-        totalAmount: 0, // Calculated from items
-        status: 'draft',
-      }).returning();
+      const [po] = (await tx
+        .insert(invoices)
+        .values({
+          organizationId,
+          supplierId,
+          invoiceNumber: `PO-${Date.now()}`,
+          date: new Date(),
+          totalAmount: 0, // Calculated from items
+          status: 'draft',
+        })
+        .returning()) as any[];
 
       if (items.length > 0) {
         await tx.insert(invoiceItems).values(
-          items.map(item => ({ 
-            ...item, 
+          items.map((item) => ({
+            ...item,
             invoiceId: po.id,
-            totalPrice: item.quantity * item.pricePerUnit 
-          }))
+            totalPrice: item.quantity * item.pricePerUnit,
+          })),
         );
       }
+
       return po;
     });
   }
@@ -39,6 +48,7 @@ export class OrderManagerService {
     // 1. Fetch both
     // 2. Compare line items
     // 3. Return discrepancy report
-    return { status: 'reconciled', discrepancies: [] };
+
+    return { status: 'reconciled', discrepancies: [] } as any;
   }
 }

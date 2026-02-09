@@ -1,6 +1,7 @@
-import { KnowledgeDocView } from '@sous/features';
-import { getKnowledgeBaseDocs } from '@sous/features/server';
-import { Book } from 'lucide-react';
+import { KnowledgeDocView } from "@sous/features";
+import { getKnowledgeBaseDocs } from "@sous/features/server";
+import { Book } from "lucide-react";
+import type { DocFile } from "@sous/features";
 
 export default async function DocPage({
   params,
@@ -9,9 +10,9 @@ export default async function DocPage({
 }) {
   const { slug } = await params;
   const docs = await getKnowledgeBaseDocs();
-  
+
   const currentSlug = slug?.[0];
-  const doc = docs.find((d) => d.slug === currentSlug) || docs[0];
+  const doc = (docs.find((d) => d.slug === currentSlug) || docs[0]) as DocFile;
 
   if (!doc) {
     return (
@@ -19,7 +20,9 @@ export default async function DocPage({
         <div className="p-8 rounded-3xl bg-zinc-900/30 border border-zinc-800/50 animate-pulse">
           <Book size={64} className="opacity-20" />
         </div>
-        <p className="font-bold tracking-[0.2em] uppercase text-xs">Document Not Found</p>
+        <p className="font-bold tracking-[0.2em] uppercase text-xs">
+          Document Not Found
+        </p>
       </div>
     );
   }

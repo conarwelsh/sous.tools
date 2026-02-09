@@ -10,16 +10,27 @@ export class InventoryService {
   async getLedger(organizationId: string, locationId?: string) {
     const filters = [eq(stockLedger.organizationId, organizationId)];
     if (locationId) filters.push(eq(stockLedger.locationId, locationId));
-    
-    return this.dbService.db.select().from(stockLedger).where(and(...filters));
+
+    return this.dbService.db
+      .select()
+      .from(stockLedger)
+      .where(and(...filters));
   }
 
   async recordMovement(data: typeof stockLedger.$inferInsert) {
-    const result = await this.dbService.db.insert(stockLedger).values(data).returning();
+    const result = await this.dbService.db
+      .insert(stockLedger)
+      .values(data)
+      .returning();
     return result[0];
   }
 
-  async depleteStock(organizationId: string, locationId: string, ingredientId: string, amount: number) {
+  async depleteStock(
+    organizationId: string,
+    locationId: string,
+    ingredientId: string,
+    amount: number,
+  ) {
     return this.recordMovement({
       organizationId,
       locationId,

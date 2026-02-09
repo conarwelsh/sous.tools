@@ -1,4 +1,4 @@
-import { PlaygroundController } from '@sous/features';
+import { PlaygroundController } from "@sous/features";
 
 export default async function PlaygroundPage({
   params,

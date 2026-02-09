@@ -1,41 +1,5 @@
-@import "tailwindcss";
+@import "../../../../packages/ui/src/styles.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@source "../../../../packages/features/src/**/*.{ts,tsx}";
+@source "../../../../packages/ui/src/**/*.{ts,tsx}";
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-brand: var(--font-brand);
-  --font-mono: var(--font-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-
-  background: var(--background);
-
-  color: var(--foreground);
-
-}
-
-
-
-@keyframes draw {
-
-  0% { stroke-dasharray: 0 100; stroke-dashoffset: 0; }
-
-  50% { stroke-dasharray: 100 0; stroke-dashoffset: 0; }
-
-  100% { stroke-dasharray: 0 100; stroke-dashoffset: -100; }
-
-}

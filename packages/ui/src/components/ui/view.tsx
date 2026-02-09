@@ -1,9 +1,17 @@
-import { View as RNView } from 'react-native';
-import { cssInterop } from 'react-native-css-interop';
+import * as React from "react";
+import { cn } from "../../lib/utils";
 
-export const View = RNView;
+export interface ViewProps extends React.HTMLAttributes<HTMLDivElement> {
+  asChild?: boolean;
+}
 
-// @ts-ignore
-cssInterop(View, {
-  className: 'style',
-});
+const View = React.forwardRef<HTMLDivElement, ViewProps>(
+  ({ className, ...props }, ref) => {
+    return (
+      <div ref={ref} className={cn("flex flex-col", className)} {...props} />
+    );
+  },
+);
+View.displayName = "View";
+
+export { View };

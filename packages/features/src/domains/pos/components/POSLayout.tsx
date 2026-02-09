@@ -1,10 +1,9 @@
-import React from 'react';
-import { View } from '@sous/ui';
+import React from "react";
 
 export const POSLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <View className="flex-1 flex-row h-screen bg-background">
+    <div className="flex-1 flex flex-row h-screen bg-[#0a0a0a] overflow-hidden">
       {children}
-    </View>
+    </div>
   );
 };

@@ -23,7 +23,12 @@ export class AppCommand extends CommandRunner {
 
     const templateName = options?.template || 'native-app';
     const rootDir = path.resolve(process.cwd(), '../../');
-    const templateDir = path.join(rootDir, 'packages', 'templates', templateName);
+    const templateDir = path.join(
+      rootDir,
+      'packages',
+      'templates',
+      templateName,
+    );
     const appsDir = path.join(rootDir, 'apps');
     const targetDir = path.join(appsDir, appName);
 
@@ -33,11 +38,15 @@ export class AppCommand extends CommandRunner {
     }
 
     if (fs.existsSync(targetDir)) {
-      logger.error(`❌ Application '${appName}' already exists at ${targetDir}`);
+      logger.error(
+        `❌ Application '${appName}' already exists at ${targetDir}`,
+      );
       return;
     }
 
-    logger.info(`🚀 Generating app '@sous/${appName}' from template '${templateName}'...`);
+    logger.info(
+      `🚀 Generating app '@sous/${appName}' from template '${templateName}'...`,
+    );
 
     // 1. Copy template
     this.copyDir(templateDir, targetDir);
@@ -53,20 +62,22 @@ export class AppCommand extends CommandRunner {
     this.replaceInFile(path.join(targetDir, 'src-tauri', 'tauri.conf.json'), {
       '{{APP_SLUG}}': appSlug,
     });
-    
+
     this.replaceInFile(path.join(targetDir, 'src-tauri', 'Cargo.toml'), {
       '{{APP_SLUG}}': appSlug,
     });
 
     // 3. Update pnpm-workspace if needed (optional, usually handled by glob)
-    
+
     logger.info(`✅ App generated at apps/${appName}`);
     logger.info(`📦 Installing dependencies...`);
-    
+
     try {
       execSync('pnpm install', { stdio: 'inherit', cwd: rootDir });
     } catch (e) {
-      logger.warn('⚠️  pnpm install encountered an issue, but the app was created.');
+      logger.warn(
+        '⚠️  pnpm install encountered an issue, but the app was created.',
+      );
     }
   }
 
@@ -79,7 +90,12 @@ export class AppCommand extends CommandRunner {
       const destPath = path.join(dest, entry.name);
 
       if (entry.isDirectory()) {
-         if (entry.name === 'node_modules' || entry.name === 'target' || entry.name === 'dist') continue;
+        if (
+          entry.name === 'node_modules' ||
+          entry.name === 'target' ||
+          entry.name === 'dist'
+        )
+          continue;
         this.copyDir(srcPath, destPath);
       } else {
         fs.copyFileSync(srcPath, destPath);
@@ -87,7 +103,10 @@ export class AppCommand extends CommandRunner {
     }
   }
 
-  private replaceInFile(filePath: string, replacements: Record<string, string>) {
+  private replaceInFile(
+    filePath: string,
+    replacements: Record<string, string>,
+  ) {
     if (!fs.existsSync(filePath)) return;
     let content = fs.readFileSync(filePath, 'utf-8');
     for (const [key, value] of Object.entries(replacements)) {

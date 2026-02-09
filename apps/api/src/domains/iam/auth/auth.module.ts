@@ -6,10 +6,13 @@ import { JwtModule } from '@nestjs/jwt';
 import { configPromise } from '@sous/config';
 import { JwtStrategy } from './guards/jwt.strategy.js';
 import { LocalStrategy } from './guards/local.strategy.js';
+import { SessionService } from './services/session.service.js';
+import { CoreModule } from '../../core/core.module.js';
 
 @Global()
 @Module({
   imports: [
+    CoreModule,
     PassportModule,
     JwtModule.registerAsync({
       useFactory: async () => {
@@ -24,8 +27,8 @@ import { LocalStrategy } from './guards/local.strategy.js';
       },
     }),
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy, SessionService],
   controllers: [AuthController],
-  exports: [AuthService, JwtModule],
+  exports: [AuthService, JwtModule, SessionService],
 })
 export class AuthModule {}

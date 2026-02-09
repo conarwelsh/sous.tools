@@ -1,6 +1,6 @@
-import pino from 'pino';
+import pino from "pino";
 
-const isServer = typeof window === 'undefined';
+const isServer = typeof window === "undefined";
 
 // Storage for Request Context (Trace IDs, User IDs, etc.)
 // Only available on server
@@ -14,19 +14,19 @@ export { loggerStorage };
 export function createLogger(options: { name: string }) {
   const transports: any[] = [];
 
-  const isDev = !isServer ? true : process.env.NODE_ENV === 'development';
-  const useJson = isServer && process.env.SOUS_JSON_LOGS === 'true';
+  const isDev = !isServer ? true : process.env.NODE_ENV === "development";
+  const useJson = isServer && process.env.SOUS_JSON_LOGS === "true";
 
   // Transports are only supported on server in Pino
   if (isServer) {
     // 1. Local Development Pretty Printing (unless JSON is requested by orchestrator)
     if (isDev && !useJson) {
       transports.push({
-        target: 'pino-pretty',
+        target: "pino-pretty",
         options: {
           colorize: true,
-          translateTime: 'HH:MM:ss Z',
-          ignore: 'pid,hostname',
+          translateTime: "HH:MM:ss Z",
+          ignore: "pid,hostname",
           messageFormat: `[{name}] {msg}`,
         },
       });
@@ -37,25 +37,25 @@ export function createLogger(options: { name: string }) {
     // But we'll try to load them dynamically to be safe
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let logFile: string | null = null;
-    
+
     // In a real monorepo, we'd probably pass the log path in config
     // but for now we try to detect home dir
     const home = process.env.HOME || process.env.USERPROFILE;
     if (home) {
-        // We use a simple join to avoid needing 'path'
-        const logDir = `${home}/.sous/logs`;
-        logFile = `${logDir}/combined.log`;
-        
-        transports.push({
-            target: 'pino/file',
-            options: { destination: logFile, mkdir: true },
-        });
+      // We use a simple join to avoid needing 'path'
+      const logDir = `${home}/.sous/logs`;
+      logFile = `${logDir}/combined.log`;
+
+      transports.push({
+        target: "pino/file",
+        options: { destination: logFile, mkdir: true },
+      });
     }
 
     // 3. Remote Transport (Better Stack / Logtail)
     if (process.env.LOGTAIL_SOURCE_TOKEN) {
       transports.push({
-        target: '@logtail/pino',
+        target: "@logtail/pino",
         options: { sourceToken: process.env.LOGTAIL_SOURCE_TOKEN },
       });
     }
@@ -64,7 +64,7 @@ export function createLogger(options: { name: string }) {
   const baseLogger = pino(
     {
       name: options.name,
-      level: isServer ? (process.env.LOG_LEVEL || 'info') : 'info',
+      level: isServer ? process.env.LOG_LEVEL || "info" : "info",
       // Automatic Context Injection
       mixin() {
         const store = loggerStorage?.getStore?.();
@@ -73,17 +73,21 @@ export function createLogger(options: { name: string }) {
         }
         return {};
       },
-      browser: isServer ? undefined : {
-        asObject: true
-      }
+      browser: isServer
+        ? undefined
+        : {
+            asObject: true,
+          },
     },
-    (isServer && transports.length > 0) ? pino.transport({ targets: transports }) : undefined
+    isServer && transports.length > 0
+      ? pino.transport({ targets: transports })
+      : undefined,
   );
 
   return baseLogger;
 }
 
 // Global initialization
-logger = createLogger({ name: '@sous/core' });
+logger = createLogger({ name: "@sous/core" });
 
 export { logger };

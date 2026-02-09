@@ -3,8 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "bash -c \"PATH=$(echo $PATH | tr ':' '\\n' | grep -v 'mnt/c' | tr '\\n' ':') ANDROID_HOME=$HOME/Android/Sdk ./gradlew :apps:wearos:installDebug && adb shell monkey -p com.sous.wearos -c android.intent.category.LAUNCHER 1\"",
+    "dev": "bash /home/conar/sous.tools/scripts/run-wearos.sh",
+    "build:debug": "bash -c \"PATH=$(echo $PATH | tr ':' '\\n' | grep -v 'mnt/c' | tr '\\n' ':') ANDROID_HOME=$HOME/Android/Sdk ./gradlew assembleDebug\"",
     "build": "./gradlew assembleRelease",
     "lint": "./gradlew lint"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.1.18",
+    "tailwindcss": "4.1.18"
   }
 }

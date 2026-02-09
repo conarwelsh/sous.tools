@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { CoreModule } from './domains/core/core.module.js';
 import { IamModule } from './domains/iam/iam.module.js';
 import { MediaModule } from './domains/media/media.module.js';
@@ -14,16 +16,26 @@ import { CulinaryModule } from './domains/culinary/culinary.module.js';
 import { InventoryModule } from './domains/inventory/inventory.module.js';
 import { AccountingModule } from './domains/accounting/accounting.module.js';
 import { IntegrationsModule } from './domains/integrations/integrations.module.js';
+import { MaintenanceModule } from './domains/maintenance/maintenance.module.js';
 import { join } from 'path';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, 'public'),
+      serveRoot: '/',
+    }),
     ScheduleModule.forRoot(),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
-      playground: true,
+      playground: false, // Disabled deprecated GraphQL Playground
+      installSubscriptionHandlers: true,
+      subscriptions: {
+        'graphql-ws': true,
+      },
+      plugins: [ApolloServerPluginLandingPageLocalDefault()], // Enabled Apollo Sandbox
     }),
     CoreModule,
     IamModule,
@@ -37,6 +49,7 @@ import { join } from 'path';
     InventoryModule,
     AccountingModule,
     IntegrationsModule,
+    MaintenanceModule,
   ],
   controllers: [],
   providers: [],

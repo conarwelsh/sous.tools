@@ -1,24 +1,53 @@
-import { defineConfig } from 'tsup';
+import { defineConfig } from "tsup";
 
 export default defineConfig([
   {
-    entry: { client: 'src/client.ts' },
-    format: ['cjs', 'esm'],
+    entry: {
+      client: "src/client.ts",
+      index: "src/index.ts",
+    },
+    format: ["cjs", "esm"],
     dts: true,
-    external: ['react', 'react-dom', 'next/link', 'next/navigation'],
     clean: true,
     bundle: true,
     splitting: false,
     banner: {
       js: '"use client";',
     },
+    external: [
+      "react",
+      "react-dom",
+      "next/link",
+      "next/navigation",
+      "@sous/ui",
+      "@sous/config",
+      "@sous/client-sdk",
+      "socket.io-client",
+      "lucide-react",
+      "react-markdown",
+      "remark-gfm",
+    ],
   },
   {
-    entry: { server: 'src/server.ts' },
-    format: ['cjs', 'esm'],
+    entry: {
+      server: "src/server.ts",
+    },
+    format: ["cjs", "esm"],
     dts: true,
-    external: ['fs', 'path', 'server-only', 'react', 'react-dom'],
+    clean: false,
     bundle: true,
     splitting: false,
-  }
+    external: [
+      "react",
+      "react-dom",
+      "next/link",
+      "next/navigation",
+      "@sous/ui",
+      "@sous/config",
+      "@sous/client-sdk",
+      "fs",
+      "path",
+      "server-only",
+    ],
+  },
 ]);
