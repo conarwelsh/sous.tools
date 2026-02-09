@@ -37,6 +37,9 @@ jobs:
       - name: Build Web Assets
         run: pnpm turbo run build --filter=@sous/web...
 
+      - name: Create Web Output Dir
+        run: mkdir -p apps/web/out
+
       - name: Sync Capacitor Android
         run: npx cap sync android
         working-directory: apps/web
