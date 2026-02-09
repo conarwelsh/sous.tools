@@ -14,8 +14,15 @@ function findRoot(): string {
   if (!isServer) return "";
   
   try {
-    const current = process.cwd();
-    return current;
+    const fs = require("fs");
+    const path = require("path");
+    let current = process.cwd();
+    
+    // Walk up until we find pnpm-workspace.yaml or hit root
+    while (current !== "/" && !fs.existsSync(path.join(current, "pnpm-workspace.yaml"))) {
+      current = path.dirname(current);
+    }
+    return current === "/" ? process.cwd() : current;
   } catch (e) {
     return "";
   }
@@ -33,21 +40,12 @@ function bootstrap() {
 
   try {
     // Only attempt Infisical/Dotenv in local dev where we might have require
-    // This uses a dynamic check to avoid bundler issues in ESM environments
+    // We use a cautious check for require to support both CJS and ESM runtimes
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     if (typeof require !== "undefined") {
       const path = require("path");
       const fs = require("fs");
-      
-      // Basic implementation of findRoot since we can't rely on the outer function
-      // recursively in this context without causing potential issues
-      let root = process.cwd(); 
-      // Walk up until we find pnpm-workspace.yaml or hit root
-      // (Simplified for safety in this specific context)
-      while (root !== "/" && !fs.existsSync(path.join(root, "pnpm-workspace.yaml"))) {
-        root = path.dirname(root);
-      }
-      if (root === "/") root = process.cwd(); // Fallback
+      const root = findRoot();
 
       // 1. Load bootstrap variables from .env if present
       const envPath = path.join(root, ".env");
@@ -56,7 +54,6 @@ function bootstrap() {
       }
 
       // 2. Load from Infisical if in development and missing critical keys
-      // We only do this if NOT in a Next.js runtime, as Next handles its own env
       const isNext = !!process.env.NEXT_RUNTIME;
       const hasProjectId = !!process.env.INFISICAL_PROJECT_ID;
       
@@ -90,7 +87,7 @@ function bootstrap() {
               console.log(`✅ [@sous/config] Population complete. Injected ${count} new variables.`);
             }
           }
-        } catch (e) {
+        } catch (e: any) {
           console.warn("⚠️ [@sous/config] Infisical CLI fetch failed. Ensure CLI is installed and authenticated.");
         }
       }
@@ -107,6 +104,12 @@ const getEnvVars = () => {
   if (isServer) return process.env;
   return (globalThis as any).process?.env || (globalThis as any).__SOUS_ENV__ || {};
 };
+
+function sanitizeUrl(url: string | undefined, fallback: string): string {
+  if (!url) return fallback;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `https://${url}`;
+}
 
 /**
  * Builds the configuration object from current environment variables.
@@ -188,12 +191,6 @@ function buildConfig(): Config {
   }
 
   return parsed.data;
-}
-
-function sanitizeUrl(url: string | undefined, fallback: string): string {
-  if (!url) return fallback;
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  return `https://${url}`;
 }
 
 // 1. Run bootstrap immediately on import (Server only)
