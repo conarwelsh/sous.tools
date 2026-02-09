@@ -119,15 +119,24 @@ function buildConfig(): Config {
     env,
     api: {
       port: Number(envVars.PORT_API || envVars.API_PORT || 4000),
-      url: envVars.NEXT_PUBLIC_API_URL || envVars.API_URL || `http://localhost:${envVars.PORT_API || 4000}`,
+      url: sanitizeUrl(
+        envVars.NEXT_PUBLIC_API_URL || envVars.API_URL,
+        `http://localhost:${envVars.PORT_API || 4000}`
+      ),
     },
     web: {
       port: Number(envVars.PORT_WEB || envVars.WEB_PORT || 3000),
-      url: envVars.NEXT_PUBLIC_WEB_URL || envVars.WEB_URL || `http://localhost:${envVars.PORT_WEB || 3000}`,
+      url: sanitizeUrl(
+        envVars.NEXT_PUBLIC_WEB_URL || envVars.WEB_URL,
+        `http://localhost:${envVars.PORT_WEB || 3000}`
+      ),
     },
     docs: {
       port: Number(envVars.PORT_DOCS || envVars.DOCS_PORT || 3001),
-      url: envVars.DOCS_URL || `http://localhost:${envVars.PORT_DOCS || 3001}`,
+      url: sanitizeUrl(
+        envVars.DOCS_URL,
+        `http://localhost:${envVars.PORT_DOCS || 3001}`
+      ),
     },
     native: {
       port: Number(envVars.NATIVE_PORT || 1421),
@@ -169,11 +178,22 @@ function buildConfig(): Config {
   if (!parsed.success) {
     if (isServer) {
       console.error("❌ [@sous/config] Invalid configuration structure:", JSON.stringify(parsed.error.format(), null, 2));
+      console.error("⚠️ [@sous/config] Raw Invalid Config (partial):", JSON.stringify({
+        api: rawConfig.api,
+        web: rawConfig.web,
+        db: rawConfig.db
+      }, null, 2));
     }
     return rawConfig as any;
   }
 
   return parsed.data;
+}
+
+function sanitizeUrl(url: string | undefined, fallback: string): string {
+  if (!url) return fallback;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `https://${url}`;
 }
 
 // 1. Run bootstrap immediately on import (Server only)
