@@ -20,6 +20,7 @@
     "@apollo/client": "^4.1.4",
     "@pinojs/redact": "^0.4.0",
     "@radix-ui/react-slot": "^1.2.4",
+    "@sous/client-sdk": "workspace:*",
     "@sous/config": "workspace:*",
     "@sous/features": "workspace:*",
     "@sous/ui": "workspace:*",
