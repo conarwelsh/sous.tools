@@ -14,6 +14,22 @@ let cachedConfig: Config | null = null;
  * Normalizes environment name
  */
 function getEnv(): "development" | "staging" | "production" | "test" {
+  // 1. Check for context override file (Local Dev only)
+  if (isServer) {
+    try {
+      const fs = require("fs");
+      const path = require("path");
+      const os = require("os");
+      const contextPath = path.join(os.homedir(), ".sous", "context.json");
+      if (fs.existsSync(contextPath)) {
+        const context = JSON.parse(fs.readFileSync(contextPath, "utf-8"));
+        if (context.env) return context.env;
+      }
+    } catch (e) {
+      // Ignore errors reading context
+    }
+  }
+
   const env = process.env.NODE_ENV || process.env.MODE || "development";
   if (env === "prod") return "production";
   if (env === "stage") return "staging";

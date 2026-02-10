@@ -25,6 +25,12 @@ import { WorkspaceCommand } from './commands/workspace.command.js';
 import { DashboardCommand } from './commands/env/dashboard.command.js';
 import { ContextCommand } from './commands/env/context/context.command.js';
 import { WhoamiCommand } from './commands/env/context/whoami.command.js';
+import { SwitchEnvCommand } from './commands/env/context/switch-env.command.js';
+import { HardwareCommand } from './commands/hardware/hardware.command.js';
+import { HardwareListCommand } from './commands/hardware/hardware-list.command.js';
+import { IntelCommand } from './commands/intel/intel.command.js';
+import { IntelCostCommand } from './commands/intel/intel-cost.command.js';
+import { ConfigListCommand } from './commands/env/config/config-list.command.js';
 import { ProcessManager } from './commands/dev/process-manager.service.js';
 
 @Module({
@@ -37,6 +43,7 @@ import { ProcessManager } from './commands/dev/process-manager.service.js';
     EnvCommand,
     ConfigCommand,
     ConfigAddCommand,
+    ConfigListCommand,
     LogsCommand,
     LogsTailCommand,
     LogsWipeCommand,
@@ -44,6 +51,11 @@ import { ProcessManager } from './commands/dev/process-manager.service.js';
     DashboardCommand,
     ContextCommand,
     WhoamiCommand,
+    SwitchEnvCommand,
+    HardwareCommand,
+    HardwareListCommand,
+    IntelCommand,
+    IntelCostCommand,
     QualityCommand,
     TestCommand,
     CheckCommand,

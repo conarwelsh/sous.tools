@@ -1,6 +1,6 @@
 # Spec 020: Windows Agent Integration
 
-## Status: Proposed
+## Status: Completed
 ## Strategic Umbrella: Tooling & DX
 
 ## 1. Context & Problem Statement

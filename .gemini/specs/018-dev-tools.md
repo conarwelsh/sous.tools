@@ -1,6 +1,6 @@
 # Spec 018: Sous Dev Tools (Process Manager & Dashboard)
 
-## Status: Proposed
+## Status: Completed
 ## Strategic Umbrella: Tooling & DX
 
 ## 1. Context & Problem Statement

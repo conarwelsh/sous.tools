@@ -39,6 +39,72 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
   const [isResettingDb, setIsResettingDb] = useState(false);
   const [dbResetStatus, setDbResetStatus] = useState<string | null>(null);
   const [cloudLogs, setCloudLogs] = useState<string[]>([]);
+  const [cloudProcess, setCloudProcess] = useState<any>(null);
+
+  // Cloud Logs Tailer
+  useEffect(() => {
+    if (activeTab !== 'cloud' || activeEnv === 'dev') {
+      if (cloudProcess) {
+        cloudProcess.kill();
+        setCloudProcess(null);
+      }
+      return;
+    }
+
+    setCloudLogs([]);
+    const app = processes[selectedIdx];
+    let command = '';
+    let args: string[] = [];
+
+    // Map internal IDs to cloud project names
+    const projectMap: Record<string, string> = {
+      api: 'sous-api',
+      web: 'sous-tools',
+      docs: 'sous-docs',
+    };
+
+    const projectName = projectMap[app.id];
+    if (!projectName) {
+      setCloudLogs(['[SYSTEM] No cloud mapping for this service.']);
+      return;
+    }
+
+    if (app.id === 'api') {
+      // Render CLI
+      command = 'render';
+      args = ['logs', projectName, '--env', activeEnv];
+    } else {
+      // Vercel CLI
+      command = 'vercel';
+      args = ['logs', projectName, activeEnv === 'production' ? '--prod' : '--staging'];
+    }
+
+    try {
+      const child = spawn(command, args, { shell: true });
+      setCloudProcess(child);
+
+      child.stdout?.on('data', (data) => {
+        const lines = data.toString().split('\n');
+        setCloudLogs((prev) => [...prev, ...lines].slice(-1000));
+      });
+
+      child.stderr?.on('data', (data) => {
+        setCloudLogs((prev) => [...prev, `[ERR] ${data.toString()}`].slice(-1000));
+      });
+
+      child.on('error', (err) => {
+        setCloudLogs((prev) => [...prev, `[FAIL] ${err.message}`]);
+      });
+    } catch (e: any) {
+      setCloudLogs([`[ERROR] Failed to start cloud tail: ${e.message}`]);
+    }
+
+    return () => {
+      if (cloudProcess) {
+        cloudProcess.kill();
+      }
+    };
+  }, [activeTab, activeEnv, selectedIdx]);
 
   const [systemMetrics, setSystemMetrics] = useState({
     cpu: 0,

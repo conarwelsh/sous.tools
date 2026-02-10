@@ -119,13 +119,24 @@ fi
 
 # 8. WSL/Windows Bridge Setup
 if [ "$IS_WSL" = true ]; then
-  echo "🪟 Setting up Windows Agent Bridge..."
+  echo "🪟 Setting up Windows Agent Bridge (Live Symlinks)..."
   
   # Ensure the Windows-side tools directory exists
   powershell.exe -Command "New-Item -ItemType Directory -Force -Path C:\tools\sous-agent" > /dev/null
   
-  # Copy files from WSL to Windows tools dir
-  cp scripts/windows/* /mnt/c/tools/sous-agent/
+  # Create symlinks from Windows to WSL filesystem for live updates
+  # We use powershell to create the links on the Windows host
+  WSL_PATH="\\\\wsl.localhost\\Ubuntu-22.04\\home\\conar\\sous.tools\\scripts\\windows"
+  
+  powershell.exe -Command "
+    \$files = @('agent.ico', 'agent.png', 'sous-agent.js', 'sous-launcher.vbs', 'sous-tray.ps1');
+    foreach (\$f in \$files) {
+      \$target = \"\$WSL_PATH\\\$f\";
+      \$link = \"C:\\tools\\sous-agent\\\$f\";
+      if (Test-Path \$link) { Remove-Item \$link -Force };
+      New-Item -ItemType SymbolicLink -Path \$link -Target \$target -Force;
+    }
+  " > /dev/null
   
   # Firewall and Unblocking (requires admin, but we attempt)
   echo "🛡️  Configuring Windows Firewall (may prompt for admin)..."
