@@ -9,27 +9,22 @@ import chalk from 'chalk';
 })
 export class ConfigListCommand extends CommandRunner {
   async run(): Promise<void> {
-    console.log('
-' + chalk.bold('⚙️  RESOLVED CONFIGURATION'));
+    console.log('\n' + chalk.bold('⚙️  RESOLVED CONFIGURATION'));
     console.log('='.repeat(50));
-    
+
     const mask = (val: any) => (val ? '********' : chalk.red('MISSING'));
 
-    console.log(chalk.bold('
-[Infrastructure]'));
+    console.log(chalk.bold('\n[Infrastructure]'));
     console.log(`API URL: ${config.api.url}`);
     console.log(`Web URL: ${config.web.url}`);
-    
-    console.log(chalk.bold('
-[Secrets]'));
+
+    console.log(chalk.bold('\n[Secrets]'));
     console.log(`JWT Secret:      ${mask(config.iam.jwtSecret)}`);
     console.log(`Supabase Key:    ${mask(config.storage.supabase.anonKey)}`);
     console.log(`Redis URL:       ${mask(config.redis.url)}`);
-    
-    console.log(chalk.bold('
-[Context]'));
+
+    console.log(chalk.bold('\n[Context]'));
     console.log(`Environment:     ${config.env.toUpperCase()}`);
-    console.log('='.repeat(50) + '
-');
+    console.log('='.repeat(50) + '\n');
   }
 }

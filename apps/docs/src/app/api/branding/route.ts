@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { brandingConfigSchema } from "@sous/config";
+import { brandingConfigSchema, config, resolveConfig } from "@sous/config";
 
 function findMonorepoRoot(startDir: string): string {
   let current = startDir;
@@ -36,7 +36,6 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const { config, resolveConfig } = require("@sous/config");
   await resolveConfig();
   
   // Only allow in development

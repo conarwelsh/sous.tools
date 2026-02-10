@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { config } from "@sous/config";
 
 export function FlavorGate() {
   const router = useRouter();
@@ -16,7 +17,6 @@ export function FlavorGate() {
 
       // EMERGENCY REDIRECT: If we are on localhost in native, we are lost. Force to WSL IP.
       if (typeof window !== "undefined" && window.location.hostname === "localhost" && (window as any).Capacitor) {
-         const { config } = require("@sous/config");
          const targetUrl = config.web.url;
          
          if (!targetUrl || targetUrl.includes("localhost")) {

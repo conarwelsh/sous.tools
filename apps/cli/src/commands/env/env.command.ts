@@ -9,16 +9,26 @@ import { logger } from '@sous/logger';
 @Command({
   name: 'env',
   description: 'Infrastructure and environment management',
-  subCommands: [ConfigCommand, LogsCommand, BrandingCommand, EnvExportCommand, DashboardCommand],
+  subCommands: [
+    ConfigCommand,
+    LogsCommand,
+    BrandingCommand,
+    EnvExportCommand,
+    DashboardCommand,
+  ],
 })
 export class EnvCommand extends CommandRunner {
   async run(passedParam: string[]): Promise<void> {
     if (
       passedParam.length > 0 &&
-      ['config', 'logs', 'branding', 'export', 'dashboard'].includes(passedParam[0])
+      ['config', 'logs', 'branding', 'export', 'dashboard'].includes(
+        passedParam[0],
+      )
     ) {
       return;
     }
-    logger.info('Please specify a subcommand: config, logs, branding, export, dashboard');
+    logger.info(
+      'Please specify a subcommand: config, logs, branding, export, dashboard',
+    );
   }
 }

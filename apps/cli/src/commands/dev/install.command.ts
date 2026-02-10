@@ -17,10 +17,13 @@ interface InstallOptions {
 export class InstallCommand extends CommandRunner {
   async run(passedParam: string[], options?: InstallOptions): Promise<void> {
     const target = passedParam[0];
-    
+
     // Find project root by looking for pnpm-workspace.yaml
     let rootDir = process.cwd();
-    while (rootDir !== '/' && !fs.existsSync(path.join(rootDir, 'pnpm-workspace.yaml'))) {
+    while (
+      rootDir !== '/' &&
+      !fs.existsSync(path.join(rootDir, 'pnpm-workspace.yaml'))
+    ) {
       rootDir = path.dirname(rootDir);
     }
 
@@ -36,7 +39,7 @@ export class InstallCommand extends CommandRunner {
 
     if (!target) {
       logger.info('👨‍🍳 Detecting role as Developer Workstation...');
-      
+
       // 1. Setup .env for @sous/config if it doesn't exist
       const configDir = path.join(rootDir, 'packages', 'config');
       const envPath = path.join(configDir, '.env');
@@ -52,7 +55,7 @@ export class InstallCommand extends CommandRunner {
         const scriptPath = path.join(rootDir, 'scripts', 'install-dev.sh');
         logger.info(`🚀 Running system-level installer: ${scriptPath}...`);
         execSync(`bash ${scriptPath}`, { stdio: 'inherit' });
-        
+
         this.printPostInstallInstructions();
       } catch (error) {
         logger.error('❌ Local installation failed.');
@@ -63,14 +66,18 @@ export class InstallCommand extends CommandRunner {
     if (options?.android) {
       logger.info(`📱 Connecting to Android device at ${target} via ADB...`);
       try {
-        const connectionString = target.includes(':') ? target : `${target}:5555`;
+        const connectionString = target.includes(':')
+          ? target
+          : `${target}:5555`;
         execSync(`adb connect ${connectionString}`, { stdio: 'inherit' });
         logger.info('✅ Connected.');
       } catch (error) {
         logger.error(`❌ Failed to connect to Android device at ${target}.`);
       }
     } else {
-      logger.info(`🚀 Dispatching remote Linux/RPi installation to ${target}...`);
+      logger.info(
+        `🚀 Dispatching remote Linux/RPi installation to ${target}...`,
+      );
       try {
         const scriptPath = path.join(rootDir, 'scripts', 'install-remote.sh');
         execSync(`bash ${scriptPath} ${target}`, { stdio: 'inherit' });
@@ -86,7 +93,9 @@ export class InstallCommand extends CommandRunner {
     console.log('='.repeat(60));
     console.log('\nNext steps to get cooking:');
     console.log('\n1. 🔐 Configure Secrets:');
-    console.log('   Open packages/config/.env and add your INFISICAL_ credentials.');
+    console.log(
+      '   Open packages/config/.env and add your INFISICAL_ credentials.',
+    );
     console.log('\n2. 🐚 Apply Shell Changes:');
     console.log('   Run: source ~/.zshrc');
     console.log('\n3. 🚀 Launch Development Tools:');
@@ -97,7 +106,13 @@ export class InstallCommand extends CommandRunner {
   }
 
   private async installWindowsAgent(rootDir: string) {
-    if (!fs.existsSync('/proc/version') || !execSync('cat /proc/version').toString().toLowerCase().includes('microsoft')) {
+    if (
+      !fs.existsSync('/proc/version') ||
+      !execSync('cat /proc/version')
+        .toString()
+        .toLowerCase()
+        .includes('microsoft')
+    ) {
       logger.warn('⚠️  This command is only intended for WSL2 environments.');
       return;
     }
@@ -105,17 +120,27 @@ export class InstallCommand extends CommandRunner {
     logger.info('🪟 Installing Sous Windows Agent (WSL Bridge)...');
     try {
       // 1. Ensure Windows-side directory exists
-      execSync('powershell.exe -Command "New-Item -ItemType Directory -Force -Path C:\\tools\\sous-agent" > /dev/null');
-      
+      execSync(
+        'powershell.exe -Command "New-Item -ItemType Directory -Force -Path C:\\tools\\sous-agent" > /dev/null',
+      );
+
       // 2. Copy files (idempotent)
-      execSync(`cp ${path.join(rootDir, 'scripts/windows/*')} /mnt/c/tools/sous-agent/`);
-      
+      execSync(
+        `cp ${path.join(rootDir, 'scripts/windows/*')} /mnt/c/tools/sous-agent/`,
+      );
+
       // 3. Configure Firewall and Unblock (requires admin elevation)
-      logger.info('🛡️  Requesting admin privileges for Windows Firewall configuration...');
-      execSync('powershell.exe -Command "Start-Process powershell -Verb RunAs -ArgumentList \'New-NetFirewallRule -DisplayName \\"Sous Agent (TCP-In)\\" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 4040 -ErrorAction SilentlyContinue; Unblock-File -Path C:\\tools\\sous-agent\\sous-tray.ps1\'"');
-      
+      logger.info(
+        '🛡️  Requesting admin privileges for Windows Firewall configuration...',
+      );
+      execSync(
+        'powershell.exe -Command "Start-Process powershell -Verb RunAs -ArgumentList \'New-NetFirewallRule -DisplayName \\"Sous Agent (TCP-In)\\" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 4040 -ErrorAction SilentlyContinue; Unblock-File -Path C:\\tools\\sous-agent\\sous-tray.ps1\'"',
+      );
+
       logger.info('✅ Windows Agent files installed to C:\\tools\\sous-agent');
-      logger.info('👉 To finish, double-click C:\\tools\\sous-agent\\sous-launcher.vbs on your Windows host.');
+      logger.info(
+        '👉 To finish, double-click C:\\tools\\sous-agent\\sous-launcher.vbs on your Windows host.',
+      );
     } catch (e: any) {
       logger.error(`❌ Failed to install Windows Agent: ${e.message}`);
     }

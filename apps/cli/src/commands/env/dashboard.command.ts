@@ -23,7 +23,9 @@ export class DashboardCommand extends CommandRunner {
 
   async run(passedParam: string[], options?: DashboardOptions): Promise<void> {
     const env = options?.env || 'dev';
-    logger.info(`📊 Opening Infrastructure Dashboard for environment: ${env}...`);
+    logger.info(
+      `📊 Opening Infrastructure Dashboard for environment: ${env}...`,
+    );
 
     // In a real standalone dashboard, we would only show the 'infra' tab
     // For now, we reuse the existing Dev Dashboard but we could specialize it further

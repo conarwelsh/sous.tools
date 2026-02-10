@@ -16,7 +16,9 @@ export class EnvExportCommand extends CommandRunner {
     const projectId = 'd1c836b9-17fe-49ed-bf45-2966cf2591d2';
 
     if (passedParam.length === 0) {
-      logger.error('❌ Please provide a command to run (e.g., sous env export -- pnpm build)');
+      logger.error(
+        '❌ Please provide a command to run (e.g., sous env export -- pnpm build)',
+      );
       return;
     }
 

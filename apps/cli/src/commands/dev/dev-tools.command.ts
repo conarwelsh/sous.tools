@@ -39,7 +39,7 @@ export class DevToolsCommand extends CommandRunner {
 
     if (options?.headless) {
       if (options?.json) {
-        const processes = this.manager.getProcesses().map(p => ({
+        const processes = this.manager.getProcesses().map((p) => ({
           id: p.id,
           name: p.name,
           status: p.status,

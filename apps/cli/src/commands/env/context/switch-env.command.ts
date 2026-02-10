@@ -11,14 +11,20 @@ interface SwitchOptions {
 
 @SubCommand({
   name: 'switch-env',
-  description: 'Switch the active environment context (dev, staging, production)',
+  description:
+    'Switch the active environment context (dev, staging, production)',
 })
 export class SwitchEnvCommand extends CommandRunner {
   async run(passedParam: string[], options?: SwitchOptions): Promise<void> {
     const env = passedParam[0] || options?.env;
-    
-    if (!env || !['dev', 'staging', 'production', 'development'].includes(env)) {
-      logger.error('❌ Please specify a valid environment: dev, staging, or production');
+
+    if (
+      !env ||
+      !['dev', 'staging', 'production', 'development'].includes(env)
+    ) {
+      logger.error(
+        '❌ Please specify a valid environment: dev, staging, or production',
+      );
       return;
     }
 
@@ -31,15 +37,19 @@ export class SwitchEnvCommand extends CommandRunner {
       fs.mkdirSync(sousDir, { recursive: true });
     }
 
-    const context = fs.existsSync(contextPath) 
+    const context = fs.existsSync(contextPath)
       ? JSON.parse(fs.readFileSync(contextPath, 'utf-8'))
       : {};
 
     context.env = normalizedEnv;
     fs.writeFileSync(contextPath, JSON.stringify(context, null, 2));
 
-    logger.info(`✅ Environment context switched to: ${chalk.bold(normalizedEnv.toUpperCase())}`);
-    logger.info('👉 Note: You may need to restart long-running processes for changes to take effect.');
+    logger.info(
+      `✅ Environment context switched to: ${chalk.bold(normalizedEnv.toUpperCase())}`,
+    );
+    logger.info(
+      '👉 Note: You may need to restart long-running processes for changes to take effect.',
+    );
   }
 
   @Option({

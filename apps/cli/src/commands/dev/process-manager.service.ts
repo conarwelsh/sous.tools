@@ -1,7 +1,7 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { spawn, ChildProcess, exec } from 'child_process';
 import treeKill from 'tree-kill';
-import { resolveConfig } from '@sous/config';
+import { resolveConfig, config } from '@sous/config';
 import { logger } from '@sous/logger';
 import { EventEmitter } from 'events';
 import { promisify } from 'util';
@@ -11,7 +11,12 @@ import * as fs from 'fs';
 
 const execAsync = promisify(exec);
 
-export type ProcessStatus = 'running' | 'starting' | 'stopped' | 'error' | 'building';
+export type ProcessStatus =
+  | 'running'
+  | 'starting'
+  | 'stopped'
+  | 'error'
+  | 'building';
 
 export interface ManagedLog {
   id: string;
@@ -296,13 +301,21 @@ export class ProcessManager
 
   async autoStartCore() {
     try {
-      this.addLog('db', '🐳 Ensuring Docker infrastructure is running...', 'info');
-      
+      this.addLog(
+        'db',
+        '🐳 Ensuring Docker infrastructure is running...',
+        'info',
+      );
+
       // Check if docker daemon is running
       try {
         await execAsync('docker info');
       } catch (e) {
-        this.addLog('db', '❌ Docker daemon is not running. Please start Docker.', 'error');
+        this.addLog(
+          'db',
+          '❌ Docker daemon is not running. Please start Docker.',
+          'error',
+        );
         return;
       }
 

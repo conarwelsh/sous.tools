@@ -220,15 +220,13 @@ export class PresentationService {
   }
 
   async deleteTemplate(id: string, organizationId: string) {
-    await this.dbService.db
-      .delete(templates)
-      .where(
-        and(
-          eq(templates.id, id),
-          eq(templates.organizationId, organizationId),
-          eq(templates.isSystem, false), // Prevent deleting system templates
-        ),
-      );
+    await this.dbService.db.delete(templates).where(
+      and(
+        eq(templates.id, id),
+        eq(templates.organizationId, organizationId),
+        eq(templates.isSystem, false), // Prevent deleting system templates
+      ),
+    );
     return { success: true };
   }
 

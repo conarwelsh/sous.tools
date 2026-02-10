@@ -3,7 +3,7 @@ import { Box, Text, useInput, useApp } from 'ink';
 import TextInput from 'ink-text-input';
 import Spinner from 'ink-spinner';
 import { ProcessManager, ManagedProcess } from '../process-manager.service.js';
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 import os from 'os';
 
 interface Props {
@@ -83,16 +83,16 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
       const child = spawn(command, args, { shell: true });
       setCloudProcess(child);
 
-      child.stdout?.on('data', (data) => {
+      child.stdout?.on('data', (data: Buffer) => {
         const lines = data.toString().split('\n');
         setCloudLogs((prev) => [...prev, ...lines].slice(-1000));
       });
 
-      child.stderr?.on('data', (data) => {
+      child.stderr?.on('data', (data: Buffer) => {
         setCloudLogs((prev) => [...prev, `[ERR] ${data.toString()}`].slice(-1000));
       });
 
-      child.on('error', (err) => {
+      child.on('error', (err: Error) => {
         setCloudLogs((prev) => [...prev, `[FAIL] ${err.message}`]);
       });
     } catch (e: any) {

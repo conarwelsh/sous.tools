@@ -10,7 +10,10 @@ import { logger } from '@sous/logger';
 })
 export class ContextCommand extends CommandRunner {
   async run(passedParam: string[]): Promise<void> {
-    if (passedParam.length > 0 && ['whoami', 'switch-env'].includes(passedParam[0])) {
+    if (
+      passedParam.length > 0 &&
+      ['whoami', 'switch-env'].includes(passedParam[0])
+    ) {
       return;
     }
     logger.info('Please specify a subcommand: whoami, switch-env');

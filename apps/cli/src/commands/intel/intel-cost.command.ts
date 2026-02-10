@@ -14,16 +14,18 @@ export class IntelCostCommand extends CommandRunner {
       return;
     }
 
-    console.log('
-' + chalk.bold(`📊 COST ANALYSIS: ${id.toUpperCase()}`));
+    console.log('\n' + chalk.bold(`📊 COST ANALYSIS: ${id.toUpperCase()}`));
     console.log('='.repeat(50));
-    console.log(`${chalk.bold('INGREDIENT'.padEnd(25))} ${chalk.bold('QTY'.padEnd(10))} ${chalk.bold('COST')}`);
+    console.log(
+      `${chalk.bold('INGREDIENT'.padEnd(25))} ${chalk.bold('QTY'.padEnd(10))} ${chalk.bold('COST')}`,
+    );
     console.log(`${'Butter'.padEnd(25)} ${'500g'.padEnd(10)} $4.50`);
     console.log(`${'Flour'.padEnd(25)} ${'1kg'.padEnd(10)} $1.20`);
     console.log('-'.repeat(50));
     console.log(`${chalk.bold('TOTAL COST:'.padEnd(35))} $5.70`);
-    console.log(`${chalk.green(chalk.bold('MARGIN (at $25.00):'.padEnd(35)))} 77.2%`);
-    console.log('='.repeat(50) + '
-');
+    console.log(
+      `${chalk.green(chalk.bold('MARGIN (at $25.00):'.padEnd(35)))} 77.2%`,
+    );
+    console.log('='.repeat(50) + '\n');
   }
 }
