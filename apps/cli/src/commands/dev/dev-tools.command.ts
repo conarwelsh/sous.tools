@@ -19,7 +19,7 @@ interface DevOptions {
 }
 
 @Command({
-  name: 'dev-tools',
+  name: 'dev',
   description: 'Manage development environment',
   subCommands: [InstallCommand, SyncCommand],
 })
