@@ -1,7 +1,7 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { spawn, ChildProcess, exec } from 'child_process';
 import treeKill from 'tree-kill';
-import { server as config } from '@sous/config';
+import { resolveConfig } from '@sous/config';
 import { logger } from '@sous/logger';
 import { EventEmitter } from 'events';
 import { promisify } from 'util';
@@ -52,10 +52,11 @@ export class ProcessManager
 
   constructor() {
     super();
-    this.initProcesses();
   }
 
   async onModuleInit() {
+    const config = await resolveConfig();
+    this.initProcesses(config);
     await this.resolvePnpm();
     await this.connectPm2();
     // Start polling status and agent logs
@@ -169,7 +170,7 @@ export class ProcessManager
     pm2.disconnect();
   }
 
-  private initProcesses() {
+  private initProcesses(config: any) {
     const apps: Partial<ManagedProcess>[] = [
       {
         id: 'api',

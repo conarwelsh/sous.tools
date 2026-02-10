@@ -36,8 +36,11 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const { config, resolveConfig } = require("@sous/config");
+  await resolveConfig();
+  
   // Only allow in development
-  if (process.env.NODE_ENV !== "development") {
+  if (config.env !== "development") {
     return NextResponse.json(
       { error: "Direct saving only available in development" },
       { status: 403 },

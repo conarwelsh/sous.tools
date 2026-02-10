@@ -1,10 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { MaintenanceModule } from './domains/maintenance/maintenance.module.js';
 import { SeederService } from './domains/maintenance/services/seeder.service.js';
-import { AuthService } from './domains/iam/auth/auth.service.js';
+import { resolveConfig } from '@sous/config';
 import { logger } from '@sous/logger';
 
 async function bootstrap() {
+  const config = await resolveConfig();
   logger.info('🚀 Bootstrapping Seeder Application Context...');
   try {
     const app = await NestFactory.createApplicationContext(MaintenanceModule, {
@@ -13,7 +14,7 @@ async function bootstrap() {
     await app.init();
     logger.info('✅ Application Context Created and Initialized.');
 
-    const dbUrl = process.env.DATABASE_URL;
+    const dbUrl = config.db.url;
     logger.info(
       `🐘 Database URL: ${dbUrl ? dbUrl.replace(/:.*@/, ':****@') : 'MISSING'}`,
     );

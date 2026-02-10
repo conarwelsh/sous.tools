@@ -2,17 +2,9 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import * as schema from '../apps/api/src/domains/core/database/schema.js';
 import { sql } from 'drizzle-orm';
+import { resolveConfig } from '../packages/config/src/index.js';
 
-const dbUrl = process.env.DATABASE_URL;
-if (!dbUrl) {
-  console.error('DATABASE_URL is missing');
-  process.exit(1);
-}
-
-const pool = new Pool({ connectionString: dbUrl });
-const db = drizzle(pool, { schema });
-
-async function wipe() {
+async function wipe(db: any) {
   console.log('🔥 Wiping database (Dropping all tables and enums)...');
   
   // Drop tables
@@ -40,9 +32,19 @@ async function wipe() {
 }
 
 async function main() {
+  const config = await resolveConfig();
+  const dbUrl = config.db.url;
+  if (!dbUrl) {
+    console.error('DATABASE_URL is missing');
+    process.exit(1);
+  }
+
+  const pool = new Pool({ connectionString: dbUrl });
+  const db = drizzle(pool, { schema });
+
   const cmd = process.argv[2];
   if (cmd === 'wipe') {
-    await wipe();
+    await wipe(db);
   } else {
     console.error('Unknown command. Use "wipe".');
   }

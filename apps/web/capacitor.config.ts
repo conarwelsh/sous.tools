@@ -4,9 +4,10 @@ import { execSync } from "child_process";
 // Detect WSL IP for development
 let serverUrl = "http://10.0.2.2:3000"; 
 try {
+  const { config } = require("@sous/config");
   const output = execSync("hostname -I").toString().trim();
   const wslIp = output.split(" ").find(ip => ip !== "127.0.0.1" && ip.startsWith("172.")) || output.split(" ")[0];
-  const port = process.env.PORT || "3000";
+  const port = config.web.port || "3000";
   if (wslIp) {
     serverUrl = `http://${wslIp}:${port}`;
     console.log("CapacitorConfig: BAKING_IN_URL:", serverUrl);

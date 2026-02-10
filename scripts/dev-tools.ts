@@ -1,41 +1,43 @@
-import { localConfig } from "../packages/config/src/index";
+import { resolveConfig } from "../packages/config/src/index";
 import { spawn, execSync, ChildProcess } from "child_process";
 import net from "net";
 import fs from "fs";
 import path from "path";
 
-const app = process.argv[2];
-const instanceName = process.env.PM2_APP_NAME || app;
+async function run() {
+  const configResolved = await resolveConfig();
+  const app = process.argv[2];
+  const instanceName = process.env.PM2_APP_NAME || app;
 
-if (!app) {
-  console.error("Usage: dev-tools <app_name>");
-  process.exit(1);
-}
+  if (!app) {
+    console.error("Usage: dev-tools <app_name>");
+    process.exit(1);
+  }
 
-// --- Configuration ---
+  // --- Configuration ---
 
-const appConfigs: Record<
-  string,
-  { port: number; command: string; cwd: string; color: string; requiresEmulator?: boolean }
-> = {
-  web: {
-    port: Number(process.env.PORT) || localConfig.web.port,
-    command: "next dev -H 0.0.0.0",
-    cwd: "apps/web",
-    color: "34", // Blue
-  },
-  docs: {
-    port: Number(process.env.PORT) || localConfig.docs.port,
-    command: "next dev --webpack -H 0.0.0.0",
-    cwd: "apps/docs",
-    color: "32", // Green
-  },
-  api: {
-    port: Number(process.env.PORT) || localConfig.api.port,
-    command: "nest start --watch",
-    cwd: "apps/api",
-    color: "33", // Yellow
-  },
+  const appConfigs: Record<
+    string,
+    { port: number; command: string; cwd: string; color: string; requiresEmulator?: boolean }
+  > = {
+    web: {
+      port: Number(process.env.PORT) || configResolved.web.port,
+      command: "next dev -H 0.0.0.0",
+      cwd: "apps/web",
+      color: "34", // Blue
+    },
+    docs: {
+      port: Number(process.env.PORT) || configResolved.docs.port,
+      command: "next dev --webpack -H 0.0.0.0",
+      cwd: "apps/docs",
+      color: "32", // Green
+    },
+    api: {
+      port: Number(process.env.PORT) || configResolved.api.port,
+      command: "nest start --watch",
+      cwd: "apps/api",
+      color: "33", // Yellow
+    },
   wearos: {
     port: 8081,
     command: "bash /home/conar/sous.tools/scripts/run-wearos.sh TARGET_DEVICE",
@@ -305,17 +307,16 @@ async function startProcess() {
     stdio: ["ignore", "pipe", "pipe"],
     cwd: config.cwd,
     detached: true, // Critical for tree-killing
-    env: {
-      ...process.env,
-      PORT: config.port.toString(),
-      FLAVOR: process.env.FLAVOR,
-      DIST_DIR: process.env.DIST_DIR,
-      ANDROID_SERIAL: targetDevice || undefined,
-      NEXT_PUBLIC_API_URL: `http://${hostIp}:4000`,
-      NEXT_PUBLIC_WEB_URL: `http://${hostIp}:${config.port}`,
-      FORCE_COLOR: "1", 
-    },
-  });
+          env: {
+            ...process.env,
+            PORT: config.port.toString(),
+            FLAVOR: process.env.FLAVOR,
+            DIST_DIR: process.env.DIST_DIR,
+            ANDROID_SERIAL: targetDevice || undefined,
+            NEXT_PUBLIC_API_URL: configResolved.api.url,
+            NEXT_PUBLIC_WEB_URL: configResolved.web.url,
+            FORCE_COLOR: "1", 
+          },  });
 
   child.stdout?.on("data", (data) => {
     log(data.toString(), "raw");
@@ -415,5 +416,8 @@ process.on("SIGINT", () => {
   process.exit();
 });
 
-// Start initially
-startProcess();
+// Start the tool
+run().catch(err => {
+  console.error("FATAL:", err);
+  process.exit(1);
+});

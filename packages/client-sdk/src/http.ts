@@ -77,11 +77,7 @@ let clientInstance: HttpClient | null = null;
 
 export const getHttpClient = async () => {
   if (clientInstance) return clientInstance;
-  const config = localConfig;
-  clientInstance = new HttpClient(
-    process.env.NEXT_PUBLIC_API_URL ||
-      config.api.url ||
-      "http://localhost:4000",
-  );
+  const { config } = await import("@sous/config");
+  clientInstance = new HttpClient(config.api.url);
   return clientInstance;
 };

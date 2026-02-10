@@ -1,7 +1,9 @@
 import { CommandFactory } from 'nest-commander';
 import { AppModule } from './app.module.js';
+import { configPromise } from '@sous/config';
 
 async function bootstrap() {
+  await configPromise;
   // Suppress React 19 / Ink deprecation warnings by silencing console.error for specific patterns
   const originalError = console.error;
   console.error = (...args) => {
