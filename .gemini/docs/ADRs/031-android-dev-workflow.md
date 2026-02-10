@@ -25,7 +25,7 @@ We will adopt an **Automated Hybrid Bridge** approach managed by `@sous/cli`:
 1.  **Build Environment:** All compilation (Gradle, Rust/Tauri) occurs inside WSL2 to avoid cross-OS filesystem overhead.
 2.  **SDKs:** Android SDK and JDK 17+ are installed inside WSL2.
 3.  **Global ADB Bridge:** WSL2 is configured to use the Windows host's ADB server as the master socket via `ADB_SERVER_SOCKET=tcp:$WIN_IP:5037`. This requires the Windows ADB server to be started with `-a` (e.g., `adb -a nodaemon server start`).
-4.  **Path Sanitization:** The CLI orchestrator (`sous dev`) automatically strips Windows `/mnt/c/` paths from the environment during Android-target builds to prevent "Android Studio" folder collisions.
+4.  **Path Sanitization:** The CLI dev tools (`sous dev`) automatically strips Windows `/mnt/c/` paths from the environment during Android-target builds to prevent "Android Studio" folder collisions.
 5.  **Automated Emulator Management:** The CLI automatically detects if an emulator is running on the host. If not, it launches the Windows-native `emulator.exe` and waits for it to become available before starting the build.
 6.  **Centralized Configuration:** All bridge settings (WIN_IP, ADB_SERVER_SOCKET) are managed via `~/.sous/shell/zshrc`.
 

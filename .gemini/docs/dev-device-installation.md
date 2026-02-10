@@ -32,7 +32,7 @@ The `@sous/cli` will detect your Windows IP and connect WSL2 to this server via 
 
 ## 3. Emulator Management
 
-The orchestrator (`sous dev`) will automatically launch the preferred emulator if none are detected. You can configure the AVD name in `apps/cli/src/commands/dev/process-manager.service.ts`.
+The dev tools (`sous dev`) will automatically launch the preferred emulator if none are detected. You can configure the AVD name in `apps/cli/src/commands/dev/process-manager.service.ts`.
 
 ## 4. Path Sanitization
 

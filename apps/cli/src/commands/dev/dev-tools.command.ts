@@ -37,7 +37,7 @@ export class DevToolsCommand extends CommandRunner {
     }
 
     if (options?.headless) {
-      logger.info('🚀 Starting Dev Orchestrator in HEADLESS mode...');
+      logger.info('🚀 Starting Sous Dev Tools in HEADLESS mode...');
       await this.manager.autoStartCore();
 
       if (options?.kiosks) {
@@ -273,7 +273,7 @@ export class DevToolsCommand extends CommandRunner {
       process.stdout.write('\x1b[?1049h');
       process.stdout.write('\x1b[2J\x1b[0f');
 
-      logger.info('🚀 Starting Robust Dev Orchestrator (Ink TUI)...');
+      logger.info('🚀 Starting Sous Dev Tools (Ink TUI)...');
 
       // Auto-start core services
       this.manager.autoStartCore();

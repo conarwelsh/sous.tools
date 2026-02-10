@@ -42,7 +42,6 @@ export ADB_SERVER_SOCKET=tcp:$WIN_IP:5037
 export ANDROID_HOME="$HOME/Android/Sdk"
 export NDK_HOME="$ANDROID_HOME/ndk/28.0.12674011"
 export JAVA_HOME="/usr/lib/jvm/java-21-openjdk-amd64"
-export TAURI_DEV_HOST=localhost
 
 # WSL2 GUI Rendering Fixes (MESA/WebKit Overrides)
 export WEBKIT_DISABLE_COMPOSITING_MODE=1
@@ -62,11 +61,6 @@ alias sm="sous maintenance housekeep"
 alias ss="sous dev sync"
 alias si="sous dev install"
 alias st="cd ~/sous.tools"
-
-# Path-Sanitized Android Dev Helper
-function sda() {
-  PATH=$(echo $PATH | tr ':' '\\n' | grep -v 'mnt/c' | tr '\\n' ':') ANDROID_HOME="$HOME/Android/Sdk" NDK_HOME="$HOME/Android/Sdk/ndk/29.0.13846066" pnpm tauri android dev --no-dev-server-wait
-}
 
 alias c="clear"
 alias ls="ls -lah --color=auto"

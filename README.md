@@ -10,7 +10,7 @@ This is a monorepo managed by **TurboRepo** and **pnpm workspaces**.
 
 - **[@sous/api](./apps/api)**: Centralized NestJS API & Drizzle ORM.
 - **[@sous/web](./apps/web)**: Unified Next.js 16 application for all platforms. Includes Admin Console, KDS, POS, and Signage targets via Capacitor Product Flavors.
-- **[@sous/cli](./apps/cli)**: Command-line orchestrator & developer tools.
+- **[@sous/cli](./apps/cli)**: Sous Dev Tools & command-line utility.
 - **[@sous/wearos](./apps/wearos)**: Native Wear OS companion app.
 - **[@sous/docs](./apps/docs)**: Documentation hub & Branding lab.
 

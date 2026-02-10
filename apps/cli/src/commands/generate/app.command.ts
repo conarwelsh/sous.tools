@@ -59,14 +59,6 @@ export class AppCommand extends CommandRunner {
       '{{APP_NAME}}': appPackageName,
     });
 
-    this.replaceInFile(path.join(targetDir, 'src-tauri', 'tauri.conf.json'), {
-      '{{APP_SLUG}}': appSlug,
-    });
-
-    this.replaceInFile(path.join(targetDir, 'src-tauri', 'Cargo.toml'), {
-      '{{APP_SLUG}}': appSlug,
-    });
-
     // 3. Update pnpm-workspace if needed (optional, usually handled by glob)
 
     logger.info(`✅ App generated at apps/${appName}`);

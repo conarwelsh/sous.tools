@@ -20,7 +20,7 @@ This is a monorepo for the `@sous` suite of tools, managed using TurboRepo. It f
 - **`apps/`**
   - `@sous/web`: Next.js application (Primary UI).
   - `@sous/api`: NestJS application (Core Intelligence).
-  - `@sous/cli`: NestJS-based CLI tool (Orchestrator).
+  - `@sous/cli`: NestJS-based CLI tool (Sous Dev Tools).
 - **`packages/`**
   - `@sous/ui`: Shared UI component library (Shadcn pattern).
   - `@sous/features`: Shared business logic, "Organisms", and Server Actions.

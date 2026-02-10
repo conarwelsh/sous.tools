@@ -1,4 +1,4 @@
-# ADR 008: CLI Orchestrator Strategy (@sous/cli)
+# ADR 008: CLI Dev Tools Strategy (@sous/cli)
 
 ## Status
 

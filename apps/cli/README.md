@@ -1,6 +1,6 @@
 # @sous/cli
 
-The command-line orchestrator for the `sous.tools` platform.
+The central developer toolset for the `sous.tools` platform.
 
 ## Strategic Umbrellas
 
@@ -85,5 +85,5 @@ When the `@sous` shell customization is installed, the following aliases are ava
 
 ## Related ADRs
 
-- [ADR 008: CLI Orchestrator Strategy](../../.gemini/docs/ADRs/008-cli-orchestrator-strategy.md)
+- [ADR 008: CLI Dev Tools Strategy](../../.gemini/docs/ADRs/008-cli-dev-tools-strategy.md)
 - [ADR 039: CLI-Driven ZSH Customization](../../.gemini/docs/ADRs/039-cli-zsh-customization.md)

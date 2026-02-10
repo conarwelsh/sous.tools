@@ -2,7 +2,7 @@ export * from "./domains/iam/auth/components/LoginForm";
 export * from "./domains/iam/auth/components/AuthProvider";
 export * from "./domains/iam/auth/hooks/useAuth";
 export * from "./domains/iam/auth/services/auth.service";
-export * from "./domains/branding/components/BrandingLab";
+export * from "./domains/branding/components/Atelier";
 export * from "./domains/knowledge/components/KnowledgeShell";
 export * from "./domains/knowledge/components/KnowledgeDocView";
 export * from "./domains/knowledge/components/KnowledgeSkeleton";

@@ -25,7 +25,7 @@ export interface ManagedProcess {
   id: string;
   name: string;
   type: 'app' | 'docker' | 'pm2';
-  framework: 'tauri' | 'nextjs' | 'nestjs' | 'native' | 'vite';
+  framework: 'nextjs' | 'nestjs' | 'native' | 'vite';
   status: ProcessStatus;
   port?: number;
   logs: ManagedLog[];

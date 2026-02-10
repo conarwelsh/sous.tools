@@ -149,7 +149,7 @@
 - **Dashboard & Dev Experience (God View):**
   - **Resolved @sous/docs "barking" issues:**
     - Fixed "Workspace Root" warning in Next.js by explicitly setting `outputFileTracingRoot`.
-    - Silenced "Port 3000 in use" noise by passing the correct `PORT=3001` in the `dev.kdl` orchestrator.
+    - Silenced "Port 3000 in use" noise by passing the correct `PORT=3001` in the `dev.kdl` dev tools.
     - Resolved several ESLint errors and warnings in `apps/docs` (unused variables, illegal `require` in tailwind config).
     - Cleaned up unused `react-dom-shim.js` logic and unified React 19 compatibility shims.
   - Added `[c]` keyboard shortcut to `sous dev` to clear logs for the currently active panel (Services, Combined, Terminal, or Gemini).
@@ -176,7 +176,7 @@
 - **Phase 1.2 Accomplishments:**
   - **Documentation Hub:** Implemented `@sous/docs` with a persistent Knowledge Base that aggregates ADRs, Specs, and READMEs. Refactored `@sous/features` build system to support split client/server entries for Next.js compatibility.
   - **CLI DDD Refactoring:** Reorganized `@sous/cli` into strategic umbrellas (`dev`, `env`, `quality`, `maintenance`).
-  - **Robust Dev Orchestrator:** Implemented an interactive React Ink TUI for `sous dev`, replacing static logging with a real-time process dashboard.
+  - **Robust Sous Dev Tools:** Implemented an interactive React Ink TUI for `sous dev`, replacing static logging with a real-time process dashboard.
   - **ZSH Customization:** Implemented `sous dev install shell` which adds brand-aligned prompts, infrastructure health indicators, and productivity aliases (`sous`, `sd`, `sl`, `c`, `ls`, etc.) to the user's terminal.
 - Enforced **Mandate 15: The Shell Pattern** by moving strategic umbrellas from `@sous/web` to the shared **`@sous/features`** package, ensuring absolute logic reuse between platforms.
 - Completed **Phase 1.1** of the rollout plan.
@@ -233,11 +233,11 @@
 - Created ADR 034: Real-time Throttling (60s batching for free-tier sustainability).
 - Created **ADR 035: Docker Infrastructure Strategy** (Local Cloud Mocks: Postgres, Redis, MailDev, Minio).
 - Created **ADR 036: Shared Features & Shell Pattern Strategy** (Maximizing reuse via `@sous/features`).
-- Created **ADR 037: Robust Dev Orchestrator Strategy** (Implementing custom React Ink TUI).
+- Created **ADR 037: Robust Sous Dev Tools Strategy** (Implementing custom React Ink TUI).
 - Created **ADR 038: CLI Infrastructure Dashboard Strategy** (Animated TUI for platform metrics).
 - Established **.gemini/specs/004-cli-infra-dashboard.md** for the real-time reporting tool.
-- Integrated **Docker Compose management** (Status, Start/Stop, Logs) into the Dev Orchestrator plan.
-- Added **RPi Edge Integration** to Dev Orchestrator (SSH log tailing, one-click Sync+Start).
+- Integrated **Docker Compose management** (Status, Start/Stop, Logs) into the Sous Dev Tools plan.
+- Added **RPi Edge Integration** to Sous Dev Tools (SSH log tailing, one-click Sync+Start).
 - Expanded **`sous maintenance`** brainstorming with `dead-code`, `unused-packages`, and `unused-css` commands.
 - Added **`ubuntu-sandbox` image** to ADR 035 for ephemeral testing of installation scripts.
 - Added **Mandate 17: Build Artifact Exclusion** (Ensuring @.gemini is excluded from production).

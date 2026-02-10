@@ -1,4 +1,4 @@
-# ADR 037: Robust Dev Orchestrator Strategy
+# ADR 037: Robust Sous Dev Tools Strategy
 
 ## Status
 
@@ -35,11 +35,11 @@ We will replace the multiplexer-based orchestration with a custom **TUI (Termina
 ### 3. Integrated Log Management
 
 - Instead of raw piping, the dashboard will consume JSON logs from `@sous/logger` and **stream logs from Docker Compose** to provide a unified experience.
-- **Remote RPi Logs:** For devices on the local network (e.g., Raspberry Pi), the orchestrator will support SSH-based log tailing, allowing RPi logs to appear alongside local application logs in the "God-View."
+- **Remote RPi Logs:** For devices on the local network (e.g., Raspberry Pi), the dev tools will support SSH-based log tailing, allowing RPi logs to appear alongside local application logs in the "God-View."
 
 ### 4. Edge Development Orchestration
 
-To support physical hardware development, the orchestrator will include:
+To support physical hardware development, the dev tools will include:
 
 - **One-Click RPi Start:** A specialized action that handles `pnpm sous dev sync` to the RPi and initiates the dev process on the remote device in a single step.
 - **Remote Management:** Start/Stop/Restart commands issued from the TUI to the RPi via the Real-time Gateway or SSH.

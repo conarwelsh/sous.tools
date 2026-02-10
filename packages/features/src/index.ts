@@ -42,7 +42,6 @@ export * from "./domains/hardware/components/AddHardwareView";
 export * from "./domains/hardware/hooks/useHardware";
 
 // Branding Domain
-export * from "./domains/branding/components/BrandingLab";
 export * from "./domains/branding/components/Atelier";
 
 // Docs Domain

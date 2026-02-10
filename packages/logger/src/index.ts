@@ -19,7 +19,7 @@ export function createLogger(options: { name: string }) {
 
   // Transports are only supported on server in Pino
   if (isServer) {
-    // 1. Local Development Pretty Printing (unless JSON is requested by orchestrator)
+    // 1. Local Development Pretty Printing (unless JSON is requested by dev tools)
     if (isDev && !useJson) {
       transports.push({
         target: "pino-pretty",

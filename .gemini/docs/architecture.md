@@ -9,7 +9,7 @@ This project is a monorepo managed by TurboRepo, following a **"Web-First"** arc
 - **Frontend**: Next.js (@sous/web) - The primary application serving all targets (Web, Mobile via Capacitor, and Kiosk via FullPageOS).
 - **Documentation**: Next.js (@sous/docs) - Centralized intelligence hub and component lab.
 - **Backend**: NestJS (@sous/api) - Hybrid REST (Scalar) and GraphQL (Apollo) architecture.
-- **CLI**: NestJS (@sous/cli) - Operational orchestrator.
+- **CLI**: NestJS (@sous/cli) - Sous Dev Tools.
 - **Watch**: Native Wear OS (@sous/wearos) - Specialized hands-free extension.
 - **Shared Libraries**: Standard React/TypeScript packages in `packages/`.
 
