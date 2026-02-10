@@ -102,6 +102,8 @@ export class InstallCommand extends CommandRunner {
     console.log('   Run: pnpm dev');
     console.log('\n4. 🪟 Windows Users (WSL2):');
     console.log('   Run: sous dev install agent (to fix emulator bridge)');
+    console.log('\n5. 🪟 Login to render: render login');
+    console.log('\n5. 🪟 Login to vercel: vercel login');
     console.log('\n' + '='.repeat(60) + '\n');
   }
 

@@ -107,7 +107,7 @@ fi
 
 if ! command -v render &> /dev/null; then
   echo "🚀 Installing Render CLI..."
-  curl https://render.com/install-cli.sh | s_sh=1 sh
+  curl curl -fsSL https://raw.githubusercontent.com/render-oss/cli/refs/heads/main/bin/install.sh | sh
 fi
 
 # 7. Infisical CLI
@@ -126,16 +126,22 @@ if [ "$IS_WSL" = true ]; then
   
   # Create symlinks from Windows to WSL filesystem for live updates
   # We use powershell to create the links on the Windows host
-  WSL_PATH="\\\\wsl.localhost\\Ubuntu-22.04\\home\\conar\\sous.tools\\scripts\\windows"
+  DISTRO_NAME=$WSL_DISTRO_NAME
+  PROJECT_ROOT=$(pwd)
+  # Convert /home/user/path to home\user\path
+  WIN_PROJECT_ROOT=$(echo $PROJECT_ROOT | sed 's/\//\\/g' | sed 's/^\\//')
+  WSL_PATH="\\\\wsl.localhost\\$DISTRO_NAME\\$WIN_PROJECT_ROOT\\scripts\\windows"
   
   powershell.exe -Command "
-    \$files = @('agent.ico', 'agent.png', 'sous-agent.js', 'sous-launcher.vbs', 'sous-tray.ps1');
-    foreach (\$f in \$files) {
-      \$target = \"\$WSL_PATH\\\$f\";
-      \$link = \"C:\\tools\\sous-agent\\\$f\";
-      if (Test-Path \$link) { Remove-Item \$link -Force };
-      New-Item -ItemType SymbolicLink -Path \$link -Target \$target -Force;
-    }
+    Start-Process powershell -Verb RunAs -ArgumentList '-Command', '
+      \$files = @(''agent.ico'', ''agent.png'', ''sous-agent.js'', ''sous-launcher.vbs'', ''sous-tray.ps1'');
+      foreach (\$f in \$files) {
+        \$target = \"$WSL_PATH\\\$f\";
+        \$link = \"C:\\tools\\sous-agent\\\$f\";
+        if (Test-Path \$link) { Remove-Item \$link -Force };
+        New-Item -ItemType SymbolicLink -Path \$link -Target \$target -Force;
+      }
+    '
   " > /dev/null
   
   # Firewall and Unblocking (requires admin, but we attempt)

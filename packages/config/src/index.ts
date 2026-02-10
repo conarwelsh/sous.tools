@@ -23,13 +23,13 @@ let cachedConfig: Config | null = null;
 /**
  * Normalizes environment name
  */
-function getEnv(): "development" | "staging" | "production" | "test" {
+async function getEnv(): Promise<"development" | "staging" | "production" | "test"> {
   // 1. Check for context override file (Local Dev only)
   if (isServer) {
     try {
-      const fs = require("fs");
-      const path = require("path");
-      const os = require("os");
+      const fs = await import("fs");
+      const path = await import("path");
+      const os = await import("os");
       const contextPath = path.join(os.homedir(), ".sous", "context.json");
       if (fs.existsSync(contextPath)) {
         const context = JSON.parse(fs.readFileSync(contextPath, "utf-8"));
@@ -50,10 +50,10 @@ function getEnv(): "development" | "staging" | "production" | "test" {
 /**
  * Finds project root by looking for pnpm-workspace.yaml
  */
-function findProjectRoot(): string {
+async function findProjectRoot(): Promise<string> {
   if (!isServer) return "";
-  const fs = require("fs");
-  const path = require("path");
+  const fs = await import("fs");
+  const path = await import("path");
   let current = process.cwd();
   while (current !== "/" && !fs.existsSync(path.join(current, "pnpm-workspace.yaml"))) {
     const parent = path.dirname(current);
@@ -79,7 +79,7 @@ async function fetchInfisicalSecrets(env: string): Promise<Record<string, string
   }
 
   try {
-    const { InfisicalSDK } = require("@infisical/sdk");
+    const { InfisicalSDK } = await import("@infisical/sdk");
     const client = new InfisicalSDK();
     await client.auth().universalAuth.login({
       clientId,
@@ -89,8 +89,6 @@ async function fetchInfisicalSecrets(env: string): Promise<Record<string, string
     const secrets = await client.secrets().listSecrets({
       environment: env === "development" ? "dev" : env === "staging" ? "staging" : "prod",
       projectId,
-      path: "/",
-      attachToProcessEnv: false,
     });
 
     const secretMap: Record<string, string> = {};
@@ -165,10 +163,18 @@ export async function resolveConfig(): Promise<Config> {
   // Load .env from project root if server-side
   if (isServer) {
     try {
-      const { config: loadDotenv } = require("dotenv");
-      const path = require("path");
-      const fs = require("fs");
-      const root = findProjectRoot();
+      const { config: loadDotenv } = await import("dotenv");
+      const path = await import("path");
+      const fs = await import("fs");
+      const root = await findProjectRoot();
+      
+      // 1. Load from root
+      const rootEnvPath = path.join(root, ".env");
+      if (fs.existsSync(rootEnvPath)) {
+        loadDotenv({ path: rootEnvPath });
+      }
+
+      // 2. Load from package (overrides root if exists)
       const envPath = path.join(root, "packages/config/.env");
       if (fs.existsSync(envPath)) {
         loadDotenv({ path: envPath });
@@ -183,7 +189,7 @@ export async function resolveConfig(): Promise<Config> {
     return cachedConfig;
   }
 
-  const env = getEnv();
+  const env = await getEnv();
   const envVars = { ...process.env };
 
   // 1. Fetch from Vault if server-side and credentials exist

@@ -51,6 +51,7 @@ export class DevToolsCommand extends CommandRunner {
 
       logger.info('🚀 Starting Sous Dev Tools in HEADLESS mode...');
       await this.manager.autoStartCore();
+      this.manager.startPolling();
 
       if (options?.kiosks) {
         const kiosks = ['pos', 'kds', 'signage', 'tools-app', 'wearos'];
@@ -289,6 +290,7 @@ export class DevToolsCommand extends CommandRunner {
 
       // Auto-start core services
       this.manager.autoStartCore();
+      this.manager.startPolling();
 
       this.renderDashboard();
     }
@@ -307,6 +309,7 @@ export class DevToolsCommand extends CommandRunner {
       process.stdout.write('\x1b[?1049l');
 
       logger.info('👋 Shutting down managed processes...');
+      this.manager.stopPolling();
       await this.manager.stopAll();
 
       logger.info('✅ Cleanup complete. Goodbye!');

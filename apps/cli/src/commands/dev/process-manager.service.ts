@@ -55,6 +55,8 @@ export class ProcessManager
   private lastAgentLogCheck: number = 0;
   private remoteEnv: Record<string, string> = {};
 
+  private pollIntervals: NodeJS.Timeout[] = [];
+
   constructor() {
     super();
   }
@@ -64,13 +66,26 @@ export class ProcessManager
     this.initProcesses(config);
     await this.resolvePnpm();
     await this.connectPm2();
+  }
+
+  startPolling() {
+    console.log("[ProcessManager] Starting polling...");
     // Start polling status and agent logs
-    setInterval(() => {
-      void this.updatePm2Statuses();
-    }, 5000);
-    setInterval(() => {
-      void this.pollAgentLogs();
-    }, 3000);
+    this.pollIntervals.push(
+      setInterval(() => {
+        void this.updatePm2Statuses();
+      }, 5000)
+    );
+    this.pollIntervals.push(
+      setInterval(() => {
+        void this.pollAgentLogs();
+      }, 3000)
+    );
+  }
+
+  stopPolling() {
+    this.pollIntervals.forEach(clearInterval);
+    this.pollIntervals = [];
   }
 
   private async connectPm2(): Promise<void> {
