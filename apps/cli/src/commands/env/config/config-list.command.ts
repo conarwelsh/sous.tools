@@ -15,13 +15,13 @@ export class ConfigListCommand extends CommandRunner {
     const mask = (val: any) => (val ? '********' : chalk.red('MISSING'));
 
     console.log(chalk.bold('\n[Infrastructure]'));
-    console.log(`API URL: ${config.api.url}`);
-    console.log(`Web URL: ${config.web.url}`);
+    console.log(`API URL: ${config.api?.url || 'DEFAULT'}`);
+    console.log(`Web URL: ${config.web?.url || 'DEFAULT'}`);
 
     console.log(chalk.bold('\n[Secrets]'));
-    console.log(`JWT Secret:      ${mask(config.iam.jwtSecret)}`);
-    console.log(`Supabase Key:    ${mask(config.storage.supabase.anonKey)}`);
-    console.log(`Redis URL:       ${mask(config.redis.url)}`);
+    console.log(`JWT Secret:      ${mask(config.iam?.jwtSecret)}`);
+    console.log(`Supabase Key:    ${mask(config.storage?.supabase?.anonKey)}`);
+    console.log(`Redis URL:       ${mask(config.redis?.url)}`);
 
     console.log(chalk.bold('\n[Context]'));
     console.log(`Environment:     ${config.env.toUpperCase()}`);

@@ -78,6 +78,6 @@ let clientInstance: HttpClient | null = null;
 export const getHttpClient = async () => {
   if (clientInstance) return clientInstance;
   const { config } = await import("@sous/config");
-  clientInstance = new HttpClient(config.api.url);
+  clientInstance = new HttpClient(config.api?.url || "http://localhost:4000");
   return clientInstance;
 };
