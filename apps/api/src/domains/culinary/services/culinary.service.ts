@@ -4,8 +4,10 @@ import {
   ingredients,
   recipes,
   recipeIngredients,
+  categories,
+  products,
 } from '../../core/database/schema.js';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { logger } from '@sous/logger';
 
 @Injectable()
@@ -13,6 +15,42 @@ export class CulinaryService {
   constructor(
     @Inject(DatabaseService) private readonly dbService: DatabaseService,
   ) {}
+
+  // --- Catalog ---
+  async getCategories(organizationId: string) {
+    return this.dbService.db
+      .select()
+      .from(categories)
+      .where(eq(categories.organizationId, organizationId));
+  }
+
+  async createCategory(data: typeof categories.$inferInsert) {
+    const result = await this.dbService.db
+      .insert(categories)
+      .values(data)
+      .returning();
+    return result[0];
+  }
+
+  async getProducts(organizationId: string, categoryId?: string) {
+    const filters = [eq(products.organizationId, organizationId)];
+    if (categoryId) {
+      filters.push(eq(products.categoryId, categoryId));
+    }
+
+    return this.dbService.db
+      .select()
+      .from(products)
+      .where(and(...filters));
+  }
+
+  async createProduct(data: typeof products.$inferInsert) {
+    const result = await this.dbService.db
+      .insert(products)
+      .values(data)
+      .returning();
+    return result[0];
+  }
 
   async seedSystem(orgId: string) {
     logger.info('  └─ Seeding Culinary System Data...');
@@ -40,6 +78,65 @@ export class CulinaryService {
         organizationId: orgId,
       })
       .onConflictDoNothing();
+
+    // Catalog Seeding
+    const [beers] = await this.dbService.db
+      .insert(categories)
+      .values({
+        name: 'Draft Beers',
+        organizationId: orgId,
+      })
+      .onConflictDoNothing()
+      .returning();
+
+    const [burgers] = await this.dbService.db
+      .insert(categories)
+      .values({
+        name: 'Burgers',
+        organizationId: orgId,
+      })
+      .onConflictDoNothing()
+      .returning();
+
+    if (beers) {
+      await this.dbService.db
+        .insert(products)
+        .values([
+          {
+            name: 'Pilsner',
+            price: 700,
+            categoryId: beers.id,
+            organizationId: orgId,
+          },
+          {
+            name: 'IPA',
+            price: 800,
+            categoryId: beers.id,
+            organizationId: orgId,
+          },
+        ])
+        .onConflictDoNothing();
+    }
+
+    if (burgers) {
+      await this.dbService.db
+        .insert(products)
+        .values([
+          {
+            name: 'Classic Burger',
+            price: 1500,
+            categoryId: burgers.id,
+            organizationId: orgId,
+          },
+          {
+            name: 'Cheeseburger',
+            price: 1700,
+            categoryId: burgers.id,
+            organizationId: orgId,
+          },
+        ])
+        .onConflictDoNothing();
+    }
   }
 
   async getIngredients(organizationId: string) {

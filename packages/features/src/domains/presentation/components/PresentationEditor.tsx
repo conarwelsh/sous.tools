@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import { Button, Card, Input, View, Text, ScrollView } from "@sous/ui";
 import { getHttpClient } from "@sous/client-sdk";

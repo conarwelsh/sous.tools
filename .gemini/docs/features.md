@@ -16,6 +16,15 @@
   - `@sous/logger`: Centralized logging (Pino).
   - `@sous/ui`: Standard React UI component library (Shadcn pattern).
   - `@sous/features`: Shared business logic and "Organisms".
+- **Shared Ingestion Engine (Spec 013)**:
+  - **Document Capture**: Multi-source support (Camera/Upload) with pre-processing.
+  - **Smart Mapping**: Fuzzy-matching and automated alias learning for catalog items.
+  - **Verification Flow**: Split-screen reviewer for AI extraction results.
+- **Presentation Engine (Spec 006/007)**:
+  - **Layout Designer**: Recursive, visual editor for display skeletons with Flexbox/Grid support.
+  - **Screen Manager**: Data-binding interface for mapping POS Catalog and Media assets to layout slots.
+  - **Real-time Synchronization**: Zero-refresh updates pushed to hardware displays via Socket.io.
+  - **Multi-Output Support**: Assign screens to physical HDMI ports or unique web slugs.
 
 ## CLI Capabilities (@sous/cli)
 

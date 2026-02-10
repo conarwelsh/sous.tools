@@ -49,7 +49,7 @@ export const POSFeature = () => {
   if (!isPaired) {
     return (
       <div className="flex-1 bg-black flex flex-col items-center justify-center p-8 text-center min-h-screen">
-        <Logo variant="cloud" size={64} animate suffix="pos" className="mb-12" />
+        <Logo size={64} animate suffix="pos" className="mb-12" />
         <h1 className="text-4xl font-black text-white uppercase tracking-tighter mb-4">
           Pair POS Terminal
         </h1>

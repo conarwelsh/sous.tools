@@ -50,7 +50,7 @@ export default function RegisterPage() {
         </Button>
 
         <View className="mb-12 flex flex-col items-center">
-          <Logo variant="neon" size={48} showWordmark={false} />
+          <Logo size={48} showWordmark={false} />
           <h1 className="text-4xl font-black text-white tracking-tighter uppercase mt-6">
             Create Organization
           </h1>

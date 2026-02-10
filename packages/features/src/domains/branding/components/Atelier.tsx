@@ -46,7 +46,7 @@ export const Atelier: React.FC = () => {
     setTimeout(() => {
       setSaving(false);
       navigator.clipboard.writeText(JSON.stringify(config, null, 2));
-      alert("Atelier workspace state committed to clipboard. In dev mode, this would write to branding.config.json.");
+      alert("Atelier workspace state committed to clipboard. In dev mode, this would write to branding.configon.");
     }, 800);
   };
 

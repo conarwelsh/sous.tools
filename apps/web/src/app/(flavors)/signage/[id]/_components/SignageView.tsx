@@ -36,7 +36,7 @@ export const SignageView = ({ id }: { id: string }) => {
   if (!isPaired) {
     return (
       <View className="flex-1 bg-black flex flex-col items-center justify-center p-8 text-center min-h-screen">
-        <Logo variant="neon" size={64} animate suffix="signage" className="mb-12" />
+        <Logo size={64} animate suffix="signage" className="mb-12" />
         <h1 className="text-4xl font-black text-white uppercase tracking-tighter mb-4">
           Pair Digital Screen
         </h1>
@@ -57,7 +57,7 @@ export const SignageView = ({ id }: { id: string }) => {
   if (!presentation) {
     return (
       <View className="flex-1 bg-black flex flex-col items-center justify-center p-8 text-center min-h-screen">
-        <Logo variant="neon" size={48} animate suffix="signage" className="mb-12 opacity-20" />
+        <Logo size={48} animate suffix="signage" className="mb-12 opacity-20" />
         <Text className="text-zinc-500 font-bold uppercase tracking-widest animate-pulse">
           Awaiting Content...
         </Text>

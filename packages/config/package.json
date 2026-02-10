@@ -13,8 +13,8 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
-    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean --external fs,path,dotenv,child_process",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch --external fs,path,dotenv,child_process",
     "lint": "echo 'Placeholder'",
     "test": "jest"
   },

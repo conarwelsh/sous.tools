@@ -4,7 +4,7 @@ import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Book, Lightbulb, FileText } from "lucide-react";
-import { type DocFile } from "../types.js";
+import { type DocFile } from "../types";
 
 interface Props {
   doc: DocFile;

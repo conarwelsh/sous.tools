@@ -26,6 +26,15 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@sous/features": [
+        "../../packages/features/src/index"
+      ],
+      "@sous/features/server": [
+        "../../packages/features/src/server"
+      ],
+      "@sous/ui": [
+        "../../packages/ui/src/index"
       ]
     }
   },
@@ -34,19 +43,20 @@
     "nativewind-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "**/*.mts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts",
-    ".next-pos/types/**/*.ts",
-    ".next-pos/dev/types/**/*.ts",
     ".next-kds/types/**/*.ts",
     ".next-kds/dev/types/**/*.ts",
     ".next-signage/types/**/*.ts",
     ".next-signage/dev/types/**/*.ts",
+    ".next-pos/types/**/*.ts",
+    ".next-pos/dev/types/**/*.ts",
     ".next-mobile/types/**/*.ts",
     ".next-mobile/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    ".next"
   ]
 }

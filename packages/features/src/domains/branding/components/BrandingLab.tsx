@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Atelier } from "./Atelier.js";
+import { Atelier } from "./Atelier";
 
 /**
  * @deprecated Use Atelier component instead.

@@ -82,7 +82,7 @@ export const HardwareManager = () => {
   if (loading && !devices.length) {
     return (
       <div className="p-20 flex items-center justify-center">
-        <Logo variant="cloud" size={48} animate />
+        <Logo size={48} animate />
       </div>
     );
   }

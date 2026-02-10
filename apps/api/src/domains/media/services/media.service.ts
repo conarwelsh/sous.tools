@@ -2,11 +2,19 @@ import { Injectable } from '@nestjs/common';
 import sharp from 'sharp';
 import { DatabaseService } from '../../core/database/database.service.js';
 import { media } from '../../core/database/schema.js';
+import { eq } from 'drizzle-orm';
 import { logger } from '@sous/logger';
 
 @Injectable()
 export class MediaService {
   constructor(private readonly dbService: DatabaseService) {}
+
+  async getMedia(organizationId: string) {
+    return this.dbService.db
+      .select()
+      .from(media)
+      .where(eq(media.organizationId, organizationId));
+  }
 
   async processImage(
     buffer: Buffer,

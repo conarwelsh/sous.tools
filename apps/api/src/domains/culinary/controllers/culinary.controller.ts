@@ -33,4 +33,31 @@ export class CulinaryController {
       ingredients || [],
     );
   }
+
+  // --- Catalog ---
+  @Get('categories')
+  async getCategories(@Req() req: any) {
+    return this.culinaryService.getCategories(req.user.organizationId);
+  }
+
+  @Post('categories')
+  async createCategory(@Body() body: any, @Req() req: any) {
+    return this.culinaryService.createCategory({
+      ...body,
+      organizationId: req.user.organizationId,
+    });
+  }
+
+  @Get('products')
+  async getProducts(@Req() req: any) {
+    return this.culinaryService.getProducts(req.user.organizationId);
+  }
+
+  @Post('products')
+  async createProduct(@Body() body: any, @Req() req: any) {
+    return this.culinaryService.createProduct({
+      ...body,
+      organizationId: req.user.organizationId,
+    });
+  }
 }

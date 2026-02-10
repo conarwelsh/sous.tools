@@ -1,41 +1,50 @@
 // IAM Domain
-export * from "./domains/iam/auth/components/AuthProvider.js";
-export * from "./domains/iam/auth/components/LoginForm.js";
-export * from "./domains/iam/auth/hooks/useAuth.js";
-export * from "./domains/iam/auth/services/auth.service.js";
+export * from "./domains/iam/auth/components/AuthProvider";
+export * from "./domains/iam/auth/components/LoginForm";
+export * from "./domains/iam/auth/hooks/useAuth";
+export * from "./domains/iam/auth/services/auth.service";
 
 // Knowledge Domain
-export * from "./domains/knowledge/components/KnowledgeShell.js";
-export * from "./domains/knowledge/components/KnowledgeDocView.js";
-export * from "./domains/knowledge/components/KnowledgeSkeleton.js";
-export * from "./domains/knowledge/types.js";
+export * from "./domains/knowledge/components/KnowledgeShell";
+export * from "./domains/knowledge/components/KnowledgeDocView";
+export * from "./domains/knowledge/components/KnowledgeSkeleton";
+export * from "./domains/knowledge/types";
 
 // Presentation Domain
-export * from "./domains/presentation/components/PresentationRenderer.js";
-export * from "./domains/presentation/components/PresentationEditor.js";
-export * from "./domains/presentation/components/LayoutManager.js";
-export * from "./domains/presentation/components/KioskManager.js";
-export * from "./domains/presentation/components/LabelEditor.js";
-export * from "./domains/presentation/types/presentation.types.js";
+export * from "./domains/presentation/index";
+export * from "./domains/presentation/types/presentation.types";
 
 // POS Domain
-export * from "./domains/pos/index.js";
+export * from "./domains/pos/index";
 
 // KDS Domain
-export * from "./domains/kds/index.js";
+export * from "./domains/kds/index";
 
 // Home Domain
-export * from "./domains/home/components/HomeView.js";
+export * from "./domains/home/components/HomeView";
+
+// Culinary Domain
+export * from "./domains/culinary/index";
+
+// Ingestion Domain
+export * from "./domains/ingestion/index";
+
+// Procurement Domain
+export * from "./domains/procurement/index";
+
+// Inventory Domain
+export * from "./domains/inventory/index";
 
 // Hardware Domain
-export * from "./domains/hardware/components/PairingWorkflow.js";
-export * from "./domains/hardware/components/HardwareManager.js";
-export * from "./domains/hardware/hooks/useHardware.js";
+export * from "./domains/hardware/components/PairingWorkflow";
+export * from "./domains/hardware/components/HardwareManager";
+export * from "./domains/hardware/components/AddHardwareView";
+export * from "./domains/hardware/hooks/useHardware";
 
 // Branding Domain
-export * from "./domains/branding/components/BrandingLab.js";
-export * from "./domains/branding/components/Atelier.js";
+export * from "./domains/branding/components/BrandingLab";
+export * from "./domains/branding/components/Atelier";
 
 // Docs Domain
-export * from "./domains/docs/components/PlaygroundController.js";
-export * from "./domains/docs/components/ComponentPlayground.js";
+export * from "./domains/docs/components/PlaygroundController";
+export * from "./domains/docs/components/ComponentPlayground";

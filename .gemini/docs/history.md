@@ -1,76 +1,36 @@
 # History
 
-## 2026-02-05
+## 2026-02-10 (Layout Manager Refactor & Stability)
 
-- **Monorepo Health Check & Housekeeping:**
-  - Executed a comprehensive health check via `sous quality check` (lint, typecheck, test, build).
-  - **Fixed `@sous/cli` Test & ESM Support:**
-    - Configured Jest for ESM support with `NODE_OPTIONS=--experimental-vm-modules`.
-    - Resolved `jest is not defined` errors by importing from `@jest/globals`.
-    - Removed stale web-app boilerplate controllers and tests from the CLI app.
-  - **Fixed `@sous/api` Typechecking:**
-    - Resolved missing dependencies (`@nestjs/passport`, `passport`).
-    - Fixed relative import paths and added mandatory `.js` extensions for `NodeNext` compatibility.
-    - Corrected `sharp` import style to support its default function export.
-  - **Resolved `@sous/ui` Linting & Typing:**
-    - Automated fixing of 38+ Prettier/ESLint issues.
-    - Suppressed SVG `className` type errors in `@sous/docs` by using any-casted object spreads for NativeWind compatibility.
-  - **Fixed `@sous/config` Test Imports:**
-    - Added `moduleNameMapper` to Jest config to resolve `.js` extensions in TypeScript source files.
-  - **Dependency Hydration:** Ensured all `apps/native` dependencies are correctly linked and building successfully.
-  - **Result:** ACHIEVED 100% PASS RATE across all 43 turbo tasks (lint, typecheck, test, build) for all 13 packages/apps.
-- **Universal Configuration & Logging:**
-  - Refactored **`@sous/config`** and **`@sous/logger`** to be browser-safe, enabling their use in Tauri/Vite environments.
-  - Enhanced **`@sous/config`** to properly fetch and merge **Infisical secrets** into `process.env` and the centralized config object, ensuring remote secrets override local ones.
-  - Resolved `AsyncLocalStorage` and `Top-level await` issues in the logger and config packages for CJS/ESM hybrid compatibility.
-- **Native-Headless Initialization:**
-  - Scaffolded a new **`apps/native-headless`** application using **Tauri v2 + React + TypeScript**.
-  - Configured the app to use port **1422** and integrated it with the monorepo design system and configuration.
-  - **Networking Robustness:** Standardized on `127.0.0.1` for `devUrl` and Vite host to resolve IPv6 mapping issues in WSL2. Updated `TAURI_DEV_HOST` to `localhost`.
-  - **Fixes:** Resolved blank window issue by simplifying the initial `App.tsx` and verifying build pipeline stability.
-- **Android Dev Ops Automation:**
-  - Implemented a permanent fix for WSL2-Windows Android interop issues.
-  - **Automated Emulator Management:** `sous dev --android` now detects, launches, and waits for the Windows Android emulator automatically.
-  - **Automated Device Selection:** The CLI now passes the preferred `emulatorName` directly to the `tauri android dev` command, eliminating interactive prompts.
-  - **Automated ADB Bridge:** The CLI now automatically attempts to start the Windows ADB server with the `-a` flag (listening on all interfaces) via PowerShell, eliminating the need for manual setup on the Windows side.
-  - **Path Sanitization:** The CLI now automatically strips Windows paths from the environment during Android builds to prevent directory collisions with "Android Studio".
-  - **Environment Bridging:** Configured a global ADB bridge (`ADB_SERVER_SOCKET`) managed via `~/.sous/shell/zshrc`.
-  - **Shell Cleanup:** Stripped redundant/duplicate Android configurations from the user's main `~/.zshrc`, consolidating all platform logic into the managed `~/.sous/shell/zshrc` file.
-  - **Universal Shared Packages:** Refactored `@sous/logger` and `@sous/config` to be fully browser-safe and ESM-compatible, resolving `Dynamic require` and `AsyncLocalStorage` issues in universal environments.
-  - **Centralized Logging:** Ensured all platform components append to `~/.sous/logs/combined.log` for a unified "God View" debugging experience.
-- **Robust Dev Installation:**
-  - Fixed **APT 404 errors** in `install-dev.sh` by automatically detecting and configuring `ports.ubuntu.com` mirrors when `arm64` is present as a foreign architecture.
-  - Resolved **EACCES error** in shell customization by switching to `pnpm run sous`.
-  - Automated **ZSH & Oh My Zsh** plugin configuration, ensuring `git`, `syntax-highlighting`, and `autosuggestions` are always present.
-- **Project Infrastructure & Stability:**
-  - **API Recovery:** Fixed `@sous/api` startup crashes by resolving database connection mismatches and explicitly binding to `0.0.0.0`.
-  - **Database Sync:** Standardized local development database credentials and automated schema synchronization via `pnpm run db:push`.
-  - **GUI Rendering Fixes:** Resolved "Blank Window" issues in Tauri apps under WSL2 by injecting software rendering and sandbox deactivation overrides (`WEBKIT_DISABLE_COMPOSITING_MODE=1`, etc.) into the environment.
-  - **Docker Orchestration:** Integrated automatic `docker compose up -d` into the CLI orchestrator to ensure infrastructure is ready before apps attempt to connect.
+- **Layout Manager Refactor:**
+    - Transitioned `LayoutManager` to use standard Next.js routing (`/presentation/layouts/new`, `/presentation/layouts/[id]`).
+    - Implemented a robust Drag-and-Drop system in `LayoutDesigner` using `@dnd-kit`.
+    - Added automatic nesting logic for structural elements (Containers, Slots, Fixed Boxes).
+    - Fixed API crash during template saves by sanitizing payloads to match the Drizzle schema.
+    - Resolved port conflict (EADDRINUSE: 4000) issues by cleaning up orphan `nest` and `node` processes.
+    - Updated `TemplateSkeletonRenderer` to support custom child rendering for the designer.
 
-## 2026-02-08 (Monorepo Health & CI Readiness)
+## 2026-02-09 (Presentation & Infrastructure Stability)
 
-- **Comprehensive Monorepo Fixes:**
-  - Resolved 100+ linting errors and warnings across all packages and apps to achieve a clean baseline for staging deployment.
-  - **Fixed `@sous/cli` Infrastructure Logic:**
-    - Wrapped async polling in `ProcessManager` to prevent returning Promises to `setInterval`, satisfying strict ESLint rules.
-    - Replaced forbidden `require('fs')` with standard `fs` imports.
-    - Sanitized complex bash command escapes in the Android deployment logic.
-    - Implemented type-safe `AgentResponse` interfaces to eliminate `any` returns in `WorkspaceCommand`.
-  - **Fixed `@sous/api` Driver Logic:**
-    - Resolved `Date` serialization issues in template literals within `SquareDriver`.
-  - **Fixed `@sous/web` UX & Architecture:**
-    - Refactored `AdminLayout` to move `SidebarContent` out of the render loop, eliminating performance bottlenecks and lint errors.
-    - Suppressed SSR hydration warnings for `isMounted` and `userOS` detection patterns using explanatory `@ts-expect-error` and `eslint-disable` comments.
-    - Resolved a critical parsing error in the admin layout caused by mismatched closing braces.
-    - Optimized ESLint performance by ignoring massive build artifacts in `.next*`, `android`, and `ios` directories.
-  - **Fixed `@sous/wearos` Build Environment:**
-    - Corrected `local.properties` to use the Linux Android SDK path, enabling successful Gradle builds in the WSL environment.
-- **CI/CD & Runner Verification:**
-  - Verified that the self-hosted GitHub runner is active, connected, and properly listening for jobs via PM2.
-  - Confirmed 100% test pass rate across all core domain packages.
-- **Next Steps:** Proceed with merge to `staging` and verify end-to-end deployment pipeline.
+- **Functional Layout Designer (Spec 006):**
+  - Upgraded the **`LayoutDesigner`** from a static mockup to a fully functional visual editor.
+  - **Recursive Tree Management:** Implemented logic to ensure all layout nodes have internal tracking IDs and can be updated or deleted recursively within the tree.
+  - **Property Editor:** Developed a context-aware sidebar for editing node properties (Flex, Gap, Padding, Background, and absolute positioning for fixed boxes).
+  - **Node Creation:** Implemented functional "Element Cards" to add new Groups (Containers), Slots, and Fixed boxes to the selected container.
+  - **Interactive Canvas:** Enhanced the **`TemplateSkeletonRenderer`** with click-to-select functionality and high-fidelity visual feedback for the active node.
+- **Screen Manager Implementation (Spec 007):**
+  - **Database Expansion:** Added the `screens` table to the PostgreSQL schema via Drizzle ORM to persist persistent content assignments.
+  - **Relational Integrity:** Updated the display assignment logic to link physical displays to **Screens** (which contain content and styles) instead of raw Layout Templates.
+  - **Backend API:** Implemented a full suite of CRUD endpoints in the `PresentationController` and `PresentationService` for managing screens.
+  - **UI Foundations:** Scaffolded the **`ScreenManager`** and **`ScreenEditor`** in `@sous/features`, allowing users to select a layout and bind real-world data sources (POS, Media, Static) to defined slots.
+- **Infrastructure & Environment Recovery:**
+  - **ESM require Resolution:** Fixed a critical "Dynamic require" error in `@sous/config` by implementing a resilient `eval('require')` check that correctly identifies CJS vs ESM environments.
+  - **Build Command Sanitization:** Marked Node.js built-ins (`fs`, `path`, etc.) as external in the `tsup` configuration for the config package, preventing bundler-induced runtime crashes.
+  - **Database Migration Reliability:** Resolved schema resolution issues in `drizzle-kit` by removing hardcoded `.js` extensions from TypeScript imports and switching to glob-based schema scanning.
+  - **Typecheck Stability:** Configured `tsconfig.json` to exclude the `.next` directory, preventing transient build errors from blocking development quality checks.
+- **Result:** ACHIEVED a fully functional presentation management loop (from structural design to content assignment) while stabilizing the monorepo build and development environment.
 
+## 2026-02-05 (Identity & Asset Strategy)
 
 - **Implemented Android Product Flavors:**
   - Added `tools`, `kds`, `pos`, and `signage` flavors to `apps/web/android/app/build.gradle`.

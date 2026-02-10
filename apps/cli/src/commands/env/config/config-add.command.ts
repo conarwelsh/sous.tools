@@ -1,6 +1,5 @@
 import { logger } from '@sous/logger';
 import { SubCommand, CommandRunner, Option } from 'nest-commander';
-import { InfisicalSDK } from '@infisical/sdk';
 import * as process from 'process';
 
 interface ConfigAddOptions {
@@ -22,67 +21,24 @@ export class ConfigAddCommand extends CommandRunner {
       process.exit(1);
     }
 
-    // Use @sous/config to ensure environment is bootstrapped
-    const { server: config } = await import('@sous/config');
+    try {
+      const { secrets } = await import('@sous/config');
 
-    const clientId = process.env.INFISICAL_CLIENT_ID;
-    const clientSecret = process.env.INFISICAL_CLIENT_SECRET;
-    const projectId = process.env.INFISICAL_PROJECT_ID;
-
-    if (!clientId || !clientSecret || !projectId) {
-      logger.error(
-        '❌ Error: Missing Infisical credentials (INFISICAL_CLIENT_ID, INFISICAL_CLIENT_SECRET, INFISICAL_PROJECT_ID)',
-      );
-      process.exit(1);
-    }
-
-    const { InfisicalSDK } = await import('@infisical/sdk');
-    const client = new InfisicalSDK();
-    await client.auth().universalAuth.login({
-      clientId,
-      clientSecret,
-    });
-
-    const targetEnvs = envs && envs.length > 0 ? envs : ['development'];
-
-    for (const env of targetEnvs) {
-      const infisicalEnv =
-        env === 'development' ? 'dev' : env === 'staging' ? 'staging' : 'prod';
-      logger.info(`🚀 Upserting ${key} to ${env} (${infisicalEnv})...`);
-
-      try {
-        try {
-          // Check if secret exists
-          await client.secrets().getSecret({
-            environment: infisicalEnv,
-            projectId,
-            secretName: key,
-            secretPath: '/',
-            type: 'shared' as any,
-          });
-          // Update existing secret
-          await client.secrets().updateSecret(key, {
-            environment: infisicalEnv,
-            projectId,
-            secretValue: value,
-            secretPath: '/',
-            type: 'shared' as any,
-          });
-          logger.info(`✅ Updated ${key} in ${env}`);
-        } catch (e) {
-          // Create new secret if not found
-          await client.secrets().createSecret(key, {
-            environment: infisicalEnv,
-            projectId,
-            secretValue: value,
-            secretPath: '/',
-            type: 'shared' as any,
-          });
-          logger.info(`✅ Created ${key} in ${env}`);
-        }
-      } catch (error) {
-        logger.error(`❌ Failed for ${env}: ${error}`);
+      if (!secrets) {
+        throw new Error(
+          'Secret manager is only available in server environments',
+        );
       }
+
+      const targetEnvs = envs && envs.length > 0 ? envs : ['development'];
+
+      for (const env of targetEnvs) {
+        logger.info(`🚀 Upserting ${key} to ${env}...`);
+        await secrets.upsertSecret(key, value, env);
+      }
+    } catch (error: any) {
+      logger.error(`❌ Failed to add configuration: ${error.message}`);
+      process.exit(1);
     }
 
     // Force exit to prevent hanging

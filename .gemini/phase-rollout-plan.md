@@ -8,6 +8,8 @@
 - [x] **@sous/ui Refactor**: Implement standard Shadcn/Tailwind components.
 - [x] **Dependency Cleanup**: Remove RNW/Tauri baggage.
 - [x] **Docs Update**: Align all ADRs and specs with the new direction.
+- [x] **Shell Pattern Rollout**: Offload UI logic to `@sous/features` (Mandate 15).
+- [x] **Schema Decentralization**: Domain-specific database schemas (Mandate 14).
 
 ### Phase 1.2: Mobile & Kiosk Shells
 
@@ -22,11 +24,13 @@
 
 ## Phase 2: Signage & Presentation (High Priority)
 
+- [ ] **Layout Manager**: Recursive structure and visual designer (Spec 006 - In Progress).
 - [ ] **Presentation Renderer**: Update the renderer to use standard HTML/CSS.
 - [ ] **Display Pairing**: Implement the browser-based pairing workflow for kiosk nodes.
 
 ## Phase 3: Culinary Intelligence
 
+- [x] **Shared Ingestion Engine**: Core components for OCR/Mapping (Spec 013).
 - [ ] **Invoices Domain**: AI-powered extraction from scans/PDFs.
 - [ ] **Recipes Domain**: Advanced scaling and culinary math.
 
