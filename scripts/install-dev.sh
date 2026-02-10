@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Developer Installation Script
+# Sous Developer Installation Script
 # This script is maintained automatically per Mandate 10.
 # It is designed to be IDEMPOTENT and works on Ubuntu (Native or WSL2).
 
@@ -8,7 +8,14 @@ set -e
 
 echo "👨‍🍳 Starting Sous Developer Environment Setup..."
 
-# 0. Fix ARM64 Sources if needed
+# 0. Environment Detection
+IS_WSL=false
+if grep -qi Microsoft /proc/version; then
+  IS_WSL=true
+  echo "💻 Detected WSL2 Environment"
+fi
+
+# 0.1 Fix ARM64 Sources if needed
 if dpkg --print-architecture | grep -q "arm64" || dpkg --print-foreign-architectures | grep -q "arm64"; then
   if ! grep -q "ports.ubuntu.com" /etc/apt/sources.list && ! ls /etc/apt/sources.list.d/*.list 2>/dev/null | xargs grep -q "ports.ubuntu.com"; then
     echo "⚠️  Detected arm64 architecture but no ports.ubuntu.com sources. Fixing..."
@@ -110,17 +117,19 @@ if ! command -v infisical &> /dev/null; then
   sudo apt-get update && sudo apt-get install -y infisical
 fi
 
-# 8. Rust
-if ! command -v cargo &> /dev/null; then
-  echo "🦀 Installing Rust..."
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-fi
-# Ensure cargo is in path for rest of script
-source "$HOME/.cargo/env" || true
-
-if ! rustup target list | grep -q "aarch64-linux-android (installed)"; then
-  echo "🦀 Adding Android targets to Rust..."
-  rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+# 8. WSL/Windows Bridge Setup
+if [ "$IS_WSL" = true ]; then
+  echo "🪟 Setting up Windows Agent Bridge..."
+  
+  # Ensure the Windows-side tools directory exists
+  powershell.exe -Command "New-Item -ItemType Directory -Force -Path C:\tools\sous-agent" > /dev/null
+  
+  # Copy files from WSL to Windows tools dir
+  cp scripts/windows/* /mnt/c/tools/sous-agent/
+  
+  # Firewall and Unblocking (requires admin, but we attempt)
+  echo "🛡️  Configuring Windows Firewall (may prompt for admin)..."
+  powershell.exe -Command "Start-Process powershell -Verb RunAs -ArgumentList 'New-NetFirewallRule -DisplayName \"Sous Agent (TCP-In)\" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 4040 -ErrorAction SilentlyContinue; Unblock-File -Path C:\tools\sous-agent\sous-tray.ps1'" || echo "⚠️  Firewall config failed. Please run 'sous dev install agent' manually if emulators fail."
 fi
 
 # 9. Android Development
@@ -155,7 +164,6 @@ chmod +x "$HOME/.local/bin/studio"
 
 # 11. Finalizing
 echo "🐚 Finalizing shell configuration..."
-# We run this at the end to ensure pnpm/node are ready
 pnpm run sous dev install shell
 
 echo ""

@@ -2,7 +2,7 @@
 
 ## Status
 
-Superseded by [ADR 041](./041-web-first-pivot.md) - Native interop is now handled via **Capacitor Plugins** instead of a Rust/Tauri bridge.
+Superseded by [ADR 041](./041-web-first-pivot.md) - Native interop is now handled via **Capacitor Plugins** instead of a Capacitor bridge.
 
 ## Date
 
@@ -10,7 +10,7 @@ Superseded by [ADR 041](./041-web-first-pivot.md) - Native interop is now handle
 
 ## Context
 
-Our ecosystem includes multiple desktop and kiosk applications built with **Tauri** (e.g., `@sous/signage` for kiosks). These applications share a common set of requirements for low-level system access, hardware interaction, and network operations that are best handled in **Rust** for performance and safety.
+Our ecosystem includes multiple desktop and kiosk applications built with **Capacitor** (e.g., `@sous/signage` for kiosks). These applications share a common set of requirements for low-level system access, hardware interaction, and network operations that are best handled in **Native** for performance and safety.
 
 We need a centralized way to manage:
 
@@ -23,12 +23,12 @@ We need a centralized way to manage:
 
 ## Decision
 
-We will create a specialized package, **`@sous/native-bridge`**, to serve as the shared core for all Tauri-based applications.
+We will create a specialized package, **`@sous/native-bridge`**, to serve as the shared core for all Capacitor-based applications.
 
 ### Key Components
 
-1.  **Shared Rust Core:**
-    - A library crate containing common Tauri commands and logic.
+1.  **Shared Native Core:**
+    - A library crate containing common Capacitor commands and logic.
     - Modules for:
       - `metrics`: Host health and performance monitoring.
       - `network`: Network scanning (mDNS, SSDP, or custom UDP/TCP scanning).
@@ -46,8 +46,8 @@ We will create a specialized package, **`@sous/native-bridge`**, to serve as the
 
 ### Implementation Strategy
 
-- Use **Tauri Plugins** where appropriate to modularize features (e.g., a "Metrics Plugin").
-- Expose typed TypeScript bindings for all Rust commands to ensure end-to-end type safety.
+- Use **Capacitor Plugins** where appropriate to modularize features (e.g., a "Metrics Plugin").
+- Expose typed TypeScript bindings for all Native commands to ensure end-to-end type safety.
 - The bridge will be a package within the `packages/` directory of the monorepo.
 
 ### 4. Safety Mode (Local SQLite Fallback)
@@ -61,24 +61,24 @@ As the POS and KDS are mission-critical, the bridge will implement a **Safety Mo
 ## Consequences
 
 - **Positive:**
-  - **Code Reuse:** Logic for complex hardware protocols is written once in Rust and shared across all native apps.
+  - **Code Reuse:** Logic for complex hardware protocols is written once in Native and shared across all native apps.
   - **Consistency:** All native apps report metrics and discover hardware using the same battle-tested code.
-  - **Simplified DX:** Application developers don't need to write Rust; they consume the bridge via TypeScript.
+  - **Simplified DX:** Application developers don't need to write Native; they consume the bridge via TypeScript.
 - **Negative:**
-  - **Build Complexity:** Compiling Rust-based packages adds overhead to the CI/CD pipeline and requires the host to have the Rust toolchain installed.
+  - **Build Complexity:** Compiling Native-based packages adds overhead to the CI/CD pipeline and requires the host to have the Android SDK installed.
   - **Tight Coupling:** Changes to the bridge may require simultaneous updates and testing across multiple native applications.
 
 ## Research & Implementation Plan
 
 ### Research
 
-- **Tauri 2.0:** Selected for its improved plugin system and native mobile support (if needed later).
-- **Rust Crates:** Identified `btleplug` for BLE, `mdns-sd` for discovery, and `sysinfo` for metrics.
+- **Capacitor 2.0:** Selected for its improved plugin system and native mobile support (if needed later).
+- **Native Crates:** Identified `btleplug` for BLE, `mdns-sd` for discovery, and `sysinfo` for metrics.
 
 ### Implementation Plan
 
-1. **Bridge Skeleton:** Create the `@sous/native-bridge` package as a Tauri plugin.
-2. **Metrics Module:** Implement Rust commands to fetch CPU temperature, memory usage, and display status.
+1. **Bridge Skeleton:** Create the `@sous/native-bridge` package as a Capacitor plugin.
+2. **Metrics Module:** Implement Native commands to fetch CPU temperature, memory usage, and display status.
 3. **Network Module:** Implement mDNS discovery for local network scanning.
 4. **Storage Module:** Integrate `rusqlite` for local persistent caching of platform data.
-5. **TS Bindings:** Generate TypeScript types for all Rust commands to ensure type safety in the consuming apps.
+5. **TS Bindings:** Generate TypeScript types for all Native commands to ensure type safety in the consuming apps.

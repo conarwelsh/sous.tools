@@ -25,17 +25,17 @@ We need a specialized application for dedicated hardware (primarily Raspberry Pi
 
 ## Decision
 
-We will implement **`@sous/signage`** as a React Native application hosted within a **Tauri** wrapper.
+We will implement **`@sous/signage`** as a React Native application hosted within a **Capacitor** wrapper.
 
 ### Key Technology Choices
 
-1.  **Framework: React Native + Tauri**
+1.  **Framework: React Native + Capacitor**
     - Uses the **Universal UI** strategy (ADR 006) to share components with the web and mobile apps.
-    - Tauri provides the native bridge (ADR 011) to access RPi hardware APIs (vcgencmd, xrandr, systemd).
+    - Capacitor provides the native bridge (ADR 011) to access RPi hardware APIs (vcgencmd, xrandr, systemd).
 
 2.  **State Management & Routing**
     - A top-level state machine will manage the transition between Pairing, Configuration, and Active modes.
-    - **Multi-Window:** Tauri will spawn two distinct webview windows, each pinned to a specific HDMI output/display.
+    - **Multi-Window:** Capacitor will spawn two distinct webview windows, each pinned to a specific HDMI output/display.
 
 3.  **Communication Layer**
     - **Inbound:** Uses the `RealtimeClient` from `@sous/client-sdk` (ADR 010) to receive pusher-style commands.
@@ -58,7 +58,7 @@ We will implement **`@sous/signage`** as a React Native application hosted withi
 
 - **Positive:**
   - **Unified UI:** Digital menus use the same design system and components as the web app.
-  - **Robustness:** Rust/Tauri ensures the application is performant and has stable access to system-level commands.
+  - **Robustness:** Capacitor ensures the application is performant and has stable access to system-level commands.
   - **Scalability:** The pairing method allows non-technical staff to deploy new hardware easily.
 - **Negative:**
   - **Linux/ARM Specifics:** Hardware control (like HDMI power) requires RPi-specific CLI tool interaction which must be carefully abstracted in the bridge.

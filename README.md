@@ -56,7 +56,7 @@ To set up your development environment on Ubuntu (Native or WSL2):
     ```
 
 3.  **Run the Sous Installer:**
-    This command is idempotent and will install all system dependencies (Docker, Node, Rust, Android SDK, etc.).
+    This command is idempotent and will install all system dependencies (Docker, Node, Native, Android SDK, etc.).
     ```bash
     pnpm sous dev install
     ```
@@ -73,8 +73,21 @@ To set up your development environment on Ubuntu (Native or WSL2):
 
 6.  **Launch Dev Tools:**
     ```bash
-    pnpm dev-tools
+    pnpm dev
     ```
+
+---
+
+## 💻 Recommended IDE Setup
+
+For the best development experience, we recommend **VS Code** with the following:
+
+- **WSL Extension**: If developing on Windows.
+- **Prettier & ESLint**: Core formatting and linting.
+- **Tailwind CSS IntelliSense**: For styling utilities.
+- **Drizzle Studio**: For local database exploration.
+
+The project includes a `.vscode` folder with recommended extensions and debug configurations.
 
 ---
 
@@ -84,10 +97,10 @@ We use a Docker-based ephemeral Ubuntu container to verify the installation proc
 
 ```bash
 # Start the tester container
-docker compose up -d install-tester
+docker compose up -d installer
 
 # Run the automated install test
-bash scripts/test-install.sh
+docker exec -it sous-installer pnpm sous dev install
 ```
 
 ## Architecture & Mandates

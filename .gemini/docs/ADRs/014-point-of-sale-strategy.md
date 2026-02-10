@@ -22,11 +22,11 @@ A restaurant's Point of Sale (POS) system is the primary revenue-generating tool
 
 ## Decision
 
-We will implement **`@sous/native-pos`** as a React Native application wrapped in **Tauri**.
+We will implement **`@sous/native-pos`** as a React Native application wrapped in **Capacitor**.
 
 ### Key Technology Choices
 
-1.  **Framework: React Native + Tauri**
+1.  **Framework: React Native + Capacitor**
     - Consistent with the **Universal UI** strategy (ADR 006).
     - Uses the **Native Bridge** (ADR 011) for local peripheral control (printers, cash drawers).
 
@@ -41,7 +41,7 @@ We will implement **`@sous/native-pos`** as a React Native application wrapped i
 
 4.  **Peripheral Integration**
     - Utilizes `@sous/native-bridge` to send ESC/POS commands to receipt printers.
-    - Integrates with local payment terminals via SDKs bridged through Rust/Tauri.
+    - Integrates with local payment terminals via SDKs bridged through Capacitor.
 
 ### Implementation Strategy
 
@@ -52,7 +52,7 @@ We will implement **`@sous/native-pos`** as a React Native application wrapped i
 ## Consequences
 
 - **Positive:**
-  - **Speed:** Tauri's lightweight nature ensures the UI stays responsive even with large menus.
+  - **Speed:** Capacitor's lightweight nature ensures the UI stays responsive even with large menus.
   - **Reliability:** Built-in offline support ensures service never stops.
   - **Unified Ecosystem:** Orders placed on the POS immediately appear on the KDS (@sous/native-kds) via the shared backend/SDK.
 - **Negative:**
