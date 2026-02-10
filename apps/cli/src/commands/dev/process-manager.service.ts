@@ -295,11 +295,22 @@ export class ProcessManager
 
   async autoStartCore() {
     try {
-      this.addLog('db', '🐳 Ensuring Docker infrastructure...', 'info');
+      this.addLog('db', '🐳 Ensuring Docker infrastructure is running...', 'info');
+      
+      // Check if docker daemon is running
+      try {
+        await execAsync('docker info');
+      } catch (e) {
+        this.addLog('db', '❌ Docker daemon is not running. Please start Docker.', 'error');
+        return;
+      }
+
       await execAsync('docker compose up -d');
 
-      this.processes.get('db')!.status = 'running';
-      this.processes.get('redis')!.status = 'running';
+      const dbProc = this.processes.get('db');
+      const redisProc = this.processes.get('redis');
+      if (dbProc) dbProc.status = 'running';
+      if (redisProc) redisProc.status = 'running';
 
       this.streamDockerLogs('db', 'sous-postgres');
       this.streamDockerLogs('redis', 'sous-redis');

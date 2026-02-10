@@ -109,6 +109,18 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
+  # Ephemeral Ubuntu image for testing installation workflow
+  install-tester:
+    image: ubuntu:22.04
+    container_name: sous-install-tester
+    volumes:
+      - .:/home/conar/sous.tools
+      - /var/run/docker.sock:/var/run/docker.sock
+    working_dir: /home/conar/sous.tools
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
+    command: tail -f /dev/null
+
 volumes:
   postgres_data:
   minio_data:

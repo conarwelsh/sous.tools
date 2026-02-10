@@ -40,20 +40,55 @@ cp .env.example .env
 # Edit .env with your INFISICAL_CLIENT_ID, etc.
 ```
 
-### 3. Installation
+## 🚀 Quick Start (Installation)
+
+To set up your development environment on Ubuntu (Native or WSL2):
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/conarwelsh/sous.tools.git
+    cd sous.tools
+    ```
+
+2.  **Install base dependencies:**
+    ```bash
+    pnpm install
+    ```
+
+3.  **Run the Sous Installer:**
+    This command is idempotent and will install all system dependencies (Docker, Node, Rust, Android SDK, etc.).
+    ```bash
+    pnpm sous dev install
+    ```
+
+4.  **Configure Environment:**
+    The installer creates `packages/config/.env`. Open it and add your `INFISICAL_` credentials.
+
+5.  **Optional: Install Shell Customization:**
+    Adds productivity aliases and a brand-aligned ZSH prompt.
+    ```bash
+    pnpm sous dev install shell
+    source ~/.zshrc
+    ```
+
+6.  **Launch Dev Tools:**
+    ```bash
+    pnpm dev-tools
+    ```
+
+---
+
+## 🛠️ Testing the Installation Workflow
+
+We use a Docker-based ephemeral Ubuntu container to verify the installation process remains robust.
 
 ```bash
-pnpm install
-pnpm sous dev install
+# Start the tester container
+docker compose up -d install-tester
+
+# Run the automated install test
+bash scripts/test-install.sh
 ```
-
-### 4. Development
-
-```bash
-pnpm sous dev
-```
-
-This will launch the **Ink TUI Dashboard** with the API, Web, and Docs servers running.
 
 ## Architecture & Mandates
 
