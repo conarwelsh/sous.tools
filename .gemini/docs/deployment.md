@@ -8,7 +8,7 @@ The development environment is optimized for rapid iteration using a hybrid of l
 
 ### Core Services (WSL2)
 - **@sous/api**, **@sous/web**, and **@sous/docs** run directly in the WSL2 Ubuntu environment.
-- Orchestration is handled via `sous dev` or `scripts/dev-orchestrator.ts`.
+- Orchestration is handled via `sous dev` or `scripts/dev-tools.ts`.
 
 ### Native & Wearable Extensions (Emulators)
 - **Native App Flavors** (`pos`, `kds`, `tools`): Ran via targeted Android emulators (Pixel 5, Pixel C, etc.) using Capacitor.

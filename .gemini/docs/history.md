@@ -188,7 +188,7 @@
 - Rewrote `@sous/cli` README.md to accurately reflect the tool's capabilities and document the upcoming shell customization features.
 - Created **ADR 039: CLI-Driven ZSH Customization** to improve Developer Experience with brand-aligned prompts and infrastructure status indicators.
 - Updated `phase-rollout-plan.md` to include ZSH customization in Phase 1.2.
-- Refactored `scripts/dev-orchestrator.ts` to use absolute `pnpm` paths and avoid `shell: true` issues, fixing `ENOENT` errors during app startup.
+- Refactored `scripts/dev-tools.ts` to use absolute `pnpm` paths and avoid `shell: true` issues, fixing `ENOENT` errors during app startup.
 - Updated root `.idea` configuration to use `#GRADLE_LOCAL_JAVA_HOME` for better WSL compatibility in Android Studio.
 - Switched to `includeBuild` in the root `settings.gradle.kts` for Tauri-based projects.
 - Fixed a Gradle sync error in the `apps/native` subproject by removing the redundant `allprojects` repository block.

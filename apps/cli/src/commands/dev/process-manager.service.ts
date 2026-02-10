@@ -11,7 +11,7 @@ import * as fs from 'fs';
 
 const execAsync = promisify(exec);
 
-export type ProcessStatus = 'running' | 'starting' | 'stopped' | 'error';
+export type ProcessStatus = 'running' | 'starting' | 'stopped' | 'error' | 'building';
 
 export interface ManagedLog {
   id: string;
@@ -141,10 +141,12 @@ export class ProcessManager
         const id = p.name?.replace('sous-', '');
         const proc = id ? this.processes.get(id) : null;
         if (proc && proc.type === 'pm2') {
-          const newStatus =
-            p.pm2_env?.status === 'online' ? 'running' : 'stopped';
-          if (proc.status !== newStatus) {
-            proc.status = newStatus;
+          const pm2Status = p.pm2_env?.status;
+          if (pm2Status !== 'online') {
+            proc.status = 'stopped';
+            updated = true;
+          } else if (proc.status === 'stopped') {
+            proc.status = 'running';
             updated = true;
           }
         }
@@ -627,6 +629,30 @@ export class ProcessManager
       } catch (e) {
         message = trimmed.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
       }
+
+      // State Detection
+      const lower = message.toLowerCase();
+      if (
+        lower.includes('compiling') ||
+        lower.includes('building') ||
+        lower.includes('starting')
+      ) {
+        proc.status = 'building';
+      } else if (
+        lower.includes('ready') ||
+        lower.includes('started') ||
+        lower.includes('listening') ||
+        lower.includes('build successful') ||
+        lower.includes('compiled successfully')
+      ) {
+        proc.status = 'running';
+      } else if (lower.includes('error') || lower.includes('failed')) {
+        // Only set error if it's not a service that's already running (some logs have "error" in them)
+        if (proc.status === 'starting' || proc.status === 'building') {
+          proc.status = 'error';
+        }
+      }
+
       const logEntry: ManagedLog = { id, name, message, timestamp, level };
       proc.logs.push(logEntry);
       if (proc.logs.length > 1000) proc.logs.shift();

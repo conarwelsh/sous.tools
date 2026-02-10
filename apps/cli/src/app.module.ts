@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { DevCommand } from './commands/dev/dev.command.js';
+import { DevToolsCommand } from './commands/dev/dev-tools.command.js';
 import { InstallCommand } from './commands/dev/install.command.js';
 import { ShellInstallCommand } from './commands/dev/shell-install.command.js';
 import { SyncCommand } from './commands/dev/sync.command.js';
@@ -29,7 +29,7 @@ import { ProcessManager } from './commands/dev/process-manager.service.js';
 @Module({
   providers: [
     ProcessManager,
-    DevCommand,
+    DevToolsCommand,
     InstallCommand,
     ShellInstallCommand,
     SyncCommand,

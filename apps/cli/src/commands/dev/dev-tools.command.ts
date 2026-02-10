@@ -19,11 +19,11 @@ interface DevOptions {
 }
 
 @Command({
-  name: 'dev',
+  name: 'dev-tools',
   description: 'Manage development environment',
   subCommands: [InstallCommand, SyncCommand],
 })
-export class DevCommand extends CommandRunner {
+export class DevToolsCommand extends CommandRunner {
   constructor(
     @Inject(ProcessManager) private readonly manager: ProcessManager,
   ) {

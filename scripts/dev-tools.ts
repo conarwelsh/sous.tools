@@ -8,7 +8,7 @@ const app = process.argv[2];
 const instanceName = process.env.PM2_APP_NAME || app;
 
 if (!app) {
-  console.error("Usage: dev-orchestrator <app_name>");
+  console.error("Usage: dev-tools <app_name>");
   process.exit(1);
 }
 

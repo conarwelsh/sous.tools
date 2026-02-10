@@ -119,7 +119,9 @@ const getEnvVars = () => {
 
 function sanitizeUrl(url: string | undefined, fallback: string): string {
   if (!url) return fallback;
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  // If it's a relative URL (like /api), keep it as is for some environments, 
+  // but usually we want absolute for the SDK
+  if (url.startsWith("/") || url.startsWith("http://") || url.startsWith("https://")) return url;
   return `https://${url}`;
 }
 
@@ -130,21 +132,26 @@ function buildConfig(): Config {
   const envVars = getEnvVars();
   const env = envVars.NODE_ENV || (envVars as any).MODE || "development";
 
+  // Priority: 1. Explicit Service URL, 2. NEXT_PUBLIC version (for web), 3. Fallback
+  const apiUrl = sanitizeUrl(
+    envVars.API_URL || envVars.NEXT_PUBLIC_API_URL,
+    `http://localhost:${envVars.PORT_API || envVars.API_PORT || 4000}`
+  );
+
+  const webUrl = sanitizeUrl(
+    envVars.WEB_URL || envVars.NEXT_PUBLIC_WEB_URL,
+    `http://localhost:${envVars.PORT_WEB || envVars.WEB_PORT || 3000}`
+  );
+
   const rawConfig = {
     env,
     api: {
       port: Number(envVars.PORT_API || envVars.API_PORT || 4000),
-      url: sanitizeUrl(
-        envVars.NEXT_PUBLIC_API_URL || envVars.API_URL,
-        `http://localhost:${envVars.PORT_API || 4000}`
-      ),
+      url: apiUrl,
     },
     web: {
       port: Number(envVars.PORT_WEB || envVars.WEB_PORT || 3000),
-      url: sanitizeUrl(
-        envVars.NEXT_PUBLIC_WEB_URL || envVars.WEB_URL,
-        `http://localhost:${envVars.PORT_WEB || 3000}`
-      ),
+      url: webUrl,
     },
     docs: {
       port: Number(envVars.PORT_DOCS || envVars.DOCS_PORT || 3001),

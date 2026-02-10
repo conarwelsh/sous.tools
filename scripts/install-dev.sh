@@ -82,10 +82,15 @@ if ! command -v gh &> /dev/null; then
 	&& sudo apt install gh -y
 fi
 
-# 6. Vercel CLI
+# 6. Vercel & Render CLI
 if ! command -v vercel &> /dev/null; then
   echo "Installing Vercel CLI..."
   npm install -g vercel
+fi
+
+if ! command -v render &> /dev/null; then
+  echo "Installing Render CLI..."
+  curl https://render.com/install-cli.sh | s_sh=1 sh
 fi
 
 # 7. Infisical CLI
