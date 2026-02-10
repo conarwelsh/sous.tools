@@ -6,38 +6,38 @@ export const configSchema = z.object({
   // Infrastructure
   api: z.object({
     port: z.coerce.number().default(4000),
-    url: z.string().url(),
+    url: z.string().url().optional(),
   }),
   web: z.object({
     port: z.coerce.number().default(3000),
-    url: z.string().url(),
+    url: z.string().url().optional(),
   }),
   docs: z.object({
     port: z.coerce.number().default(3001),
-    url: z.string().url(),
+    url: z.string().url().optional(),
   }),
   
   // Database & Cache
   db: z.object({
-    url: z.string().url(),
+    url: z.string().url().optional(),
   }),
   redis: z.object({
-    url: z.string().url(),
+    url: z.string().url().optional(),
   }),
   
   // Authentication
   iam: z.object({
-    jwtSecret: z.string().min(10),
+    jwtSecret: z.string().min(10).optional(),
   }),
   
   // Storage & Media
   storage: z.object({
     supabase: z.object({
-      url: z.string().url(),
-      anonKey: z.string().min(1),
+      url: z.string().url().optional(),
+      anonKey: z.string().min(1).optional(),
       serviceRoleKey: z.string().min(1).optional(),
       bucket: z.string().default("media"),
-    }),
+    }).optional(),
     cloudinary: z.object({
       cloudName: z.string().optional(),
       apiKey: z.string().optional(),
