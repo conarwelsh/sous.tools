@@ -16,6 +16,7 @@ interface DevOptions {
   wear?: boolean;
   kiosks?: boolean;
   headless?: boolean;
+  json?: boolean;
 }
 
 @Command({
@@ -37,6 +38,17 @@ export class DevToolsCommand extends CommandRunner {
     }
 
     if (options?.headless) {
+      if (options?.json) {
+        const processes = this.manager.getProcesses().map(p => ({
+          id: p.id,
+          name: p.name,
+          status: p.status,
+          port: p.port,
+        }));
+        console.log(JSON.stringify(processes, null, 2));
+        process.exit(0);
+      }
+
       logger.info('🚀 Starting Sous Dev Tools in HEADLESS mode...');
       await this.manager.autoStartCore();
 
@@ -347,6 +359,14 @@ export class DevToolsCommand extends CommandRunner {
     description: 'Run in headless mode without TUI',
   })
   parseHeadless(): boolean {
+    return true;
+  }
+
+  @Option({
+    flags: '--json',
+    description: 'Output machine-readable JSON',
+  })
+  parseJson(): boolean {
     return true;
   }
 }

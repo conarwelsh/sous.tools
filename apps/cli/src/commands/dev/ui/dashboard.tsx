@@ -10,10 +10,12 @@ interface Props {
   manager: ProcessManager;
 }
 
-type ViewMode = 'services' | 'combined' | 'infra';
+type ViewMode = 'services' | 'combined' | 'infra' | 'cloud';
+type PlatformEnv = 'dev' | 'staging' | 'production';
 
 const BRAND_BLUE = '#0ea5e9';
 const BRAND_GRAY = '#9ca3af';
+const BRAND_PURPLE = '#a855f7';
 const DARK_GRAY = '#374151';
 
 interface HealthStatus {
@@ -26,6 +28,7 @@ interface HealthStatus {
 export const Dashboard: React.FC<Props> = ({ manager }) => {
   const { exit } = useApp();
   const [activeTab, setActiveTab] = useState<ViewMode>('services');
+  const [activeEnv, setActiveEnv] = useState<PlatformEnv>('dev');
   const [processes, setProcesses] = useState<ManagedProcess[]>(
     manager?.getProcesses() || [],
   );
@@ -35,6 +38,7 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
   const [scrollOffset, setScrollOffset] = useState(0);
   const [isResettingDb, setIsResettingDb] = useState(false);
   const [dbResetStatus, setDbResetStatus] = useState<string | null>(null);
+  const [cloudLogs, setCloudLogs] = useState<string[]>([]);
 
   const [systemMetrics, setSystemMetrics] = useState({
     cpu: 0,
@@ -167,13 +171,21 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
     }
 
     if (key.tab) {
-      const modes: ViewMode[] = ['services', 'combined', 'infra'];
+      const modes: ViewMode[] = ['services', 'combined', 'infra', 'cloud'];
       const currentIdx = modes.indexOf(activeTab);
       const nextIdx = key.shift
         ? (currentIdx - 1 + modes.length) % modes.length
         : (currentIdx + 1) % modes.length;
       setActiveTab(modes[nextIdx]);
       setScrollOffset(0);
+    }
+
+    // Toggle Environment: [e]
+    if (input === 'e') {
+      const envs: PlatformEnv[] = ['dev', 'staging', 'production'];
+      const currentIdx = envs.indexOf(activeEnv);
+      const nextIdx = (currentIdx + 1) % envs.length;
+      setActiveEnv(envs[nextIdx]);
     }
 
     if (key.upArrow) {
@@ -225,7 +237,7 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
   });
 
   useEffect(() => {
-    const currentLogs = activeTab === 'combined' ? combinedLogs : (selectedApp?.logs || []);
+    const currentLogs = activeTab === 'combined' ? combinedLogs : (activeTab === 'cloud' ? cloudLogs : (selectedApp?.logs || []));
     const maxScroll = Math.max(0, currentLogs.length - visibleLines);
     if (scrollOffset > maxScroll) {
       setScrollOffset(maxScroll);
@@ -233,6 +245,7 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
   }, [
     selectedApp?.logs.length,
     combinedLogs.length,
+    cloudLogs.length,
     activeTab,
     visibleLines,
   ]);
@@ -272,11 +285,11 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
           </Text>
           <Text color={BRAND_GRAY}>.tools</Text>
           <Box marginLeft={4}>
-            {(['services', 'combined', 'infra'] as const).map((t) => (
+            {(['services', 'combined', 'infra', 'cloud'] as const).map((t) => (
               <Box key={t} marginLeft={2}>
                 <Text
                   bold={activeTab === t}
-                  color={activeTab === t ? BRAND_BLUE : BRAND_GRAY}
+                  color={activeTab === t ? (t === 'cloud' ? BRAND_PURPLE : BRAND_BLUE) : BRAND_GRAY}
                 >
                   {t.toUpperCase()}
                 </Text>
@@ -285,6 +298,11 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
           </Box>
         </Box>
         <Box alignItems="center">
+          <Box marginRight={2}>
+            <Text color={activeEnv === 'production' ? BRAND_BLUE : activeEnv === 'staging' ? '#f59e0b' : '#10b981'} bold>
+              [{activeEnv.toUpperCase()}]
+            </Text>
+          </Box>
           {dbResetStatus && (
             <Box marginRight={2}>
               <Text color={dbResetStatus.includes('Error') ? '#ef4444' : '#10b981'}>
@@ -426,6 +444,39 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
             </Box>
           )}
 
+          {activeTab === 'cloud' && (
+            <Box flexDirection="column" flexGrow={1}>
+              <Box justifyContent="space-between" marginBottom={1}>
+                <Text bold color={BRAND_PURPLE}>
+                  CLOUD LOGS: {selectedApp?.name.toUpperCase()} ({activeEnv.toUpperCase()})
+                </Text>
+                <Text color="gray">LIVE TAIL ACTIVE</Text>
+              </Box>
+              <Box flexDirection="column" flexGrow={1} overflow="hidden">
+                {cloudLogs.length === 0 ? (
+                  <Box flexGrow={1} alignItems="center" justifyContent="center">
+                    <Text color="gray" italic>
+                      {activeEnv === 'dev' 
+                        ? 'Cloud logs not available for local dev. Switch to Staging/Production [e].' 
+                        : 'Fetching cloud logs... (Requires Vercel/Render CLI)'}
+                    </Text>
+                  </Box>
+                ) : (
+                  cloudLogs
+                    .slice(
+                      Math.max(0, cloudLogs.length - visibleLines - scrollOffset),
+                      Math.max(0, cloudLogs.length - scrollOffset),
+                    )
+                    .map((l, i) => (
+                      <Text key={i} wrap="truncate-end" color="#d1d5db">
+                        {l}
+                      </Text>
+                    ))
+                )}
+              </Box>
+            </Box>
+          )}
+
           {activeTab === 'infra' && (
             <Box flexDirection="column" flexGrow={1}>
               <Box marginBottom={1}>
@@ -515,7 +566,7 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
       {/* Shortcuts Help Area (New simplified footer) */}
       <Box height={2} paddingX={1} justifyContent="space-between">
         <Text color="gray" dimColor>
-          [Tab] Switch Tab [↑/↓] Select/Scroll [Enter] Toggle Process [r] Restart [c] Clear [d] DB Reset [q] Quit
+          [Tab] Switch Tab [↑/↓] Scroll [Enter] Start/Stop [r] Restart [c] Clear [d] DB Reset [e] Toggle Env [q] Quit
         </Text>
         <Text color={BRAND_BLUE} bold>SOUS DEV TOOLS</Text>
       </Box>
