@@ -19,12 +19,13 @@ Currently, configuration is scattered, and while `@sous/config` exists, it still
 - **Zod Schema**: Definitive schema for all platform settings (API URLs, Ports, Database Strings, Third-party keys).
 - **Runtime Detection**: Determine if running on a Client (Browser), Server (Node), or Mobile (Capacitor) environment.
 - **Provider Layer**:
-    - **Local**: Loads from `.env`.
-    - **Vault**: Fetches from Infisical via SDK or CLI export.
-    - **System**: Uses pre-existing environment variables (CI/CD).
+    - **Bootstrap**: Loads Infisical credentials from `@sous/config/.env`.
+    - **Vault**: Fetches ALL application secrets from Infisical (Dev, Staging, Prod).
+    - **System**: Uses pre-existing environment variables (CI/CD) when available.
 
 ### 3.2 Infisical Abstraction
-- The package handles authentication and fetching internally.
+- The package handles authentication and fetching internally using the bootstrap credentials.
+- No other environment variables should be stored in .env files.
 - Secrets are cached during a session to prevent excessive API calls.
 
 ### 3.3 CLI Integration (`@sous/cli`)

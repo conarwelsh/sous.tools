@@ -30,6 +30,31 @@ function findRoot(): string {
 }
 
 /**
+ * Robustly finds the package root of @sous/config
+ */
+function findPackageRoot(): string {
+  if (!isServer) return "";
+  try {
+    const path = eval('require("path")');
+    // In many environments, we can use the location of this file
+    // If we're in Node.js (which we are if isServer is true and we're bootstrapping)
+    const currentFile = typeof __filename !== 'undefined' 
+      ? __filename 
+      : import.meta.url.replace('file://', '');
+    
+    let current = path.dirname(currentFile);
+    while (current !== "/" && !current.endsWith('config')) {
+      const parent = path.dirname(current);
+      if (parent === current) break;
+      current = parent;
+    }
+    return current;
+  } catch (e) {
+    return "";
+  }
+}
+
+/**
  * Synchronously loads environment variables from .env and Infisical.
  * This runs ONLY on the server during module initialization.
  */
@@ -59,11 +84,18 @@ function bootstrap() {
     const child_process = req("child_process");
 
     const root = findRoot();
+    const pkgRoot = findPackageRoot();
 
-    // 1. Load bootstrap variables from .env if present
-    const envPath = path.join(root, ".env");
-    if (fs.existsSync(envPath)) {
-      dotenv.config({ path: envPath });
+    // 1. Load bootstrap variables from .env if present (check project root and package root)
+    const envPaths = [
+      path.join(root, ".env"),
+      path.join(pkgRoot, ".env")
+    ];
+
+    for (const envPath of envPaths) {
+      if (fs.existsSync(envPath)) {
+        dotenv.config({ path: envPath });
+      }
     }
 
     // 2. Load from Infisical if in development and missing critical keys
