@@ -154,23 +154,36 @@ export class ProcessManager
 
     // 2. Check PM2 processes
     pm2.list((err, list) => {
-      if (err) return;
+      if (err) {
+        console.error('[ProcessManager] PM2 List error:', err);
+        return;
+      }
       let updated = false;
       for (const p of list) {
         const id = p.name?.replace('sous-', '');
         const proc = id ? this.processes.get(id) : null;
         if (proc && proc.type === 'pm2') {
           const pm2Status = p.pm2_env?.status;
+          console.log(
+            `[ProcessManager] Found PM2 process: ${p.name} (${id}), status: ${pm2Status}`,
+          );
           if (pm2Status !== 'online') {
-            proc.status = 'stopped';
-            updated = true;
+            if (proc.status !== 'stopped') {
+              proc.status = 'stopped';
+              updated = true;
+            }
           } else if (proc.status === 'stopped') {
             proc.status = 'running';
             updated = true;
           }
         }
       }
-      if (updated) this.emit('update');
+      if (updated) {
+        console.log(
+          '[ProcessManager] Process statuses updated, emitting update',
+        );
+        this.emit('update');
+      }
     });
   }
 
@@ -438,7 +451,7 @@ export class ProcessManager
         const agentUrl = `http://${winIp}:4040`;
 
         if (id === 'wearos') {
-          script = `bash -c "ANDROID_SERIAL=emulator-5562 ./gradlew installDebug && ${adbPrefix}adb -s emulator-5562 shell monkey -p com.sous.wearos -c android.intent.category.LAUNCHER 1"`;
+          script = `bash -c "ANDROID_SERIAL=emulator-5562 ./gradlew :apps:wearos:installDebug && ${adbPrefix}adb -s emulator-5562 shell monkey -p com.sous.wearos -c android.intent.category.LAUNCHER 1"`;
         } else {
           script = `bash -c "CAPACITOR_LIVE_RELOAD_URL='${reloadUrl}' npx cap sync android && cd android && ./gradlew assemble${capitalizedFlavor}Debug --no-daemon --console=plain && mkdir -p /mnt/c/tools/sous-agent/apks && cp app/build/outputs/apk/${flavor}/debug/${apkName} ${wslApkPath} && curl -s -X POST -H 'Content-Type: application/json' -d '{\\"command\\":\\"adb\\", \\"args\\":\\"-s emulator-${proc.emulatorPort} install -r ${winApkPath}\\"}' ${agentUrl} && curl -s -X POST -H 'Content-Type: application/json' -d '{\\"command\\":\\"adb\\", \\"args\\":\\"-s emulator-${proc.emulatorPort} shell am start -n ${appId}/com.sous.tools.MainActivity\\"}' ${agentUrl}"`;
         }
@@ -459,10 +472,10 @@ export class ProcessManager
               proc.status = 'error';
             } else {
               this.addLog(id, `🚀 Started via PM2`, 'info');
-              proc.status = 'running';
+              // proc.status = 'running'; // Status will be updated by logs
             }
             this.emit('update');
-            resolve();
+            setTimeout(resolve, 100);
           },
         );
       });
@@ -693,9 +706,9 @@ export class ProcessManager
 
       const logEntry: ManagedLog = { id, name, message, timestamp, level };
       proc.logs.push(logEntry);
-      if (proc.logs.length > 1000) proc.logs.shift();
+      if (proc.logs.length > 5000) proc.logs.shift();
       this.combinedLogs.push(logEntry);
-      if (this.combinedLogs.length > 2000) this.combinedLogs.shift();
+      if (this.combinedLogs.length > 10000) this.combinedLogs.shift();
     }
     this.emit('update');
   }

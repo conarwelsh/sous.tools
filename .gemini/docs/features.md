@@ -51,4 +51,5 @@
 - **Database**: Postgres 16 with Row-Level Security (RLS).
 - **Real-time**: Socket.io for instant updates.
 - **Hardware Simulation**: Dockerized Android OS (Redroid) for signage verification.
+- **Unified Tag Engine (Spec 017)**: Polymorphic tagging system with organization-level isolation and color-coding for any UUID-based entity.
 - **Domains**: IAM, Procurement, Culinary, Intelligence, Accounting, Presentation, Hardware, Integrations.

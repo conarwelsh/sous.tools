@@ -12,6 +12,7 @@ export * from '../../culinary/culinary.schema';
 export * from '../../culinary/catalog/catalog.schema';
 export * from '../../accounting/accounting.schema';
 export * from '../../integrations/integrations.schema';
+export * from '../tags/tags.schema';
 
 // 3. Mixed Dependencies
 export * from '../../procurement/procurement.schema';
@@ -33,6 +34,7 @@ import { recipes } from '../../culinary/culinary.schema';
 import { recipeIngredients } from '../../culinary/culinary.schema';
 import { ingredients } from '../../culinary/culinary.schema';
 import { categories, products } from '../../culinary/catalog/catalog.schema';
+import { tags, tagAssignments } from '../tags/tags.schema';
 
 // --- Relations ---
 
@@ -41,6 +43,7 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
   locations: many(locations),
   categories: many(categories),
   products: many(products),
+  tags: many(tags),
 }));
 
 import { locations } from '../../iam/locations/locations.schema';
@@ -126,3 +129,18 @@ export const recipeIngredientsRelations = relations(
     }),
   }),
 );
+
+export const tagsRelations = relations(tags, ({ one, many }) => ({
+  organization: one(organizations, {
+    fields: [tags.organizationId],
+    references: [organizations.id],
+  }),
+  assignments: many(tagAssignments),
+}));
+
+export const tagAssignmentsRelations = relations(tagAssignments, ({ one }) => ({
+  tag: one(tags, {
+    fields: [tagAssignments.tagId],
+    references: [tags.id],
+  }),
+}));

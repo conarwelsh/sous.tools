@@ -1,5 +1,21 @@
 # History
 
+## 2026-02-10 (Tag Engine & Layout Designer Enhancements)
+
+- **Unified Tag Engine (Spec 017):**
+    - Implemented a polymorphic tagging system in `@sous/api` using `tags` and `tag_assignments` tables.
+    - Added REST endpoints for organization-scoped tag CRUD and entity assignments.
+    - Created a shared `TagManager` component in `@sous/features` for universal tag management across entities.
+    - Integrated `TagManager` into the `LayoutDesigner` settings modal and sidebar.
+- **Layout Designer Improvements:**
+    - **Grid Resizing:** Implemented logic for resizing grid tracks (rows/cols) using percentage units, as defined in ADR 044.
+    - **UI Cleanup:** Removed non-functional resize handles from the root-level container and cleaned up visual clutter in `TemplateSkeletonRenderer`.
+    - **Build Stability:** Fixed module resolution errors in the Next.js build by correcting file extensions in feature exports.
+- **Windows Agent Bridge:**
+    - Refactored `scripts/install-dev.sh` to use `wslpath -w` for reliable Windows path resolution.
+    - Fixed quoting and elevation issues in the PowerShell-based symlink creation script.
+    - Verified real-time connectivity between WSL and the custom Windows Agent on port 4040.
+
 ## 2026-02-10 (Layout Manager Refactor & Stability)
 
 - **Layout Manager Refactor:**

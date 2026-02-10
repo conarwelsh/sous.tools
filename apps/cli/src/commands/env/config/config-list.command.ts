@@ -20,7 +20,7 @@ export class ConfigListCommand extends CommandRunner {
 
     console.log(chalk.bold('\n[Secrets]'));
     console.log(`JWT Secret:      ${mask(config.iam.jwtSecret)}`);
-    console.log(`Supabase Key:    ${mask(config.storage.supabase.anonKey)}`);
+    console.log(`Supabase Key:    ${mask(config.storage.supabase?.anonKey)}`);
     console.log(`Redis URL:       ${mask(config.redis.url)}`);
 
     console.log(chalk.bold('\n[Context]'));
