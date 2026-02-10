@@ -26,7 +26,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  pointerIntersection,
+  pointerWithin,
   rectIntersection,
   CollisionDetection,
 } from "@dnd-kit/core";
@@ -34,10 +34,10 @@ import {
 // Custom collision detection to handle nested droppables
 // It prefers droppables with smaller surface areas when multiple overlap (favoring children over parents)
 const nestedCollisionDetection: CollisionDetection = (args) => {
-  const pointerCollisions = pointerIntersection(args);
+  const pointerCollisions = pointerWithin(args);
   
   if (pointerCollisions.length > 0) {
-    return pointerCollisions.sort((a, b) => {
+    return pointerCollisions.sort((a: any, b: any) => {
       const aRect = a.data?.droppableContainer.rect.current;
       const bRect = b.data?.droppableContainer.rect.current;
       if (aRect && bRect) {

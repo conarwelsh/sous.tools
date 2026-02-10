@@ -29,7 +29,7 @@ We will utilize **Docker Compose** to orchestrate a suite of "Local Cloud" servi
 
 ### 3. Build & Testing Hardware
 
-- **`my-github-runner`**: A custom Dockerfile (based on Ubuntu) containing the Rust toolchain, Android SDK, and QEMU. This will act as the local runner for native app compilation (ADR 007) and hardware-in-the-loop testing (ADR 033).
+- **`my-github-runner`**: A custom Dockerfile (based on Ubuntu) containing the Android SDK, Android SDK, and QEMU. This will act as the local runner for native app compilation (ADR 007) and hardware-in-the-loop testing (ADR 033).
 - **`ubuntu-sandbox`**: A clean `ubuntu:22.04` image used exclusively for testing `sous env install`.
   - **Persistence:** This container is configured to be **ephemeral**; all state is wiped upon restart to ensure the "Zero to Dev" installation script is verified on a truly fresh OS every time.
 

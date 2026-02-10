@@ -25,7 +25,7 @@ We will adopt a **Type-Safe, Code-Split I18n** strategy.
 ### 2. Implementation Strategy
 
 - **Code Splitting:** Translations will be stored in JSON files scoped by Domain (e.g., `culinary.json`, `procurement.json`) and loaded on-demand to minimize the initial JS bundle.
-- **Universal Support:** The I18n setup must work in Next.js (Web) and React Native (Mobile/Tauri) via the shared `@sous/ui` package.
+- **Universal Support:** The I18n setup must work in Next.js (Web) and React Native (Mobile/Capacitor) via the shared `@sous/ui` package.
 - **Directionality:** Tailwind's `rtl` / `ltr` utilities will be mandated for layout-sensitive components.
 
 ## Consequences

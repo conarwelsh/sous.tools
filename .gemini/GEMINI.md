@@ -149,10 +149,10 @@
 
 ### 20. App Template Synchronization (MANDATE)
 
-**Rule:** The application templates (specifically `packages/templates/native-app`) MUST be kept in sync with the canonical implementations (e.g., `@sous/native`).
+**Rule:** All application templates MUST be kept in sync with their canonical implementations.
 
 - **Action:**
-  - Any time a structural fix, configuration update (e.g., to `tauri.conf.json`), or dependency upgrade is applied to a live app like `@sous/native` that is derived from a template, you MUST apply the same change to the corresponding template in `packages/templates/`.
+  - Any time a structural fix, configuration update, or dependency upgrade is applied to a live app that is derived from a template (e.g., `@sous/web`), you MUST apply the same change to the corresponding template in `packages/templates/`.
   - This ensures that newly generated applications inherit the latest best practices and fixes.
 - **Goal:** Prevent drift between the "ideal" app structure and new apps.
 
@@ -195,7 +195,9 @@
 - **Apps:**
   - `@sous/web` (Next.js 16)
   - `@sous/api` (NestJS)
-  - `@sous/cli` (NestJS CLI)
+  - `@sous/cli` (NestJS CLI / Dev Tools)
+  - `@sous/wearos` (Native Wear OS)
+  - `@sous/docs` (Next.js Documentation)
 - **Packages:**
   - `@sous/client-sdk`: Generated client SDK.
   - `@sous/config`: Centralized configuration.

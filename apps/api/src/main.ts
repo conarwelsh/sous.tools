@@ -1,12 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
-import { configPromise } from '@sous/config';
+import { resolveConfig } from '@sous/config';
 import { logger } from '@sous/logger';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
 
 async function bootstrap() {
-  const config = await configPromise;
+  const config = await resolveConfig();
   const app = await NestFactory.create(AppModule);
 
   app.enableCors();

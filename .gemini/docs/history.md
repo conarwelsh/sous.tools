@@ -57,24 +57,24 @@
   - **Dependency Correction:** Added `socket.io-client` to the `dependencies` of `@sous/features` and `@sous/web` to ensure correct resolution now that it is excluded from the library bundle.
   - **Result:** ACHIEVED a stable browser environment for `@sous/web` while maintaining full functionality for the `useHardware` realtime hook.
 
-## 2026-02-07 (Tauri-to-Capacitor Refactor Completion)
+## 2026-02-07 (Capacitor-to-Capacitor Refactor Completion)
 
-- **Tauri to Capacitor Migration Implementation:**
-  - Completed the full refactor of native application targets from Tauri to Capacitor as per ADR 041.
+- **Capacitor to Capacitor Migration Implementation:**
+  - Completed the full refactor of native application targets from Capacitor to Capacitor as per ADR 041.
   - **@sous/web Consolidation:** Migrated all specialized native app views (KDS, POS, Signage) into the primary Next.js web application as dedicated routes under `(kiosk)` and `(admin)` groups.
   - **Capacitor Integration:** Initialized and configured Capacitor in `apps/web` with support for Android and iOS platforms.
-  - **Hardware Pairing Strategy:** Implemented a new `useHardware` hook in `@sous/features` to manage browser-based hardware identification and pairing workflows, replacing the Rust-based `native-bridge`.
-  - **CLI Orchestrator Update:** Refactored `sous dev` and the `ProcessManager` service to support the new Capacitor-based development loop and remove references to deleted Tauri applications.
+  - **Hardware Pairing Strategy:** Implemented a new `useHardware` hook in `@sous/features` to manage browser-based hardware identification and pairing workflows, replacing the Native-based `native-bridge`.
+  - **CLI Orchestrator Update:** Refactored `sous dev` and the `ProcessManager` service to support the new Capacitor-based development loop and remove references to deleted Capacitor applications.
   - **UI & Feature Cleanup:** Finalized the removal of `react-native`, `nativewind`, and `tauri` dependencies across the monorepo, standardizing on a pure React/Tailwind/Radix UI stack.
   - **Documentation & Scripts Refresh:** Updated `README.md`, `pnpm-workspace.yaml`, and `install-rpi.sh` to reflect the web-first architecture and browser-only kiosk targets.
 
 ## 2026-02-07 (Architectural Pivot)
 
-- **Web-First Pivot**: Abandoned React Native Web and Tauri universal architecture due to integration fragility with Next.js 16/React 19.
+- **Web-First Pivot**: Abandoned React Native Web and Capacitor universal architecture due to integration fragility with Next.js 16/React 19.
 - **UI Refactor**: Converted `@sous/ui` from React Native primitives to standard Shadcn UI patterns (Radix + Tailwind).
 - **Dependency Cleanup**: Removed all `react-native`, `nativewind`, and `tauri` related packages from the monorepo.
 - **Mobile Strategy**: Switched to Capacitor for mobile shells, allowing for a single high-performance web codebase.
-- **Kiosk Strategy**: Switched to FullPageOS for Raspberry Pi nodes, eliminating the need for custom Rust/Tauri builds on Linux.
+- **Kiosk Strategy**: Switched to FullPageOS for Raspberry Pi nodes, eliminating the need for custom Capacitor builds on Linux.
 - **Documentation Update**: Refreshed all ADRs and architectural docs to reflect the new direction.
 
 ## 2026-02-07
@@ -149,7 +149,7 @@
 - **Dashboard & Dev Experience (God View):**
   - **Resolved @sous/docs "barking" issues:**
     - Fixed "Workspace Root" warning in Next.js by explicitly setting `outputFileTracingRoot`.
-    - Silenced "Port 3000 in use" noise by passing the correct `PORT=3001` in the `dev.kdl` orchestrator.
+    - Silenced "Port 3000 in use" noise by passing the correct `PORT=3001` in the `dev.kdl` dev tools.
     - Resolved several ESLint errors and warnings in `apps/docs` (unused variables, illegal `require` in tailwind config).
     - Cleaned up unused `react-dom-shim.js` logic and unified React 19 compatibility shims.
   - Added `[c]` keyboard shortcut to `sous dev` to clear logs for the currently active panel (Services, Combined, Terminal, or Gemini).
@@ -176,7 +176,7 @@
 - **Phase 1.2 Accomplishments:**
   - **Documentation Hub:** Implemented `@sous/docs` with a persistent Knowledge Base that aggregates ADRs, Specs, and READMEs. Refactored `@sous/features` build system to support split client/server entries for Next.js compatibility.
   - **CLI DDD Refactoring:** Reorganized `@sous/cli` into strategic umbrellas (`dev`, `env`, `quality`, `maintenance`).
-  - **Robust Dev Orchestrator:** Implemented an interactive React Ink TUI for `sous dev`, replacing static logging with a real-time process dashboard.
+  - **Robust Sous Dev Tools:** Implemented an interactive React Ink TUI for `sous dev`, replacing static logging with a real-time process dashboard.
   - **ZSH Customization:** Implemented `sous dev install shell` which adds brand-aligned prompts, infrastructure health indicators, and productivity aliases (`sous`, `sd`, `sl`, `c`, `ls`, etc.) to the user's terminal.
 - Enforced **Mandate 15: The Shell Pattern** by moving strategic umbrellas from `@sous/web` to the shared **`@sous/features`** package, ensuring absolute logic reuse between platforms.
 - Completed **Phase 1.1** of the rollout plan.
@@ -188,9 +188,9 @@
 - Rewrote `@sous/cli` README.md to accurately reflect the tool's capabilities and document the upcoming shell customization features.
 - Created **ADR 039: CLI-Driven ZSH Customization** to improve Developer Experience with brand-aligned prompts and infrastructure status indicators.
 - Updated `phase-rollout-plan.md` to include ZSH customization in Phase 1.2.
-- Refactored `scripts/dev-orchestrator.ts` to use absolute `pnpm` paths and avoid `shell: true` issues, fixing `ENOENT` errors during app startup.
+- Refactored `scripts/dev-tools.ts` to use absolute `pnpm` paths and avoid `shell: true` issues, fixing `ENOENT` errors during app startup.
 - Updated root `.idea` configuration to use `#GRADLE_LOCAL_JAVA_HOME` for better WSL compatibility in Android Studio.
-- Switched to `includeBuild` in the root `settings.gradle.kts` for Tauri-based projects.
+- Switched to `includeBuild` in the root `settings.gradle.kts` for Capacitor-based projects.
 - Fixed a Gradle sync error in the `apps/native` subproject by removing the redundant `allprojects` repository block.
 - Fixed Android Studio "Invalid Gradle JDK" warnings by switching to `#PROJECT_SDK` and defining a clean `17` JavaSDK in `.idea/misc.xml`.
 - Configured monorepo for "Single Window" Android Studio support by adding root `settings.gradle.kts` and `build.gradle.kts`.
@@ -233,11 +233,11 @@
 - Created ADR 034: Real-time Throttling (60s batching for free-tier sustainability).
 - Created **ADR 035: Docker Infrastructure Strategy** (Local Cloud Mocks: Postgres, Redis, MailDev, Minio).
 - Created **ADR 036: Shared Features & Shell Pattern Strategy** (Maximizing reuse via `@sous/features`).
-- Created **ADR 037: Robust Dev Orchestrator Strategy** (Implementing custom React Ink TUI).
+- Created **ADR 037: Robust Sous Dev Tools Strategy** (Implementing custom React Ink TUI).
 - Created **ADR 038: CLI Infrastructure Dashboard Strategy** (Animated TUI for platform metrics).
 - Established **.gemini/specs/004-cli-infra-dashboard.md** for the real-time reporting tool.
-- Integrated **Docker Compose management** (Status, Start/Stop, Logs) into the Dev Orchestrator plan.
-- Added **RPi Edge Integration** to Dev Orchestrator (SSH log tailing, one-click Sync+Start).
+- Integrated **Docker Compose management** (Status, Start/Stop, Logs) into the Sous Dev Tools plan.
+- Added **RPi Edge Integration** to Sous Dev Tools (SSH log tailing, one-click Sync+Start).
 - Expanded **`sous maintenance`** brainstorming with `dead-code`, `unused-packages`, and `unused-css` commands.
 - Added **`ubuntu-sandbox` image** to ADR 035 for ephemeral testing of installation scripts.
 - Added **Mandate 17: Build Artifact Exclusion** (Ensuring @.gemini is excluded from production).

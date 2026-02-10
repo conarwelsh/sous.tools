@@ -10,7 +10,7 @@ This is a monorepo managed by **TurboRepo** and **pnpm workspaces**.
 
 - **[@sous/api](./apps/api)**: Centralized NestJS API & Drizzle ORM.
 - **[@sous/web](./apps/web)**: Unified Next.js 16 application for all platforms. Includes Admin Console, KDS, POS, and Signage targets via Capacitor Product Flavors.
-- **[@sous/cli](./apps/cli)**: Command-line orchestrator & developer tools.
+- **[@sous/cli](./apps/cli)**: Sous Dev Tools & command-line utility.
 - **[@sous/wearos](./apps/wearos)**: Native Wear OS companion app.
 - **[@sous/docs](./apps/docs)**: Documentation hub & Branding lab.
 
@@ -40,20 +40,68 @@ cp .env.example .env
 # Edit .env with your INFISICAL_CLIENT_ID, etc.
 ```
 
-### 3. Installation
+## 🚀 Quick Start (Installation)
+
+To set up your development environment on Ubuntu (Native or WSL2):
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/conarwelsh/sous.tools.git
+    cd sous.tools
+    ```
+
+2.  **Install base dependencies:**
+    ```bash
+    pnpm install
+    ```
+
+3.  **Run the Sous Installer:**
+    This command is idempotent and will install all system dependencies (Docker, Node, Native, Android SDK, etc.).
+    ```bash
+    pnpm sous dev install
+    ```
+
+4.  **Configure Environment:**
+    The installer creates `packages/config/.env`. Open it and add your `INFISICAL_` credentials.
+
+5.  **Optional: Install Shell Customization:**
+    Adds productivity aliases and a brand-aligned ZSH prompt.
+    ```bash
+    pnpm sous dev install shell
+    source ~/.zshrc
+    ```
+
+6.  **Launch Dev Tools:**
+    ```bash
+    pnpm dev
+    ```
+
+---
+
+## 💻 Recommended IDE Setup
+
+For the best development experience, we recommend **VS Code** with the following:
+
+- **WSL Extension**: If developing on Windows.
+- **Prettier & ESLint**: Core formatting and linting.
+- **Tailwind CSS IntelliSense**: For styling utilities.
+- **Drizzle Studio**: For local database exploration.
+
+The project includes a `.vscode` folder with recommended extensions and debug configurations.
+
+---
+
+## 🛠️ Testing the Installation Workflow
+
+We use a Docker-based ephemeral Ubuntu container to verify the installation process remains robust.
 
 ```bash
-pnpm install
-pnpm sous dev install
+# Start the tester container
+docker compose up -d installer
+
+# Run the automated install test
+docker exec -it sous-installer pnpm sous dev install
 ```
-
-### 4. Development
-
-```bash
-pnpm sous dev
-```
-
-This will launch the **Ink TUI Dashboard** with the API, Web, and Docs servers running.
 
 ## Architecture & Mandates
 

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { View, Text, Button, Card, ScrollView, Logo } from "@sous/ui";
+import { client as config } from "@sous/config";
 
 import {
   Monitor,
@@ -22,8 +23,8 @@ export default function DownloadPage() {
   >("linux");
   const [manifest, setManifest] = useState<Record<string, string>>({});
 
-  // Determine environment (mocked for frontend, ideally would come from config)
-  const env = process.env.NEXT_PUBLIC_APP_ENV || "development";
+  // Determine environment
+  const env = config.features.appEnv || "development";
 
   useEffect(() => {
     const ua = window.navigator.userAgent.toLowerCase();

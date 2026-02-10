@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { config } from "@sous/config";
 
 export function FlavorGate() {
   const router = useRouter();
@@ -16,9 +17,9 @@ export function FlavorGate() {
 
       // EMERGENCY REDIRECT: If we are on localhost in native, we are lost. Force to WSL IP.
       if (typeof window !== "undefined" && window.location.hostname === "localhost" && (window as any).Capacitor) {
-         const targetUrl = process.env.NEXT_PUBLIC_WEB_URL;
+         const targetUrl = config.web.url;
          
-         if (!targetUrl) {
+         if (!targetUrl || targetUrl.includes("localhost")) {
             // If we don't have the env var, we might have it injected into the window by the bridge
             // or we can try to guess from the strings.xml if we had a plugin for it.
             // For now, let's assume the build process worked and we have the env var.

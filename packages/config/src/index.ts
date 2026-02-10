@@ -1,183 +1,233 @@
 import {
   configSchema,
-  type Config,
   brandingConfigSchema,
+  type Config,
   type BrandingConfig,
 } from "./schema.js";
+import { SecretManager } from "./secrets.js";
 
 const isServer = typeof window === "undefined";
 
 /**
- * Robustly finds the project root by looking for pnpm-workspace.yaml
+ * Singleton secrets manager instance
  */
-function findRoot(): string {
-  if (!isServer) return "";
-  
-  try {
-    const fs = eval('require("fs")');
-    const path = eval('require("path")');
-    let current = process.cwd();
-    
-    while (current !== "/" && !fs.existsSync(path.join(current, "pnpm-workspace.yaml"))) {
-      const parent = path.dirname(current);
-      if (parent === current) break;
-      current = parent;
-    }
-    return current;
-  } catch (e) {
-    return process.cwd();
-  }
-}
+export const secrets = new SecretManager();
+
+export { configSchema, brandingConfigSchema, type BrandingConfig };
 
 /**
- * Synchronously loads environment variables from .env and Infisical.
- * This runs ONLY on the server during module initialization.
+ * Singleton configuration instance
  */
-function bootstrap() {
-  if (!isServer) return;
+let cachedConfig: Config | null = null;
 
-  const isDev = process.env.NODE_ENV !== "production";
-  if (!isDev) return;
-
-  try {
-    // Check if require exists (CJS environment)
-    // We use a check that won't be shimmed by esbuild
-    let req: any;
+/**
+ * Normalizes environment name
+ */
+async function getEnv(): Promise<"development" | "staging" | "production" | "test"> {
+  // 1. Check for context override file (Local Dev only)
+  if (isServer) {
     try {
-      req = eval('require');
-    } catch (e) {
-      // In ESM Node.js, eval('require') will throw. 
-      // We skip bootstrap and rely on external env population.
-      return;
-    }
-
-    if (!req || typeof req !== 'function') return;
-
-    const fs = req("fs");
-    const path = req("path");
-    const dotenv = req("dotenv");
-    const child_process = req("child_process");
-
-    const root = findRoot();
-
-    // 1. Load bootstrap variables from .env if present
-    const envPath = path.join(root, ".env");
-    if (fs.existsSync(envPath)) {
-      dotenv.config({ path: envPath });
-    }
-
-    // 2. Load from Infisical if in development and missing critical keys
-    const isNext = !!process.env.NEXT_RUNTIME;
-    const hasProjectId = !!process.env.INFISICAL_PROJECT_ID;
-    
-    if (!isNext && !process.env.DATABASE_URL && hasProjectId) {
-      try {
-        const { execSync } = child_process;
-        const projectId = process.env.INFISICAL_PROJECT_ID;
-        const envName = "dev";
-        
-        console.log(`🔐 [@sous/config] Fetching secrets from Infisical (Project: ${projectId}, Env: ${envName})...`);
-        
-        const output = execSync(
-          `infisical export --projectId ${projectId} --env ${envName} --format json`,
-          { 
-            encoding: "utf8", 
-            stdio: ["ignore", "pipe", "ignore"],
-            env: { ...process.env }
-          }
-        );
-        
-        const secrets = JSON.parse(output);
-        if (Array.isArray(secrets)) {
-          let count = 0;
-          for (const { key, value } of secrets) {
-            if (!process.env[key]) {
-              process.env[key] = value;
-              count++;
-            }
-          }
-          if (count > 0) {
-            console.log(`✅ [@sous/config] Population complete. Injected ${count} new variables.`);
-          }
-        }
-      } catch (e: any) {
-        console.warn("⚠️ [@sous/config] Infisical CLI fetch failed. Ensure CLI is installed and authenticated.");
+      const fs = await import("fs");
+      const path = await import("path");
+      const os = await import("os");
+      const contextPath = path.join(os.homedir(), ".sous", "context.json");
+      if (fs.existsSync(contextPath)) {
+        const context = JSON.parse(fs.readFileSync(contextPath, "utf-8"));
+        if (context.env) return context.env;
       }
+    } catch (e) {
+      // Ignore errors reading context
     }
-  } catch (e) {
-    // Silently ignore bootstrap failures in environments where require is unavailable (ESM)
+  }
+
+  const env = process.env.NODE_ENV || process.env.MODE || "development";
+  if (env === "prod") return "production";
+  if (env === "stage") return "staging";
+  if (env === "dev") return "development";
+  return env as any;
+}
+
+/**
+ * Finds project root by looking for pnpm-workspace.yaml
+ */
+async function findProjectRoot(): Promise<string> {
+  if (!isServer) return "";
+  const fs = await import("fs");
+  const path = await import("path");
+  let current = process.cwd();
+  while (current !== "/" && !fs.existsSync(path.join(current, "pnpm-workspace.yaml"))) {
+    const parent = path.dirname(current);
+    if (parent === current) break;
+    current = parent;
+  }
+  return current;
+}
+
+/**
+ * Fetches secrets from Infisical using the SDK (Server only)
+ */
+async function fetchInfisicalSecrets(env: string): Promise<Record<string, string>> {
+  if (!isServer) return {};
+
+  const projectId = process.env.INFISICAL_PROJECT_ID;
+  const clientId = process.env.INFISICAL_CLIENT_ID;
+  const clientSecret = process.env.INFISICAL_CLIENT_SECRET;
+
+  if (!projectId || !clientId || !clientSecret) {
+    // If no credentials, we might be in a CI or local environment already populated
+    return {};
+  }
+
+  try {
+    const { InfisicalSDK } = await import("@infisical/sdk");
+    const client = new InfisicalSDK();
+    await client.auth().universalAuth.login({
+      clientId,
+      clientSecret,
+    });
+
+    const secrets = await client.secrets().listSecrets({
+      environment: env === "development" ? "dev" : env === "staging" ? "staging" : "prod",
+      projectId,
+    });
+
+    const secretMap: Record<string, string> = {};
+    for (const secret of secrets.secrets) {
+      secretMap[secret.secretKey] = secret.secretValue;
+    }
+    return secretMap;
+  } catch (error) {
+    console.warn("⚠️ [@sous/config] Infisical SDK fetch failed, falling back to process.env/cli", error);
+    return {};
   }
 }
 
 /**
- * Normalizes environment variables from process.env or globalThis.
+ * Normalizes public environment variables for the client
  */
-const getEnvVars = () => {
-  if (isServer) return process.env;
-  return (globalThis as any).process?.env || (globalThis as any).__SOUS_ENV__ || {};
-};
-
-function sanitizeUrl(url: string | undefined, fallback: string): string {
-  if (!url) return fallback;
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  return `https://${url}`;
+function getPublicEnv() {
+  const envVars: any = isServer ? process.env : (globalThis as any).process?.env || {};
+  const publicEnv: Record<string, string> = {};
+  for (const key in envVars) {
+    if (key.startsWith("NEXT_PUBLIC_") || key.startsWith("VITE_")) {
+      publicEnv[key] = envVars[key]!;
+    }
+  }
+  return publicEnv;
 }
 
 /**
- * Builds the configuration object from current environment variables.
+ * Builds a configuration object from pre-calculated environment variables
+ * (Used for client-side where we can't fetch from Infisical)
  */
-function buildConfig(): Config {
-  const envVars = getEnvVars();
-  const env = envVars.NODE_ENV || (envVars as any).MODE || "development";
+function buildPublicConfig(): Config {
+  const envVars = getPublicEnv();
+  const env = (envVars.NEXT_PUBLIC_APP_ENV || "development") as any;
 
+  return {
+    env,
+    api: {
+      port: 4000,
+      url: envVars.NEXT_PUBLIC_API_URL || "http://localhost:4000",
+    },
+    web: {
+      port: 3000,
+      url: envVars.NEXT_PUBLIC_WEB_URL || "http://localhost:3000",
+    },
+    docs: {
+      port: 3001,
+      url: envVars.NEXT_PUBLIC_DOCS_URL || "http://localhost:3001",
+    },
+    features: {
+      enableRegistration: envVars.NEXT_PUBLIC_ENABLE_REGISTRATION !== "false",
+      appVersion: envVars.NEXT_PUBLIC_APP_VERSION || "0.1.0",
+      appEnv: env,
+    },
+    // Other fields as empty/defaults for client
+    db: { url: "" },
+    redis: { url: "" },
+    iam: { jwtSecret: "" },
+    storage: {
+      supabase: { url: "", anonKey: "", bucket: "media" },
+    },
+    logger: { level: "info", json: false },
+  } as Config;
+}
+
+/**
+ * Resolves the configuration object
+ */
+export async function resolveConfig(): Promise<Config> {
+  if (cachedConfig) return cachedConfig;
+
+  // Load .env from project root if server-side
+  if (isServer) {
+    try {
+      const { config: loadDotenv } = await import("dotenv");
+      const path = await import("path");
+      const fs = await import("fs");
+      const root = await findProjectRoot();
+      
+      // 1. Load from root
+      const rootEnvPath = path.join(root, ".env");
+      if (fs.existsSync(rootEnvPath)) {
+        loadDotenv({ path: rootEnvPath });
+      }
+
+      // 2. Load from package (overrides root if exists)
+      const envPath = path.join(root, "packages/config/.env");
+      if (fs.existsSync(envPath)) {
+        loadDotenv({ path: envPath });
+      }
+    } catch (e) {
+      // Ignore errors loading .env
+    }
+  }
+
+  if (!isServer) {
+    cachedConfig = buildPublicConfig();
+    return cachedConfig;
+  }
+
+  const env = await getEnv();
+  const envVars = { ...process.env };
+
+  // 1. Fetch from Vault if server-side and credentials exist
+  if (isServer && env !== "test") {
+    const vaultSecrets = await fetchInfisicalSecrets(env);
+    Object.assign(envVars, vaultSecrets);
+  }
+
+  // 2. Map environment variables to schema
   const rawConfig = {
     env,
     api: {
-      port: Number(envVars.PORT_API || envVars.API_PORT || 4000),
-      url: sanitizeUrl(
-        envVars.NEXT_PUBLIC_API_URL || envVars.API_URL,
-        `http://localhost:${envVars.PORT_API || 4000}`
-      ),
+      port: Number(envVars.PORT_API || 4000),
+      url: envVars.API_URL || 
+           (envVars.NEXT_PUBLIC_API_URL && envVars.NEXT_PUBLIC_API_URL !== "undefined" ? envVars.NEXT_PUBLIC_API_URL : `http://localhost:${envVars.PORT_API || 4000}`),
     },
     web: {
-      port: Number(envVars.PORT_WEB || envVars.WEB_PORT || 3000),
-      url: sanitizeUrl(
-        envVars.NEXT_PUBLIC_WEB_URL || envVars.WEB_URL,
-        `http://localhost:${envVars.PORT_WEB || 3000}`
-      ),
+      port: Number(envVars.PORT_WEB || 3000),
+      url: envVars.WEB_URL || envVars.NEXT_PUBLIC_WEB_URL || `http://localhost:${envVars.PORT_WEB || 3000}`,
     },
     docs: {
-      port: Number(envVars.PORT_DOCS || envVars.DOCS_PORT || 3001),
-      url: sanitizeUrl(
-        envVars.DOCS_URL,
-        `http://localhost:${envVars.PORT_DOCS || 3001}`
-      ),
-    },
-    native: {
-      port: Number(envVars.NATIVE_PORT || 1421),
-    },
-    headless: {
-      port: Number(envVars.HEADLESS_PORT || 1422),
-    },
-    kds: {
-      port: Number(envVars.KDS_PORT || 1423),
-    },
-    pos: {
-      port: Number(envVars.POS_PORT || 1424),
+      port: Number(envVars.PORT_DOCS || 3001),
+      url: envVars.DOCS_URL || envVars.NEXT_PUBLIC_DOCS_URL || `http://localhost:${envVars.PORT_DOCS || 3001}`,
     },
     db: {
-      url: envVars.DATABASE_URL,
+      url: envVars.DATABASE_URL || "postgres://localhost:5432/sous",
     },
     redis: {
-      url: envVars.REDIS_URL,
+      url: envVars.REDIS_URL || (envVars.REDIS_HOST ? `redis://${envVars.REDIS_HOST}:${envVars.REDIS_PORT || 6379}` : "redis://localhost:6379"),
     },
     iam: {
-      jwtSecret: envVars.JWT_SECRET || "sous-secret-key",
+      jwtSecret: envVars.JWT_SECRET || envVars.SESSION_SECRET || "fallback-secret-too-short",
     },
     storage: {
       supabase: {
-        url: envVars.SUPABASE_URL,
-        anonKey: envVars.SUPABASE_ANON_KEY,
+        url: envVars.SUPABASE_URL || "http://localhost:54321",
+        anonKey: envVars.NEXT_PUBLIC_SUPABASE_ANON_KEY || envVars.SUPABASE_ANON_KEY || envVars.SUPABASE_PASSWORD || "placeholder",
+        serviceRoleKey: envVars.SUPABASE_SERVICE_ROLE_KEY,
         bucket: envVars.SUPABASE_BUCKET || "media",
       },
       cloudinary: {
@@ -186,77 +236,78 @@ function buildConfig(): Config {
         apiSecret: envVars.CLOUDINARY_API_SECRET,
       },
     },
+    logger: {
+      level: envVars.LOG_LEVEL || (env === "development" ? "debug" : "info"),
+      json: envVars.SOUS_JSON_LOGS === "true",
+      logtailToken: envVars.LOGTAIL_SOURCE_TOKEN,
+    },
+    features: {
+      enableRegistration: envVars.ENABLE_REGISTRATION !== "false",
+      appVersion: envVars.NEXT_PUBLIC_APP_VERSION || envVars.APP_VERSION || "0.1.0",
+      appEnv: envVars.APP_ENV || env,
+    },
+    infisical: {
+      projectId: envVars.INFISICAL_PROJECT_ID,
+      clientId: envVars.INFISICAL_CLIENT_ID,
+      clientSecret: envVars.INFISICAL_CLIENT_SECRET,
+    }
   };
 
-  const parsed = configSchema.safeParse(rawConfig);
-  
-  if (!parsed.success) {
-    if (isServer) {
-      console.error("❌ [@sous/config] Invalid configuration structure:", JSON.stringify(parsed.error.format(), null, 2));
-      console.error("⚠️ [@sous/config] Raw Invalid Config (partial):", JSON.stringify({
-        api: rawConfig.api,
-        web: rawConfig.web,
-        db: rawConfig.db
-      }, null, 2));
+  const result = configSchema.safeParse(rawConfig);
+  if (!result.success) {
+    const error = result.error.format();
+    console.error("❌ [@sous/config] Invalid Configuration:", JSON.stringify(error, null, 2));
+    
+    const isBuild = process.env.SKIP_CONFIG_VALIDATION === "true" || 
+                    process.env.CI === "true" || 
+                    process.env.NODE_ENV === "production"; // During Next.js build, NODE_ENV is production
+
+    // In production runtime, we should probably throw here to prevent inconsistent state
+    // but during build we might not have all secrets
+    if (env === "production" && !isBuild) {
+      throw new Error("Invalid production configuration");
     }
-    return rawConfig as any;
+    cachedConfig = rawConfig as any;
+  } else {
+    cachedConfig = result.data;
   }
 
-  return parsed.data;
-}
-
-// 1. Run bootstrap immediately on import (Server only)
-if (isServer) {
-  bootstrap();
+  return cachedConfig!;
 }
 
 /**
- * Server-side configuration. Contains all secrets.
- * NEVER use this in client-side code.
+ * Promise that resolves to the configuration
  */
-export const server = buildConfig();
+export const configPromise = resolveConfig();
 
 /**
- * Client-side configuration. Filtered to only include public variables.
+ * Synchronous access to configuration. 
+ * WARNING: Requires resolveConfig() to have been called once at startup.
  */
-export const client = (() => {
-  const fullConfig = server;
-  const envVars = getEnvVars();
-  
-  // Extract all keys starting with NEXT_PUBLIC_ or VITE_
-  const publicEnv: Record<string, string> = {};
-  for (const key in envVars) {
-    if (key.startsWith("NEXT_PUBLIC_") || key.startsWith("VITE_")) {
-      publicEnv[key] = envVars[key]!;
-    }
+export const config = (() => {
+  // Client-side initialization: if we're in the browser, we can pre-build
+  if (!isServer && !cachedConfig) {
+    cachedConfig = buildPublicConfig();
   }
 
-  // Merge the structured public parts of the config
-  return {
-    env: fullConfig.env,
-    api: fullConfig.api,
-    web: fullConfig.web,
-    docs: fullConfig.docs,
-    ...publicEnv,
-  } as const;
+  return new Proxy({} as Config, {
+    get(_, prop) {
+      if (!cachedConfig) {
+        if (!isServer) {
+           cachedConfig = buildPublicConfig();
+        } else {
+           // Fallback to public config even on server if it's accessed during build/prerender 
+           // and resolveConfig hasn't finished yet.
+           console.warn("[@sous/config] Configuration accessed synchronously before resolution. Using public defaults.");
+           cachedConfig = buildPublicConfig();
+        }
+      }
+      return (cachedConfig as any)[prop];
+    }
+  });
 })();
 
-// Helper exports
-export const localConfig = server;
-export const getActiveConfig = () => server;
-export const configPromise = Promise.resolve(server);
-export const getConfig = async () => server;
-
-/**
- * Secret management utility. Only available on server.
- */
-export const secrets = isServer ? (() => {
-  try {
-    const SecretManager = eval('require("./secrets.js").SecretManager');
-    return new SecretManager();
-  } catch (e) {
-    return null;
-  }
-})() : null;
-
-export { configSchema, brandingConfigSchema, type Config, type BrandingConfig };
+// For legacy support while refactoring
+export const server = config;
+export const client = config;
+export const localConfig = config;

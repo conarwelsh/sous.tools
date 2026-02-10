@@ -6,7 +6,7 @@ module.exports = {
     // --- Core Apps ---
     {
       name: "sous-api",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-orchestrator.ts api",
+      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts api",
       env: {
         NODE_ENV: "development",
         FORCE_COLOR: "1"
@@ -14,7 +14,7 @@ module.exports = {
     },
     {
       name: "sous-web",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-orchestrator.ts web",
+      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts web",
       env: {
         NODE_ENV: "development",
         PORT: 3000,
@@ -23,7 +23,7 @@ module.exports = {
     },
     {
       name: "sous-docs",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-orchestrator.ts docs",
+      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts docs",
       env: {
         NODE_ENV: "development",
         PORT: 3001,
@@ -34,7 +34,7 @@ module.exports = {
     // --- Mobile / Flavor Apps (Serving via @sous/web + Capacitor) ---
     {
       name: "sous-kds",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-orchestrator.ts web",
+      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts web",
       env: {
         NODE_ENV: "development",
         PORT: 1423,
@@ -45,7 +45,7 @@ module.exports = {
     },
     {
       name: "sous-pos",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-orchestrator.ts web",
+      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts web",
       env: {
         NODE_ENV: "development",
         PORT: 1424,
@@ -56,7 +56,7 @@ module.exports = {
     },
     {
       name: "sous-signage",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-orchestrator.ts web",
+      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts web",
       env: {
         NODE_ENV: "development",
         PORT: 1425,
@@ -67,7 +67,7 @@ module.exports = {
     },
     {
       name: "sous-signage-android",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-orchestrator.ts signage-android",
+      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts signage-android",
       autorestart: false,
       env: {
         NODE_ENV: "development",
@@ -77,7 +77,7 @@ module.exports = {
     },
     {
       name: "sous-kds-android",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-orchestrator.ts kds-android",
+      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts kds-android",
       autorestart: false,
       env: {
         NODE_ENV: "development",
@@ -87,7 +87,7 @@ module.exports = {
     },
     {
       name: "sous-pos-android",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-orchestrator.ts pos-android",
+      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts pos-android",
       autorestart: false,
       env: {
         NODE_ENV: "development",
@@ -97,7 +97,7 @@ module.exports = {
     },
     {
       name: "sous-tools-android",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-orchestrator.ts tools-android",
+      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts tools-android",
       autorestart: false,
       env: {
         NODE_ENV: "development",
@@ -107,7 +107,7 @@ module.exports = {
     },
     {
       name: "sous-wearos",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-orchestrator.ts wearos",
+      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts wearos",
       autorestart: false,
       env: {
         NODE_ENV: "development",
@@ -117,7 +117,7 @@ module.exports = {
     // The 5th mobile app could be the standard consumer app (mobile web/capacitor)
     {
       name: "sous-mobile-web",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-orchestrator.ts web",
+      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts web",
       env: {
         NODE_ENV: "development",
         PORT: 3002,

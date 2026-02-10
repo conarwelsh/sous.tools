@@ -4,40 +4,21 @@ import fs from 'fs';
 import path from 'path';
 import mime from 'mime-types';
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-  console.error('❌ Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
-  process.exit(1);
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey);
-const BUCKET = 'media';
-const RELEASE_FOLDER = 'releases/latest';
-
-async function uploadFile(filePath: string, destPath: string) {
-  const fileContent = fs.readFileSync(filePath);
-  const contentType = mime.lookup(filePath) || 'application/octet-stream';
-
-  const { error } = await supabase.storage
-    .from(BUCKET)
-    .upload(destPath, fileContent, {
-      contentType,
-      upsert: true,
-    });
-
-  if (error) {
-    console.error(`❌ Failed to upload ${path.basename(filePath)}:`, error.message);
-    throw error;
-  }
-  
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(destPath);
-  console.log(`✅ Uploaded: ${path.basename(filePath)} -> ${data.publicUrl}`);
-  return data.publicUrl;
-}
+import { resolveConfig } from '../packages/config/src/index.js';
 
 async function main() {
+  const config = await resolveConfig();
+  const supabaseUrl = config.storage.supabase.url;
+  const supabaseKey = config.storage.supabase.serviceRoleKey;
+
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('❌ Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in configuration');
+    process.exit(1);
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseKey);
+  const BUCKET = config.storage.supabase.bucket;
+  const RELEASE_FOLDER = 'releases/latest';
   const artifactsDir = path.resolve(process.cwd(), 'dist/artifacts');
   if (!fs.existsSync(artifactsDir)) {
     console.error(`❌ Artifacts directory not found: ${artifactsDir}`);

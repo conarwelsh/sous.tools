@@ -10,7 +10,7 @@ Proposed
 
 ## Context
 
-The platform's complexity (Web, Tauri, RPi, Wear OS) requires a rigorous testing strategy to prevent regressions in mission-critical features like POS and KDS.
+The platform's complexity (Web, Capacitor, RPi, Wear OS) requires a rigorous testing strategy to prevent regressions in mission-critical features like POS and KDS.
 
 ## Decision
 
@@ -29,7 +29,7 @@ We will adopt a multi-layered testing pyramid.
 ### 3. End-to-End (Playwright & Appium)
 
 - **Web:** **Playwright** for critical path flows (Auth, Organization setup).
-- **Native (Tauri/Android):** **Appium** (or Playwright's Tauri driver) for KDS/POS simulation.
+- **Native (Capacitor/Android):** **Appium** (or Playwright's Capacitor driver) for KDS/POS simulation.
 
 ### 4. Hardware-in-the-Loop (HITL) Simulation
 

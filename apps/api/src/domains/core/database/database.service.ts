@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { drizzle, NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import { getActiveConfig, configPromise } from '@sous/config';
+import { config, resolveConfig } from '@sous/config';
 import * as schema from './schema.js';
 import { logger } from '@sous/logger';
 
@@ -11,34 +11,16 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   public db!: NodePgDatabase<typeof schema>;
 
   constructor() {
-    const config = getActiveConfig();
-
-    if (!config.db.url) {
-      logger.warn(
-        '⚠️ Database URL is undefined during constructor. Configuration may still be loading...',
-      );
-      // We will initialize the pool in onModuleInit if it's not ready here
-      return;
+    try {
+      if (config.db.url) {
+        this.initializePool(config.db.url);
+      }
+    } catch (e) {
+      // Configuration likely not resolved yet, will try again in onModuleInit
     }
-
-    this.initializePool(config.db.url);
   }
 
   private initializePool(url: string) {
-    try {
-      const parsed = new URL(url);
-      console.log('DEBUG DB URL Check:', {
-        protocol: parsed.protocol,
-        host: parsed.host,
-        port: parsed.port,
-        user: parsed.username,
-        passLength: parsed.password.length,
-        db: parsed.pathname,
-      });
-    } catch (e) {
-      console.error('DEBUG DB URL Parse Error:', url);
-    }
-
     this.pool = new Pool({
       connectionString: url,
     });
@@ -51,14 +33,14 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   async onModuleInit() {
     if (!this.pool) {
       logger.info('⏳ Waiting for configuration to load...');
-      const config = await configPromise;
-      if (!config.db.url) {
+      const resolved = await resolveConfig();
+      if (!resolved.db.url) {
         logger.error(
-          '❌ Database URL is still undefined after waiting for configPromise',
+          '❌ Database URL is still undefined after waiting for configuration',
         );
         throw new Error('Database configuration missing');
       }
-      this.initializePool(config.db.url);
+      this.initializePool(resolved.db.url);
     }
     logger.info('🔌 Database service initialized');
   }

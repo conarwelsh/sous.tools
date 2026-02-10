@@ -1,7 +1,7 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { spawn, ChildProcess, exec } from 'child_process';
 import treeKill from 'tree-kill';
-import { server as config } from '@sous/config';
+import { resolveConfig, config } from '@sous/config';
 import { logger } from '@sous/logger';
 import { EventEmitter } from 'events';
 import { promisify } from 'util';
@@ -11,7 +11,12 @@ import * as fs from 'fs';
 
 const execAsync = promisify(exec);
 
-export type ProcessStatus = 'running' | 'starting' | 'stopped' | 'error';
+export type ProcessStatus =
+  | 'running'
+  | 'starting'
+  | 'stopped'
+  | 'error'
+  | 'building';
 
 export interface ManagedLog {
   id: string;
@@ -25,7 +30,7 @@ export interface ManagedProcess {
   id: string;
   name: string;
   type: 'app' | 'docker' | 'pm2';
-  framework: 'tauri' | 'nextjs' | 'nestjs' | 'native' | 'vite';
+  framework: 'nextjs' | 'nestjs' | 'native' | 'vite';
   status: ProcessStatus;
   port?: number;
   logs: ManagedLog[];
@@ -50,21 +55,37 @@ export class ProcessManager
   private lastAgentLogCheck: number = 0;
   private remoteEnv: Record<string, string> = {};
 
+  private pollIntervals: NodeJS.Timeout[] = [];
+
   constructor() {
     super();
-    this.initProcesses();
   }
 
   async onModuleInit() {
+    const config = await resolveConfig();
+    this.initProcesses(config);
     await this.resolvePnpm();
     await this.connectPm2();
+  }
+
+  startPolling() {
+    console.log("[ProcessManager] Starting polling...");
     // Start polling status and agent logs
-    setInterval(() => {
-      void this.updatePm2Statuses();
-    }, 5000);
-    setInterval(() => {
-      void this.pollAgentLogs();
-    }, 3000);
+    this.pollIntervals.push(
+      setInterval(() => {
+        void this.updatePm2Statuses();
+      }, 5000)
+    );
+    this.pollIntervals.push(
+      setInterval(() => {
+        void this.pollAgentLogs();
+      }, 3000)
+    );
+  }
+
+  stopPolling() {
+    this.pollIntervals.forEach(clearInterval);
+    this.pollIntervals = [];
   }
 
   private async connectPm2(): Promise<void> {
@@ -141,10 +162,12 @@ export class ProcessManager
         const id = p.name?.replace('sous-', '');
         const proc = id ? this.processes.get(id) : null;
         if (proc && proc.type === 'pm2') {
-          const newStatus =
-            p.pm2_env?.status === 'online' ? 'running' : 'stopped';
-          if (proc.status !== newStatus) {
-            proc.status = newStatus;
+          const pm2Status = p.pm2_env?.status;
+          if (pm2Status !== 'online') {
+            proc.status = 'stopped';
+            updated = true;
+          } else if (proc.status === 'stopped') {
+            proc.status = 'running';
             updated = true;
           }
         }
@@ -167,7 +190,7 @@ export class ProcessManager
     pm2.disconnect();
   }
 
-  private initProcesses() {
+  private initProcesses(config: any) {
     const apps: Partial<ManagedProcess>[] = [
       {
         id: 'api',
@@ -293,11 +316,30 @@ export class ProcessManager
 
   async autoStartCore() {
     try {
-      this.addLog('db', '🐳 Ensuring Docker infrastructure...', 'info');
+      this.addLog(
+        'db',
+        '🐳 Ensuring Docker infrastructure is running...',
+        'info',
+      );
+
+      // Check if docker daemon is running
+      try {
+        await execAsync('docker info');
+      } catch (e) {
+        this.addLog(
+          'db',
+          '❌ Docker daemon is not running. Please start Docker.',
+          'error',
+        );
+        return;
+      }
+
       await execAsync('docker compose up -d');
 
-      this.processes.get('db')!.status = 'running';
-      this.processes.get('redis')!.status = 'running';
+      const dbProc = this.processes.get('db');
+      const redisProc = this.processes.get('redis');
+      if (dbProc) dbProc.status = 'running';
+      if (redisProc) redisProc.status = 'running';
 
       this.streamDockerLogs('db', 'sous-postgres');
       this.streamDockerLogs('redis', 'sous-redis');
@@ -627,6 +669,30 @@ export class ProcessManager
       } catch (e) {
         message = trimmed.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
       }
+
+      // State Detection
+      const lower = message.toLowerCase();
+      if (
+        lower.includes('compiling') ||
+        lower.includes('building') ||
+        lower.includes('starting')
+      ) {
+        proc.status = 'building';
+      } else if (
+        lower.includes('ready') ||
+        lower.includes('started') ||
+        lower.includes('listening') ||
+        lower.includes('build successful') ||
+        lower.includes('compiled successfully')
+      ) {
+        proc.status = 'running';
+      } else if (lower.includes('error') || lower.includes('failed')) {
+        // Only set error if it's not a service that's already running (some logs have "error" in them)
+        if (proc.status === 'starting' || proc.status === 'building') {
+          proc.status = 'error';
+        }
+      }
+
       const logEntry: ManagedLog = { id, name, message, timestamp, level };
       proc.logs.push(logEntry);
       if (proc.logs.length > 1000) proc.logs.shift();

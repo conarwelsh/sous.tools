@@ -3,7 +3,6 @@ import pino from "pino";
 const isServer = typeof window === "undefined";
 
 // Storage for Request Context (Trace IDs, User IDs, etc.)
-// Only available on server
 let loggerStorage: any = null;
 
 // Global default logger placeholder
@@ -11,15 +10,37 @@ let logger: any;
 
 export { loggerStorage };
 
-export function createLogger(options: { name: string }) {
-  const transports: any[] = [];
+/**
+ * Interface for configuration to avoid circular dependency
+ */
+interface LoggerConfig {
+  env: string;
+  logger: {
+    level: string;
+    json: boolean;
+    logtailToken?: string;
+  };
+}
 
-  const isDev = !isServer ? true : process.env.NODE_ENV === "development";
-  const useJson = isServer && process.env.SOUS_JSON_LOGS === "true";
+export function createLogger(options: { name: string; config?: LoggerConfig }) {
+  const transports: any[] = [];
+  
+  // Use provided config or safe fallbacks for bootstrap/browser
+  const logConfig = options.config || {
+    env: isServer ? (process.env.NODE_ENV || "development") : "development",
+    logger: {
+      level: isServer ? (process.env.LOG_LEVEL || "info") : "info",
+      json: isServer ? (process.env.SOUS_JSON_LOGS === "true") : false,
+      logtailToken: isServer ? process.env.LOGTAIL_SOURCE_TOKEN : undefined,
+    }
+  };
+
+  const isDev = logConfig.env === "development";
+  const useJson = logConfig.logger.json;
 
   // Transports are only supported on server in Pino
   if (isServer) {
-    // 1. Local Development Pretty Printing (unless JSON is requested by orchestrator)
+    // 1. Local Development Pretty Printing
     if (isDev && !useJson) {
       transports.push({
         target: "pino-pretty",
@@ -32,31 +53,21 @@ export function createLogger(options: { name: string }) {
       });
     }
 
-    // 2. Centralized Local Log File (God View)
-    // We try to use a static path if we can't load 'os' and 'path'
-    // But we'll try to load them dynamically to be safe
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    let logFile: string | null = null;
-
-    // In a real monorepo, we'd probably pass the log path in config
-    // but for now we try to detect home dir
+    // 2. Centralized Local Log File
+    // Note: We avoid dynamic path detection here to keep it stable
     const home = process.env.HOME || process.env.USERPROFILE;
     if (home) {
-      // We use a simple join to avoid needing 'path'
-      const logDir = `${home}/.sous/logs`;
-      logFile = `${logDir}/combined.log`;
-
       transports.push({
         target: "pino/file",
-        options: { destination: logFile, mkdir: true },
+        options: { destination: `${home}/.sous/logs/combined.log`, mkdir: true },
       });
     }
 
     // 3. Remote Transport (Better Stack / Logtail)
-    if (process.env.LOGTAIL_SOURCE_TOKEN) {
+    if (logConfig.logger.logtailToken) {
       transports.push({
         target: "@logtail/pino",
-        options: { sourceToken: process.env.LOGTAIL_SOURCE_TOKEN },
+        options: { sourceToken: logConfig.logger.logtailToken },
       });
     }
   }
@@ -64,20 +75,12 @@ export function createLogger(options: { name: string }) {
   const baseLogger = pino(
     {
       name: options.name,
-      level: isServer ? process.env.LOG_LEVEL || "info" : "info",
-      // Automatic Context Injection
+      level: logConfig.logger.level,
       mixin() {
         const store = loggerStorage?.getStore?.();
-        if (store) {
-          return Object.fromEntries(store);
-        }
-        return {};
+        return store ? Object.fromEntries(store) : {};
       },
-      browser: isServer
-        ? undefined
-        : {
-            asObject: true,
-          },
+      browser: isServer ? undefined : { asObject: true },
     },
     isServer && transports.length > 0
       ? pino.transport({ targets: transports })
@@ -87,7 +90,8 @@ export function createLogger(options: { name: string }) {
   return baseLogger;
 }
 
-// Global initialization
+// Global default instance
+// In a fully refactored state, we would pass the resolved config here
 logger = createLogger({ name: "@sous/core" });
 
 export { logger };

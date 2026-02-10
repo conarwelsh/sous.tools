@@ -1,6 +1,6 @@
 # Android Device & Emulator Installation
 
-This guide covers the "Hybrid" setup required to build Android apps (Tauri, Wear OS) inside WSL2 while running emulators and hardware on the Windows host.
+This guide covers the "Hybrid" setup required to build Android apps (Capacitor, Wear OS) inside WSL2 while running emulators and hardware on the Windows host.
 
 ## Prerequisites
 
@@ -32,7 +32,7 @@ The `@sous/cli` will detect your Windows IP and connect WSL2 to this server via 
 
 ## 3. Emulator Management
 
-The orchestrator (`sous dev`) will automatically launch the preferred emulator if none are detected. You can configure the AVD name in `apps/cli/src/commands/dev/process-manager.service.ts`.
+The dev tools (`sous dev`) will automatically launch the preferred emulator if none are detected. You can configure the AVD name in `apps/cli/src/commands/dev/process-manager.service.ts`.
 
 ## 4. Path Sanitization
 
@@ -71,9 +71,9 @@ The project is configured for a **"Single Project"** approach. Instead of openin
 
 > **Note on Gradle JVM Warning:** If you see a warning about "Project JDK is invalid or not defined," this is normal for the first sync. The project is pre-configured in `.idea/gradle.xml` to use the **Embedded JDK (JetBrains Runtime)**, which is the recommended approach for Android Studio projects to ensure consistency between WSL and Windows.
 
-## 7. Tauri Android Commands
+## 7. Capacitor Android Commands
 
-To run the Tauri app on the emulator:
+To run the Capacitor app on the emulator:
 
 ```bash
 cd apps/native
@@ -93,7 +93,7 @@ The Wear OS app is a native Kotlin project.
 
 ## 9. WSL2 GUI Rendering Fixes (Mesa/WebKit Overrides)
 
-If you experience "Blank/White Screen" issues or `MESA-LOADER` errors when running Tauri applications (like `@sous/signage`) in WSL2, you must apply the following environment variables. These disable hardware acceleration and the WebKit sandbox, which are often incompatible with the WSL2 GPU bridge.
+If you experience "Blank/White Screen" issues or `MESA-LOADER` errors when running Capacitor applications (like `@sous/signage`) in WSL2, you must apply the following environment variables. These disable hardware acceleration and the WebKit sandbox, which are often incompatible with the WSL2 GPU bridge.
 
 Add these to your `~/.zshrc` (or they are automatically managed in `~/.sous/shell/zshrc`):
 

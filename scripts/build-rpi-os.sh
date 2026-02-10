@@ -2,7 +2,7 @@
 set -e
 
 # --- Configuration ---
-BASE_IMAGE_URL="https://down.konstakang.com/rpi4/lineage-21.0-20240419-KonstaKANG-rpi4.zip" # Example URL
+BASE_IMAGE_URL="https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2024-11-20/2024-11-19-raspios-jazzy-arm64-lite.img.xz"
 WORK_DIR=".tmp/rpi-build"
 SIGNAGE_APK="apps/web/android/app/build/outputs/apk/signage/debug/app-signage-debug.apk"
 OUTPUT_IMAGE="dist/sous-os-rpi4.img"
@@ -13,13 +13,12 @@ echo "🥧 Starting Sous OS build for Raspberry Pi..."
 mkdir -p $WORK_DIR
 mkdir -p dist
 
-# 2. Download and Extract Base Image (KonstaKANG LineageOS)
+# 2. Download and Extract Base Image
 if [ ! -f "$WORK_DIR/base.img" ]; then
-    echo "⬇️  Downloading base LineageOS image..."
-    # In a real CI, we might cache this
-    curl -L $BASE_IMAGE_URL -o $WORK_DIR/base.zip
-    unzip $WORK_DIR/base.zip -d $WORK_DIR
-    mv $WORK_DIR/*.img $WORK_DIR/base.img
+    echo "⬇️  Downloading base Raspberry Pi OS image..."
+    curl -L $BASE_IMAGE_URL -o $WORK_DIR/base.img.xz
+    echo "📦 Extracting image..."
+    xz -d $WORK_DIR/base.img.xz
 fi
 
 cp $WORK_DIR/base.img $OUTPUT_IMAGE

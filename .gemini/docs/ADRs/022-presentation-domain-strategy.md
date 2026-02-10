@@ -44,7 +44,7 @@ Content assigned to slots can be:
 
 ### 3. Output Targets
 
-- **Digital Screens:** Mapping logical `Display` entities to HDMI ports on hardware nodes (Tauri) or authenticated web URLs.
+- **Digital Screens:** Mapping logical `Display` entities to HDMI ports on hardware nodes (Capacitor) or authenticated web URLs.
 - **Labels:** Hydrating templates with real-time culinary data and routing to thermal printers via the Native Bridge.
 
 ### 3. Real-Time Orchestration

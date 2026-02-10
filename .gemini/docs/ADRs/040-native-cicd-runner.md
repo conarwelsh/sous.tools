@@ -8,7 +8,7 @@ Proposed
 
 Building native binaries for Windows (`.exe`) and Linux/ARM64 (`AppImage` for RPi) requires specific host architectures.
 
-- Tauri Windows builds must be performed on a Windows host.
+- Capacitor Windows builds must be performed on a Windows host.
 - Raspberry Pi builds are most efficient when built natively or cross-compiled on a similar architecture.
 
 ## Decision
@@ -30,7 +30,7 @@ We will use **Self-Hosted GitHub Runners** for architecture-specific native buil
 ### 3. Docker vs. Native
 
 - While Docker is used for local infrastructure (Postgres, Redis, Traefik), it is **not** used for native Windows builds due to the lack of native Windows kernel support in standard Linux-based CI pipelines.
-- Self-hosted runners allow us to utilize existing hardware without incurring "Build Minute" costs on GitHub's hosted runners (especially for heavy Rust/Tauri compilations).
+- Self-hosted runners allow us to utilize existing hardware without incurring "Build Minute" costs on GitHub's hosted runners (especially for heavy Capacitor compilations).
 
 ## Consequences
 
