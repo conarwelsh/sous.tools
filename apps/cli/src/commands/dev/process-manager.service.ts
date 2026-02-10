@@ -54,7 +54,6 @@ export class ProcessManager
   private lastBridgeCheck: { time: number; result: boolean } | null = null;
   private lastAgentLogCheck: number = 0;
   private remoteEnv: Record<string, string> = {};
-
   private pollIntervals: NodeJS.Timeout[] = [];
 
   constructor() {
@@ -69,17 +68,16 @@ export class ProcessManager
   }
 
   startPolling() {
-    console.log("[ProcessManager] Starting polling...");
     // Start polling status and agent logs
     this.pollIntervals.push(
       setInterval(() => {
         void this.updatePm2Statuses();
-      }, 5000)
+      }, 5000),
     );
     this.pollIntervals.push(
       setInterval(() => {
         void this.pollAgentLogs();
-      }, 3000)
+      }, 3000),
     );
   }
 
