@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Date
 
@@ -27,7 +27,6 @@ As a complex monorepo with multiple apps (Web, API, CLI, Native) and shared pack
 - **Pattern:** Deeply nested subcommands following a DDD approach.
 - **Mandate: Command Aggregation:** Every operational task defined in any package or app's `package.json` MUST be aggregated here. `@sous/cli` serves as the single source of truth for developer operations.
 - **Delegation:** The CLI will act as a wrapper around `pnpm` workspace commands.
-  - _Example:_ `sous db wipe` executes `pnpm --filter @sous/api run db:wipe`.
 
 ### 2. Visuals & Branding
 
@@ -38,50 +37,42 @@ As a complex monorepo with multiple apps (Web, API, CLI, Native) and shared pack
 
 ### 3. Safety Mechanisms
 
-- **Confirmations:** Destructive commands (e.g., `db wipe`) in non-development environments will require explicit user confirmation.
+- **Confirmations:** Destructive commands (e.g., `db reset`) in non-development environments will require explicit user confirmation.
 - **Bypass:** A `-y` or `--yes` flag will be provided for programmatic/CI usage.
 
-### 4. Planned Command List (Brainstorming)
+### 4. Command List (Status Map)
 
-This is a living list of commands to be implemented in `@sous/cli`.
-
-#### **Maintenance (`sous maintenance`)**
-
-- `sous maintenance housekeep`: Deep cleans the monorepo by deleting all `node_modules`, `.next`, `dist`, and `.turbo` folders.
-- `sous maintenance cache-clear`: Clears all TurboRepo and package manager caches.
-- `sous maintenance dead-code`: Scans the monorepo for unused exports and files.
-- `sous maintenance unused-packages`: Scans `package.json` files for dependencies that are not imported anywhere in the code.
-- `sous maintenance unused-css`: Scans for CSS classes or styles that are defined but never applied in components.
-
-#### **Development (`sous dev`)**
-
+#### **Development (`sous dev`) [ACTIVE]**
 - `sous dev`: Starts the interactive development dashboard (Ink TUI).
-  - **Panels:** `@sous/api`, `@sous/web`, `gemini-cli`.
-  - **Auto-Restart:** Automatically restarts services on crash or file change.
-  - **Integrated Logs:** Centralized "God View" log aggregation.
+- `sous dev install`: Platform installation wizard (Ubuntu/WSL2).
+- `sous dev sync`: Hardware/Schema synchronization.
 
-#### **Database (`sous db`)**
+#### **Environment (`sous env`) [ACTIVE]**
+- `sous env dashboard`: Infrastructure health dashboard (Spec 004).
+- `sous env config`: Secret management (Infisical integration).
+- `sous env export`: Inject secrets into shell commands (Spec 019).
+- `sous env context`: Identity and target switching (whoami).
 
-- `sous db migrate`: Runs pending migrations.
-- `sous db seed`: Seeds essential system data.
-  - **Flags:** `--sampleData` (Adds robust mock data for dev/staging).
-- `sous db wipe`: **DESTRUCTIVE**. Drops all tables. Requires confirmation or `-y`.
-- `sous db reset`: Convenience command for `wipe` + `migrate` + `seed`.
+#### **Hardware (`sous hardware`) [PLANNED]**
+- `sous hardware list`: Paired device overview.
+- `sous hardware reboot`: Remote node control.
+- `sous hardware logs`: Tail remote RPi logs.
 
-#### **Logs (`sous logs`)**
+#### **Integrations (`sous integrations`) [PLANNED]**
+- `sous integrations sync`: Trigger provider data pulls (Square/Google).
 
-- `sous logs`: Tails remote or local logs.
-  - **Flags:** `--env=[prod|staging|dev]`.
+#### **Quality (`sous quality`) [ACTIVE]**
+- `sous quality check`: Full platform health check (lint, typecheck, test, build).
+- `sous quality test`: Test runner wrapper.
 
-#### **Cloud & Deployment (`sous cloud`)**
-
-- `sous cloud deploy`: Triggers deployment pipelines.
-- `sous cloud status`: Checks the health/status of cloud services (Vercel, Render, Supabase).
+#### **Maintenance (`sous maintenance`) [ACTIVE]**
+- `sous maintenance housekeep`: monorepo artifact cleanup.
+- `sous maintenance db reset`: database factory reset and seeding.
 
 ### 5. Implementation Strategy: The "Wrapper" Pattern
 
 Wherever possible, the CLI will not reimplement logic. It will invoke the corresponding `package.json` script in the target package.
-_Example:_ `sous db wipe` -> `pnpm --filter @sous/api run db:wipe`.
+_Example:_ `sous maintenance db reset` -> `pnpm --filter @sous/cli run start -- maintenance db reset`.
 
 ## Consequences
 
@@ -90,7 +81,7 @@ _Example:_ `sous db wipe` -> `pnpm --filter @sous/api run db:wipe`.
   - Prevents accidental production data loss.
   - Extremely fast onboarding for new developers (`git clone` -> `pnpm install` -> `sous dev`).
 - **Negative:**
-  - **Process Management Complexity:** Ensuring 100% cleanup of ghost processes across different OS environments can be challenging.
+  - **Process Management Complexity:** Ensuring 100% cleanup of ghost processes across different OS environments.
 
 ## Research & Implementation Plan
 
@@ -102,8 +93,6 @@ _Example:_ `sous db wipe` -> `pnpm --filter @sous/api run db:wipe`.
 ### Implementation Plan
 
 1. **Core CLI:** Initialize `@sous/cli` with `nest-commander`.
-2. **Orchestrator Command:** Implement `sous dev` which:
-   - Starts the backend infra (Postgres, Redis).
-   - Launches an interactive Ink-based dashboard with integrated logs and service management.
+2. **Orchestrator Command:** Implement `sous dev` with an interactive Ink-based dashboard.
 3. **Housekeeping:** Implement cleanup commands for `node_modules` and caches.
-4. **Interactive DB Tools:** Create the `sous db` command suite for migrations and seeding.
+4. **Interactive DB Tools:** Create the `sous maintenance db` command suite for resets and seeding.

@@ -1,7 +1,7 @@
 # Spec 004: CLI Infrastructure Dashboard (Ink TUI)
 
 **Status:** Completed
-**Date:** 2026-02-04
+**Date:** 2026-02-10
 **Reference:** sous dev (INFRA tab)
 
 ## Objective

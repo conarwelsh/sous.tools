@@ -22,6 +22,9 @@ import { DbResetCommand } from './commands/maintenance/db/db-reset.command.js';
 import { SeedCommand } from './commands/maintenance/db/seed.command.js';
 import { BrandingCommand } from './commands/env/branding/branding.command.js';
 import { WorkspaceCommand } from './commands/workspace.command.js';
+import { DashboardCommand } from './commands/env/dashboard.command.js';
+import { ContextCommand } from './commands/env/context/context.command.js';
+import { WhoamiCommand } from './commands/env/context/whoami.command.js';
 import { ProcessManager } from './commands/dev/process-manager.service.js';
 
 @Module({
@@ -38,6 +41,9 @@ import { ProcessManager } from './commands/dev/process-manager.service.js';
     LogsTailCommand,
     LogsWipeCommand,
     BrandingCommand,
+    DashboardCommand,
+    ContextCommand,
+    WhoamiCommand,
     QualityCommand,
     TestCommand,
     CheckCommand,
