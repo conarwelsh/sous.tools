@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { PairingWorkflow } from "./PairingWorkflow.js";
+import { PairingWorkflow } from "./PairingWorkflow";
 import { useRouter } from "next/navigation";
 import { View, Button } from "@sous/ui";
 import { ChevronLeft } from "lucide-react";

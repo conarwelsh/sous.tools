@@ -1,77 +1,36 @@
 # History
 
-## 2026-02-05
+## 2026-02-10 (Layout Manager Refactor & Stability)
 
-- **Monorepo Health Check & Housekeeping:**
-  - Executed a comprehensive health check via `sous quality check` (lint, typecheck, test, build).
-  - **Fixed `@sous/cli` Test & ESM Support:**
-    - Configured Jest for ESM support with `NODE_OPTIONS=--experimental-vm-modules`.
-    - Resolved `jest is not defined` errors by importing from `@jest/globals`.
-    - Removed stale web-app boilerplate controllers and tests from the CLI app.
-  - **Fixed `@sous/api` Typechecking:**
-    - Resolved missing dependencies (`@nestjs/passport`, `passport`).
-    - Fixed relative import paths and added mandatory `.js` extensions for `NodeNext` compatibility.
-    - Corrected `sharp` import style to support its default function export.
-  - **Resolved `@sous/ui` Linting & Typing:**
-    - Automated fixing of 38+ Prettier/ESLint issues.
-    - Suppressed SVG `className` type errors in `@sous/docs` by using any-casted object spreads for NativeWind compatibility.
-  - **Fixed `@sous/config` Test Imports:**
-    - Added `moduleNameMapper` to Jest config to resolve `.js` extensions in TypeScript source files.
-  - **Dependency Hydration:** Ensured all `apps/native` dependencies are correctly linked and building successfully.
-  - **Result:** ACHIEVED 100% PASS RATE across all 43 turbo tasks (lint, typecheck, test, build) for all 13 packages/apps.
-- **Universal Configuration & Logging:**
-  - Refactored **`@sous/config`** and **`@sous/logger`** to be browser-safe, enabling their use in Tauri/Vite environments.
-  - Enhanced **`@sous/config`** to properly fetch and merge **Infisical secrets** into `process.env` and the centralized config object, ensuring remote secrets override local ones.
-  - Resolved `AsyncLocalStorage` and `Top-level await` issues in the logger and config packages for CJS/ESM hybrid compatibility.
-- **Native-Headless Initialization:**
-  - Scaffolded a new **`apps/native-headless`** application using **Tauri v2 + React + TypeScript**.
-  - Configured the app to use port **1422** and integrated it with the monorepo design system and configuration.
-  - **Networking Robustness:** Standardized on `127.0.0.1` for `devUrl` and Vite host to resolve IPv6 mapping issues in WSL2. Updated `TAURI_DEV_HOST` to `localhost`.
-  - **Fixes:** Resolved blank window issue by simplifying the initial `App.tsx` and verifying build pipeline stability.
-- **Android Dev Ops Automation:**
-  - Implemented a permanent fix for WSL2-Windows Android interop issues.
-  - **Automated Emulator Management:** `sous dev --android` now detects, launches, and waits for the Windows Android emulator automatically.
-  - **Automated Device Selection:** The CLI now passes the preferred `emulatorName` directly to the `tauri android dev` command, eliminating interactive prompts.
-  - **Automated ADB Bridge:** The CLI now automatically attempts to start the Windows ADB server with the `-a` flag (listening on all interfaces) via PowerShell, eliminating the need for manual setup on the Windows side.
-  - **Path Sanitization:** The CLI now automatically strips Windows paths from the environment during Android builds to prevent directory collisions with "Android Studio".
-  - **Environment Bridging:** Configured a global ADB bridge (`ADB_SERVER_SOCKET`) managed via `~/.sous/shell/zshrc`.
-  - **Shell Cleanup:** Stripped redundant/duplicate Android configurations from the user's main `~/.zshrc`, consolidating all platform logic into the managed `~/.sous/shell/zshrc` file.
-  - **Universal Shared Packages:** Refactored `@sous/logger` and `@sous/config` to be fully browser-safe and ESM-compatible, resolving `Dynamic require` and `AsyncLocalStorage` issues in universal environments.
-  - **Centralized Logging:** Ensured all platform components append to `~/.sous/logs/combined.log` for a unified "God View" debugging experience.
-- **Robust Dev Installation:**
-  - Fixed **APT 404 errors** in `install-dev.sh` by automatically detecting and configuring `ports.ubuntu.com` mirrors when `arm64` is present as a foreign architecture.
-  - Resolved **EACCES error** in shell customization by switching to `pnpm run sous`.
-  - Automated **ZSH & Oh My Zsh** plugin configuration, ensuring `git`, `syntax-highlighting`, and `autosuggestions` are always present.
-- **Project Infrastructure & Stability:**
-  - **API Recovery:** Fixed `@sous/api` startup crashes by resolving database connection mismatches and explicitly binding to `0.0.0.0`.
-  - **Database Sync:** Standardized local development database credentials and automated schema synchronization via `pnpm run db:push`.
-  - **GUI Rendering Fixes:** Resolved "Blank Window" issues in Tauri apps under WSL2 by injecting software rendering and sandbox deactivation overrides (`WEBKIT_DISABLE_COMPOSITING_MODE=1`, etc.) into the environment.
-  - **Docker Orchestration:** Integrated automatic `docker compose up -d` into the CLI orchestrator to ensure infrastructure is ready before apps attempt to connect.
+- **Layout Manager Refactor:**
+    - Transitioned `LayoutManager` to use standard Next.js routing (`/presentation/layouts/new`, `/presentation/layouts/[id]`).
+    - Implemented a robust Drag-and-Drop system in `LayoutDesigner` using `@dnd-kit`.
+    - Added automatic nesting logic for structural elements (Containers, Slots, Fixed Boxes).
+    - Fixed API crash during template saves by sanitizing payloads to match the Drizzle schema.
+    - Resolved port conflict (EADDRINUSE: 4000) issues by cleaning up orphan `nest` and `node` processes.
+    - Updated `TemplateSkeletonRenderer` to support custom child rendering for the designer.
 
-## 2026-02-09 (Architectural Refinement & Ingestion Foundation)
+## 2026-02-09 (Presentation & Infrastructure Stability)
 
-- **Decentralized Schema Implementation (Mandate 14):**
-  - Refactored the centralized Drizzle schema in `@sous/api` into tactical, domain-specific `.schema.ts` files (IAM, Procurement, Culinary, Intelligence, etc.).
-  - Established a re-exporting aggregator in `core/database/schema.ts` to maintain backward compatibility while achieving strict domain isolation.
-- **Strategic Shell Pattern Rollout (Mandate 15):**
-  - Successfully refactored the core administrative domains in `@sous/web` (Inventory, Procurement, Culinary, Hardware, Presentation) into thin shells.
-  - Moved high-fidelity UI logic and dashboard views into the shared **`@sous/features`** package.
-  - ACHIEVED Server Component optimization for major route entry points in the web application by offloading client-side hooks and state to Feature components.
-- **Centralized Configuration & Infisical Abstraction (ADR 002):**
-  - Refactored `@sous/config` to act as the exclusive gatekeeper for environment variables and secrets.
-  - Implemented a centralized **`SecretManager`** within `@sous/config` to abstract all interactions with the Infisical SDK.
-  - Removed direct Infisical dependencies from `@sous/cli`, delegating all configuration management (listing and adding secrets) to the config package.
-  - Enforced a clear **Client/Server split** in configuration, ensuring sensitive data never leaks to the frontend.
-- **Shared Ingestion Engine (Spec 013):**
-  - Implemented the core components for unstructured data ingestion:
-    - **`<DocumentIngestor />`**: Universal multi-source capture interface (Camera/Upload).
-    - **`<EntityMapper />`**: Smart fuzzy-matching UI for linking OCR text to platform ingredients.
-    - **`<IngestionReviewer />`**: High-fidelity split-screen verification interface.
-  - Integrated the engine into the Procurement domain with a new **`InvoiceIngestionView`**.
-- **Redundant Route Cleanup:**
-  - Removed legacy `kds_preview` and `pos_preview` routes in favor of the new **FlavorGate** architecture.
-- **Result:** Successfully completed the foundational structural improvements from the Feb 9th analysis report, achieving 100% build success across the monorepo.
+- **Functional Layout Designer (Spec 006):**
+  - Upgraded the **`LayoutDesigner`** from a static mockup to a fully functional visual editor.
+  - **Recursive Tree Management:** Implemented logic to ensure all layout nodes have internal tracking IDs and can be updated or deleted recursively within the tree.
+  - **Property Editor:** Developed a context-aware sidebar for editing node properties (Flex, Gap, Padding, Background, and absolute positioning for fixed boxes).
+  - **Node Creation:** Implemented functional "Element Cards" to add new Groups (Containers), Slots, and Fixed boxes to the selected container.
+  - **Interactive Canvas:** Enhanced the **`TemplateSkeletonRenderer`** with click-to-select functionality and high-fidelity visual feedback for the active node.
+- **Screen Manager Implementation (Spec 007):**
+  - **Database Expansion:** Added the `screens` table to the PostgreSQL schema via Drizzle ORM to persist persistent content assignments.
+  - **Relational Integrity:** Updated the display assignment logic to link physical displays to **Screens** (which contain content and styles) instead of raw Layout Templates.
+  - **Backend API:** Implemented a full suite of CRUD endpoints in the `PresentationController` and `PresentationService` for managing screens.
+  - **UI Foundations:** Scaffolded the **`ScreenManager`** and **`ScreenEditor`** in `@sous/features`, allowing users to select a layout and bind real-world data sources (POS, Media, Static) to defined slots.
+- **Infrastructure & Environment Recovery:**
+  - **ESM require Resolution:** Fixed a critical "Dynamic require" error in `@sous/config` by implementing a resilient `eval('require')` check that correctly identifies CJS vs ESM environments.
+  - **Build Command Sanitization:** Marked Node.js built-ins (`fs`, `path`, etc.) as external in the `tsup` configuration for the config package, preventing bundler-induced runtime crashes.
+  - **Database Migration Reliability:** Resolved schema resolution issues in `drizzle-kit` by removing hardcoded `.js` extensions from TypeScript imports and switching to glob-based schema scanning.
+  - **Typecheck Stability:** Configured `tsconfig.json` to exclude the `.next` directory, preventing transient build errors from blocking development quality checks.
+- **Result:** ACHIEVED a fully functional presentation management loop (from structural design to content assignment) while stabilizing the monorepo build and development environment.
 
+## 2026-02-05 (Identity & Asset Strategy)
 
 - **Implemented Android Product Flavors:**
   - Added `tools`, `kds`, `pos`, and `signage` flavors to `apps/web/android/app/build.gradle`.

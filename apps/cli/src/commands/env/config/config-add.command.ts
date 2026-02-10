@@ -25,7 +25,9 @@ export class ConfigAddCommand extends CommandRunner {
       const { secrets } = await import('@sous/config');
 
       if (!secrets) {
-        throw new Error('Secret manager is only available in server environments');
+        throw new Error(
+          'Secret manager is only available in server environments',
+        );
       }
 
       const targetEnvs = envs && envs.length > 0 ? envs : ['development'];

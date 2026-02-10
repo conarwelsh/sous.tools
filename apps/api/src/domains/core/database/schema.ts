@@ -1,38 +1,49 @@
 import { relations } from 'drizzle-orm';
 
-// Re-export from domain schemas
-export * from '../../iam/iam.schema.js';
-export * from '../../iam/organizations/organizations.schema.js';
-export * from '../../iam/users/users.schema.js';
-export * from '../../iam/locations/locations.schema.js';
-export * from '../../media/media.schema.js';
-export * from '../../presentation/presentation.schema.js';
-export * from '../../hardware/hardware.schema.js';
-export * from '../../intelligence/intelligence.schema.js';
-export * from '../../procurement/procurement.schema.js';
-export * from '../../culinary/culinary.schema.js';
-export * from '../../inventory/inventory.schema.js';
-export * from '../../accounting/accounting.schema.js';
-export * from '../../integrations/integrations.schema.js';
+// 1. Base / Independent
+export * from '../../iam/iam.schema';
+export * from '../../iam/organizations/organizations.schema';
+
+// 2. Depends on Organizations
+export * from '../../iam/locations/locations.schema';
+export * from '../../iam/users/users.schema';
+export * from '../../media/media.schema';
+export * from '../../culinary/culinary.schema';
+export * from '../../culinary/catalog/catalog.schema';
+export * from '../../accounting/accounting.schema';
+export * from '../../integrations/integrations.schema';
+
+// 3. Mixed Dependencies
+export * from '../../procurement/procurement.schema';
+export * from '../../hardware/hardware.schema';
+export * from '../../presentation/presentation.schema';
+
+// 4. Heavy Dependencies
+export * from '../../inventory/inventory.schema';
+export * from '../../intelligence/intelligence.schema';
 
 // Import for relations
-import { organizations } from '../../iam/organizations/organizations.schema.js';
-import { users } from '../../iam/users/users.schema.js';
-import { displays } from '../../presentation/presentation.schema.js';
-import { templates } from '../../presentation/presentation.schema.js';
-import { displayAssignments } from '../../presentation/presentation.schema.js';
-import { recipes } from '../../culinary/culinary.schema.js';
-import { recipeIngredients } from '../../culinary/culinary.schema.js';
-import { ingredients } from '../../culinary/culinary.schema.js';
+import { organizations } from '../../iam/organizations/organizations.schema';
+import { users } from '../../iam/users/users.schema';
+import { displays } from '../../presentation/presentation.schema';
+import { templates } from '../../presentation/presentation.schema';
+import { screens } from '../../presentation/presentation.schema';
+import { displayAssignments } from '../../presentation/presentation.schema';
+import { recipes } from '../../culinary/culinary.schema';
+import { recipeIngredients } from '../../culinary/culinary.schema';
+import { ingredients } from '../../culinary/culinary.schema';
+import { categories, products } from '../../culinary/catalog/catalog.schema';
 
 // --- Relations ---
 
 export const organizationsRelations = relations(organizations, ({ many }) => ({
   users: many(users),
   locations: many(locations),
+  categories: many(categories),
+  products: many(products),
 }));
 
-import { locations } from '../../iam/locations/locations.schema.js';
+import { locations } from '../../iam/locations/locations.schema';
 
 export const usersRelations = relations(users, ({ one }) => ({
   organization: one(organizations, {
@@ -41,11 +52,46 @@ export const usersRelations = relations(users, ({ one }) => ({
   }),
 }));
 
+export const categoriesRelations = relations(categories, ({ one, many }) => ({
+  organization: one(organizations, {
+    fields: [categories.organizationId],
+    references: [organizations.id],
+  }),
+  products: many(products),
+  parentCategory: one(categories, {
+    fields: [categories.parentCategoryId],
+    references: [categories.id],
+    relationName: 'subcategory',
+  }),
+  subcategories: many(categories, {
+    relationName: 'subcategory',
+  }),
+}));
+
+export const productsRelations = relations(products, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [products.organizationId],
+    references: [organizations.id],
+  }),
+  category: one(categories, {
+    fields: [products.categoryId],
+    references: [categories.id],
+  }),
+}));
+
 export const displaysRelations = relations(displays, ({ many }) => ({
   assignments: many(displayAssignments),
 }));
 
 export const templatesRelations = relations(templates, ({ many }) => ({
+  screens: many(screens),
+}));
+
+export const screensRelations = relations(screens, ({ one, many }) => ({
+  layout: one(templates, {
+    fields: [screens.layoutId],
+    references: [templates.id],
+  }),
   assignments: many(displayAssignments),
 }));
 
@@ -56,9 +102,9 @@ export const displayAssignmentsRelations = relations(
       fields: [displayAssignments.displayId],
       references: [displays.id],
     }),
-    template: one(templates, {
-      fields: [displayAssignments.templateId],
-      references: [templates.id],
+    screen: one(screens, {
+      fields: [displayAssignments.screenId],
+      references: [screens.id],
     }),
   }),
 );

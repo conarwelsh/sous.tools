@@ -11,7 +11,10 @@ export ADB_SERVER_SOCKET=tcp:$WIN_IP:5037
 export PATH=$(echo "$PATH" | tr ":" "\n" | grep -v "mnt/c" | tr "\n" ":")
 
 echo "🚀 Building WearOS app..."
-cd apps/wearos || exit 1
+# Handle being called from root or package dir
+if [[ "$PWD" != *"/apps/wearos" ]]; then
+  cd apps/wearos || exit 1
+fi
 ./gradlew assembleDebug
 
 AGENT_URL="http://$WIN_IP:4040"

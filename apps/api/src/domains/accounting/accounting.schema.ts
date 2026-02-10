@@ -1,5 +1,12 @@
-import { pgTable, uuid, timestamp, varchar, integer, text } from 'drizzle-orm/pg-core';
-import { organizations } from '../iam/organizations/organizations.schema.js';
+import {
+  pgTable,
+  uuid,
+  timestamp,
+  varchar,
+  integer,
+  text,
+} from 'drizzle-orm/pg-core';
+import { organizations } from '../iam/organizations/organizations.schema';
 
 export const generalLedger = pgTable('general_ledger', {
   id: uuid('id').primaryKey().defaultRandom(),

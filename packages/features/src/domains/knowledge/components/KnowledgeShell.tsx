@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Wordmark, Logo, useTheme } from "@sous/ui";
 import { Moon, Sun, Book, ChevronLeft, Layout, Palette, Zap, Menu, X, Lightbulb, FileText } from "lucide-react";
-import { type DocFile } from "../types.js";
+import { type DocFile } from "../types";
 
 interface Props {
   children: React.ReactNode;

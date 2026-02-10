@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { DocumentIngestor, IngestionReviewer, EntityMapper } from "../../ingestion/index.js";
+import { DocumentIngestor, IngestionReviewer, EntityMapper } from "../../ingestion/index";
 import { View, Text, Input } from "@sous/ui";
 import { FileText, Calendar, User, DollarSign } from "lucide-react";
 

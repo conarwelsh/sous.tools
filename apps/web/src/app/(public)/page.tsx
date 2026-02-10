@@ -59,7 +59,7 @@ export default function MarketingPage() {
 
       {/* Navbar */}
       <View className="flex flex-row items-center justify-between px-8 py-6 border-b border-border/50 bg-background/20 backdrop-blur-xl sticky top-0 z-50">
-        <Logo variant="neon" size={28} suffix="tools" />
+        <Logo size={28} suffix="tools" />
         <View className="flex flex-row items-center gap-6">
           <button onClick={() => router.push("/download")}>
             <Text className="text-muted-foreground font-bold uppercase text-xs tracking-widest hover:text-foreground transition-colors">
@@ -231,7 +231,7 @@ export default function MarketingPage() {
 
       {/* Footer */}
       <View className="px-8 py-16 border-t border-border flex flex-col items-center relative z-10">
-        <Logo variant="neon" size={24} suffix="tools" />
+        <Logo size={24} suffix="tools" />
         <Text className="text-muted-foreground mt-6 text-[10px] font-mono uppercase tracking-[0.3em]">
           CULINARY OPERATIONS PLATFORM // v0.1.0
         </Text>

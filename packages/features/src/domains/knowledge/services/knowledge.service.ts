@@ -1,7 +1,7 @@
 import "server-only";
 import fs from "fs";
 import path from "path";
-import { type DocFile } from "../types.js";
+import { type DocFile } from "../types";
 
 function findMonorepoRoot(startDir: string): string {
   let current = startDir;

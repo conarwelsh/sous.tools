@@ -10,10 +10,10 @@ export function PresentationDashboardView() {
 
   const sections = [
     {
-      title: "Screen Assignments",
+      title: "Screens",
       description: "Map layouts to physical HDMI ports or publish unique web IDs.",
       icon: Monitor,
-      href: "/presentation/displays",
+      href: "/presentation/screens",
       stats: "0 ACTIVE",
     },
     {

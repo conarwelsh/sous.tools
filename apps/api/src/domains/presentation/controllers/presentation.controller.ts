@@ -2,6 +2,8 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
+  Delete,
   Body,
   Param,
   UseGuards,
@@ -16,6 +18,39 @@ import { JwtAuthGuard } from '../../iam/auth/guards/jwt-auth.guard.js';
 export class PresentationController {
   constructor(private readonly presentationService: PresentationService) {}
 
+  // --- Screens ---
+  @Post('screens')
+  async createScreen(@Body() body: any, @Req() req: any) {
+    return this.presentationService.createScreen({
+      ...body,
+      organizationId: req.user.orgId,
+    });
+  }
+
+  @Patch('screens/:id')
+  async updateScreen(
+    @Param('id') id: string,
+    @Body() body: any,
+    @Req() req: any,
+  ) {
+    return this.presentationService.updateScreen(id, req.user.orgId, body);
+  }
+
+  @Get('screens')
+  async getScreens(@Req() req: any) {
+    return this.presentationService.getScreens(req.user.orgId);
+  }
+
+  @Get('screens/:id')
+  async getScreenById(@Param('id') id: string, @Req() req: any) {
+    return this.presentationService.getScreenById(id, req.user.orgId);
+  }
+
+  @Delete('screens/:id')
+  async deleteScreen(@Param('id') id: string, @Req() req: any) {
+    return this.presentationService.deleteScreen(id, req.user.orgId);
+  }
+
   // --- Templates ---
   @Post('templates')
   async createTemplate(@Body() body: any, @Req() req: any) {
@@ -28,6 +63,20 @@ export class PresentationController {
   @Get('templates')
   async getTemplates(@Req() req: any) {
     return this.presentationService.getTemplates(req.user.orgId);
+  }
+
+  @Patch('templates/:id')
+  async updateTemplate(
+    @Param('id') id: string,
+    @Body() body: any,
+    @Req() req: any,
+  ) {
+    return this.presentationService.updateTemplate(id, req.user.orgId, body);
+  }
+
+  @Delete('templates/:id')
+  async deleteTemplate(@Param('id') id: string, @Req() req: any) {
+    return this.presentationService.deleteTemplate(id, req.user.orgId);
   }
 
   // --- Displays ---
@@ -54,9 +103,8 @@ export class PresentationController {
     );
     if (!display) throw new BadRequestException('Invalid Display ID');
 
-    return this.presentationService.assignTemplateToDisplay({
+    return this.presentationService.assignScreenToDisplay({
       ...body,
-      // We don't need orgId here as it's a join table, but we validated access above
     });
   }
 }

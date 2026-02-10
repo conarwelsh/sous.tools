@@ -1,2 +1,2 @@
-export * from "./components/ProcurementDashboardView.js";
-export * from "./components/InvoiceIngestionView.js";
+export * from "./components/ProcurementDashboardView";
+export * from "./components/InvoiceIngestionView";

@@ -24,6 +24,7 @@
 
 ## Phase 2: Signage & Presentation (High Priority)
 
+- [ ] **Layout Manager**: Recursive structure and visual designer (Spec 006 - In Progress).
 - [ ] **Presentation Renderer**: Update the renderer to use standard HTML/CSS.
 - [ ] **Display Pairing**: Implement the browser-based pairing workflow for kiosk nodes.
 

@@ -52,7 +52,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
   if (loading || !isMounted || !isAuthenticated) {
     return (
       <View className="flex-1 bg-background flex justify-center items-center h-screen">
-        <Logo variant="plate" size={48} suffix="tools" animate />
+        <Logo variant="cloud" size={48} suffix="tools" animate />
       </View>
     );
   }
@@ -74,7 +74,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
     <View className="flex flex-col md:flex-row bg-background min-h-screen w-full relative">
       {/* Mobile Header */}
       <View className="md:hidden flex flex-row items-center justify-between p-4 border-b border-border/50 bg-background/20 backdrop-blur-xl sticky top-0 z-[60] pt-[calc(env(safe-area-inset-top)+1rem)]">
-        <Logo variant="plate" size={20} suffix="tools" />
+        <Logo variant="cloud" size={20} suffix="tools" />
         <View className="flex flex-row items-center gap-2">
           <button
             onClick={toggleTheme}
@@ -185,7 +185,7 @@ function SidebarContent({
     <View className="flex flex-col h-full justify-between">
       <View>
         <View className={cn("mb-12 transition-all duration-300 flex flex-row items-center justify-between", isCollapsed && !mobile ? "ml-0 justify-center" : "ml-2")}>
-          <Logo variant="plate" size={24} suffix={isCollapsed && !mobile ? undefined : "tools"} showWordmark={!isCollapsed || mobile} />
+          <Logo variant="cloud" size={24} suffix={isCollapsed && !mobile ? undefined : "tools"} showWordmark={!isCollapsed || mobile} />
           {(!isCollapsed || mobile) && (
             <button
               onClick={toggleTheme}

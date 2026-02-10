@@ -6,8 +6,8 @@ import {
   integer,
   text,
 } from 'drizzle-orm/pg-core';
-import { organizations } from '../iam/organizations/organizations.schema.js';
-import { media } from '../media/media.schema.js';
+import { organizations } from '../iam/organizations/organizations.schema';
+import { media } from '../media/media.schema';
 
 export const suppliers = pgTable('suppliers', {
   id: uuid('id').primaryKey().defaultRandom(),

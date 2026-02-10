@@ -1,1 +1,1 @@
-export * from "./components/CulinaryDashboardView.js";
+export * from "./components/CulinaryDashboardView";

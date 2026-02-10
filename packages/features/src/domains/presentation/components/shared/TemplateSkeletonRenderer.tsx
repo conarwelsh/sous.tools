@@ -2,14 +2,20 @@
 
 import React from "react";
 import { View, Text, cn } from "@sous/ui";
-import { LayoutNode, LayoutNodeType } from "../../types/presentation.types.js";
+import { LayoutNode, LayoutNodeType } from "../../types/presentation.types";
+import { Pencil } from "lucide-react";
 
 export interface TemplateSkeletonRendererProps {
   node: LayoutNode;
   isEditMode?: boolean;
   onSlotClick?: (slotId: string) => void;
+  onNodeClick?: (node: LayoutNode) => void;
+  onEditClick?: (node: LayoutNode) => void;
+  selectedNodeId?: string;
+  isRoot?: boolean;
   contentMap?: Record<string, React.ReactNode>;
   scale?: number;
+  renderChildren?: (children: LayoutNode[]) => React.ReactNode;
 }
 
 /**
@@ -20,27 +26,59 @@ export function TemplateSkeletonRenderer({
   node,
   isEditMode = false,
   onSlotClick,
+  onNodeClick,
+  onEditClick,
+  selectedNodeId,
+  isRoot = false,
   contentMap = {},
   scale = 1,
+  renderChildren,
 }: TemplateSkeletonRendererProps) {
   const { type, children, styles, id, name } = node;
 
-  // Apply scaling if provided
+  // Apply scaling and grid styles if provided
   const scaledStyles: React.CSSProperties = {
     ...styles,
-    minHeight: node.type === 'container' || node.type === 'slot' 
-      ? (styles.minHeight || 100) 
-      : undefined,
-    minWidth: node.type === 'container' || node.type === 'slot' 
-      ? (styles.minWidth || 100) 
-      : undefined,
+    // Support grid layout
+    display: styles.display || (type === 'container' ? 'flex' : undefined),
+    gridTemplateColumns: styles.gridTemplateColumns,
+    gridTemplateRows: styles.gridTemplateRows,
+    gap: styles.gap,
+    // Force full size for layout elements
+    width: (type === "container" || type === "slot") ? "100%" : (styles.width || 'auto'),
+    height: (type === "container" || type === "slot") ? "100%" : (styles.height || 'auto'),
+    minWidth: type === 'fixed' ? (styles.minWidth || 120) : (styles.minWidth || (isEditMode ? 40 : 0)),
+    minHeight: type === 'fixed' ? (styles.minHeight || 80) : (styles.minHeight || (isEditMode ? 40 : 0)),
+    alignSelf: 'stretch',
+    justifySelf: 'stretch',
+    // Fixed positioning
+    position: type === 'fixed' ? 'absolute' : 'relative',
+    left: type === 'fixed' ? (styles.left || '10%') : undefined,
+    top: type === 'fixed' ? (styles.top || '10%') : undefined,
+    zIndex: type === 'fixed' ? 100 : undefined,
   } as any;
 
   const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (type === "slot" && id && onSlotClick) {
-      e.stopPropagation();
       onSlotClick(id);
     }
+    if (onNodeClick) {
+      onNodeClick(node);
+    }
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onEditClick) {
+      onEditClick(node);
+    }
+  };
+
+  // Helper to get count of rows/cols for grid visualization
+  const getGridCount = (template?: string) => {
+    if (!template || typeof template !== 'string') return 1;
+    return template.trim().split(/\s+/).length;
   };
 
   const renderContent = () => {
@@ -63,25 +101,35 @@ export function TemplateSkeletonRenderer({
       );
     }
 
+    if (renderChildren && children) {
+      return renderChildren(children);
+    }
+
     return children?.map((child, index) => (
       <TemplateSkeletonRenderer
-        key={`${child.type}-${child.id || index}`}
+        key={(child as any)._internalId || `${child.type}-${child.id || index}`}
         node={child}
         isEditMode={isEditMode}
         onSlotClick={onSlotClick}
+        onNodeClick={onNodeClick}
+        onEditClick={onEditClick}
+        selectedNodeId={selectedNodeId}
         contentMap={contentMap}
         scale={scale}
       />
     ));
   };
 
+  const isSelected = selectedNodeId && (id === selectedNodeId || (node as any)._internalId === selectedNodeId);
+
   const baseClasses = cn(
     "relative flex flex-col transition-all",
-    type === "container" && "flex-1",
-    type === "slot" && "flex-1 border-2 border-dashed border-zinc-800 bg-zinc-900/20 hover:border-sky-500/50 hover:bg-sky-500/5 cursor-pointer",
-    type === "fixed" && "absolute",
-    isEditMode && type === "container" && "border border-zinc-800/50 m-1",
-    isEditMode && type === "slot" && "m-1"
+    (type === "container" || type === "slot") && "flex-1 w-full h-full",
+    type === "slot" && "border-2 border-dashed border-zinc-800 bg-zinc-900/20 hover:border-sky-500/50 hover:bg-sky-500/5 cursor-pointer",
+    type === "fixed" && "border-2 border-sky-500/30 bg-zinc-900 shadow-2xl rounded-lg overflow-hidden",
+    isEditMode && type === "container" && "border border-zinc-800/50 p-1 cursor-pointer hover:border-sky-500/30",
+    isEditMode && type === "slot" && "p-1",
+    isSelected && "ring-2 ring-sky-500 z-50 bg-sky-500/10 shadow-[0_0_25px_rgba(14,165,233,0.4)]"
   );
 
   return (
@@ -90,13 +138,55 @@ export function TemplateSkeletonRenderer({
       className={baseClasses}
       onClick={handleClick}
     >
+      {/* Grid Helper Lines for Edit Mode */}
+      {isEditMode && type === 'container' && styles.display === 'grid' && (
+        <div 
+          className="absolute inset-0 pointer-events-none opacity-10 z-0" 
+          style={{
+            display: 'grid',
+            gridTemplateColumns: styles.gridTemplateColumns as string,
+            gridTemplateRows: styles.gridTemplateRows as string,
+            gap: styles.gap as any,
+          }}
+        >
+          {Array.from({ 
+            length: getGridCount(styles.gridTemplateColumns as string) * getGridCount(styles.gridTemplateRows as string) 
+          }).map((_, i) => (
+            <div key={i} className="border border-sky-500 min-h-[40px] min-w-[40px]" />
+          ))}
+        </div>
+      )}
+
       {/* Label for Edit Mode */}
-      {isEditMode && (type === "container" || type === "fixed") && (
-        <div className="absolute top-0 left-0 bg-zinc-800/80 px-1.5 py-0.5 rounded-br z-20 pointer-events-none">
+      {isEditMode && !isRoot && (
+        <div className="absolute top-0 left-0 bg-zinc-800/80 px-1.5 py-0.5 rounded-br z-20 pointer-events-none flex flex-row items-center gap-1.5">
           <span className="text-zinc-500 font-black uppercase text-[6px] tracking-tighter">
-            {type}{name ? `: ${name}` : ''}
+            {type === 'container' ? (styles.display === 'grid' ? 'grid' : 'flex') : type}{name ? `: ${name}` : ''}
           </span>
         </div>
+      )}
+
+      {/* Resize Handles & Controls for Edit Mode */}
+      {isEditMode && !isRoot && (
+        <>
+          {/* Edit Icon */}
+          <button 
+            onClick={handleEdit}
+            className="absolute top-1 right-1 w-5 h-5 bg-zinc-800 hover:bg-sky-500 rounded flex items-center justify-center z-30 transition-colors border border-zinc-700"
+          >
+            <Pencil size={10} className="text-white" />
+          </button>
+
+          {/* Resize Corner Handle (Bottom Right) */}
+          <div 
+            className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize z-40 group/resize"
+            onMouseDown={(e) => {
+              // This is handled visually here, logic is in LayoutDesigner.tsx
+            }}
+          >
+            <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-r-2 border-b-2 border-zinc-600 group-hover/resize:border-sky-500 transition-colors" />
+          </div>
+        </>
       )}
       
       {renderContent()}

@@ -90,23 +90,27 @@ export class RealtimeGateway
 
     if (!display) return;
 
-    // 2. Find active assignment with template
-
+    // 2. Find active assignment with screen
     const assignment =
       (await this.dbService.db.query.displayAssignments.findFirst({
         where: eq(displayAssignments.displayId, display.id),
-
         orderBy: (assignments: any, { desc }: any) =>
           [desc(assignments.createdAt)] as any,
         with: {
-          template: true,
+          screen: {
+            with: {
+              layout: true,
+            },
+          },
         },
       })) as any;
 
-    if (assignment) {
+    if (assignment && assignment.screen) {
       this.emitToHardware(hardwareId, 'presentation:update', {
-        structure: JSON.parse(assignment.template.structure),
-        content: JSON.parse(assignment.content),
+        screenId: assignment.screenId,
+        structure: JSON.parse(assignment.screen.layout.structure),
+        slots: JSON.parse(assignment.screen.slots),
+        customCss: assignment.screen.customCss,
       });
     }
   }

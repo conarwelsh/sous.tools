@@ -6,8 +6,8 @@ import {
   varchar,
   boolean,
 } from 'drizzle-orm/pg-core';
-import { organizations } from '../organizations/organizations.schema.js';
-import { roleEnum } from '../iam.schema.js';
+import { organizations } from '../organizations/organizations.schema';
+import { roleEnum } from '../iam.schema';
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),

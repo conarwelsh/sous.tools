@@ -7,8 +7,8 @@ import {
   timestamp,
   integer,
 } from 'drizzle-orm/pg-core';
-import { organizations } from '../iam/organizations/organizations.schema.js';
-import { locations } from '../iam/locations/locations.schema.js';
+import { organizations } from '../iam/organizations/organizations.schema';
+import { locations } from '../iam/locations/locations.schema';
 
 export const templates = pgTable('templates', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -37,15 +37,31 @@ export const displays = pgTable('displays', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+export const screens = pgTable('screens', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id')
+    .references(() => organizations.id)
+    .notNull(),
+  layoutId: uuid('layout_id')
+    .references(() => templates.id)
+    .notNull(),
+  name: varchar('name', { length: 255 }).notNull(),
+  slots: text('slots').notNull(), // JSON: Record<string, SlotAssignment>
+  assignments: text('assignments').notNull(), // JSON: webSlug, isPublic, etc.
+  customCss: text('custom_css'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
 export const displayAssignments = pgTable('display_assignments', {
   id: uuid('id').primaryKey().defaultRandom(),
   displayId: uuid('display_id')
     .references(() => displays.id)
+    .notNull()
+    .unique(),
+  screenId: uuid('screen_id')
+    .references(() => screens.id)
     .notNull(),
-  templateId: uuid('template_id')
-    .references(() => templates.id)
-    .notNull(),
-  content: text('content').notNull(), // JSON: Binding data to slots
   schedule: text('schedule'), // JSON: Optional scheduling rules (Cron/Time ranges)
   priority: integer('priority').default(0).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),

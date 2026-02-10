@@ -1,1 +1,1 @@
-export * from "./domains/knowledge/services/knowledge.service.js";
+export * from "./domains/knowledge/services/knowledge.service";

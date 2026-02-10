@@ -1,5 +1,12 @@
-import { pgTable, uuid, varchar, text, boolean, timestamp } from 'drizzle-orm/pg-core';
-import { organizations } from '../iam/organizations/organizations.schema.js';
+import {
+  pgTable,
+  uuid,
+  varchar,
+  text,
+  boolean,
+  timestamp,
+} from 'drizzle-orm/pg-core';
+import { organizations } from '../iam/organizations/organizations.schema';
 
 export const integrationConfigs = pgTable('integration_configs', {
   id: uuid('id').primaryKey().defaultRandom(),

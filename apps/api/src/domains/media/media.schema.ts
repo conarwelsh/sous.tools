@@ -1,5 +1,12 @@
-import { pgTable, uuid, varchar, integer, text, timestamp } from 'drizzle-orm/pg-core';
-import { organizations } from '../iam/organizations/organizations.schema.js';
+import {
+  pgTable,
+  uuid,
+  varchar,
+  integer,
+  text,
+  timestamp,
+} from 'drizzle-orm/pg-core';
+import { organizations } from '../iam/organizations/organizations.schema';
 
 export const media = pgTable('media', {
   id: uuid('id').primaryKey().defaultRandom(),

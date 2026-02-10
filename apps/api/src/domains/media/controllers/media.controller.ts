@@ -1,5 +1,6 @@
 import {
   Controller,
+  Get,
   Post,
   UseInterceptors,
   UploadedFile,
@@ -20,6 +21,12 @@ export class MediaController {
     private readonly mediaService: MediaService,
     private readonly storageService: SupabaseStorageService,
   ) {}
+
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  async getMedia(@Req() req: any) {
+    return this.mediaService.getMedia(req.user.orgId);
+  }
 
   @Post('upload')
   @UseGuards(JwtAuthGuard)

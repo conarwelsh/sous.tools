@@ -31,6 +31,32 @@ export interface AssignmentContent {
   >;
 }
 
+export interface SlotAssignment {
+  sourceType: 'POS' | 'MEDIA' | 'STATIC';
+  dataConfig: {
+    filters?: { categoryId?: string; tags?: string[] };
+    overrides?: Record<string, { featured?: boolean; soldOut?: boolean; hidden?: boolean }>;
+    staticData?: any;
+    mediaId?: string;
+  };
+  component: string; // e.g., 'MenuItemList'
+  componentProps: Record<string, any>;
+}
+
+export interface ScreenConfig {
+  id: string;
+  name: string;
+  layoutId: string; // Reference to Layout Template
+  customCss?: string;
+  slots: Record<string, SlotAssignment>; // Keyed by Slot ID from Layout
+  // Target Configuration
+  assignments: {
+    hardware?: string[]; // Array of Display IDs (HDMI ports)
+    webSlug?: string;    // URL slug
+    isPublic?: boolean;  // Access control
+  }
+}
+
 // Legacy support (will be refactored as we implement the new engine)
 export interface TemplateSlot {
   id: string;

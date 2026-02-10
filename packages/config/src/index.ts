@@ -14,17 +14,18 @@ function findRoot(): string {
   if (!isServer) return "";
   
   try {
-    const fs = require("fs");
-    const path = require("path");
+    const fs = eval('require("fs")');
+    const path = eval('require("path")');
     let current = process.cwd();
     
-    // Walk up until we find pnpm-workspace.yaml or hit root
     while (current !== "/" && !fs.existsSync(path.join(current, "pnpm-workspace.yaml"))) {
-      current = path.dirname(current);
+      const parent = path.dirname(current);
+      if (parent === current) break;
+      current = parent;
     }
-    return current === "/" ? process.cwd() : current;
+    return current;
   } catch (e) {
-    return "";
+    return process.cwd();
   }
 }
 
@@ -39,61 +40,72 @@ function bootstrap() {
   if (!isDev) return;
 
   try {
-    // Only attempt Infisical/Dotenv in local dev where we might have require
-    // We use a cautious check for require to support both CJS and ESM runtimes
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    if (typeof require !== "undefined") {
-      const path = require("path");
-      const fs = require("fs");
-      const root = findRoot();
+    // Check if require exists (CJS environment)
+    // We use a check that won't be shimmed by esbuild
+    let req: any;
+    try {
+      req = eval('require');
+    } catch (e) {
+      // In ESM Node.js, eval('require') will throw. 
+      // We skip bootstrap and rely on external env population.
+      return;
+    }
 
-      // 1. Load bootstrap variables from .env if present
-      const envPath = path.join(root, ".env");
-      if (fs.existsSync(envPath)) {
-        require("dotenv").config({ path: envPath });
-      }
+    if (!req || typeof req !== 'function') return;
 
-      // 2. Load from Infisical if in development and missing critical keys
-      const isNext = !!process.env.NEXT_RUNTIME;
-      const hasProjectId = !!process.env.INFISICAL_PROJECT_ID;
-      
-      if (!isNext && !process.env.DATABASE_URL && hasProjectId) {
-        try {
-          const { execSync } = require("child_process");
-          const projectId = process.env.INFISICAL_PROJECT_ID;
-          const envName = "dev";
-          
-          console.log(`🔐 [@sous/config] Fetching secrets from Infisical (Project: ${projectId}, Env: ${envName})...`);
-          
-          const output = execSync(
-            `infisical export --projectId ${projectId} --env ${envName} --format json`,
-            { 
-              encoding: "utf8", 
-              stdio: ["ignore", "pipe", "ignore"],
-              env: { ...process.env }
-            }
-          );
-          
-          const secrets = JSON.parse(output);
-          if (Array.isArray(secrets)) {
-            let count = 0;
-            for (const { key, value } of secrets) {
-              if (!process.env[key]) {
-                process.env[key] = value;
-                count++;
-              }
-            }
-            if (count > 0) {
-              console.log(`✅ [@sous/config] Population complete. Injected ${count} new variables.`);
+    const fs = req("fs");
+    const path = req("path");
+    const dotenv = req("dotenv");
+    const child_process = req("child_process");
+
+    const root = findRoot();
+
+    // 1. Load bootstrap variables from .env if present
+    const envPath = path.join(root, ".env");
+    if (fs.existsSync(envPath)) {
+      dotenv.config({ path: envPath });
+    }
+
+    // 2. Load from Infisical if in development and missing critical keys
+    const isNext = !!process.env.NEXT_RUNTIME;
+    const hasProjectId = !!process.env.INFISICAL_PROJECT_ID;
+    
+    if (!isNext && !process.env.DATABASE_URL && hasProjectId) {
+      try {
+        const { execSync } = child_process;
+        const projectId = process.env.INFISICAL_PROJECT_ID;
+        const envName = "dev";
+        
+        console.log(`🔐 [@sous/config] Fetching secrets from Infisical (Project: ${projectId}, Env: ${envName})...`);
+        
+        const output = execSync(
+          `infisical export --projectId ${projectId} --env ${envName} --format json`,
+          { 
+            encoding: "utf8", 
+            stdio: ["ignore", "pipe", "ignore"],
+            env: { ...process.env }
+          }
+        );
+        
+        const secrets = JSON.parse(output);
+        if (Array.isArray(secrets)) {
+          let count = 0;
+          for (const { key, value } of secrets) {
+            if (!process.env[key]) {
+              process.env[key] = value;
+              count++;
             }
           }
-        } catch (e: any) {
-          console.warn("⚠️ [@sous/config] Infisical CLI fetch failed. Ensure CLI is installed and authenticated.");
+          if (count > 0) {
+            console.log(`✅ [@sous/config] Population complete. Injected ${count} new variables.`);
+          }
         }
+      } catch (e: any) {
+        console.warn("⚠️ [@sous/config] Infisical CLI fetch failed. Ensure CLI is installed and authenticated.");
       }
     }
   } catch (e) {
-    console.error("❌ [@sous/config] Critical error during bootstrap:", e);
+    // Silently ignore bootstrap failures in environments where require is unavailable (ESM)
   }
 }
 
@@ -238,6 +250,13 @@ export const getConfig = async () => server;
 /**
  * Secret management utility. Only available on server.
  */
-export const secrets = isServer ? new (require("./secrets.js").SecretManager)() : null;
+export const secrets = isServer ? (() => {
+  try {
+    const SecretManager = eval('require("./secrets.js").SecretManager');
+    return new SecretManager();
+  } catch (e) {
+    return null;
+  }
+})() : null;
 
 export { configSchema, brandingConfigSchema, type Config, type BrandingConfig };

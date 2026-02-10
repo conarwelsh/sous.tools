@@ -6,8 +6,8 @@ import {
   text,
   pgEnum,
 } from 'drizzle-orm/pg-core';
-import { organizations } from '../iam/organizations/organizations.schema.js';
-import { locations } from '../iam/locations/locations.schema.js';
+import { organizations } from '../iam/organizations/organizations.schema';
+import { locations } from '../iam/locations/locations.schema';
 
 export const deviceTypeEnum = pgEnum('device_type', [
   'signage',

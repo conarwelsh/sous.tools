@@ -1,3 +1,3 @@
-export * from "./components/DocumentIngestor.js";
-export * from "./components/EntityMapper.js";
-export * from "./components/IngestionReviewer.js";
+export * from "./components/DocumentIngestor";
+export * from "./components/EntityMapper";
+export * from "./components/IngestionReviewer";

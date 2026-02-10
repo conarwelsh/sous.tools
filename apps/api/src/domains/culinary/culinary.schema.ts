@@ -7,7 +7,7 @@ import {
   integer,
   boolean,
 } from 'drizzle-orm/pg-core';
-import { organizations } from '../iam/organizations/organizations.schema.js';
+import { organizations } from '../iam/organizations/organizations.schema';
 
 export const ingredients = pgTable('ingredients', {
   id: uuid('id').primaryKey().defaultRandom(),

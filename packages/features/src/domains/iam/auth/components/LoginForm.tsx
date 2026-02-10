@@ -40,7 +40,7 @@ export const LoginForm = ({ onSuccess, showClose = false }: { onSuccess?: () => 
       )}
 
       <div className="flex flex-col items-center mb-16">
-        <Logo variant="cloud" size={60} />
+        <Logo size={60} />
       </div>
 
       <div className="flex flex-col gap-8">

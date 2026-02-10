@@ -5,11 +5,11 @@ import {
   text,
   timestamp,
   decimal,
+  integer,
 } from 'drizzle-orm/pg-core';
-import { organizations } from '../iam/organizations/organizations.schema.js';
-import { devices } from '../hardware/hardware.schema.js';
-import { recipes } from '../culinary/culinary.schema.js';
-import { ingredients } from '../culinary/culinary.schema.js';
+import { organizations } from '../iam/organizations/organizations.schema';
+import { devices } from '../hardware/hardware.schema';
+import { recipes, ingredients } from '../culinary/culinary.schema';
 
 export const telemetry = pgTable('telemetry', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -55,6 +55,3 @@ export const priceTrends = pgTable('price_trends', {
   volatilityScore: decimal('volatility_score', { precision: 5, scale: 2 }),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
-
-// Need to import integer
-import { integer } from 'drizzle-orm/pg-core';

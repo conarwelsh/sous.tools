@@ -1,7 +1,13 @@
-import { pgTable, uuid, integer, varchar, timestamp } from 'drizzle-orm/pg-core';
-import { organizations } from '../iam/organizations/organizations.schema.js';
-import { locations } from '../iam/locations/locations.schema.js';
-import { ingredients } from '../culinary/culinary.schema.js';
+import {
+  pgTable,
+  uuid,
+  integer,
+  varchar,
+  timestamp,
+} from 'drizzle-orm/pg-core';
+import { organizations } from '../iam/organizations/organizations.schema';
+import { locations } from '../iam/locations/locations.schema';
+import { ingredients } from '../culinary/culinary.schema';
 
 export const stockLedger = pgTable('stock_ledger', {
   id: uuid('id').primaryKey().defaultRandom(),
