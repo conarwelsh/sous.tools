@@ -86,42 +86,51 @@ export function TemplateSkeletonRenderer({
   };
 
   const renderContent = () => {
+    if (!node) return null;
+
     if (type === "slot" && id && contentMap[id]) {
       return contentMap[id];
     }
 
+    let childrenContent = null;
+
+    if (renderChildren && children) {
+      childrenContent = renderChildren(children);
+    } else if (children) {
+      childrenContent = children.map((child, index) => (
+        <TemplateSkeletonRenderer
+          key={(child as any)._internalId || `${child.type}-${child.id || index}`}
+          node={child}
+          isEditMode={isEditMode}
+          onSlotClick={onSlotClick}
+          onNodeClick={onNodeClick}
+          onEditClick={onEditClick}
+          selectedNodeId={selectedNodeId}
+          contentMap={contentMap}
+          scale={scale}
+        />
+      ));
+    }
+
     if (type === "slot") {
       return (
-        <View className="flex-1 items-center justify-center p-4">
-          <Text className="text-zinc-700 font-black uppercase text-[10px] tracking-widest text-center">
-            {name || "Empty Slot"}
-          </Text>
-          {id && (
-            <Text className="text-zinc-800 font-mono text-[8px] mt-1">
-              ID: {id}
+        <View className="flex-1 relative">
+          <View className="absolute inset-0 items-center justify-center p-4 pointer-events-none">
+            <Text className="text-zinc-700 font-black uppercase text-[10px] tracking-widest text-center">
+              {name || "Empty Slot"}
             </Text>
-          )}
+            {id && (
+              <Text className="text-zinc-800 font-mono text-[8px] mt-1">
+                ID: {id}
+              </Text>
+            )}
+          </View>
+          {childrenContent}
         </View>
       );
     }
 
-    if (renderChildren && children) {
-      return renderChildren(children);
-    }
-
-    return children?.map((child, index) => (
-      <TemplateSkeletonRenderer
-        key={(child as any)._internalId || `${child.type}-${child.id || index}`}
-        node={child}
-        isEditMode={isEditMode}
-        onSlotClick={onSlotClick}
-        onNodeClick={onNodeClick}
-        onEditClick={onEditClick}
-        selectedNodeId={selectedNodeId}
-        contentMap={contentMap}
-        scale={scale}
-      />
-    ));
+    return childrenContent;
   };
 
   const isSelected = selectedNodeId && (id === selectedNodeId || (node as any)._internalId === selectedNodeId);

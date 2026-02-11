@@ -153,6 +153,91 @@ const DEFAULT_ROOT: LayoutNode = {
 
 // --- DND Components ---
 
+function ElementTreeItem({ 
+  node, 
+  depth = 0, 
+  selectedNodeId, 
+  onSelect, 
+  onEdit,
+  onDelete
+}: { 
+  node: LayoutNode; 
+  depth?: number; 
+  selectedNodeId?: string; 
+  onSelect: (node: LayoutNode) => void;
+  onEdit: (node: LayoutNode) => void;
+  onDelete: (id: string) => void;
+}) {
+  const isSelected = selectedNodeId === (node as any)._internalId;
+  const hasChildren = node.children && node.children.length > 0;
+  
+  return (
+    <View className="flex flex-col">
+      <div 
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelect(node);
+        }}
+        className={cn(
+          "flex flex-row items-center gap-2 py-1.5 px-3 rounded-lg cursor-pointer transition-all group",
+          isSelected ? "bg-sky-500/20 shadow-[inset_0_0_0_1px_rgba(14,165,233,0.3)]" : "hover:bg-accent/50"
+        )}
+        style={{ paddingLeft: `${depth * 16 + 12}px` }}
+      >
+        <div className="flex-shrink-0">
+          {node.type === 'container' ? (
+            <Grid3X3 size={12} className={isSelected ? "text-sky-500" : "text-muted-foreground"} />
+          ) : node.type === 'fixed' ? (
+            <Maximize size={12} className={isSelected ? "text-sky-500" : "text-muted-foreground"} />
+          ) : (
+            <Square size={12} className={isSelected ? "text-sky-500" : "text-muted-foreground"} />
+          )}
+        </div>
+        
+        <Text className={cn(
+          "text-[10px] font-bold uppercase tracking-tight flex-1 truncate",
+          isSelected ? "text-sky-500" : "text-foreground/80"
+        )}>
+          {node.name || (node.type === 'container' ? (node.styles.display === 'grid' ? 'Grid' : 'Flex') : node.type)}
+        </Text>
+
+        <div className="flex flex-row items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button 
+            onClick={(e) => { e.stopPropagation(); onEdit(node); }}
+            className="p-1 hover:bg-sky-500/20 rounded text-muted-foreground hover:text-sky-500 transition-colors"
+          >
+            <Pencil size={10} />
+          </button>
+          {depth > 0 && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); onDelete((node as any)._internalId); }}
+              className="p-1 hover:bg-red-500/20 rounded text-muted-foreground hover:text-red-500 transition-colors"
+            >
+              <Trash2 size={10} />
+            </button>
+          )}
+        </div>
+      </div>
+      
+      {hasChildren && (
+        <div className="flex flex-col">
+          {node.children?.map(child => (
+            <ElementTreeItem 
+              key={(child as any)._internalId} 
+              node={child} 
+              depth={depth + 1} 
+              selectedNodeId={selectedNodeId}
+              onSelect={onSelect}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          ))}
+        </div>
+      )}
+    </View>
+  );
+}
+
 function DraggablePaletteItem({ type, icon: Icon, label, data }: { type: LayoutNodeType; icon: any; label: string; data?: any }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `palette-${type}-${label}`,
@@ -165,12 +250,12 @@ function DraggablePaletteItem({ type, icon: Icon, label, data }: { type: LayoutN
       {...listeners}
       {...attributes}
       className={cn(
-        "p-4 bg-black/40 border-zinc-800 items-center justify-center cursor-grab active:cursor-grabbing hover:border-sky-500/50 transition-colors",
+        "p-4 bg-muted/30 border-border items-center justify-center cursor-grab active:cursor-grabbing hover:border-sky-500/50 transition-colors",
         isDragging && "opacity-50 border-sky-500"
       )}
     >
-      <Icon size={20} className="text-zinc-600 mb-2" />
-      <Text className="text-zinc-500 font-bold uppercase text-[8px] tracking-widest text-center">{label}</Text>
+      <Icon size={20} className="text-muted-foreground mb-2" />
+      <Text className="text-muted-foreground font-bold uppercase text-[8px] tracking-widest text-center">{label}</Text>
     </Card>
   );
 }
@@ -325,6 +410,7 @@ function DesignerRenderer({ node, parentNode, onNodeClick, onEditClick, onResize
       isEditMode
       selectedNodeId={selectedNodeId}
       onEditClick={onEditClick}
+      onNodeClick={onNodeClick}
       isRoot={isRoot}
       renderChildren={(children: LayoutNode[]) => (
         children.map((child) => (
@@ -404,6 +490,9 @@ export function LayoutDesigner({
   const [showSettings, setShowSettings] = useState(false);
   const [activeDragType, setActiveDragType] = useState<LayoutNodeType | null>(null);
   const [showMenu, setShowMenu] = useState(false);
+  
+  // Track last used grid config to avoid "old values" or stuck defaults
+  const [lastGridConfig, setLastGridConfig] = useState({ rows: 2, cols: 2 });
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -452,21 +541,25 @@ export function LayoutDesigner({
       const node = active.data.current.node;
       const delta = event.delta;
       
-      // Calculate new position in percentages
-      // We assume parent is the stage for fixed elements dropped in root
       const stageRect = document.querySelector('.template-stage')?.getBoundingClientRect();
       if (stageRect) {
         const currentLeft = parseFloat(String(node.styles.left || '0')) || 0;
         const currentTop = parseFloat(String(node.styles.top || '0')) || 0;
+        const width = parseFloat(String(node.styles.width || '0')) || 0;
+        const height = parseFloat(String(node.styles.height || '0')) || 0;
         
         const dxPercent = (delta.x / stageRect.width) * 100;
         const dyPercent = (delta.y / stageRect.height) * 100;
         
+        // Clamp to screen (0 to 100 minus element dimension)
+        const nextLeft = Math.max(0, Math.min(100 - width, currentLeft + dxPercent));
+        const nextTop = Math.max(0, Math.min(100 - height, currentTop + dyPercent));
+
         handleUpdateNode((node as any)._internalId, {
           styles: {
             ...node.styles,
-            left: `${(currentLeft + dxPercent).toFixed(1)}%`,
-            top: `${(currentTop + dyPercent).toFixed(1)}%`,
+            left: `${nextLeft.toFixed(1)}%`,
+            top: `${nextTop.toFixed(1)}%`,
           }
         });
       }
@@ -483,19 +576,40 @@ export function LayoutDesigner({
         type,
         name: isGrid ? 'Grid' : `New ${type}`,
         styles: (type === 'fixed' 
-          ? { position: 'absolute', width: '20%', height: '20%', left: '40%', top: '40%', background: '#18181b' }
+          ? { position: 'absolute', width: '20%', height: '20%', left: '40%', top: '40%', background: '#18181b', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }
           : { display: isGrid ? 'grid' : 'flex', flex: 1, flexDirection: isGrid ? undefined : 'column' }) as any,
-        children: type === "container" ? [] : undefined,
+        children: (type === "container" || type === 'fixed') ? [] : undefined,
         id: type === "slot" ? `slot-${Date.now()}` : undefined,
       };
 
+      if (type === 'fixed') {
+        const stageRect = document.querySelector('.template-stage')?.getBoundingClientRect();
+        if (stageRect && event.activatorEvent instanceof MouseEvent) {
+          // Calculate drop position precisely
+          const dropX = event.activatorEvent.clientX + event.delta.x;
+          const dropY = event.activatorEvent.clientY + event.delta.y;
+          
+          const xPercent = ((dropX - stageRect.left) / stageRect.width) * 100;
+          const yPercent = ((dropY - stageRect.top) / stageRect.height) * 100;
+
+          // Center the box on the drop point (assuming 20% width/height)
+          newNode.styles.left = `${Math.max(0, Math.min(80, xPercent - 10)).toFixed(1)}%`;
+          newNode.styles.top = `${Math.max(0, Math.min(80, yPercent - 10)).toFixed(1)}%`;
+        }
+      }
+
       if (isGrid) {
-        newNode.styles.gridTemplateRows = "1fr 1fr";
-        newNode.styles.gridTemplateColumns = "1fr";
-        newNode.children = [
-          { type: 'slot', id: `slot-${Date.now()}-1`, name: 'Slot 1', styles: { flex: 1 } as any },
-          { type: 'slot', id: `slot-${Date.now()}-2`, name: 'Slot 2', styles: { flex: 1 } as any },
-        ].map(n => ensureInternalIds(n as LayoutNode));
+        const { rows, cols } = lastGridConfig;
+        newNode.styles.gridTemplateRows = Array(rows).fill("1fr").join(" ");
+        newNode.styles.gridTemplateColumns = Array(cols).fill("1fr").join(" ");
+        newNode.children = Array.from({ length: rows * cols }).map((_, i) => (
+          ensureInternalIds({ 
+            type: 'slot', 
+            id: `slot-${Date.now()}-${i}`, 
+            name: `Slot ${i + 1}`, 
+            styles: { flex: 1 } as any 
+          } as LayoutNode)
+        ));
       }
 
       const targetNode = findNode(activeTemplate.root, targetId);
@@ -512,7 +626,7 @@ export function LayoutDesigner({
 
         handleUpdateNode(targetId, updates);
         
-        if (type === 'container') {
+        if (type === 'container' || type === 'fixed') {
           setEditingNode(nodeWithId);
         }
       }
@@ -561,9 +675,11 @@ export function LayoutDesigner({
       if (type === 'cols') {
         updates.styles.gridTemplateColumns = template;
         updates.styles.gridTemplateRows = currentStyles.gridTemplateRows || "1fr";
+        setLastGridConfig(prev => ({ ...prev, cols: n }));
       } else {
         updates.styles.gridTemplateRows = template;
         updates.styles.gridTemplateColumns = currentStyles.gridTemplateColumns || "1fr";
+        setLastGridConfig(prev => ({ ...prev, rows: n }));
       }
       
       handleUpdateNode(internalId, updates);
@@ -607,6 +723,7 @@ export function LayoutDesigner({
           <View className="gap-2">
             <Text className="text-zinc-400 font-bold uppercase text-[8px] tracking-widest">Name</Text>
             <Input 
+              key={`${internalId}-name`}
               value={node.name || ""}
               onChange={(e) => handleUpdateNode(internalId, { name: e.target.value })}
               className="h-10 bg-black/40 border-zinc-800 text-xs" 
@@ -617,6 +734,7 @@ export function LayoutDesigner({
             <View className="gap-2">
               <Text className="text-zinc-400 font-bold uppercase text-[8px] tracking-widest">Slot ID</Text>
               <Input 
+                key={`${internalId}-slot-id`}
                 value={node.id || ""}
                 onChange={(e) => handleUpdateNode(internalId, { id: e.target.value })}
                 className="h-10 bg-black/40 border-zinc-800 text-xs font-mono" 
@@ -630,6 +748,7 @@ export function LayoutDesigner({
                 <View className="gap-2">
                   <Text className="text-zinc-400 font-bold uppercase text-[8px] tracking-widest">Columns</Text>
                   <Input 
+                    key={`${internalId}-cols`}
                     type="number"
                     min="1"
                     value={getGridCount(node.styles.gridTemplateColumns as string)}
@@ -640,6 +759,7 @@ export function LayoutDesigner({
                 <View className="gap-2">
                   <Text className="text-zinc-400 font-bold uppercase text-[8px] tracking-widest">Rows</Text>
                   <Input 
+                    key={`${internalId}-rows`}
                     type="number"
                     min="1"
                     value={getGridCount(node.styles.gridTemplateRows as string)}
@@ -660,6 +780,7 @@ export function LayoutDesigner({
             <View className="gap-2">
               <Text className="text-zinc-400 font-bold uppercase text-[8px] tracking-widest">Width (%)</Text>
               <Input 
+                key={`${internalId}-width`}
                 value={String(node.styles.width || "")}
                 onChange={(e) => handleUpdateNode(internalId, { styles: { ...node.styles, width: e.target.value } })}
                 className="h-10 bg-black/40 border-zinc-800 text-xs" 
@@ -668,6 +789,7 @@ export function LayoutDesigner({
             <View className="gap-2">
               <Text className="text-zinc-400 font-bold uppercase text-[8px] tracking-widest">Height (%)</Text>
               <Input 
+                key={`${internalId}-height`}
                 value={String(node.styles.height || "")}
                 onChange={(e) => handleUpdateNode(internalId, { styles: { ...node.styles, height: e.target.value } })}
                 className="h-10 bg-black/40 border-zinc-800 text-xs" 
@@ -721,22 +843,22 @@ export function LayoutDesigner({
       onDragStart={(e) => setActiveDragType(e.active.data.current?.type)}
       onDragEnd={handleDragEnd}
     >
-      <View className="flex-1 h-screen bg-[#050505] flex-row overflow-hidden">
+      <View className="flex-1 h-screen bg-background flex-row overflow-hidden">
         {/* Sidebar / Toolbar */}
-        <View className="w-80 border-r border-zinc-800 bg-zinc-900 flex flex-col">
-          <View className="p-6 border-b border-zinc-800 flex-row items-center gap-4">
+        <View className="w-80 border-r border-border bg-card flex flex-col">
+          <View className="p-6 border-b border-border flex-row items-center gap-4">
             <Button 
               onClick={onCancel}
               variant="ghost" 
-              className="w-10 h-10 rounded-xl bg-black border border-zinc-800 items-center justify-center p-0"
+              className="w-10 h-10 rounded-xl bg-background border border-border items-center justify-center p-0"
             >
-              <ChevronLeft size={20} className="text-zinc-500" />
+              <ChevronLeft size={20} className="text-muted-foreground" />
             </Button>
             <View>
               <Text className="text-sky-500 font-black uppercase text-[10px] tracking-widest mb-1">
                 Layout Designer
               </Text>
-              <Text className="text-white font-black uppercase tracking-tight truncate w-40">
+              <Text className="text-foreground font-black uppercase tracking-tight truncate w-40">
                 {activeTemplate.name}
               </Text>
             </View>
@@ -746,7 +868,7 @@ export function LayoutDesigner({
             <View className="p-6 gap-8">
               {/* Elements Palette */}
               <View className="gap-4">
-                <Text className="text-zinc-500 font-black uppercase text-[10px] tracking-widest">
+                <Text className="text-muted-foreground font-black uppercase text-[10px] tracking-widest">
                   Elements (Drag into Canvas)
                 </Text>
                 <div className="grid grid-cols-2 gap-2">
@@ -757,25 +879,41 @@ export function LayoutDesigner({
                 </div>
               </View>
 
+              {/* Element Tree */}
+              <View className="border-t border-border pt-8 gap-4">
+                <Text className="text-muted-foreground font-black uppercase text-[10px] tracking-widest">
+                  Element Hierarchy
+                </Text>
+                <View className="bg-muted/20 rounded-xl border border-border/50 p-2">
+                  <ElementTreeItem 
+                    node={activeTemplate.root}
+                    selectedNodeId={selectedNode ? (selectedNode as any)._internalId : undefined}
+                    onSelect={(node) => setSelectedNode(node)}
+                    onEdit={(node) => setEditingNode(node)}
+                    onDelete={(id) => handleDeleteNode(id)}
+                  />
+                </View>
+              </View>
+
               {/* Selection Info */}
-              <View className="border-t border-zinc-800 pt-8 gap-4">
-                <Text className="text-zinc-500 font-black uppercase text-[10px] tracking-widest">
+              <View className="border-t border-border pt-8 gap-4">
+                <Text className="text-muted-foreground font-black uppercase text-[10px] tracking-widest">
                   Active Selection
                 </Text>
                 {selectedNode ? (
-                  <Card className="p-4 bg-black/40 border-zinc-800 flex-row items-center justify-between">
-                    <View>
-                      <Text className="text-white font-black uppercase text-[10px] tracking-tight mb-1">
-                        {selectedNode.name}
+                  <Card className="p-4 bg-muted/20 border-border flex-row items-center justify-between">
+                    <View className="flex-1 mr-4">
+                      <Text className="text-foreground font-black uppercase text-[10px] tracking-tight mb-1 truncate">
+                        {selectedNode.name || 'Unnamed Element'}
                       </Text>
-                      <Text className="text-zinc-500 font-bold uppercase text-[8px] tracking-widest">
+                      <Text className="text-muted-foreground font-bold uppercase text-[8px] tracking-widest">
                         {selectedNode.type === 'container' ? (selectedNode.styles.display === 'grid' ? 'grid' : 'flex') : selectedNode.type}
                       </Text>
                     </View>
                     <Button 
                       onClick={() => setEditingNode(selectedNode)}
                       variant="ghost" 
-                      className="w-8 h-8 p-0 bg-zinc-800 hover:bg-sky-500 transition-colors"
+                      className="w-8 h-8 p-0 bg-muted hover:bg-sky-500 transition-colors"
                     >
                       <Pencil size={12} className="text-white" />
                     </Button>
@@ -789,7 +927,15 @@ export function LayoutDesigner({
         </View>
 
         {/* Main Canvas */}
-        <View className="flex-1 relative" onClick={() => setSelectedNode(null)}>
+        <View 
+          className="flex-1 relative" 
+          onClick={(e) => {
+            // Only deselect if clicking directly on the canvas background
+            if (e.target === e.currentTarget) {
+              setSelectedNode(null);
+            }
+          }}
+        >
           <TemplateStage isEditMode className="template-stage">
             <DesignerRenderer 
               node={activeTemplate.root} 

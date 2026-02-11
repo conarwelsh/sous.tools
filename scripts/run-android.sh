@@ -89,36 +89,51 @@ PKG_ID="com.sous.${2:-tools}"
 ACTIVITY="com.sous.tools.MainActivity"
 if [ "${2:-default}" == "default" ] || [ "${2:-default}" == "tools" ]; then PKG_ID="com.sous.tools"; fi
 
-# Helper to call agent
-call_agent_json() {
-  local payload=$1
-  curl -s -X POST -H 'Content-Type: application/json' -d "$payload" "$AGENT_URL"
+# Helper to call agent or direct adb
+call_adb() {
+  local serial=$1
+  local args=$2
+  
+  # Try direct adb first if WIN_IP is set but we want to try local connection
+  # If the user fixed interop, 'adb' command in WSL should see the devices
+  if adb -s "$serial" shell getprop ro.product.model >/dev/null 2>&1; then
+    echo "⚡ Using direct ADB for $serial"
+    adb -s "$serial" $args
+  else
+    echo "🛰️  Falling back to Agent for $serial"
+    PAYLOAD=$(python3 -c "import json; import sys; print(json.dumps({'command': 'adb', 'args': sys.argv[1]}))" "-s $serial $args")
+    curl -s -X POST -H 'Content-Type: application/json' -d "$PAYLOAD" "$AGENT_URL"
+  fi
 }
 
 # Force uninstall via agent
 echo "🗑️ Force uninstalling old app ($PKG_ID) from $1..."
-PAYLOAD=$(python3 -c "import json; print(json.dumps({'command': 'adb', 'args': f'-s $1 uninstall $PKG_ID'}))")
-call_agent_json "$PAYLOAD"
+call_adb "$1" "uninstall $PKG_ID"
 
 # WIPE DATA to be sure (in case uninstall fails to clear some cache)
 echo "🧹 Wiping app data ($PKG_ID) on $1..."
-PAYLOAD=$(python3 -c "import json; print(json.dumps({'command': 'adb', 'args': f'-s $1 shell pm clear $PKG_ID'}))")
-call_agent_json "$PAYLOAD"
+call_adb "$1" "shell pm clear $PKG_ID"
 
 sleep 2
 
 # Manual install via agent - Using RAW string in Python
 APK_PATH="\\\\wsl.localhost\\Ubuntu-22.04\\home\\conar\\sous.tools\\apps\\web\\android\\app\\build\\outputs\\apk\\${2:-tools}\\debug\\app-${2:-tools}-debug.apk"
 echo "🏗️ Manually installing fresh APK ($APK_PATH) via agent..."
-PAYLOAD=$(python3 -c "import json; print(json.dumps({'command': 'adb', 'args': r'-s $1 install -r \"$APK_PATH\"'}))")
-call_agent_json "$PAYLOAD"
+# For install, we usually need the agent because the APK is on WSL but ADB is on Windows
+# UNLESS the user mapped the WSL drive
+if adb -s "$1" install -r "apps/web/android/app/build/outputs/apk/${2:-tools}/debug/app-${2:-tools}-debug.apk" >/dev/null 2>&1; then
+    echo "⚡ Direct install successful"
+else
+    echo "🛰️  Agent install fallback..."
+    PAYLOAD=$(python3 -c "import json; print(json.dumps({'command': 'adb', 'args': r'-s $1 install -r \"$APK_PATH\"'}))")
+    curl -s -X POST -H 'Content-Type: application/json' -d "$PAYLOAD" "$AGENT_URL"
+fi
 
 sleep 5
 
 echo "🚀 Starting app via agent ($PKG_ID/$ACTIVITY)..."
 # Pass the CAPACITOR_LIVE_RELOAD_URL as an extra string to force WebView if the baked config is stuck
-PAYLOAD=$(python3 -c "import json; print(json.dumps({'command': 'adb', 'args': f'-s $1 shell am start -n $PKG_ID/$ACTIVITY --es url \"$CAPACITOR_LIVE_RELOAD_URL\"'}))")
-call_agent_json "$PAYLOAD"
+call_adb "$1" "shell am start -n $PKG_ID/$ACTIVITY --es url \"$CAPACITOR_LIVE_RELOAD_URL\""
 
 # Force window to foreground after a short delay
 (

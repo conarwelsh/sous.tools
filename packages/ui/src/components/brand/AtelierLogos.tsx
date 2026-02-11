@@ -781,8 +781,8 @@ export const BrandCloud: React.FC<AtelierLogoProps> = ({
   const lod = (forcedLod || getLOD(size)) as "micro" | "medium" | "macro";
   const s = size;
 
-  // FIX: Micro scaling (1.7x) and centering
-  const baseScale = (lod as string) === "micro" ? 1.7 : 1.0;
+  // FIX: Micro scaling (1.5x) and centering
+  const baseScale = (lod as string) === "micro" ? 1.5 : 1.0;
   const yOffset = (lod as string) === "micro" ? -45 : -50;
 
   const style =

@@ -13,6 +13,7 @@ export * from '../../culinary/catalog/catalog.schema';
 export * from '../../accounting/accounting.schema';
 export * from '../../integrations/integrations.schema';
 export * from '../tags/tags.schema';
+export * from '../ingestion/ingestion.schema';
 
 // 3. Mixed Dependencies
 export * from '../../procurement/procurement.schema';
@@ -35,6 +36,10 @@ import { recipeIngredients } from '../../culinary/culinary.schema';
 import { ingredients } from '../../culinary/culinary.schema';
 import { categories, products } from '../../culinary/catalog/catalog.schema';
 import { tags, tagAssignments } from '../tags/tags.schema';
+import { ingestionSessions } from '../ingestion/ingestion.schema';
+import { suppliers, invoices, invoiceItems, purchaseOrders, poItems, vendorMappings } from '../../procurement/procurement.schema';
+import { stockAudits, stockAuditItems, wastageEvents } from '../../inventory/inventory.schema';
+import { recipeSteps, cookNotes } from '../../culinary/culinary.schema';
 
 // --- Relations ---
 

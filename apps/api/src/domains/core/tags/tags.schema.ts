@@ -7,7 +7,7 @@ import {
   unique,
   index,
 } from 'drizzle-orm/pg-core';
-import { organizations } from '../../iam/organizations/organizations.schema.js';
+import { organizations } from '../../iam/organizations/organizations.schema';
 
 export const tags = pgTable(
   'tags',

@@ -1,6 +1,7 @@
 import { Command, CommandRunner, Option } from 'nest-commander';
 import { SyncCommand } from './sync.command.js';
 import { InstallCommand } from './install.command.js';
+import { KillCommand } from './kill.command.js';
 import { spawn, execSync } from 'child_process';
 import React from 'react';
 import { render } from 'ink';
@@ -22,7 +23,7 @@ interface DevOptions {
 @Command({
   name: 'dev',
   description: 'Manage development environment',
-  subCommands: [InstallCommand, SyncCommand],
+  subCommands: [InstallCommand, SyncCommand, KillCommand],
 })
 export class DevToolsCommand extends CommandRunner {
   constructor(
@@ -288,15 +289,29 @@ export class DevToolsCommand extends CommandRunner {
 
       logger.info('🚀 Starting Sous Dev Tools (Ink TUI)...');
 
-      // Auto-start core services
-      this.manager.autoStartCore();
-      this.manager.startPolling();
+      try {
+        logger.info('🔌 Connecting to PM2...');
+        // Auto-start core services
+        logger.info('🐳 Initializing core infrastructure...');
+        await this.manager.autoStartCore();
+        
+        logger.info('📡 Starting process polling...');
+        this.manager.startPolling();
 
-      this.renderDashboard();
+        logger.info('🖥️  Launching dashboard...');
+        await this.renderDashboard();
+      } catch (e: any) {
+        process.stdout.write('\x1b[?1049l');
+        logger.error('❌ FATAL ERROR IN DEV TOOLS:');
+        logger.error(e.message);
+        if (e.stack) logger.error(e.stack);
+        process.exit(1);
+      }
     }
   }
 
   private async renderDashboard() {
+    logger.info('📡 Initializing Dashboard view...');
     // Render the Ink TUI
     const { waitUntilExit } = render(
       React.createElement(Dashboard, { manager: this.manager }),
@@ -304,16 +319,18 @@ export class DevToolsCommand extends CommandRunner {
 
     try {
       await waitUntilExit();
+    } catch (e: any) {
+      logger.error(`❌ Dashboard exited with error: ${e.message}`);
+      throw e;
     } finally {
       // Restore terminal buffer immediately before cleanup logs
       process.stdout.write('\x1b[?1049l');
 
-      logger.info('👋 Shutting down managed processes...');
+      logger.info('👋 Exiting Dev Tools UI...');
       this.manager.stopPolling();
-      await this.manager.stopAll();
+      // await this.manager.stopAll(); // Processes remain running
 
-      logger.info('✅ Cleanup complete. Goodbye!');
-      process.exit(0); // Force exit to prevent hanging from lingering emitters/timers
+      logger.info('✅ Processes left running in background. Use "sous dev kill" to stop.');
     }
   }
 

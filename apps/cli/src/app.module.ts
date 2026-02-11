@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { DevToolsCommand } from './commands/dev/dev-tools.command.js';
 import { InstallCommand } from './commands/dev/install.command.js';
+import { KillCommand } from './commands/dev/kill.command.js';
 import { ShellInstallCommand } from './commands/dev/shell-install.command.js';
 import { SyncCommand } from './commands/dev/sync.command.js';
 import { EnvCommand } from './commands/env/env.command.js';
@@ -19,6 +20,7 @@ import { DbPushCommand } from './commands/maintenance/db/db-push.command.js';
 import { DbUpCommand } from './commands/maintenance/db/db-up.command.js';
 import { DbDownCommand } from './commands/maintenance/db/db-down.command.js';
 import { DbResetCommand } from './commands/maintenance/db/db-reset.command.js';
+import { RemoteResetCommand } from './commands/maintenance/db/remote-reset.command.js';
 import { SeedCommand } from './commands/maintenance/db/seed.command.js';
 import { BrandingCommand } from './commands/env/branding/branding.command.js';
 import { WorkspaceCommand } from './commands/workspace.command.js';
@@ -38,6 +40,7 @@ import { ProcessManager } from './commands/dev/process-manager.service.js';
     ProcessManager,
     DevToolsCommand,
     InstallCommand,
+    KillCommand,
     ShellInstallCommand,
     SyncCommand,
     EnvCommand,
@@ -66,6 +69,7 @@ import { ProcessManager } from './commands/dev/process-manager.service.js';
     DbUpCommand,
     DbDownCommand,
     DbResetCommand,
+    RemoteResetCommand,
     SeedCommand,
     WorkspaceCommand,
   ],

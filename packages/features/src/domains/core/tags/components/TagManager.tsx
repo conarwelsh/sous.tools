@@ -26,6 +26,13 @@ export const TagManager: React.FC<TagManagerProps> = ({ entityType, entityId }) 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const fetchData = async () => {
+    // Skip if entityId is a placeholder (e.g., 'new-layout' in designer)
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(entityId);
+    if (!isUuid) {
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     try {
       const http = await getHttpClient();

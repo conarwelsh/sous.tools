@@ -35,7 +35,7 @@ fi
 # 1. Update & Build Tools
 echo "📦 Updating system packages..."
 sudo apt update -y
-sudo apt install -y build-essential curl git wget unzip zsh pkg-config libwebkit2gtk-4.1-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev jq netcat-openbsd xz-utils
+sudo apt install -y build-essential curl git wget unzip zsh pkg-config libwebkit2gtk-4.1-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev jq netcat-openbsd xz-utils libguestfs-tools
 
 # 1.1 Setup ZSH & Oh My Zsh
 if [ ! -d "$HOME/.oh-my-zsh" ]; then

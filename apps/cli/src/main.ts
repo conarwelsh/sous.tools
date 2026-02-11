@@ -18,6 +18,7 @@ async function bootstrap() {
   await CommandFactory.run(AppModule, {
     logger: ['error'],
   });
+  process.exit(0);
 }
 
 bootstrap();

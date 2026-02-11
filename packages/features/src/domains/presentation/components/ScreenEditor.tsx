@@ -140,16 +140,16 @@ export function ScreenEditor({
   }, [activeScreen.slots]);
 
   return (
-    <View className="flex-1 h-screen bg-[#050505] flex-row overflow-hidden">
+    <View className="flex-1 h-screen bg-background flex-row overflow-hidden">
       {/* Sidebar */}
-      <View className="w-96 border-r border-zinc-800 bg-zinc-900 flex flex-col">
-        <View className="p-6 border-b border-zinc-800 flex-row items-center gap-4">
+      <View className="w-96 border-r border-border bg-card flex flex-col">
+        <View className="p-6 border-b border-border flex-row items-center gap-4">
           <Button 
             onClick={onCancel}
             variant="ghost" 
-            className="w-10 h-10 rounded-xl bg-black border border-zinc-800 items-center justify-center p-0"
+            className="w-10 h-10 rounded-xl bg-background border border-border items-center justify-center p-0"
           >
-            <ChevronLeft size={20} className="text-zinc-500" />
+            <ChevronLeft size={20} className="text-muted-foreground" />
           </Button>
           <View className="flex-1">
             <Text className="text-sky-500 font-black uppercase text-[10px] tracking-widest mb-1">
@@ -158,12 +158,12 @@ export function ScreenEditor({
             <Input 
               value={activeScreen.name}
               onChange={(e) => setActiveScreen(prev => ({ ...prev, name: e.target.value }))}
-              className="h-8 bg-transparent border-none p-0 text-white font-black uppercase tracking-tight text-lg focus-visible:ring-0" 
+              className="h-8 bg-transparent border-none p-0 text-foreground font-black uppercase tracking-tight text-lg focus-visible:ring-0" 
             />
           </View>
         </View>
 
-        <View className="flex-row border-b border-zinc-800">
+        <View className="flex-row border-b border-border">
           {[
             { id: "content", label: "Content", icon: Database },
             { id: "targets", label: "Targets", icon: Monitor },
@@ -175,13 +175,13 @@ export function ScreenEditor({
               onClick={() => setActiveTab(tab.id as any)}
               className={cn(
                 "flex-1 h-12 rounded-none gap-2 transition-all",
-                activeTab === tab.id ? "bg-white/5 border-b-2 border-sky-500" : "text-zinc-500"
+                activeTab === tab.id ? "bg-accent/50 border-b-2 border-sky-500" : "text-muted-foreground"
               )}
             >
               <tab.icon size={14} className={activeTab === tab.id ? "text-sky-500" : ""} />
               <Text className={cn(
                 "text-[10px] font-black uppercase tracking-widest",
-                activeTab === tab.id ? "text-white" : "text-zinc-500"
+                activeTab === tab.id ? "text-foreground" : "text-muted-foreground"
               )}>{tab.label}</Text>
             </Button>
           ))}
@@ -192,14 +192,14 @@ export function ScreenEditor({
             {activeTab === "content" && (
               <View className="gap-6">
                 <View className="gap-2">
-                  <Text className="text-zinc-500 font-black uppercase text-[10px] tracking-widest">Active Layout</Text>
-                  <Card className="p-4 bg-black/40 border-zinc-800 flex-row items-center gap-4">
-                    <View className="w-10 h-10 rounded-lg bg-zinc-800 items-center justify-center text-zinc-500">
+                  <Text className="text-muted-foreground font-black uppercase text-[10px] tracking-widest">Active Layout</Text>
+                  <Card className="p-4 bg-muted/20 border-border flex-row items-center gap-4">
+                    <View className="w-10 h-10 rounded-lg bg-muted items-center justify-center text-muted-foreground">
                       <Layout size={20} />
                     </View>
                     <View className="flex-1">
-                      <Text className="text-white font-bold text-xs">{selectedTemplate?.name || "No layout selected"}</Text>
-                      <Text className="text-zinc-600 text-[8px] uppercase font-black">Skeleton Template</Text>
+                      <Text className="text-foreground font-bold text-xs">{selectedTemplate?.name || "No layout selected"}</Text>
+                      <Text className="text-muted-foreground/50 text-[8px] font-black uppercase">Skeleton Template</Text>
                     </View>
                     <Button onClick={() => setShowLayoutSelector(true)} variant="ghost" className="h-8 px-2 text-sky-500 hover:bg-sky-500/10 uppercase font-black text-[8px]">Switch</Button>
                   </Card>
@@ -207,13 +207,13 @@ export function ScreenEditor({
 
                 <View className="gap-4">
                   <div className="flex flex-row justify-between items-center">
-                    <Text className="text-zinc-500 font-black uppercase text-[10px] tracking-widest">Slot Configuration</Text>
-                    <Text className="text-zinc-700 font-mono text-[8px] uppercase">{Object.keys(activeScreen.slots).length} Populated</Text>
+                    <Text className="text-muted-foreground font-black uppercase text-[10px] tracking-widest">Slot Configuration</Text>
+                    <Text className="text-muted-foreground/30 font-mono text-[8px] uppercase">{Object.keys(activeScreen.slots).length} Populated</Text>
                   </div>
                   <View className="gap-2">
                     {Object.entries(activeScreen.slots).length === 0 ? (
-                      <View className="p-8 border-2 border-dashed border-zinc-800 rounded-2xl items-center justify-center bg-black/20">
-                        <Text className="text-zinc-600 text-[10px] font-bold uppercase text-center leading-relaxed">
+                      <View className="p-8 border-2 border-dashed border-border rounded-2xl items-center justify-center bg-muted/10">
+                        <Text className="text-muted-foreground/50 text-[10px] font-bold uppercase text-center leading-relaxed">
                           No slots populated.<br/>Click a slot on the canvas to assign content.
                         </Text>
                       </View>
@@ -222,18 +222,18 @@ export function ScreenEditor({
                         <Card 
                           key={slotId} 
                           className={cn(
-                            "p-4 bg-black/40 border-zinc-800 hover:border-zinc-700 cursor-pointer transition-colors group",
+                            "p-4 bg-muted/20 border-border hover:border-primary/50 cursor-pointer transition-colors group",
                             activeSlotId === slotId && "border-sky-500 bg-sky-500/5"
                           )} 
                           onClick={() => setActiveSlotId(slotId)}
                         >
                           <View className="flex-row justify-between items-center mb-2">
                             <Text className="text-sky-500 font-black text-[10px] uppercase tracking-tighter">{slotId}</Text>
-                            <div className="bg-zinc-800 px-1.5 py-0.5 rounded text-[8px] font-black text-zinc-400 uppercase">{slot.sourceType}</div>
+                            <div className="bg-muted px-1.5 py-0.5 rounded text-[8px] font-black text-muted-foreground uppercase">{slot.sourceType}</div>
                           </View>
                           <div className="flex flex-row justify-between items-center">
-                            <Text className="text-white font-bold text-sm">{slot.component}</Text>
-                            <ChevronRight size={14} className="text-zinc-700 group-hover:text-zinc-500 transition-colors" />
+                            <Text className="text-foreground font-bold text-sm">{slot.component}</Text>
+                            <ChevronRight size={14} className="text-muted-foreground/30 group-hover:text-muted-foreground transition-colors" />
                           </div>
                         </Card>
                       ))
@@ -247,13 +247,13 @@ export function ScreenEditor({
               <View className="gap-6">
                 <View className="gap-4">
                   <View className="flex-row justify-between items-center">
-                    <Text className="text-zinc-500 font-black uppercase text-[10px] tracking-widest">Physical Hardware (HDMI)</Text>
-                    <Text className="text-zinc-700 font-mono text-[8px] uppercase">{activeScreen.assignments.hardware?.length || 0} Assigned</Text>
+                    <Text className="text-muted-foreground font-black uppercase text-[10px] tracking-widest">Physical Hardware (HDMI)</Text>
+                    <Text className="text-muted-foreground/30 font-mono text-[8px] uppercase">{activeScreen.assignments.hardware?.length || 0} Assigned</Text>
                   </View>
                   <View className="gap-2">
                     {displays.length === 0 ? (
-                      <View className="p-8 bg-black/40 border border-zinc-800 rounded-2xl items-center justify-center">
-                        <Text className="text-zinc-600 text-[10px] font-bold uppercase text-center leading-relaxed">
+                      <View className="p-8 bg-muted/10 border border-border rounded-2xl items-center justify-center">
+                        <Text className="text-muted-foreground/50 text-[10px] font-bold uppercase text-center leading-relaxed">
                           No hardware detected.<br/>Pair a Raspberry Pi to see it here.
                         </Text>
                       </View>
@@ -266,21 +266,21 @@ export function ScreenEditor({
                             onClick={() => toggleHardwareAssignment(display.id)}
                             className={cn(
                               "p-4 border-2 transition-all cursor-pointer",
-                              isAssigned ? "bg-sky-500/10 border-sky-500" : "bg-black/40 border-zinc-800 hover:border-zinc-700"
+                              isAssigned ? "bg-sky-500/10 border-sky-500" : "bg-muted/20 border-border hover:border-primary/50"
                             )}
                           >
                             <View className="flex-row items-center gap-4">
                               <View className={cn(
                                 "w-10 h-10 rounded-lg items-center justify-center",
-                                isAssigned ? "bg-sky-500/20" : "bg-zinc-800"
+                                isAssigned ? "bg-sky-500/20" : "bg-muted"
                               )}>
-                                <Monitor size={20} className={isAssigned ? "text-sky-500" : "text-zinc-500"} />
+                                <Monitor size={20} className={isAssigned ? "text-sky-500" : "text-muted-foreground"} />
                               </View>
                               <View className="flex-1">
-                                <Text className={cn("font-bold text-xs", isAssigned ? "text-white" : "text-zinc-400")}>{display.name}</Text>
-                                <Text className="text-zinc-600 text-[8px] uppercase font-black">{display.resolution || "Auto Resolution"}</Text>
+                                <Text className={cn("font-bold text-xs", isAssigned ? "text-foreground" : "text-muted-foreground")}>{display.name}</Text>
+                                <Text className="text-muted-foreground/50 text-[8px] font-black uppercase">{display.resolution || "Auto Resolution"}</Text>
                               </View>
-                              {isAssigned ? <Check size={16} className="text-sky-500" /> : <Plus size={16} className="text-zinc-700" />}
+                              {isAssigned ? <Check size={16} className="text-sky-500" /> : <Plus size={16} className="text-muted-foreground/20" />}
                             </View>
                           </Card>
                         );
@@ -289,14 +289,14 @@ export function ScreenEditor({
                   </View>
                 </View>
 
-                <View className="gap-4 border-t border-zinc-800 pt-6">
-                  <Text className="text-zinc-500 font-black uppercase text-[10px] tracking-widest">Web / Smart TV (URL)</Text>
+                <View className="gap-4 border-t border-border pt-6">
+                  <Text className="text-muted-foreground font-black uppercase text-[10px] tracking-widest">Web / Smart TV (URL)</Text>
                   <View className="gap-4">
                     <View className="gap-2">
-                      <Text className="text-zinc-400 font-bold uppercase text-[8px] tracking-widest">URL Slug</Text>
+                      <Text className="text-muted-foreground font-bold uppercase text-[8px] tracking-widest">URL Slug</Text>
                       <View className="flex-row gap-2">
-                        <View className="h-10 bg-zinc-800 px-3 items-center justify-center rounded-lg border border-zinc-700">
-                          <Text className="text-zinc-500 font-mono text-[10px]">view/</Text>
+                        <View className="h-10 bg-muted px-3 items-center justify-center rounded-lg border border-border">
+                          <Text className="text-muted-foreground font-mono text-[10px]">view/</Text>
                         </View>
                         <Input 
                           value={activeScreen.assignments.webSlug || ""}
@@ -304,7 +304,7 @@ export function ScreenEditor({
                             ...prev, 
                             assignments: { ...prev.assignments, webSlug: e.target.value } 
                           }))}
-                          className="flex-1 h-10 bg-black/40 border-zinc-800 text-xs font-mono text-sky-500" 
+                          className="flex-1 h-10 bg-background border-border text-xs font-mono text-sky-500" 
                           placeholder="bar-menu"
                         />
                       </View>
@@ -321,7 +321,7 @@ export function ScreenEditor({
             {activeTab === "css" && (
               <View className="gap-4 h-full">
                 <div className="flex flex-row justify-between items-center">
-                  <Text className="text-zinc-500 font-black uppercase text-[10px] tracking-widest">Global Style Overrides</Text>
+                  <Text className="text-muted-foreground font-black uppercase text-[10px] tracking-widest">Global Style Overrides</Text>
                   <div className="flex flex-row items-center gap-1.5 bg-sky-500/10 px-2 py-1 rounded-full">
                     <Code size={10} className="text-sky-500" />
                     <Text className="text-sky-500 font-black text-[8px] uppercase">CSS</Text>
@@ -331,11 +331,11 @@ export function ScreenEditor({
                   <textarea 
                     value={activeScreen.customCss || ""}
                     onChange={(e) => setActiveScreen(prev => ({ ...prev, customCss: e.target.value }))}
-                    className="w-full h-full bg-black/40 border border-zinc-800 rounded-xl p-6 font-mono text-xs text-sky-500 outline-none focus:border-sky-500/50 transition-colors resize-none"
+                    className="w-full h-full bg-background border border-border rounded-xl p-6 font-mono text-xs text-sky-500 outline-none focus:border-sky-500/50 transition-colors resize-none"
                     placeholder=".slot-main { background: rgba(0,0,0,0.5); }"
                   />
                 </View>
-                <Text className="text-zinc-600 text-[8px] font-bold uppercase leading-relaxed px-2">
+                <Text className="text-muted-foreground/50 text-[8px] font-bold uppercase leading-relaxed px-2">
                   Tip: Target slots by ID using .slot-ID selectors.
                 </Text>
               </View>
@@ -343,14 +343,14 @@ export function ScreenEditor({
           </View>
         </ScrollView>
 
-        <View className="p-6 border-t border-zinc-800 gap-2">
+        <View className="p-6 border-t border-border gap-2">
           <Button 
             onClick={() => onSave(activeScreen)}
-            className="w-full h-14 bg-white hover:bg-zinc-200 shadow-xl shadow-white/5 group"
+            className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl group"
           >
             <View className="flex-row items-center gap-3">
-              <Save size={18} className="text-black group-hover:scale-110 transition-transform" />
-              <Text className="text-black font-black uppercase tracking-[0.1em] text-xs">
+              <Save size={18} className="text-primary-foreground group-hover:scale-110 transition-transform" />
+              <Text className="text-primary-foreground font-black uppercase tracking-[0.1em] text-xs">
                 Publish Changes
               </Text>
             </View>
@@ -359,7 +359,7 @@ export function ScreenEditor({
       </View>
 
       {/* Main Canvas */}
-      <View className="flex-1 relative bg-black">
+      <View className="flex-1 relative bg-background">
         {selectedTemplate ? (
           <TemplateStage>
             <TemplateSkeletonRenderer 
@@ -372,29 +372,29 @@ export function ScreenEditor({
           </TemplateStage>
         ) : (
           <View className="flex-1 items-center justify-center opacity-20">
-             <Layout size={64} className="text-zinc-500 mb-4 animate-pulse" />
-             <Text className="text-zinc-500 font-black uppercase tracking-widest text-xs">Awaiting Layout Selection...</Text>
+             <Layout size={64} className="text-muted-foreground mb-4 animate-pulse" />
+             <Text className="text-muted-foreground font-black uppercase tracking-widest text-xs">Awaiting Layout Selection...</Text>
           </View>
         )}
 
         {/* Slot Configuration Overlay */}
         {activeSlotId && (
-          <View className="absolute inset-0 bg-black/90 z-50 p-12 items-center justify-center animate-in fade-in zoom-in-95 duration-200">
-            <Card className="w-full max-w-5xl bg-zinc-900 border-zinc-800 p-0 rounded-3xl overflow-hidden flex flex-col max-h-[90vh] shadow-[0_0_100px_rgba(0,0,0,0.8)]">
-              <View className="p-8 border-b border-zinc-800 flex-row justify-between items-center bg-black/20">
+          <View className="absolute inset-0 bg-background/90 z-50 p-12 items-center justify-center animate-in fade-in zoom-in-95 duration-200">
+            <Card className="w-full max-w-5xl bg-card border-border p-0 rounded-3xl overflow-hidden flex flex-col max-h-[90vh] shadow-[0_0_100px_rgba(0,0,0,0.2)]">
+              <View className="p-8 border-b border-border flex-row justify-between items-center bg-muted/20">
                 <View>
                   <Text className="text-sky-500 font-black uppercase text-[10px] tracking-widest mb-1">Configuration</Text>
-                  <Text className="text-white font-black uppercase text-3xl tracking-tighter italic">Slot: {activeSlotId}</Text>
+                  <Text className="text-foreground font-black uppercase text-3xl tracking-tighter italic">Slot: {activeSlotId}</Text>
                 </View>
-                <Button onClick={() => setActiveSlotId(null)} variant="ghost" className="w-12 h-12 p-0 bg-black rounded-2xl border border-zinc-800 items-center justify-center hover:bg-zinc-900">
-                  <X size={24} className="text-zinc-500" />
+                <Button onClick={() => setActiveSlotId(null)} variant="ghost" className="w-12 h-12 p-0 bg-background rounded-2xl border border-border items-center justify-center hover:bg-muted">
+                  <X size={24} className="text-muted-foreground" />
                 </Button>
               </View>
 
               <View className="flex-row flex-1 overflow-hidden">
                 {/* Data Source Panel */}
-                <View className="w-80 border-r border-zinc-800 p-8 gap-6 bg-black/10">
-                  <Text className="text-zinc-500 font-black uppercase text-[10px] tracking-widest">Data Provider</Text>
+                <View className="w-80 border-r border-border p-8 gap-6 bg-muted/10">
+                  <Text className="text-muted-foreground font-black uppercase text-[10px] tracking-widest">Data Provider</Text>
                   <View className="gap-2">
                     {[
                       { id: 'POS', icon: Database, label: 'POS Catalog', desc: 'Real-time menu data' },
@@ -411,14 +411,14 @@ export function ScreenEditor({
                         })}
                         variant="outline"
                         className={cn(
-                          "h-24 flex flex-col items-start p-4 gap-2 border-zinc-800 hover:border-sky-500/50 hover:bg-sky-500/5 transition-all text-left",
+                          "h-24 flex flex-col items-start p-4 gap-2 border-border hover:border-sky-500/50 hover:bg-sky-500/5 transition-all text-left",
                           activeScreen.slots[activeSlotId]?.sourceType === source.id && "border-sky-500 bg-sky-500/10 ring-1 ring-sky-500/20"
                         )}
                       >
-                        <source.icon size={20} className={activeScreen.slots[activeSlotId]?.sourceType === source.id ? "text-sky-500" : "text-zinc-500"} />
+                        <source.icon size={20} className={activeScreen.slots[activeSlotId]?.sourceType === source.id ? "text-sky-500" : "text-muted-foreground"} />
                         <View>
-                          <Text className="text-xs font-black uppercase text-white tracking-tight">{source.label}</Text>
-                          <Text className="text-[8px] text-zinc-600 font-bold uppercase tracking-widest leading-tight">{source.desc}</Text>
+                          <Text className="text-xs font-black uppercase text-foreground tracking-tight">{source.label}</Text>
+                          <Text className="text-[8px] text-muted-foreground font-bold uppercase tracking-widest leading-tight">{source.desc}</Text>
                         </View>
                       </Button>
                     ))}
@@ -442,20 +442,20 @@ export function ScreenEditor({
                 </View>
 
                 {/* Configuration Panel */}
-                <View className="flex-1 bg-black/20 p-10 overflow-y-auto">
+                <View className="flex-1 bg-muted/10 p-10 overflow-y-auto">
                   {!activeScreen.slots[activeSlotId] ? (
                     <View className="h-full items-center justify-center opacity-20">
-                      <div className="w-24 h-24 rounded-full border-2 border-dashed border-zinc-700 flex items-center justify-center mb-6">
-                        <Plus size={32} className="text-zinc-500" />
+                      <div className="w-24 h-24 rounded-full border-2 border-dashed border-border flex items-center justify-center mb-6">
+                        <Plus size={32} className="text-muted-foreground" />
                       </div>
-                      <Text className="text-zinc-500 font-black uppercase text-xs tracking-[0.2em]">Select provider to configure</Text>
+                      <Text className="text-muted-foreground font-black uppercase text-xs tracking-[0.2em]">Select provider to configure</Text>
                     </View>
                   ) : (
                     <View className="gap-10">
                       {activeScreen.slots[activeSlotId].sourceType === 'POS' && (
                         <View className="gap-8">
                           <View className="gap-4">
-                            <Text className="text-zinc-500 font-black uppercase text-[10px] tracking-widest">Menu Category</Text>
+                            <Text className="text-muted-foreground font-black uppercase text-[10px] tracking-widest">Menu Category</Text>
                             <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
                               {categories.map(cat => (
                                 <Button 
@@ -466,19 +466,19 @@ export function ScreenEditor({
                                   })}
                                   variant="outline"
                                   className={cn(
-                                    "h-12 border-zinc-800 justify-start px-4 transition-all",
+                                    "h-12 border-border justify-start px-4 transition-all",
                                     activeScreen.slots[activeSlotId].dataConfig.filters?.categoryId === cat.id && "border-sky-500 bg-sky-500/5 ring-1 ring-sky-500/20"
                                   )}
                                 >
-                                  <div className={cn("w-1.5 h-1.5 rounded-full mr-3", activeScreen.slots[activeSlotId].dataConfig.filters?.categoryId === cat.id ? "bg-sky-500" : "bg-zinc-800")} />
-                                  <Text className="text-white text-[10px] font-black uppercase tracking-tight truncate">{cat.name}</Text>
+                                  <div className={cn("w-1.5 h-1.5 rounded-full mr-3", activeScreen.slots[activeSlotId].dataConfig.filters?.categoryId === cat.id ? "bg-sky-500" : "bg-muted")} />
+                                  <Text className="text-foreground text-[10px] font-black uppercase tracking-tight truncate">{cat.name}</Text>
                                 </Button>
                               ))}
                             </div>
                           </View>
 
                           <View className="gap-4">
-                            <Text className="text-zinc-500 font-black uppercase text-[10px] tracking-widest">Visual Component</Text>
+                            <Text className="text-muted-foreground font-black uppercase text-[10px] tracking-widest">Visual Component</Text>
                             <div className="flex-row gap-2">
                               {[
                                 { id: 'MenuItemList', label: 'Classic Menu' },
@@ -494,22 +494,22 @@ export function ScreenEditor({
                                   })}
                                   variant="outline"
                                   className={cn(
-                                    "flex-1 h-14 border-zinc-800 flex flex-col items-center justify-center p-0",
+                                    "flex-1 h-14 border-border flex flex-col items-center justify-center p-0",
                                     activeScreen.slots[activeSlotId].component === comp.id && "border-sky-500 bg-sky-500/5"
                                   )}
                                 >
-                                  <Text className="text-white text-[10px] font-black uppercase tracking-widest">{comp.label}</Text>
+                                  <Text className="text-foreground text-[10px] font-black uppercase tracking-widest">{comp.label}</Text>
                                 </Button>
                               ))}
                             </div>
                           </View>
 
                           {activeScreen.slots[activeSlotId].component === 'MenuItemList' && (
-                            <View className="gap-6 p-6 bg-zinc-950 rounded-2xl border border-zinc-800">
-                              <Text className="text-zinc-500 font-black uppercase text-[10px] tracking-widest">Component Tuning</Text>
+                            <View className="gap-6 p-6 bg-background rounded-2xl border border-border">
+                              <Text className="text-muted-foreground font-black uppercase text-[10px] tracking-widest">Component Tuning</Text>
                               <View className="flex-row gap-8">
                                 <View className="flex-1 gap-3">
-                                  <Text className="text-zinc-400 font-bold uppercase text-[8px] tracking-widest ml-1">Grid Columns</Text>
+                                  <Text className="text-muted-foreground/50 font-bold uppercase text-[8px] tracking-widest ml-1">Grid Columns</Text>
                                   <div className="flex-row gap-1.5">
                                     {[1, 2, 3, 4].map(cols => (
                                       <Button 
@@ -520,7 +520,7 @@ export function ScreenEditor({
                                         })}
                                         variant="outline"
                                         className={cn(
-                                          "flex-1 h-10 border-zinc-800 p-0 text-xs font-mono",
+                                          "flex-1 h-10 border-border p-0 text-xs font-mono",
                                           activeScreen.slots[activeSlotId].componentProps.columns === cols && "border-sky-500 bg-sky-500/10 text-sky-500"
                                         )}
                                       >
@@ -530,7 +530,7 @@ export function ScreenEditor({
                                   </div>
                                 </View>
                                 <View className="flex-1 gap-3">
-                                  <Text className="text-zinc-400 font-bold uppercase text-[8px] tracking-widest ml-1">Item Detail</Text>
+                                  <Text className="text-muted-foreground/50 font-bold uppercase text-[8px] tracking-widest ml-1">Item Detail</Text>
                                   <Button 
                                     onClick={() => handleUpdateSlot(activeSlotId, {
                                       ...activeScreen.slots[activeSlotId],
@@ -538,12 +538,12 @@ export function ScreenEditor({
                                     })}
                                     variant="outline"
                                     className={cn(
-                                      "h-10 border-zinc-800 w-full flex flex-row gap-2 justify-center",
+                                      "h-10 border-border w-full flex flex-row gap-2 justify-center",
                                       activeScreen.slots[activeSlotId].componentProps.showDescription && "border-sky-500 bg-sky-500/10"
                                     )}
                                   >
-                                    <Check size={14} className={activeScreen.slots[activeSlotId].componentProps.showDescription ? "text-sky-500" : "text-zinc-800"} />
-                                    <Text className="text-white text-[10px] font-black uppercase">Show Descriptions</Text>
+                                    <Check size={14} className={activeScreen.slots[activeSlotId].componentProps.showDescription ? "text-sky-500" : "text-muted-foreground/20"} />
+                                    <Text className="text-foreground text-[10px] font-black uppercase">Show Descriptions</Text>
                                   </Button>
                                 </View>
                               </View>
@@ -555,7 +555,7 @@ export function ScreenEditor({
                       {activeScreen.slots[activeSlotId].sourceType === 'MEDIA' && (
                         <View className="gap-6 h-full flex flex-col">
                           <div className="flex flex-row justify-between items-center">
-                            <Text className="text-zinc-500 font-black uppercase text-[10px] tracking-widest">Selected Media Asset</Text>
+                            <Text className="text-muted-foreground font-black uppercase text-[10px] tracking-widest">Selected Media Asset</Text>
                             <Button onClick={() => setShowImageSelector(true)} variant="outline" className="h-10 px-6 border-sky-500/30 bg-sky-500/5 hover:bg-sky-500/10">
                                <ImageIcon size={14} className="mr-2 text-sky-500" />
                                <span className="text-sky-500 font-black uppercase text-[10px]">Open Library</span>
@@ -563,20 +563,19 @@ export function ScreenEditor({
                           </div>
                           
                           {activeScreen.slots[activeSlotId].dataConfig.mediaId ? (
-                            <div className="flex-1 relative rounded-3xl overflow-hidden border-2 border-zinc-800 bg-black group">
-                               {/* We'd normally resolve the URL here if it's not external, for now let's just use it if available */}
+                            <div className="flex-1 relative rounded-3xl overflow-hidden border-2 border-border bg-black group">
                                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                  <ImageIcon size={48} className="text-zinc-800 mb-4" />
-                                  <Text className="text-zinc-600 font-mono text-[10px] uppercase">Asset Bound: {activeScreen.slots[activeSlotId].dataConfig.mediaId.substring(0, 8)}...</Text>
+                                  <ImageIcon size={48} className="text-muted-foreground/20 mb-4" />
+                                  <Text className="text-muted-foreground/50 font-mono text-[10px] uppercase">Asset Bound: {activeScreen.slots[activeSlotId].dataConfig.mediaId.substring(0, 8)}...</Text>
                                </div>
                             </div>
                           ) : (
                             <div 
                               onClick={() => setShowImageSelector(true)}
-                              className="flex-1 border-2 border-dashed border-zinc-800 rounded-3xl flex flex-col items-center justify-center cursor-pointer hover:border-zinc-700 hover:bg-white/5 transition-all"
+                              className="flex-1 border-2 border-dashed border-border rounded-3xl flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/10 transition-all"
                             >
-                               <ImageIcon size={48} className="text-zinc-800 mb-4" />
-                               <Text className="text-zinc-600 font-black uppercase tracking-widest text-[10px]">No asset selected</Text>
+                               <ImageIcon size={48} className="text-muted-foreground/20 mb-4" />
+                               <Text className="text-muted-foreground/50 font-black uppercase tracking-widest text-[10px]">No asset selected</Text>
                             </div>
                           )}
                         </View>
@@ -584,7 +583,7 @@ export function ScreenEditor({
 
                       {activeScreen.slots[activeSlotId].sourceType === 'STATIC' && (
                         <View className="gap-6">
-                          <Text className="text-zinc-500 font-black uppercase text-[10px] tracking-widest">Static JSON Definition</Text>
+                          <Text className="text-muted-foreground font-black uppercase text-[10px] tracking-widest">Static JSON Definition</Text>
                           <textarea 
                             value={JSON.stringify(activeScreen.slots[activeSlotId].dataConfig.staticData || {}, null, 2)}
                             onChange={(e) => {
@@ -596,10 +595,10 @@ export function ScreenEditor({
                                 });
                               } catch (e) {}
                             }}
-                            className="w-full h-[400px] bg-black border border-zinc-800 rounded-2xl p-6 font-mono text-sm text-sky-500 outline-none focus:border-sky-500/50 transition-colors resize-none shadow-inner"
+                            className="w-full h-[400px] bg-background border border-border rounded-2xl p-6 font-mono text-sm text-sky-500 outline-none focus:border-sky-500/50 transition-colors resize-none shadow-inner"
                             placeholder='{ "title": "Welcome", "body": "Scan QR Code to order" }'
                           />
-                          <Text className="text-zinc-600 text-[8px] font-bold uppercase leading-relaxed italic">
+                          <Text className="text-muted-foreground/50 text-[8px] font-bold uppercase leading-relaxed italic">
                             Used for specialized components requiring static structured data.
                           </Text>
                         </View>
@@ -609,7 +608,7 @@ export function ScreenEditor({
                 </View>
               </View>
               
-              <View className="p-8 border-t border-zinc-800 bg-black/20 flex flex-row justify-end">
+              <View className="p-8 border-t border-border bg-muted/20 flex flex-row justify-end">
                  <Button onClick={() => setActiveSlotId(null)} className="h-12 px-10 bg-sky-500 shadow-lg shadow-sky-500/20">
                     <span className="text-white font-black uppercase tracking-widest text-xs">Apply Configuration</span>
                  </Button>

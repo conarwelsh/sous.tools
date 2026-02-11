@@ -3,6 +3,7 @@ import { DbPushCommand } from './db-push.command.js';
 import { DbUpCommand } from './db-up.command.js';
 import { DbDownCommand } from './db-down.command.js';
 import { DbResetCommand } from './db-reset.command.js';
+import { RemoteResetCommand } from './remote-reset.command.js';
 import { SeedCommand } from './seed.command.js';
 
 @Command({
@@ -13,6 +14,7 @@ import { SeedCommand } from './seed.command.js';
     DbUpCommand,
     DbDownCommand,
     DbResetCommand,
+    RemoteResetCommand,
     SeedCommand,
   ],
 })
