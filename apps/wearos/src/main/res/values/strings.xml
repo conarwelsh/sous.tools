@@ -1,3 +1,11 @@
 <resources>
-    <string name="app_name">Sous Chef</string>
-</resources>
+    <string name="app_name">Sous WearOS</string>
+        <string name="executive_watch_face_name">Sous Executive</string>
+            <string name="operator_watch_face_name">Sous Operator</string>
+                <string name="daily_sales_complication_name">Daily Sales</string>
+                    <string name="avg_ticket_time_complication_name">Avg. Ticket Time</string>
+                        <string name="open_orders_complication_name">Open Orders</string>
+                            <string name="longest_open_order_complication_name">Longest Open Order</string>
+                            <string name="voice_input_activity_name">Voice Input</string>
+                        </resources>
+                        

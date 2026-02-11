@@ -3,6 +3,8 @@
 
     <uses-feature android:name="android.hardware.type.watch" />
 
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -15,6 +17,96 @@
         <uses-library
             android:name="com.google.android.wearable"
             android:required="true" />
+
+        <service
+            android:name=".watchfaces.ExecutiveWatchFaceService"
+            android:exported="true"
+            android:label="@string/executive_watch_face_name"
+            android:permission="android.permission.BIND_WALLPAPER">
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+                <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/watch_face" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.preview"
+                android:resource="@drawable/sous_watch_preview" />
+        </service>
+
+        <service
+            android:name=".watchfaces.OperatorWatchFaceService"
+            android:exported="true"
+            android:label="@string/operator_watch_face_name"
+            android:permission="android.permission.BIND_WALLPAPER">
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+                <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/watch_face" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.preview"
+                android:resource="@drawable/sous_watch_preview" />
+        </service>
+
+        <service
+            android:name=".complications.DailySalesComplicationService"
+            android:exported="true"
+            android:label="@string/daily_sales_complication_name"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_DATA_SOURCE">
+            <meta-data
+                android:name="android.support.wearable.complications.data.source.WATCH_FACE_ONLY"
+                android:value="true" />
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.data.source.ComplicationDataSourceService" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".complications.AvgTicketTimeComplicationService"
+            android:exported="true"
+            android:label="@string/avg_ticket_time_complication_name"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_DATA_SOURCE">
+            <meta-data
+                android:name="android.support.wearable.complications.data.source.WATCH_FACE_ONLY"
+                android:value="true" />
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.data.source.ComplicationDataSourceService" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".complications.OpenOrdersComplicationService"
+            android:exported="true"
+            android:label="@string/open_orders_complication_name"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_DATA_SOURCE">
+            <meta-data
+                android:name="android.support.wearable.complications.data.source.WATCH_FACE_ONLY"
+                android:value="true" />
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.data.source.ComplicationDataSourceService" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".complications.LongestOpenOrderComplicationService"
+            android:exported="true"
+            android:label="@string/longest_open_order_complication_name"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_DATA_SOURCE">
+            <meta-data
+                android:name="android.support.wearable.complications.data.source.WATCH_FACE_ONLY"
+                android:value="true" />
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.data.source.ComplicationDataSourceService" />
+            </intent-filter>
+        </service>
+
+        <activity
+            android:name=".voice.VoiceInputActivity"
+            android:label="@string/voice_input_activity_name" />
 
         <activity
             android:name=".MainActivity"

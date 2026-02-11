@@ -39,6 +39,18 @@ This is a monorepo for the `@sous` suite of tools, managed using TurboRepo. It f
 7.  **The Shell Pattern**: Apps are thin shells; all strategic logic resides in `@sous/features`.
 8.  **Free Tier**: All infrastructure must run on service free tiers.
 
+## Key Domains
+
+- **IAM**: Identity, Authentication (JWT), and Multi-tenancy.
+- **Procurement**: Suppliers, Invoices, and Order Management.
+- **Culinary**: Recipes, Ingredients, and Unit Conversions.
+- **Intelligence**: Async Costing (BullMQ), Price Trends, and Data Pruning.
+- **Accounting**: General Ledger, COGS Reconciliation, and Statutory Reporting (P&L).
+- **Presentation**: Digital Menus (Signage), Label Templates, and Layout Editor.
+- **Hardware**: Node Registry, Telemetry, and Remote Configuration.
+- **Integrations**: Adapter-based syncing with third-party providers.
+- **Support**: User feedback, bug reporting, and GitHub/Email orchestration.
+
 ## Current State (as of 2026-02-07)
 
 - **Pivot Complete**: Abandoned React Native Web universal architecture.
