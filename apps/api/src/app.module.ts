@@ -18,6 +18,7 @@ import { AccountingModule } from './domains/accounting/accounting.module.js';
 import { IntegrationsModule } from './domains/integrations/integrations.module.js';
 import { MaintenanceModule } from './domains/maintenance/maintenance.module.js';
 import { TagsModule } from './domains/core/tags/tags.module.js';
+import { MetricsModule } from './domains/metrics/metrics.module';
 import { join } from 'path';
 
 @Module({
@@ -52,6 +53,7 @@ import { join } from 'path';
     IntegrationsModule,
     MaintenanceModule,
     TagsModule,
+    MetricsModule,
   ],
   controllers: [],
   providers: [],

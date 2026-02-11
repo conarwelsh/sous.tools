@@ -10,6 +10,10 @@
   - `@sous/cli`: NestJS CLI tool.
   - `@sous/docs`: Centralized documentation hub and design lab.
   - `@sous/wearos`: Native Wear OS app for hands-free operations.
+- **Wear OS Enhancements (Spec 023):**
+  - **Custom Watch Faces**: "Executive" and "Operator" designs with customizable complication slots.
+  - **Platform Complications**: At-a-glance metrics for Daily Sales, Avg Ticket Time, Open Orders, Longest Open Order.
+  - **Advanced Voice Commands**: Hands-free control for wastage tracking, timer management, order item addition, and marking items as sold out.
 - **Packages**:
   - `@sous/client-sdk`: Generated client-server SDK.
   - `@sous/config`: Centralized configuration (Infisical + Zod).
@@ -30,6 +34,10 @@
   - **Grouped Navigation**: Direct sidebar access to Screens, Layouts, and Labels under the Presentation section.
   - **Real-time Synchronization**: Zero-refresh updates pushed to hardware displays via Socket.io.
   - **Multi-Output Support**: Assign screens to physical HDMI ports or unique web slugs.
+- **Support & Feedback System (Spec 022)**:
+  - **Multi-Channel Delivery**: Automated report routing to GitHub Issues and configured Support Email.
+  - **Contextual Enrichment**: Automatic capture of app version, user ID, organization, and device metadata.
+  - **SuperAdmin Configuration**: Dynamic management of support destinations via global platform settings.
 
 ## CLI Capabilities (@sous/cli)
 

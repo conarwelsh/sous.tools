@@ -66,6 +66,28 @@
     - Fixed quoting and elevation issues in the PowerShell-based symlink creation script.
     - Verified real-time connectivity between WSL and the custom Windows Agent on port 4040.
 
+## 2026-02-11 (Wear OS Custom Watch Faces and Advanced Voice Commands)
+
+- **Wear OS Enhancements Strategy (ADR 046):**
+  - Outlined the development of two custom watch faces ("Executive" and "Operator") with `@sous` branding.
+  - Defined initial platform-specific complications: Daily Sales, Average Ticket Time, Number of Open Orders, Longest Open Order Duration.
+  - Explored advanced voice command integration, including "hot phrase" detection, for hands-free operations like wastage tracking, timer management, and order updates.
+- **Wear OS Watch Faces and Voice Features (Spec 023):**
+  - Detailed the UI/UX for "Executive" and "Operator" watch faces and their complication slot types.
+  - Specified data paths and types for initial complications.
+  - Laid out the implementation plan for voice command detection (via `SpeechRecognizer` API) and the command set, along with API endpoints.
+
+## 2026-02-11 (Support & Feedback Strategy)
+
+- **Support Domain Strategy (ADR 045):**
+  - Established a centralized domain for user feedback, bug reporting, and feature requests.
+  - Defined a dual-delivery orchestration strategy: GitHub Issues (via Octokit) and Email (via internal MailerService).
+  - Mandated automatic metadata enrichment (App Version, Org ID, User ID) to reduce triage friction.
+- **Support & Feedback System (Spec 022):**
+  - Designed the `<SupportPage />` and `<FeedbackModal />` components for `@sous/features`.
+  - Defined the backend architecture for `SupportController` and `SupportService` in `@sous/api`.
+  - Added support for dynamic configuration of support email via SuperAdmin settings.
+
 ## 2026-02-10 (Layout Manager Refactor & Stability)
 
 - **Layout Manager Refactor:**
@@ -190,7 +212,7 @@
   - Achieved full, functional parity across Web, Signage, POS, and KDS apps.
 - **Result:** Successfully completed the entire **Phase Rollout Plan**, transitioning from scaffold to a fully functional, multi-tenant SaaS platform ready for production optimization.
 
-## 2026-02-05
+## 2026-02-05 (Identity & Asset Strategy)
 
 - **Identity & Multi-Tenancy (Phase 1.6):** - Established the core Drizzle ORM infrastructure in `@sous/api`.
   - Implemented a multi-tenant database schema with `organizations`, `users`, `locations`, and `media` tables.
@@ -263,7 +285,7 @@
 - Updated `dev-device-installation.md` with physical device setup and monorepo IDE instructions.
 - Fixed `@sous/config` package by implementing a proper build step with `tsup`. This resolved a `SyntaxError: Named export 'localConfig' not found` in Vite.
 - Improved `scripts/install-dev.sh` to support ZSH, use correct Android SDK paths, and export `TAURI_DEV_HOST`.
-- Fixed missing `unzip` dependency and added automatic ARM64 `apt` source fixing in `scripts/install-dev.sh`.
+- Fixed missing `unzip` dependency and added automatic ARM64 `apt` source fixing in `scripts/install/dev.sh`.
 - Verified `@sous/docs` and `@sous/web` functionality.
 - Configured development environment with non-conflicting ports:
   - API: 4000

@@ -34,6 +34,7 @@ The platform is organized by **Business Domain** using Nested Strategic Umbrella
 - **Presentation**: Digital Menus (Signage), Label Templates, and Layout Editor.
 - **Hardware**: Node Registry, Telemetry, and Remote Configuration.
 - **Integrations**: Adapter-based syncing with third-party providers.
+- **Support**: User feedback, bug reporting, and GitHub/Email orchestration.
 
 ## Component Strategy (The Shell Pattern)
 
