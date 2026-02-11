@@ -1,10 +1,4 @@
-import {
-  pgTable,
-  uuid,
-  varchar,
-  timestamp,
-  jsonb,
-} from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, timestamp, jsonb } from 'drizzle-orm/pg-core';
 import { organizations } from '../../iam/organizations/organizations.schema';
 
 export const ingestionSessions = pgTable('ingestion_sessions', {

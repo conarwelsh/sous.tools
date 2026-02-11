@@ -36,7 +36,9 @@ export const stockAudits = pgTable('stock_audits', {
   locationId: uuid('location_id')
     .references(() => locations.id)
     .notNull(),
-  performedBy: uuid('performed_by').references(() => users.id).notNull(),
+  performedBy: uuid('performed_by')
+    .references(() => users.id)
+    .notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -64,6 +66,8 @@ export const wastageEvents = pgTable('wastage_events', {
   amount: integer('amount').notNull(),
   reason: varchar('reason', { length: 100 }).notNull(), // "spilled", "spoiled", "burned", "returned"
   notes: text('note'),
-  reportedBy: uuid('reported_by').references(() => users.id).notNull(),
+  reportedBy: uuid('reported_by')
+    .references(() => users.id)
+    .notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });

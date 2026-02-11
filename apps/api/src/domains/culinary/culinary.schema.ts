@@ -68,7 +68,9 @@ export const cookNotes = pgTable('cook_notes', {
   recipeId: uuid('recipe_id')
     .references(() => recipes.id, { onDelete: 'cascade' })
     .notNull(),
-  userId: uuid('user_id').references(() => users.id).notNull(),
+  userId: uuid('user_id')
+    .references(() => users.id)
+    .notNull(),
   note: text('note').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });

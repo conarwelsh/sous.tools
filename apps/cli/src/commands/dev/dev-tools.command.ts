@@ -294,7 +294,7 @@ export class DevToolsCommand extends CommandRunner {
         // Auto-start core services
         logger.info('🐳 Initializing core infrastructure...');
         await this.manager.autoStartCore();
-        
+
         logger.info('📡 Starting process polling...');
         this.manager.startPolling();
 
@@ -330,7 +330,9 @@ export class DevToolsCommand extends CommandRunner {
       this.manager.stopPolling();
       // await this.manager.stopAll(); // Processes remain running
 
-      logger.info('✅ Processes left running in background. Use "sous dev kill" to stop.');
+      logger.info(
+        '✅ Processes left running in background. Use "sous dev kill" to stop.',
+      );
     }
   }
 

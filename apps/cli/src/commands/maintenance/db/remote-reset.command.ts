@@ -17,12 +17,16 @@ export class RemoteResetCommand extends CommandRunner {
     const env = options?.env;
 
     if (!env || (env !== 'staging' && env !== 'production')) {
-      logger.error('❌ You must specify an environment: --env=staging or --env=production');
+      logger.error(
+        '❌ You must specify an environment: --env=staging or --env=production',
+      );
       return;
     }
 
     if (!options?.force) {
-      logger.warn(`⚠️  DANGER: You are about to COMPLETELY WIPE the [${env.toUpperCase()}] database.`);
+      logger.warn(
+        `⚠️  DANGER: You are about to COMPLETELY WIPE the [${env.toUpperCase()}] database.`,
+      );
       logger.warn('This will DROP the public schema and delete ALL DATA.');
       logger.warn('This action cannot be undone.');
 
@@ -38,7 +42,9 @@ export class RemoteResetCommand extends CommandRunner {
 
     const projectId = process.env.INFISICAL_PROJECT_ID;
     if (!projectId) {
-      logger.warn('⚠️ INFISICAL_PROJECT_ID not found in environment. Infisical might fail if not initialized.');
+      logger.warn(
+        '⚠️ INFISICAL_PROJECT_ID not found in environment. Infisical might fail if not initialized.',
+      );
     }
 
     // Map 'production' to 'prod' for Infisical CLI
@@ -48,7 +54,10 @@ export class RemoteResetCommand extends CommandRunner {
       logger.info(`  └─ Running: ${cmd}`);
       try {
         const projectFlag = projectId ? `--projectId=${projectId}` : '';
-        execSync(`infisical run ${projectFlag} --env=${infisicalEnv} -- ${cmd}`, { stdio: 'inherit' });
+        execSync(
+          `infisical run ${projectFlag} --env=${infisicalEnv} -- ${cmd}`,
+          { stdio: 'inherit' },
+        );
       } catch (e: any) {
         logger.error(`❌ Command failed: ${cmd}`);
         throw e;

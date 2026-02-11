@@ -339,11 +339,7 @@ export class ProcessManager
 
   async autoStartCore() {
     try {
-      this.addLog(
-        'db',
-        '🐳 Checking Docker infrastructure...',
-        'info',
-      );
+      this.addLog('db', '🐳 Checking Docker infrastructure...', 'info');
 
       // Check if docker daemon is running
       try {
@@ -374,8 +370,12 @@ export class ProcessManager
       const coreApps = this.getProcesses().filter(
         (p) => p.type === 'pm2' && p.autoStart,
       );
-      this.addLog('db', `🚀 Auto-starting ${coreApps.length} core services...`, 'info');
-      
+      this.addLog(
+        'db',
+        `🚀 Auto-starting ${coreApps.length} core services...`,
+        'info',
+      );
+
       for (const app of coreApps) {
         this.addLog('db', `  └─ Starting ${app.name}...`, 'info');
         await this.startProcess(app.id);
@@ -447,7 +447,7 @@ export class ProcessManager
       if (proc.target === 'android') {
         await this.setupAndroidEnvironment(id, proc);
         const flavor = id === 'tools-app' ? 'tools' : id;
-        
+
         if (id === 'wearos') {
           script = `bash scripts/run-wearos.sh emulator-5562`;
         } else {
@@ -662,7 +662,10 @@ export class ProcessManager
     await Promise.all(procs.map((p) => this.stopProcess(p.id)));
   }
 
-  private async sendControlCommand(id: string, command: string): Promise<string> {
+  private async sendControlCommand(
+    id: string,
+    command: string,
+  ): Promise<string> {
     const socketPath = `/tmp/sous-dev-sous-${id}.sock`;
     return new Promise((resolve, reject) => {
       if (!fs.existsSync(socketPath)) {

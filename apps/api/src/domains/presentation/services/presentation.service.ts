@@ -202,8 +202,8 @@ export class PresentationService {
       .where(
         or(
           eq(templates.organizationId, organizationId),
-          eq(templates.isSystem, true)
-        )
+          eq(templates.isSystem, true),
+        ),
       );
   }
 
