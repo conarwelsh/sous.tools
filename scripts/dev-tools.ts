@@ -4,15 +4,14 @@ import net from "net";
 import fs from "fs";
 import path from "path";
 
-async function run() {
-  const configResolved = await resolveConfig();
-  const app = process.argv[2];
-  const instanceName = process.env.PM2_APP_NAME || app;
+const configResolved = await resolveConfig();
+const app = process.argv[2];
+const instanceName = process.env.PM2_APP_NAME || app;
 
-  if (!app) {
-    console.error("Usage: dev-tools <app_name>");
-    process.exit(1);
-  }
+if (!app) {
+  console.error("Usage: dev-tools <app_name>");
+  process.exit(1);
+}
 
   // --- Configuration ---
 
@@ -417,11 +416,6 @@ process.on("SIGINT", () => {
 });
 
 // Start the tool
-run().then(() => {
-  if (!process.env.WAIT_FOR_CONTROL) {
-    void startProcess();
-  }
-}).catch(err => {
-  console.error("FATAL:", err);
-  process.exit(1);
-});
+if (!process.env.WAIT_FOR_CONTROL) {
+  void startProcess();
+}
