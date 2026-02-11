@@ -8,6 +8,7 @@ import { promisify } from 'util';
 import pm2 from 'pm2';
 import path from 'path';
 import * as fs from 'fs';
+import * as net from 'net';
 
 const execAsync = promisify(exec);
 
@@ -55,6 +56,8 @@ export class ProcessManager
   private lastAgentLogCheck: number = 0;
   private remoteEnv: Record<string, string> = {};
   private pollIntervals: NodeJS.Timeout[] = [];
+  private pm2Bus: any = null;
+  private isPm2Connected = false;
 
   constructor() {
     super();
@@ -94,10 +97,12 @@ export class ProcessManager
           reject(err);
         } else {
           logger.info('✅ Connected to PM2');
+          this.isPm2Connected = true;
 
           // Launch Log Bus
           pm2.launchBus((err, bus) => {
             if (err) return;
+            this.pm2Bus = bus;
             bus.on('log:out', (data: any) => {
               const id = data.process.name.replace('sous-', '');
               if (this.processes.has(id)) {
@@ -154,23 +159,36 @@ export class ProcessManager
 
     // 2. Check PM2 processes
     pm2.list((err, list) => {
-      if (err) return;
+      if (err) {
+        console.error('[ProcessManager] PM2 List error:', err);
+        return;
+      }
       let updated = false;
       for (const p of list) {
         const id = p.name?.replace('sous-', '');
         const proc = id ? this.processes.get(id) : null;
         if (proc && proc.type === 'pm2') {
           const pm2Status = p.pm2_env?.status;
+          console.log(
+            `[ProcessManager] Found PM2 process: ${p.name} (${id}), status: ${pm2Status}`,
+          );
           if (pm2Status !== 'online') {
-            proc.status = 'stopped';
-            updated = true;
+            if (proc.status !== 'stopped') {
+              proc.status = 'stopped';
+              updated = true;
+            }
           } else if (proc.status === 'stopped') {
             proc.status = 'running';
             updated = true;
           }
         }
       }
-      if (updated) this.emit('update');
+      if (updated) {
+        console.log(
+          '[ProcessManager] Process statuses updated, emitting update',
+        );
+        this.emit('update');
+      }
     });
   }
 
@@ -184,8 +202,15 @@ export class ProcessManager
   }
 
   async onModuleDestroy() {
-    await this.stopAll();
-    pm2.disconnect();
+    this.stopPolling();
+    if (this.isPm2Connected) {
+      try {
+        pm2.disconnect();
+      } catch (e) {
+        // Ignore disconnect errors
+      }
+      this.isPm2Connected = false;
+    }
   }
 
   private initProcesses(config: any) {
@@ -225,7 +250,7 @@ export class ProcessManager
         target: 'android',
         emulatorName: 'Wear_OS_Large_Round',
         emulatorPort: 5562,
-        autoStart: false,
+        autoStart: true,
         isService: true,
       },
       {
@@ -236,7 +261,7 @@ export class ProcessManager
         target: 'android',
         emulatorName: 'Pixel_Tablet',
         emulatorPort: 5556,
-        autoStart: false,
+        autoStart: true,
         isService: true,
       },
       {
@@ -247,7 +272,7 @@ export class ProcessManager
         target: 'android',
         emulatorName: 'Medium_Desktop',
         emulatorPort: 5560,
-        autoStart: false,
+        autoStart: true,
         isService: true,
       },
       {
@@ -258,7 +283,7 @@ export class ProcessManager
         target: 'android',
         emulatorName: 'Television_1080p',
         emulatorPort: 5554,
-        autoStart: false,
+        autoStart: true,
         isService: true,
       },
       {
@@ -269,7 +294,7 @@ export class ProcessManager
         target: 'android',
         emulatorName: 'Pixel_9',
         emulatorPort: 5558,
-        autoStart: false,
+        autoStart: true,
         isService: true,
       },
       {
@@ -316,13 +341,14 @@ export class ProcessManager
     try {
       this.addLog(
         'db',
-        '🐳 Ensuring Docker infrastructure is running...',
+        '🐳 Checking Docker infrastructure...',
         'info',
       );
 
       // Check if docker daemon is running
       try {
         await execAsync('docker info');
+        this.addLog('db', '✅ Docker daemon is online', 'info');
       } catch (e) {
         this.addLog(
           'db',
@@ -332,7 +358,9 @@ export class ProcessManager
         return;
       }
 
+      this.addLog('db', '🚀 Starting containers via Docker Compose...', 'info');
       await execAsync('docker compose up -d');
+      this.addLog('db', '✅ Docker containers started', 'info');
 
       const dbProc = this.processes.get('db');
       const redisProc = this.processes.get('redis');
@@ -346,13 +374,18 @@ export class ProcessManager
       const coreApps = this.getProcesses().filter(
         (p) => p.type === 'pm2' && p.autoStart,
       );
+      this.addLog('db', `🚀 Auto-starting ${coreApps.length} core services...`, 'info');
+      
       for (const app of coreApps) {
+        this.addLog('db', `  └─ Starting ${app.name}...`, 'info');
         await this.startProcess(app.id);
       }
 
+      this.addLog('db', '✨ Core infrastructure initialized', 'info');
       this.emit('update');
     } catch (e: any) {
       this.addLog('db', `❌ Auto-start failed: ${e.message}`, 'error');
+      console.error('[ProcessManager] Auto-start failed:', e);
     }
   }
 
@@ -376,23 +409,20 @@ export class ProcessManager
     if (!proc || proc.status === 'running' || proc.status === 'starting')
       return;
 
+    // Try sending 'start' command to socket first (if wrapper is already running but process is stopped)
+    try {
+      await this.sendControlCommand(id, 'start');
+      this.addLog(id, '🚀 Resumed via control socket', 'info');
+      return;
+    } catch (e) {
+      // Socket not found or failed, proceed to pm2.start
+    }
+
     proc.status = 'starting';
     this.emit('update');
 
     if (proc.type === 'pm2') {
-      const packageMap: Record<string, string> = {
-        api: 'apps/api',
-        web: 'apps/web',
-        docs: 'apps/docs',
-        wearos: 'apps/wearos',
-        kds: 'apps/web',
-        pos: 'apps/web',
-        signage: 'apps/web',
-        'tools-app': 'apps/web',
-      };
-
-      let script = 'pnpm run dev';
-      // Find project root by looking for pnpm-workspace.yaml
+      // Find project root
       let rootDir = process.cwd();
       while (
         rootDir !== '/' &&
@@ -400,47 +430,28 @@ export class ProcessManager
       ) {
         rootDir = path.dirname(rootDir);
       }
-      const absoluteCwd = path.resolve(rootDir, packageMap[id]);
+      const absoluteCwd = rootDir;
 
-      // Inject BOTH local env and remote secrets
+      const devToolsPath = path.resolve(rootDir, 'scripts/dev-tools.ts');
+      let script = `pnpm tsx ${devToolsPath} ${id}`;
+
       const env: any = {
         ...process.env,
         ...this.remoteEnv,
         NODE_ENV: 'development',
         PORT: proc.port?.toString(),
-        // Ensure specific ports are set if they were missing in remoteEnv
-        PORT_API: config.api.port.toString(),
-        PORT_WEB: config.web.port.toString(),
-        PORT_DOCS: config.docs.port.toString(),
+        PM2_APP_NAME: `sous-${id}`,
+        FORCE_COLOR: '1',
       };
 
       if (proc.target === 'android') {
         await this.setupAndroidEnvironment(id, proc);
-        const winIp = await this.getWindowsIp();
-        const localIp = await this.getLocalIp();
         const flavor = id === 'tools-app' ? 'tools' : id;
-        const capitalizedFlavor =
-          flavor.charAt(0).toUpperCase() + flavor.slice(1);
-        const route =
-          id === 'signage'
-            ? '/signage/default'
-            : id === 'tools-app'
-              ? '/login'
-              : `/${id}`;
-        const reloadUrl = `http://${localIp}:3000${route}`;
-        const adbPrefix = winIp
-          ? `ADBHOST=${winIp} ADB_SERVER_SOCKET=tcp:${winIp}:5037 `
-          : '';
-        const appId = id === 'tools-app' ? 'com.sous.tools' : `com.sous.${id}`;
-        const apkName = `app-${flavor}-debug.apk`;
-        const winApkPath = `C:\\\\tools\\\\sous-agent\\\\apks\\\\${apkName}`;
-        const wslApkPath = `/mnt/c/tools/sous-agent/apks/${apkName}`;
-        const agentUrl = `http://${winIp}:4040`;
-
+        
         if (id === 'wearos') {
-          script = `bash -c "ANDROID_SERIAL=emulator-5562 ./gradlew installDebug && ${adbPrefix}adb -s emulator-5562 shell monkey -p com.sous.wearos -c android.intent.category.LAUNCHER 1"`;
+          script = `bash scripts/run-wearos.sh emulator-5562`;
         } else {
-          script = `bash -c "CAPACITOR_LIVE_RELOAD_URL='${reloadUrl}' npx cap sync android && cd android && ./gradlew assemble${capitalizedFlavor}Debug --no-daemon --console=plain && mkdir -p /mnt/c/tools/sous-agent/apks && cp app/build/outputs/apk/${flavor}/debug/${apkName} ${wslApkPath} && curl -s -X POST -H 'Content-Type: application/json' -d '{\\"command\\":\\"adb\\", \\"args\\":\\"-s emulator-${proc.emulatorPort} install -r ${winApkPath}\\"}' ${agentUrl} && curl -s -X POST -H 'Content-Type: application/json' -d '{\\"command\\":\\"adb\\", \\"args\\":\\"-s emulator-${proc.emulatorPort} shell am start -n ${appId}/com.sous.tools.MainActivity\\"}' ${agentUrl}"`;
+          script = `bash scripts/run-android.sh emulator-${proc.emulatorPort} ${flavor}`;
         }
       }
 
@@ -459,10 +470,10 @@ export class ProcessManager
               proc.status = 'error';
             } else {
               this.addLog(id, `🚀 Started via PM2`, 'info');
-              proc.status = 'running';
+              // proc.status = 'running'; // Status will be updated by logs
             }
             this.emit('update');
-            resolve();
+            setTimeout(resolve, 100);
           },
         );
       });
@@ -472,6 +483,16 @@ export class ProcessManager
   async stopProcess(id: string) {
     const proc = this.processes.get(id);
     if (!proc) return;
+
+    // Try socket command first
+    try {
+      await this.sendControlCommand(id, 'stop');
+      proc.status = 'stopped';
+      this.emit('update');
+      return;
+    } catch (e) {
+      // Socket fail, fallback to pm2.stop
+    }
 
     if (proc.type === 'pm2') {
       return new Promise<void>((resolve) => {
@@ -499,7 +520,18 @@ export class ProcessManager
 
   async restartProcess(id: string) {
     const proc = this.processes.get(id);
-    if (proc?.type === 'pm2') {
+    if (!proc) return;
+
+    // Try socket command first
+    try {
+      await this.sendControlCommand(id, 'restart');
+      this.addLog(id, '♻️ Restarted via control socket', 'info');
+      return;
+    } catch (e) {
+      // Socket fail, fallback to pm2.restart
+    }
+
+    if (proc.type === 'pm2') {
       return new Promise<void>((resolve) => {
         pm2.restart(`sous-${id}`, () => {
           this.addLog(id, '♻️ Restarted via PM2', 'info');
@@ -630,6 +662,30 @@ export class ProcessManager
     await Promise.all(procs.map((p) => this.stopProcess(p.id)));
   }
 
+  private async sendControlCommand(id: string, command: string): Promise<string> {
+    const socketPath = `/tmp/sous-dev-sous-${id}.sock`;
+    return new Promise((resolve, reject) => {
+      if (!fs.existsSync(socketPath)) {
+        return reject(new Error(`Socket not found: ${socketPath}`));
+      }
+      const client = net.createConnection(socketPath, () => {
+        client.write(command);
+      });
+      client.on('data', (data) => {
+        resolve(data.toString());
+        client.end();
+      });
+      client.on('error', (err) => {
+        reject(err);
+      });
+      // Timeout
+      setTimeout(() => {
+        client.end();
+        reject(new Error('Socket timeout'));
+      }, 2000);
+    });
+  }
+
   clearLogs(id?: string) {
     if (id === 'combined' || !id) this.combinedLogs = [];
     else {
@@ -693,9 +749,9 @@ export class ProcessManager
 
       const logEntry: ManagedLog = { id, name, message, timestamp, level };
       proc.logs.push(logEntry);
-      if (proc.logs.length > 1000) proc.logs.shift();
+      if (proc.logs.length > 5000) proc.logs.shift();
       this.combinedLogs.push(logEntry);
-      if (this.combinedLogs.length > 2000) this.combinedLogs.shift();
+      if (this.combinedLogs.length > 10000) this.combinedLogs.shift();
     }
     this.emit('update');
   }

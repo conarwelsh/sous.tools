@@ -57,17 +57,55 @@ function AdminContent({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const menuItems = [
-    { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-    { label: "Procurement", icon: ShoppingCart, href: "/procurement" },
-    { label: "Culinary", icon: UtensilsCrossed, href: "/culinary" },
-    { label: "Inventory", icon: Package, href: "/inventory" },
-    { label: "Intelligence", icon: Activity, href: "/intelligence" },
-    { label: "Accounting", icon: FileText, href: "/accounting" },
-    { label: "Presentation", icon: Monitor, href: "/presentation" },
-    { label: "Hardware", icon: Cpu, href: "/hardware" },
-    { label: "Integrations", icon: LinkIcon, href: "/integrations" },
-    { label: "Settings", icon: Settings, href: "/settings" },
+  const menuGroups = [
+    {
+      title: "Core",
+      items: [
+        { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
+      ]
+    },
+    {
+      title: "Procurement",
+      items: [
+        { label: "Overview", icon: ShoppingCart, href: "/procurement" },
+        { label: "Suppliers", icon: UtensilsCrossed, href: "/procurement/suppliers" },
+        { label: "Invoices", icon: FileText, href: "/procurement/invoices" },
+        { label: "Orders", icon: ShoppingCart, href: "/procurement/orders" },
+      ]
+    },
+    {
+      title: "Culinary",
+      items: [
+        { label: "Overview", icon: UtensilsCrossed, href: "/culinary" },
+        { label: "Recipes", icon: UtensilsCrossed, href: "/culinary/recipes" },
+        { label: "Ingredients", icon: Package, href: "/culinary/ingredients" },
+      ]
+    },
+    {
+      title: "Operations",
+      items: [
+        { label: "Inventory", icon: Package, href: "/inventory" },
+        { label: "Intelligence", icon: Activity, href: "/intelligence" },
+        { label: "Accounting", icon: FileText, href: "/accounting" },
+      ]
+    },
+    {
+      title: "Presentation",
+      items: [
+        { label: "Overview", icon: Monitor, href: "/presentation" },
+        { label: "Screens", icon: Monitor, href: "/presentation/screens" },
+        { label: "Layouts", icon: LayoutDashboard, href: "/presentation/layouts" },
+        { label: "Labels", icon: Palette, href: "/presentation/labels" },
+      ]
+    },
+    {
+      title: "System",
+      items: [
+        { label: "Hardware", icon: Cpu, href: "/hardware" },
+        { label: "Integrations", icon: LinkIcon, href: "/integrations" },
+        { label: "Settings", icon: Settings, href: "/settings" },
+      ]
+    },
   ];
 
   return (
@@ -120,7 +158,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
             isCollapsed={isCollapsed} 
             theme={theme} 
             toggleTheme={toggleTheme} 
-            menuItems={menuItems} 
+            menuGroups={menuGroups} 
             pathname={pathname} 
             router={router} 
             setIsMobileMenuOpen={setIsMobileMenuOpen} 
@@ -140,7 +178,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
             isCollapsed={isCollapsed} 
             theme={theme} 
             toggleTheme={toggleTheme} 
-            menuItems={menuItems} 
+            menuGroups={menuGroups} 
             pathname={pathname} 
             router={router} 
             setIsMobileMenuOpen={setIsMobileMenuOpen} 
@@ -176,13 +214,13 @@ function SidebarContent({
   isCollapsed, 
   theme, 
   toggleTheme, 
-  menuItems, 
+  menuGroups, 
   pathname, 
   router, 
   setIsMobileMenuOpen 
 }: any) {
   return (
-    <View className="flex flex-col h-full justify-between">
+    <View className="flex flex-col h-full justify-between pb-8">
       <View>
         <View className={cn("mb-12 transition-all duration-300 flex flex-row items-center justify-between", isCollapsed && !mobile ? "ml-0 justify-center" : "ml-2")}>
           <Logo variant="cloud" size={24} suffix={isCollapsed && !mobile ? undefined : "tools"} showWordmark={!isCollapsed || mobile} />
@@ -196,56 +234,67 @@ function SidebarContent({
           )}
         </View>
 
-        <View className="flex flex-col gap-2">
-          {menuItems.map((item: any) => {
-            const isActive = pathname.startsWith(item.href);
-            return (
-              <Button
-                key={item.label}
-                variant="ghost"
-                onClick={() => {
-                  router.push(item.href);
-                  if (mobile) setIsMobileMenuOpen(false);
-                }}
-                className={cn(
-                  "flex items-center p-4 rounded-xl transition-all w-full group relative",
-                  isActive
-                    ? "bg-primary/10 border border-primary/20"
-                    : "hover:bg-muted/50 border border-transparent",
-                  isCollapsed && !mobile ? "justify-center px-0" : "justify-between"
-                )}
-              >
-                <View className="flex flex-row items-center gap-4">
-                  <item.icon
-                    size={20}
-                    className={isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}
-                  />
-                  {(!isCollapsed || mobile) && (
-                    <Text
+        <View className="flex flex-col gap-8">
+          {menuGroups.map((group: any) => (
+            <View key={group.title} className="flex flex-col gap-2">
+              {(!isCollapsed || mobile) && (
+                <Text className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 mb-1">
+                  {group.title}
+                </Text>
+              )}
+              <View className="flex flex-col gap-1">
+                {group.items.map((item: any) => {
+                  const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+                  return (
+                    <Button
+                      key={item.label}
+                      variant="ghost"
+                      onClick={() => {
+                        router.push(item.href);
+                        if (mobile) setIsMobileMenuOpen(false);
+                      }}
                       className={cn(
-                        "font-bold uppercase text-[10px] tracking-[0.1em] whitespace-nowrap",
-                        isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                        "flex items-center p-3 rounded-xl transition-all w-full group relative",
+                        isActive
+                          ? "bg-primary/10 border border-primary/20"
+                          : "hover:bg-muted/50 border border-transparent",
+                        isCollapsed && !mobile ? "justify-center px-0" : "justify-between"
                       )}
                     >
-                      {item.label}
-                    </Text>
-                  )}
-                </View>
-                {!isCollapsed || mobile ? (
-                  isActive && <ChevronRight size={14} className="text-primary" />
-                ) : null}
+                      <View className="flex flex-row items-center gap-3">
+                        <item.icon
+                          size={18}
+                          className={isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}
+                        />
+                        {(!isCollapsed || mobile) && (
+                          <Text
+                            className={cn(
+                              "font-bold uppercase text-[10px] tracking-[0.1em] whitespace-nowrap",
+                              isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                            )}
+                          >
+                            {item.label}
+                          </Text>
+                        )}
+                      </View>
+                      {!isCollapsed || mobile ? (
+                        isActive && <ChevronRight size={12} className="text-primary" />
+                      ) : null}
 
-                {/* Tooltip for collapsed state */}
-                {isCollapsed && !mobile && (
-                  <div className="absolute left-full ml-4 px-3 py-2 bg-card border border-border rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                    <Text className="text-[10px] font-bold uppercase tracking-widest text-foreground whitespace-nowrap">
-                      {item.label}
-                    </Text>
-                  </div>
-                )}
-              </Button>
-            );
-          })}
+                      {/* Tooltip for collapsed state */}
+                      {isCollapsed && !mobile && (
+                        <div className="absolute left-full ml-4 px-3 py-2 bg-card border border-border rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl">
+                          <Text className="text-[10px] font-bold uppercase tracking-widest text-foreground whitespace-nowrap">
+                            {item.label}
+                          </Text>
+                        </div>
+                      )}
+                    </Button>
+                  );
+                })}
+              </View>
+            </View>
+          ))}
         </View>
       </View>
 

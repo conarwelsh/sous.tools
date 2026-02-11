@@ -7,7 +7,7 @@ import {
   organizations,
   screens,
 } from '../../core/database/schema.js';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, or } from 'drizzle-orm';
 import { logger } from '@sous/logger';
 import { RealtimeGateway } from '../../realtime/realtime.gateway.js';
 
@@ -119,6 +119,14 @@ export class PresentationService {
 
   async seedSystem(orgId: string) {
     console.log('🌱 Seeding Presentation System Templates...');
+
+    // Find the 'system' organization
+    const systemOrg = await this.dbService.db.query.organizations.findFirst({
+      where: eq(organizations.slug, 'system'),
+    });
+
+    const targetOrgId = systemOrg?.id || orgId;
+
     const systemTemplates = [
       {
         name: 'Fullscreen Content',
@@ -135,7 +143,7 @@ export class PresentationService {
           ],
         }),
         isSystem: true,
-        organizationId: orgId,
+        organizationId: targetOrgId,
       },
       {
         name: 'Two Column Grid',
@@ -158,7 +166,7 @@ export class PresentationService {
           ],
         }),
         isSystem: true,
-        organizationId: orgId,
+        organizationId: targetOrgId,
       },
     ];
 
@@ -191,7 +199,12 @@ export class PresentationService {
     return this.dbService.db
       .select()
       .from(templates)
-      .where(eq(templates.organizationId, organizationId));
+      .where(
+        or(
+          eq(templates.organizationId, organizationId),
+          eq(templates.isSystem, true)
+        )
+      );
   }
 
   async updateTemplate(

@@ -41,6 +41,16 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
   const [cloudLogs, setCloudLogs] = useState<string[]>([]);
   const [cloudProcess, setCloudProcess] = useState<any>(null);
 
+  // Early return if no processes to avoid index errors
+  if (!processes || processes.length === 0) {
+    return (
+      <Box flexDirection="column" padding={2}>
+        <Text color="yellow">Waiting for processes to initialize...</Text>
+        <Spinner type="dots" />
+      </Box>
+    );
+  }
+
   // Cloud Logs Tailer
   useEffect(() => {
     if (activeTab !== 'cloud' || activeEnv === 'dev') {
@@ -53,6 +63,11 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
 
     setCloudLogs([]);
     const app = processes[selectedIdx];
+    if (!app) {
+      setCloudLogs(['[SYSTEM] No service selected.']);
+      return;
+    }
+
     let command = '';
     let args: string[] = [];
 
@@ -432,9 +447,9 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
             <Box flexDirection="column" flexGrow={1}>
               <Box justifyContent="space-between" marginBottom={1}>
                 <Text bold color={BRAND_BLUE}>
-                  LOGS: {selectedApp?.name.toUpperCase()}
+                  LOGS: {selectedApp?.name?.toUpperCase() || 'N/A'}
                 </Text>
-                <Text color="gray">{selectedApp?.status.toUpperCase()}</Text>
+                <Text color="gray">{selectedApp?.status?.toUpperCase() || 'UNKNOWN'}</Text>
               </Box>
               <Box flexDirection="column" flexGrow={1} overflow="hidden">
                 {(selectedApp?.logs || [])
@@ -514,7 +529,7 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
             <Box flexDirection="column" flexGrow={1}>
               <Box justifyContent="space-between" marginBottom={1}>
                 <Text bold color={BRAND_PURPLE}>
-                  CLOUD LOGS: {selectedApp?.name.toUpperCase()} ({activeEnv.toUpperCase()})
+                  CLOUD LOGS: {selectedApp?.name?.toUpperCase() || 'N/A'} ({activeEnv.toUpperCase()})
                 </Text>
                 <Text color="gray">LIVE TAIL ACTIVE</Text>
               </Box>
@@ -634,7 +649,10 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
         <Text color="gray" dimColor>
           [Tab] Switch Tab [↑/↓] Scroll [Enter] Start/Stop [r] Restart [c] Clear [d] DB Reset [e] Toggle Env [q] Quit
         </Text>
-        <Text color={BRAND_BLUE} bold>SOUS DEV TOOLS</Text>
+        <Box>
+          <Text color={BRAND_BLUE} bold>SOUS</Text>
+          <Text color={BRAND_GRAY}>.dev</Text>
+        </Box>
       </Box>
     </Box>
   );

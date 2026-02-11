@@ -1,5 +1,71 @@
 # History
 
+## 2026-02-11 (Sidebar Refactor & Theme Stability)
+
+- **Sidebar Navigation Overhaul:**
+    - Refactored the admin sidebar to support grouped sections (Core, Procurement, Culinary, Operations, Presentation, System).
+    - Flattened nested landing pages into direct links within the sidebar for faster access to Screens, Layouts, Labels, etc.
+    - Updated `SidebarContent` to render section titles and handle active states for sub-routes.
+- **Thematic Consistency & Light Mode:**
+    - Performed a broad audit of hardcoded dark colors (`bg-[#050505]`, `bg-[#0a0a0a]`).
+    - Migrated `LayoutDesigner`, `LayoutManager`, `ScreenEditor`, and `PresentationDashboard` to theme-aware Tailwind classes (`bg-background`, `bg-card`, etc.).
+    - Fixed "clipped" Cloud Logo by adjusting SVG `baseScale` for micro-LOD variants.
+- **Next.js Conventions Mandate:**
+    - Established **Mandate 25**, requiring the use of `loading.tsx` for skeletons and `not-found.tsx` for missing dynamic resources.
+    - Implemented initial loading skeletons and not-found pages for the Presentation and Culinary domains.
+- **Enhanced Layout Visualization:**
+    - Updated `LayoutManager` cards to use `TemplateSkeletonRenderer` for live structure previews instead of static mockups.
+- **GitHub Integration Strategy:**
+    - Integrated with `gh` CLI to support automated issue research and triaging directly from the development environment.
+
+## 2026-02-11 (Critical Fixes & Infrastructure Stability)
+
+- **Layout Designer & Tagging Fixes:**
+    - Fixed "Internal Server Error" when creating tags or saving new templates by adding UUID validation in `TagManager` to skip placeholder IDs (e.g., `new-layout`).
+    - Updated `PresentationService` to correctly fetch system-level templates alongside organization-specific ones using the Drizzle `or` operator.
+    - Refactored seeding logic to ensure system templates are owned by the `system` organization but visible to all.
+- **CLI & Dev Tools Stability:**
+    - Resolved immediate crash in `sous dev` tools by adding null checks and optional chaining in the Ink `Dashboard` component.
+    - Optimized mobile app launching by refactoring `ProcessManager` to use centralized `run-android.sh` and `run-wearos.sh` scripts.
+    - Enabled `autoStart` for all mobile app flavors in `sous dev` to ensure emulators are launched and apps are deployed automatically.
+    - Improved `run-android.sh` with a hybrid communication model that attempts direct WSL-to-emulator communication (supporting improved WSL interop) before falling back to the Windows Agent.
+- **Raspberry Pi Image Build:**
+    - Refactored `scripts/build-rpi-os.sh` to handle both Android (APK injection) and Linux (browser kiosk) image paths.
+    - Added `libguestfs-tools` to `scripts/install-dev.sh` to support rootless image manipulation.
+- **Research & Future-Proofing:**
+    - Created **Spec 023: Mobile Background Update System** to enable autonomous discovery and scheduling of app updates via Supabase-hosted manifests.
+
+## 2026-02-11 (Layout Designer UX & Structural Improvements)
+
+- **Layout Designer Enhancements:**
+    - **Precise Element Placement:** Refactored `handleDragEnd` to calculate drop positions for new fixed elements based on the pointer coordinates relative to the canvas.
+    - **Hierarchy Visibility (Element Tree):** Implemented a recursive **Element Hierarchy** tree in the sidebar, providing visibility and control over all elements, including those that are hidden, off-screen, or nested deep in the tree.
+    - **State Continuity (Grid Defaults):** Added `lastGridConfig` state to remember the most recently used row/column counts, preventing repetitive configuration when building complex grids.
+    - **Input Stability:** Added unique `key` props to property editor inputs based on the selected node's internal ID, ensuring that form values reset correctly when switching between elements and eliminating "stuck" values.
+    - **Safety & Clamping:** Implemented boundary clamping for fixed element positioning to prevent items from being dropped or moved entirely off-screen.
+    - **UI Polish:** Improved the sidebar layout with better spacing, iconography, and clear visual feedback for the active selection within both the canvas and the element tree.
+
+## 2026-02-10 (Tag Engine & Layout Designer Enhancements)
+
+- **Infrastructure & Stability Improvements:**
+    - **Fixed "Always Dying" Apps:** Removed automatic `stopAll()` from `ProcessManager.onModuleDestroy()`, preventing the CLI from killing dev processes on exit.
+    - **Fixed "Fail on Boot":** Implemented auto-start logic in `dev-tools.ts` wrapper; processes now launch immediately when PM2 starts the wrapper on system boot.
+    - **Unified Process Control:** Synchronized `ProcessManager` and `ecosystem.config.js` to use the same wrapper script and standardized naming.
+    - **Socket-Based Management:** Added graceful IPC control via Unix sockets for starting, stopping, and restarting background processes from the CLI.
+- **Unified Tag Engine (Spec 017):**
+    - Implemented a polymorphic tagging system in `@sous/api` using `tags` and `tag_assignments` tables.
+    - Added REST endpoints for organization-scoped tag CRUD and entity assignments.
+    - Created a shared `TagManager` component in `@sous/features` for universal tag management across entities.
+    - Integrated `TagManager` into the `LayoutDesigner` settings modal and sidebar.
+- **Layout Designer Improvements:**
+    - **Grid Resizing:** Implemented logic for resizing grid tracks (rows/cols) using percentage units, as defined in ADR 044.
+    - **UI Cleanup:** Removed non-functional resize handles from the root-level container and cleaned up visual clutter in `TemplateSkeletonRenderer`.
+    - **Build Stability:** Fixed module resolution errors in the Next.js build by correcting file extensions in feature exports.
+- **Windows Agent Bridge:**
+    - Refactored `scripts/install-dev.sh` to use `wslpath -w` for reliable Windows path resolution.
+    - Fixed quoting and elevation issues in the PowerShell-based symlink creation script.
+    - Verified real-time connectivity between WSL and the custom Windows Agent on port 4040.
+
 ## 2026-02-10 (Layout Manager Refactor & Stability)
 
 - **Layout Manager Refactor:**

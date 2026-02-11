@@ -23,7 +23,7 @@ export class PresentationController {
   async createScreen(@Body() body: any, @Req() req: any) {
     return this.presentationService.createScreen({
       ...body,
-      organizationId: req.user.orgId,
+      organizationId: req.user.organizationId,
     });
   }
 
@@ -33,22 +33,26 @@ export class PresentationController {
     @Body() body: any,
     @Req() req: any,
   ) {
-    return this.presentationService.updateScreen(id, req.user.orgId, body);
+    return this.presentationService.updateScreen(
+      id,
+      req.user.organizationId,
+      body,
+    );
   }
 
   @Get('screens')
   async getScreens(@Req() req: any) {
-    return this.presentationService.getScreens(req.user.orgId);
+    return this.presentationService.getScreens(req.user.organizationId);
   }
 
   @Get('screens/:id')
   async getScreenById(@Param('id') id: string, @Req() req: any) {
-    return this.presentationService.getScreenById(id, req.user.orgId);
+    return this.presentationService.getScreenById(id, req.user.organizationId);
   }
 
   @Delete('screens/:id')
   async deleteScreen(@Param('id') id: string, @Req() req: any) {
-    return this.presentationService.deleteScreen(id, req.user.orgId);
+    return this.presentationService.deleteScreen(id, req.user.organizationId);
   }
 
   // --- Templates ---
@@ -56,13 +60,13 @@ export class PresentationController {
   async createTemplate(@Body() body: any, @Req() req: any) {
     return this.presentationService.createTemplate({
       ...body,
-      organizationId: req.user.orgId,
+      organizationId: req.user.organizationId,
     });
   }
 
   @Get('templates')
   async getTemplates(@Req() req: any) {
-    return this.presentationService.getTemplates(req.user.orgId);
+    return this.presentationService.getTemplates(req.user.organizationId);
   }
 
   @Patch('templates/:id')
@@ -71,12 +75,16 @@ export class PresentationController {
     @Body() body: any,
     @Req() req: any,
   ) {
-    return this.presentationService.updateTemplate(id, req.user.orgId, body);
+    return this.presentationService.updateTemplate(
+      id,
+      req.user.organizationId,
+      body,
+    );
   }
 
   @Delete('templates/:id')
   async deleteTemplate(@Param('id') id: string, @Req() req: any) {
-    return this.presentationService.deleteTemplate(id, req.user.orgId);
+    return this.presentationService.deleteTemplate(id, req.user.organizationId);
   }
 
   // --- Displays ---
@@ -84,13 +92,13 @@ export class PresentationController {
   async createDisplay(@Body() body: any, @Req() req: any) {
     return this.presentationService.createDisplay({
       ...body,
-      organizationId: req.user.orgId,
+      organizationId: req.user.organizationId,
     });
   }
 
   @Get('displays')
   async getDisplays(@Req() req: any) {
-    return this.presentationService.getDisplays(req.user.orgId);
+    return this.presentationService.getDisplays(req.user.organizationId);
   }
 
   // --- Assignments ---
@@ -99,7 +107,7 @@ export class PresentationController {
     // Basic validation: Verify display belongs to org
     const display = await this.presentationService.getDisplayById(
       body.displayId,
-      req.user.orgId,
+      req.user.organizationId,
     );
     if (!display) throw new BadRequestException('Invalid Display ID');
 

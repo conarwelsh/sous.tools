@@ -20,11 +20,58 @@ fi
 AGENT_URL="http://$WIN_IP:4040"
 PKG_ID="com.sous.wearos"
 ACTIVITY=".MainActivity"
-SERIAL=${ANDROID_SERIAL}
-if [ -z "$SERIAL" ]; then
-  echo "❌ Error: ANDROID_SERIAL not set. Aborting."
-  exit 1
+
+# 3. Resolve Serial if not set
+if [ -z "$ANDROID_SERIAL" ]; then
+  echo "🔍 ANDROID_SERIAL not set. Attempting to resolve Wear OS device..."
+  
+  # Try to find a running emulator
+  DEVICES=$(adb devices | grep "device$" | cut -f1)
+  FOUND_SERIAL=""
+  
+  for s in $DEVICES; do
+    MODEL=$(adb -s $s shell getprop ro.product.model)
+    if [[ "$MODEL" == *"sdk_gwear"* ]]; then
+      FOUND_SERIAL=$s
+      echo "✅ Found Wear OS device: $s ($MODEL)"
+      break
+    fi
+  done
+
+  if [ -z "$FOUND_SERIAL" ]; then
+    echo "⚠️ No running Wear OS emulator found. Launching 'Wear_OS_Large_Round'..."
+    
+    # Launch via ts-node to use the existing script logic (or direct agent call)
+    # Since we are in apps/wearos, we need to go up to root
+    (cd ../.. && npx tsx scripts/launch-emulator.ts)
+    
+    echo "⏳ Waiting for emulator to boot..."
+    sleep 10
+    
+    # Retry finding device loop
+    for i in {1..30}; do
+      DEVICES=$(adb devices | grep "device$" | cut -f1)
+      for s in $DEVICES; do
+        MODEL=$(adb -s $s shell getprop ro.product.model)
+        if [[ "$MODEL" == *"sdk_gwear"* ]]; then
+          FOUND_SERIAL=$s
+          break 2
+        fi
+      done
+      echo "   Waiting for device ($i/30)..."
+      sleep 2
+    done
+  fi
+  
+  if [ -z "$FOUND_SERIAL" ]; then
+    echo "❌ Failed to find or launch Wear OS emulator."
+    exit 1
+  fi
+  
+  export ANDROID_SERIAL=$FOUND_SERIAL
 fi
+
+SERIAL=${ANDROID_SERIAL}
 echo "📲 Deploying to $SERIAL via Agent..."
 
 # Helper to call agent

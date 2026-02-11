@@ -1,0 +1,38 @@
+name: Gemini Agent
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  agent:
+    if: contains(github.event.comment.body, '@gemini')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Need full history for branching
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install -g tsx @google/generative-ai
+
+      - name: Configure Git
+        run: |
+          git config --global user.name 'Gemini Agent'
+          git config --global user.email 'gemini@sous.dev'
+
+      - name: Process Command
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: tsx scripts/gemini-agent.ts

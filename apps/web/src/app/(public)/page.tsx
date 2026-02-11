@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Button, Card, Logo, useTheme } from "@sous/ui";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@sous/features";
 import {
   ChefHat,
   Gauge,
@@ -11,12 +12,14 @@ import {
   Zap,
   Download,
   Moon,
-  Sun
+  Sun,
+  LayoutDashboard
 } from "lucide-react";
 
 export default function MarketingPage() {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
+  const { user, isAuthenticated } = useAuth();
 
   const features = [
     {
@@ -76,22 +79,39 @@ export default function MarketingPage() {
             {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
           </Button>
 
-          <Button
-            onClick={() => router.push("/login")}
-            className="px-6 h-10 bg-secondary border border-border"
-          >
-            <Text className="text-foreground font-bold uppercase text-xs tracking-widest">
-              Login
-            </Text>
-          </Button>
-          <Button
-            onClick={() => router.push("/register")}
-            className="px-6 h-10 bg-primary"
-          >
-            <Text className="text-primary-foreground font-bold uppercase text-xs tracking-widest">
-              Get Started
-            </Text>
-          </Button>
+          {isAuthenticated ? (
+            <Button
+              onClick={() => router.push("/dashboard")}
+              className="px-6 h-10 bg-primary border border-primary"
+            >
+              <View className="flex flex-row items-center gap-2">
+                <LayoutDashboard size={16} className="text-primary-foreground" />
+                <Text className="text-primary-foreground font-bold uppercase text-xs tracking-widest">
+                  Dashboard
+                </Text>
+              </View>
+            </Button>
+          ) : (
+            <Button
+              onClick={() => router.push("/login")}
+              className="px-6 h-10 bg-secondary border border-border"
+            >
+              <Text className="text-foreground font-bold uppercase text-xs tracking-widest">
+                Login
+              </Text>
+            </Button>
+          )}
+          
+          {!isAuthenticated && (
+            <Button
+              onClick={() => router.push("/register")}
+              className="px-6 h-10 bg-primary"
+            >
+              <Text className="text-primary-foreground font-bold uppercase text-xs tracking-widest">
+                Get Started
+              </Text>
+            </Button>
+          )}
         </View>
       </View>
 

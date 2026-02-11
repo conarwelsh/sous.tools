@@ -35,10 +35,14 @@ export * from "./domains/procurement/index";
 // Inventory Domain
 export * from "./domains/inventory/index";
 
+// Core Domain
+export * from "./domains/core/tags/index";
+
 // Hardware Domain
 export * from "./domains/hardware/components/PairingWorkflow";
 export * from "./domains/hardware/components/HardwareManager";
 export * from "./domains/hardware/components/AddHardwareView";
+export * from "./domains/hardware/components/DevicePairingFlow";
 export * from "./domains/hardware/hooks/useHardware";
 
 // Branding Domain

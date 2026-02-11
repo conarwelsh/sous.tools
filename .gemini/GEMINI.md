@@ -172,12 +172,14 @@
 - **Action:** When inspecting logs, never use the default streaming mode. Always use `pm2 logs --nostream` or `pm2 logs <app> --nostream` along with `--lines <number>` if necessary.
 - **Goal:** Prevent the agent from getting stuck in a long-running tail process and ensure predictable tool termination.
 
-### 24. Windows Agent Mandate (MANDATE)
+### 25. Next.js Conventions Mandate (MANDATE)
 
-**Rule:** ALL interactions with the Windows host system, including but not limited to starting emulators, executing `adb` commands, file system operations on `/mnt/c/`, or window management, MUST be performed via the custom Windows Agent (port 4040).
+**Rule:** Applications MUST utilize Next.js standard files for state management and user experience.
 
-- **Action:** Never use `spawn('/mnt/c/...')` or direct shell execution for Windows binaries. Always use `curl` to send JSON payloads to `http://<WIN_IP>:4040`.
-- **Goal:** Ensure stable interop and bypass WSL-to-Windows bridge reliability issues.
+- **Action (Loading):** Every page or route group MUST provide a `loading.tsx` file that implements a visual skeleton or loading state.
+- **Exception:** `loading.tsx` is an exception to the Controller-View pattern; it is acceptable to build the UI directly within this file to ensure fast, low-overhead initial paints.
+- **Action (Not Found):** Every route that uses dynamic parameters (e.g., `[id]`) MUST utilize `not-found.tsx`. Controllers should trigger this via `notFound()` from `next/navigation` if a requested resource does not exist.
+- **Goal:** Provide a consistent, high-fidelity user experience with instant feedback and graceful error handling.
 
 ## Documentation Index
 

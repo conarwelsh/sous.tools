@@ -21,8 +21,7 @@ export function TemplateStage({
   return (
     <View
       className={cn(
-        "flex-1 w-full h-full min-h-screen relative overflow-hidden bg-black",
-        isEditMode && "bg-[#050505]",
+        "flex-1 w-full h-full min-h-screen relative overflow-hidden bg-background",
         className
       )}
     >

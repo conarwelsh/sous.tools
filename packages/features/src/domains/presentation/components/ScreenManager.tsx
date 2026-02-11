@@ -91,18 +91,18 @@ export const ScreenManager = () => {
     <ScrollView className="flex-1 p-6">
       <div className="flex flex-row justify-between items-end mb-12">
         <View>
-          <h1 className="text-4xl font-black text-white tracking-tighter uppercase mb-2">
+          <h1 className="text-4xl font-black text-foreground tracking-tighter uppercase mb-2">
             Screen Manager
           </h1>
-          <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">
+          <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">
             Manage your digital signage content and hardware assignments.
           </p>
         </View>
 
-        <Button onClick={() => setIsCreating(true)} className="bg-sky-500 h-12 px-8">
+        <Button onClick={() => setIsCreating(true)} className="bg-primary h-12 px-8">
           <View className="flex-row items-center gap-2">
-            <Plus size={16} className="text-white" />
-            <span className="text-white font-black uppercase tracking-widest text-xs">
+            <Plus size={16} className="text-primary-foreground" />
+            <span className="text-primary-foreground font-black uppercase tracking-widest text-xs">
               New Screen
             </span>
           </View>
@@ -114,12 +114,12 @@ export const ScreenManager = () => {
           <Logo size={48} animate />
         </div>
       ) : screens.length === 0 ? (
-        <Card className="p-20 bg-zinc-900/50 border-zinc-800 border-2 items-center justify-center border-dashed">
-          <Monitor size={48} className="text-zinc-700 mb-4" />
-          <Text className="text-zinc-500 font-bold uppercase tracking-widest text-sm mb-6">
+        <Card className="p-20 bg-muted/50 border-border border-2 items-center justify-center border-dashed">
+          <Monitor size={48} className="text-muted-foreground/20 mb-4" />
+          <Text className="text-muted-foreground font-bold uppercase tracking-widest text-sm mb-6">
             No screens configured yet
           </Text>
-          <Button onClick={() => setIsCreating(true)} variant="outline" className="border-zinc-700">
+          <Button onClick={() => setIsCreating(true)} variant="outline" className="border-border">
             Create your first screen
           </Button>
         </Card>
@@ -128,15 +128,15 @@ export const ScreenManager = () => {
           {screens.map((screen) => (
             <Card
               key={screen.id}
-              className="p-6 bg-zinc-900 border-zinc-800 border-2 hover:border-zinc-700 transition-all group"
+              className="p-6 bg-card border-border border-2 hover:border-primary/50 transition-all group"
             >
-              <div className="aspect-video bg-black rounded-xl border border-zinc-800 mb-6 flex items-center justify-center overflow-hidden relative">
+              <div className="aspect-video bg-black rounded-xl border border-border mb-6 flex items-center justify-center overflow-hidden relative">
                  <Monitor size={32} className="text-zinc-800" />
-                 <div className="absolute inset-0 bg-sky-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                 <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
 
               <div className="flex flex-row justify-between items-start mb-2">
-                <Text className="text-lg font-black text-white uppercase tracking-tight">
+                <Text className="text-lg font-black text-foreground uppercase tracking-tight">
                     {screen.name}
                 </Text>
                 <View className="flex-row gap-1">
@@ -148,24 +148,24 @@ export const ScreenManager = () => {
                 </View>
               </div>
               
-              <Text className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-6">
+              <Text className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-6">
                 {Object.keys(screen.slots).length} Slots Populated
               </Text>
 
               <div className="flex flex-row gap-2">
-                <Button onClick={() => setEditingScreen(screen)} className="flex-1 h-10 bg-zinc-800 hover:bg-zinc-700">
+                <Button onClick={() => setEditingScreen(screen)} className="flex-1 h-10 bg-muted hover:bg-muted/80">
                   <View className="flex-row items-center gap-2">
-                    <Settings size={14} className="text-white" />
-                    <span className="text-white text-[10px] font-black uppercase tracking-widest">
+                    <Settings size={14} className="text-foreground" />
+                    <span className="text-foreground text-[10px] font-black uppercase tracking-widest">
                       Configure
                     </span>
                   </View>
                 </Button>
                 <Button 
                   onClick={() => handleDelete(screen.id)}
-                  className="h-10 w-10 bg-zinc-800 hover:bg-red-500/20 flex items-center justify-center border-none"
+                  className="h-10 w-10 bg-muted hover:bg-destructive/20 flex items-center justify-center border-none"
                 >
-                  <Trash2 size={14} className="text-zinc-500 group-hover:text-red-500" />
+                  <Trash2 size={14} className="text-muted-foreground group-hover:text-destructive" />
                 </Button>
               </div>
             </Card>

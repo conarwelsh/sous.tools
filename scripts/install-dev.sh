@@ -6,6 +6,9 @@
 
 set -e
 
+# Prevent nvm conflicts with pnpm-provided env vars
+unset npm_config_prefix
+
 echo "👨‍🍳 Starting Sous Developer Environment Setup..."
 
 # 0. Environment Detection
@@ -32,7 +35,7 @@ fi
 # 1. Update & Build Tools
 echo "📦 Updating system packages..."
 sudo apt update -y
-sudo apt install -y build-essential curl git wget unzip zsh pkg-config libwebkit2gtk-4.1-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev jq netcat-openbsd xz-utils
+sudo apt install -y build-essential curl git wget unzip zsh pkg-config libwebkit2gtk-4.1-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev jq netcat-openbsd xz-utils libguestfs-tools
 
 # 1.1 Setup ZSH & Oh My Zsh
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
@@ -107,7 +110,7 @@ fi
 
 if ! command -v render &> /dev/null; then
   echo "🚀 Installing Render CLI..."
-  curl curl -fsSL https://raw.githubusercontent.com/render-oss/cli/refs/heads/main/bin/install.sh | sh
+  curl -fsSL https://raw.githubusercontent.com/render-oss/cli/refs/heads/main/bin/install.sh | sh
 fi
 
 # 7. Infisical CLI
@@ -119,34 +122,61 @@ fi
 
 # 8. WSL/Windows Bridge Setup
 if [ "$IS_WSL" = true ]; then
-  echo "🪟 Setting up Windows Agent Bridge (Live Symlinks)..."
+  echo "🪟 Setting up Windows Agent Bridge (Consolidated Elevated Setup)..."
   
-  # Ensure the Windows-side tools directory exists
-  powershell.exe -Command "New-Item -ItemType Directory -Force -Path C:\tools\sous-agent" > /dev/null
+  # Use wslpath for reliable Windows path resolution
+  WIN_SCRIPTS_PATH=$(wslpath -w "$(pwd)/scripts/windows")
   
-  # Create symlinks from Windows to WSL filesystem for live updates
-  # We use powershell to create the links on the Windows host
-  DISTRO_NAME=$WSL_DISTRO_NAME
-  PROJECT_ROOT=$(pwd)
-  # Convert /home/user/path to home\user\path
-  WIN_PROJECT_ROOT=$(echo $PROJECT_ROOT | sed 's/\//\\/g' | sed 's/^\\//')
-  WSL_PATH="\\\\wsl.localhost\\$DISTRO_NAME\\$WIN_PROJECT_ROOT\\scripts\\windows"
+  echo "🪟 Triggering elevated setup for symlinks and firewall..."
   
-  powershell.exe -Command "
-    Start-Process powershell -Verb RunAs -ArgumentList '-Command', '
+  # We use powershell to trigger elevation. 
+  # Using single quotes for the inner command to avoid shell expansion issues.
+  powershell.exe -NoProfile -NonInteractive -Command "
+    Start-Process powershell -Verb RunAs -ArgumentList '-NoProfile', '-Command', '
+      Write-Host \"👨‍🍳 Initializing Sous Windows Setup...\" -ForegroundColor Cyan;
+      
+      # 1. Create Directory
+      if (!(Test-Path \"C:\tools\sous-agent\")) { 
+        New-Item -ItemType Directory -Force -Path \"C:\tools\sous-agent\" | Out-Null 
+      };
+
+      # 2. Create Symlinks
+      \$scriptsPath = \"$WIN_SCRIPTS_PATH\";
       \$files = @(''agent.ico'', ''agent.png'', ''sous-agent.js'', ''sous-launcher.vbs'', ''sous-tray.ps1'');
       foreach (\$f in \$files) {
-        \$target = \"$WSL_PATH\\\$f\";
-        \$link = \"C:\\tools\\sous-agent\\\$f\";
+        \$target = Join-Path \$scriptsPath \$f;
+        \$link = \"C:\tools\sous-agent\\\$f\";
         if (Test-Path \$link) { Remove-Item \$link -Force };
-        New-Item -ItemType SymbolicLink -Path \$link -Target \$target -Force;
+        New-Item -ItemType SymbolicLink -Path \$link -Target \$target -Force | Out-Null;
       }
+      Write-Host \"✅ Symlinks created.\" -ForegroundColor Green;
+
+      # 3. Firewall
+      New-NetFirewallRule -DisplayName \"Sous Agent (TCP-In)\" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 4040 -ErrorAction SilentlyContinue | Out-Null;
+      Write-Host \"✅ Firewall configured.\" -ForegroundColor Green;
+
+      # 4. Unblock files
+      Unblock-File -Path \"C:\tools\sous-agent\*\" -ErrorAction SilentlyContinue;
+      Write-Host \"✅ Files unblocked.\" -ForegroundColor Green;
+
+      # 5. Startup Shortcut
+      \$ws = New-Object -ComObject WScript.Shell;
+      \$s = \$ws.CreateShortcut(\"\$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\SousAgent.lnk\");
+      \$s.TargetPath = \"C:\tools\sous-agent\sous-launcher.vbs\";
+      \$s.WorkingDirectory = \"C:\tools\sous-agent\";
+      \$s.Save();
+      Write-Host \"✅ Startup shortcut created.\" -ForegroundColor Green;
+
+      # 6. Run Now
+      if (Get-Process -Name \"wscript\" -ErrorAction SilentlyContinue | Where-Object { \$_.CommandLine -like \"*sous-launcher.vbs*\" }) {
+         Stop-Process -Name \"wscript\" -Force -ErrorAction SilentlyContinue;
+      }
+      Start-Process \"C:\tools\sous-agent\sous-launcher.vbs\" | Out-Null;
+      Write-Host \"🚀 Sous Windows Agent is now active.\" -ForegroundColor Cyan;
+      
+      Start-Sleep -Seconds 2;
     '
-  " > /dev/null
-  
-  # Firewall and Unblocking (requires admin, but we attempt)
-  echo "🛡️  Configuring Windows Firewall (may prompt for admin)..."
-  powershell.exe -Command "Start-Process powershell -Verb RunAs -ArgumentList 'New-NetFirewallRule -DisplayName \"Sous Agent (TCP-In)\" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 4040 -ErrorAction SilentlyContinue; Unblock-File -Path C:\tools\sous-agent\sous-tray.ps1'" || echo "⚠️  Firewall config failed. Please run 'sous dev install agent' manually if emulators fail."
+  "
 fi
 
 # 9. Android Development
@@ -181,7 +211,7 @@ chmod +x "$HOME/.local/bin/studio"
 
 # 11. Finalizing
 echo "🐚 Finalizing shell configuration..."
-pnpm run sous dev install shell
+pnpm -w run sous dev install shell
 
 echo ""
 echo "✅ Sous Developer Environment Setup Complete!"

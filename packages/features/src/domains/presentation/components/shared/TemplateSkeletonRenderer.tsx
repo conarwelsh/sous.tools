@@ -34,7 +34,8 @@ export function TemplateSkeletonRenderer({
   scale = 1,
   renderChildren,
 }: TemplateSkeletonRendererProps) {
-  const { type, children, styles, id, name } = node;
+  const { type, children, id, name } = node;
+  const styles = node.styles || {};
 
   // Apply scaling and grid styles if provided
   const scaledStyles: React.CSSProperties = {
@@ -44,9 +45,9 @@ export function TemplateSkeletonRenderer({
     gridTemplateColumns: styles.gridTemplateColumns,
     gridTemplateRows: styles.gridTemplateRows,
     gap: styles.gap,
-    // Force full size for layout elements
-    width: (type === "container" || type === "slot") ? "100%" : (styles.width || 'auto'),
-    height: (type === "container" || type === "slot") ? "100%" : (styles.height || 'auto'),
+    // Force full size for layout elements unless specified
+    width: styles.width || ((type === "container" || type === "slot") ? "100%" : 'auto'),
+    height: styles.height || ((type === "container" || type === "slot") ? "100%" : 'auto'),
     minWidth: type === 'fixed' ? (styles.minWidth || 120) : (styles.minWidth || (isEditMode ? 40 : 0)),
     minHeight: type === 'fixed' ? (styles.minHeight || 80) : (styles.minHeight || (isEditMode ? 40 : 0)),
     alignSelf: 'stretch',
@@ -56,6 +57,9 @@ export function TemplateSkeletonRenderer({
     left: type === 'fixed' ? (styles.left || '10%') : undefined,
     top: type === 'fixed' ? (styles.top || '10%') : undefined,
     zIndex: type === 'fixed' ? 100 : undefined,
+    // Scaling
+    transform: scale !== 1 ? `scale(${scale})` : undefined,
+    transformOrigin: 'top left',
   } as any;
 
   const handleClick = (e: React.MouseEvent) => {
@@ -82,42 +86,51 @@ export function TemplateSkeletonRenderer({
   };
 
   const renderContent = () => {
+    if (!node) return null;
+
     if (type === "slot" && id && contentMap[id]) {
       return contentMap[id];
     }
 
+    let childrenContent = null;
+
+    if (renderChildren && children) {
+      childrenContent = renderChildren(children);
+    } else if (children) {
+      childrenContent = children.map((child, index) => (
+        <TemplateSkeletonRenderer
+          key={(child as any)._internalId || `${child.type}-${child.id || index}`}
+          node={child}
+          isEditMode={isEditMode}
+          onSlotClick={onSlotClick}
+          onNodeClick={onNodeClick}
+          onEditClick={onEditClick}
+          selectedNodeId={selectedNodeId}
+          contentMap={contentMap}
+          scale={scale}
+        />
+      ));
+    }
+
     if (type === "slot") {
       return (
-        <View className="flex-1 items-center justify-center p-4">
-          <Text className="text-zinc-700 font-black uppercase text-[10px] tracking-widest text-center">
-            {name || "Empty Slot"}
-          </Text>
-          {id && (
-            <Text className="text-zinc-800 font-mono text-[8px] mt-1">
-              ID: {id}
+        <View className="flex-1 relative">
+          <View className="absolute inset-0 items-center justify-center p-4 pointer-events-none">
+            <Text className="text-zinc-700 font-black uppercase text-[10px] tracking-widest text-center">
+              {name || "Empty Slot"}
             </Text>
-          )}
+            {id && (
+              <Text className="text-zinc-800 font-mono text-[8px] mt-1">
+                ID: {id}
+              </Text>
+            )}
+          </View>
+          {childrenContent}
         </View>
       );
     }
 
-    if (renderChildren && children) {
-      return renderChildren(children);
-    }
-
-    return children?.map((child, index) => (
-      <TemplateSkeletonRenderer
-        key={(child as any)._internalId || `${child.type}-${child.id || index}`}
-        node={child}
-        isEditMode={isEditMode}
-        onSlotClick={onSlotClick}
-        onNodeClick={onNodeClick}
-        onEditClick={onEditClick}
-        selectedNodeId={selectedNodeId}
-        contentMap={contentMap}
-        scale={scale}
-      />
-    ));
+    return childrenContent;
   };
 
   const isSelected = selectedNodeId && (id === selectedNodeId || (node as any)._internalId === selectedNodeId);
@@ -125,6 +138,7 @@ export function TemplateSkeletonRenderer({
   const baseClasses = cn(
     "relative flex flex-col transition-all",
     (type === "container" || type === "slot") && "flex-1 w-full h-full",
+    styles.display === 'grid' && "layout-grid-container",
     type === "slot" && "border-2 border-dashed border-zinc-800 bg-zinc-900/20 hover:border-sky-500/50 hover:bg-sky-500/5 cursor-pointer",
     type === "fixed" && "border-2 border-sky-500/30 bg-zinc-900 shadow-2xl rounded-lg overflow-hidden",
     isEditMode && type === "container" && "border border-zinc-800/50 p-1 cursor-pointer hover:border-sky-500/30",
@@ -176,16 +190,6 @@ export function TemplateSkeletonRenderer({
           >
             <Pencil size={10} className="text-white" />
           </button>
-
-          {/* Resize Corner Handle (Bottom Right) */}
-          <div 
-            className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize z-40 group/resize"
-            onMouseDown={(e) => {
-              // This is handled visually here, logic is in LayoutDesigner.tsx
-            }}
-          >
-            <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-r-2 border-b-2 border-zinc-600 group-hover/resize:border-sky-500 transition-colors" />
-          </div>
         </>
       )}
       

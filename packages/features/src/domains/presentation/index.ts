@@ -9,3 +9,5 @@ export * from "./components/KioskManager";
 export * from "./components/LabelEditor";
 export * from "./components/shared/TemplateStage";
 export * from "./components/shared/TemplateSkeletonRenderer";
+export * from "./components/shared/LayoutTemplateSelector";
+export * from "./components/shared/ImageSelector";

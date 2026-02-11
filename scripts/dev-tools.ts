@@ -42,7 +42,7 @@ async function run() {
     port: 8081,
     command: "bash /home/conar/sous.tools/scripts/run-wearos.sh TARGET_DEVICE",
     cwd: ".",
-    color: "35", // Magenta",
+    color: "35", // Magenta
     requiresEmulator: true,
   },
   "signage-android": {
@@ -417,7 +417,11 @@ process.on("SIGINT", () => {
 });
 
 // Start the tool
-run().catch(err => {
+run().then(() => {
+  if (!process.env.WAIT_FOR_CONTROL) {
+    void startProcess();
+  }
+}).catch(err => {
   console.error("FATAL:", err);
   process.exit(1);
 });

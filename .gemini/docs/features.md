@@ -20,9 +20,14 @@
   - **Document Capture**: Multi-source support (Camera/Upload) with pre-processing.
   - **Smart Mapping**: Fuzzy-matching and automated alias learning for catalog items.
   - **Verification Flow**: Split-screen reviewer for AI extraction results.
+- **Mobile Background Update System (Spec 023)**:
+  - **Autonomous Discovery**: Periodically checks Supabase-hosted `manifest.json` for new builds.
+  - **Scheduled Updates**: Allows users to schedule installations outside of business hours.
+  - **Background Download**: Downloads APK artifacts in the background via Capacitor plugins.
 - **Presentation Engine (Spec 006/007)**:
-  - **Layout Designer**: Recursive, visual editor for display skeletons with Flexbox/Grid support.
+  - **Layout Designer**: Recursive, visual editor for display skeletons with Flexbox/Grid support. Full light/dark mode compatibility.
   - **Screen Manager**: Data-binding interface for mapping POS Catalog and Media assets to layout slots.
+  - **Grouped Navigation**: Direct sidebar access to Screens, Layouts, and Labels under the Presentation section.
   - **Real-time Synchronization**: Zero-refresh updates pushed to hardware displays via Socket.io.
   - **Multi-Output Support**: Assign screens to physical HDMI ports or unique web slugs.
 
@@ -51,4 +56,5 @@
 - **Database**: Postgres 16 with Row-Level Security (RLS).
 - **Real-time**: Socket.io for instant updates.
 - **Hardware Simulation**: Dockerized Android OS (Redroid) for signage verification.
+- **Unified Tag Engine (Spec 017)**: Polymorphic tagging system with organization-level isolation and color-coding for any UUID-based entity.
 - **Domains**: IAM, Procurement, Culinary, Intelligence, Accounting, Presentation, Hardware, Integrations.
