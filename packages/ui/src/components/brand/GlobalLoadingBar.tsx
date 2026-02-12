@@ -11,7 +11,7 @@ export function GlobalLoadingBar() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (isLoading) {
       setVisible(true);
       setProgress(0);

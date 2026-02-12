@@ -59,7 +59,11 @@ export class SquareDriver implements PosInterface {
         types: 'ITEM,CATEGORY',
       })) as any;
       const body = response.result || response.data || response;
-      const objects = body.objects || [];
+      let objects = body.objects || [];
+
+      if (objects.length === 0 && Array.isArray(body)) {
+        objects = body;
+      }
 
       // Flatten categories and products into a single array, tagging each item with its type
       const catalogItems = objects.flatMap((obj: any) => {
@@ -245,7 +249,17 @@ export class SquareDriver implements PosInterface {
         }
 
         // Small delay to let Square process the deletions
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+
+        // Verify it's actually empty
+        const verify = (await this.client.catalog.search({
+            objectTypes: ['ITEM', 'CATEGORY'],
+        })) as any;
+        const vBody = verify.result || verify.data || verify;
+        if (vBody.objects?.length > 0) {
+            logger.warn(`[Square] Catalog not empty after wipe (${vBody.objects.length} remaining). Waiting more...`);
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+        }
       }
     } catch (error: any) {
       logger.warn('[Square] Pre-seed wipe failed or was empty:', error.message);
@@ -315,78 +329,77 @@ export class SquareDriver implements PosInterface {
       },
     ];
 
-    const objects: any[] = [];
-
-    // 1. Add Categories to batch - use simple alphanumeric temp IDs
-    categoryNames.forEach((name) => {
-      const safeName = name.replace(/[^a-zA-Z0-9]/g, '');
-      objects.push({
-        type: 'CATEGORY',
-        id: `#cat${safeName}`,
-        categoryData: { name },
-      });
-    });
-
-    // 2. Add Items to batch with references to the categories
-    itemConfigs.forEach((item) => {
-      const safeItemName = item.name.replace(/[^a-zA-Z0-9]/g, '');
-      const safeCatName = item.category.replace(/[^a-zA-Z0-9]/g, '');
-
-      objects.push({
-        type: 'ITEM',
-        id: `#item${safeItemName}`,
-        itemData: {
-          name: item.name,
-          description: item.description,
-          categoryId: `#cat${safeCatName}`,
-          variations: [
-            {
-              type: 'ITEM_VARIATION',
-              id: `#var${safeItemName}`,
-              itemVariationData: {
-                name: 'Regular',
-                pricingType: 'FIXED_PRICING',
-                priceMoney: {
-                  amount: BigInt(item.price), // Square SDK v32+ actually prefers BigInt for amounts
-                  currency: 'USD',
-                },
-              },
-            },
-          ],
-        },
-      });
-    });
-
-    try {
-      const timestamp = Date.now();
-      logger.info(
-        `[Square] Sending batch upsert with ${objects.length} objects...`,
-      );
-
-      const response = (await this.client.catalog.batchUpsert({
-        idempotencyKey: `seed_${timestamp}_${Math.random().toString(36).substring(7)}`,
-        batches: [{ objects }],
-      })) as any;
-
-      const resultBody = response.result || response.data || response;
-      const seededCount = resultBody.objects?.length || 0;
-
-      logger.info(`[Square] Batch seeded ${seededCount} objects.`);
-
-      if (seededCount === 0) {
-        logger.warn(
-          '[Square] Batch seeded 0 objects. Response body:',
-          JSON.stringify(resultBody),
-        );
+    // 1. Create Categories individually
+    for (const name of categoryNames) {
+      try {
+        await this.client.catalog.object.upsert({
+          idempotencyKey: `seed_cat_${Date.now()}_${name.toLowerCase().replace(/\s+/g, '_')}`,
+          object: {
+            type: 'CATEGORY',
+            id: `#${name.replace(/\s+/g, '')}`,
+            categoryData: { name },
+          },
+        });
+        logger.info(`[Square] Seeded category: ${name}`);
+      } catch (error: any) {
+        logger.error(`[Square] Failed to seed category ${name}:`, error.message);
       }
+    }
+
+    // 2. Fetch all categories to get their REAL Square IDs
+    const catNameToRealId = new Map<string, string>();
+    try {
+        const response = (await this.client.catalog.list({
+            types: 'CATEGORY',
+        })) as any;
+        const body = response.result || response.data || response;
+        let cats = body.objects || [];
+        if (cats.length === 0 && Array.isArray(body)) cats = body;
+        
+        cats.forEach((c: any) => {
+            if (c.type === 'CATEGORY' && c.categoryData?.name) {
+                catNameToRealId.set(c.categoryData.name, c.id);
+            }
+        });
+        logger.info(`[Square] Mapped ${catNameToRealId.size} categories for item assignment.`);
     } catch (error: any) {
-      const errorBody = error.result || error.data || error;
-      logger.error(
-        '[Square] Batch seeding failed:',
-        error.message,
-        JSON.stringify(errorBody?.errors || errorBody),
-      );
-      throw error;
+        logger.error(`[Square] Failed to fetch categories for mapping:`, error.message);
+    }
+
+    // 3. Create Items referencing the real Category IDs
+    for (const item of itemConfigs) {
+      const categoryId = catNameToRealId.get(item.category);
+      try {
+        await this.client.catalog.object.upsert({
+          idempotencyKey: `seed_item_${Date.now()}_${item.name.toLowerCase().replace(/\s+/g, '_')}`,
+          object: {
+            type: 'ITEM',
+            id: `#${item.name.replace(/\s+/g, '')}`,
+            itemData: {
+              name: item.name,
+              description: item.description,
+              categoryId,
+              variations: [
+                {
+                  type: 'ITEM_VARIATION',
+                  id: `#var${item.name.replace(/\s+/g, '')}`,
+                  itemVariationData: {
+                    name: 'Regular',
+                    pricingType: 'FIXED_PRICING',
+                    priceMoney: {
+                      amount: BigInt(item.price),
+                      currency: 'USD',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        });
+        logger.info(`[Square] Seeded item: ${item.name} (Category ID: ${categoryId || 'NONE'})`);
+      } catch (error: any) {
+        logger.error(`[Square] Failed to seed item ${item.name}:`, error.message);
+      }
     }
 
     logger.info('[Square] Expanded catalog seeding complete.');

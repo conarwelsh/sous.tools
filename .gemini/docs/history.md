@@ -1,3 +1,17 @@
+## 2026-02-12 (Square Integration Stability & Catalog Fixes)
+
+- **Square Catalog Seeding Robustness:**
+    - Resolved issues where items were not being correctly assigned to categories during Square sandbox seeding.
+    - **Sequential Upserts:** Refactored `SquareDriver.seedCatalog` to create categories individually and fetch their real Square IDs before creating items, ensuring reliable object references.
+    - **Wipe Verification:** Added a 5-second delay and manual verification step after deleting existing catalog objects to ensure a clean state before re-seeding.
+- **Robust Square Synchronization:**
+    - **Array Body Handling:** Fixed `SquareDriver.fetchCatalog` to correctly handle responses where the Square SDK returns an array directly instead of a nested `objects` property.
+    - **Name-Based Mapping Fallback:** Implemented a robust fallback mechanism in `IntegrationsService.sync` that uses product names to map categories when Square sandbox fails to return explicit category IDs in item metadata.
+    - **Data Integrity:** Verified successful end-to-end synchronization of 14 catalog objects (6 categories, 8 items) with correct relational mapping in the local database.
+- **UI & Environment:**
+    - Verified that correctly mapped Square categories and products are now available in the **Screen Editor** for data binding.
+    - Successfully rebuilt `@sous/api` to apply synchronization logic improvements.
+
 ## 2026-02-12 (Database Health Check & Infrastructure Fixes)
 
 - **Infrastructure Stability & Permissions:**

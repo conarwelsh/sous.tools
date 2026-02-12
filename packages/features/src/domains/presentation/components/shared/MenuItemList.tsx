@@ -29,7 +29,9 @@ export function MenuItemList({
     2: "grid-cols-2",
     3: "grid-cols-3",
     4: "grid-cols-4",
-  }[columns as 1 | 2 | 3 | 4] || "grid-cols-2";
+    5: "grid-cols-5",
+    6: "grid-cols-6",
+  }[columns as 1 | 2 | 3 | 4 | 5 | 6] || "grid-cols-2";
 
   return (
     <div className={cn("grid gap-8 p-8 w-full", gridColsClass)}>

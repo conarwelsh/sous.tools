@@ -44,6 +44,16 @@ export class CulinaryService {
       .where(and(...filters));
   }
 
+  async getProductByName(organizationId: string, name: string) {
+      // Simple lookup, could use ilike or lower() for true case-insensitivity if needed
+      return this.dbService.db.query.products.findFirst({
+          where: and(
+              eq(products.organizationId, organizationId),
+              eq(products.name, name)
+          )
+      });
+  }
+
   async createProduct(data: typeof products.$inferInsert) {
     const result = await this.dbService.db
       .insert(products)

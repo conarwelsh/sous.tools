@@ -635,6 +635,66 @@ export function LayoutDesigner({
                  </div>
                </View>
              )}
+
+             <View className="gap-2 border-t border-border pt-4 mt-2">
+                <Text className="text-muted-foreground font-bold uppercase text-[8px] tracking-widest">Display Layout</Text>
+                <div className="grid grid-cols-6 gap-1">
+                  {[1, 2, 3, 4, 5, 6].map(num => (
+                    <Button
+                      key={num}
+                      onClick={() => handleUpdateSlotAssignment(node.id!, {
+                        componentProps: { ...assignment.componentProps, columns: num }
+                      })}
+                      variant="outline"
+                      className={cn(
+                        "h-8 border-border p-0",
+                        (assignment.componentProps?.columns || 2) === num && "border-sky-500 bg-sky-500/5"
+                      )}
+                    >
+                      <span className={cn(
+                        "text-[10px] font-black uppercase",
+                        (assignment.componentProps?.columns || 2) === num ? "text-sky-500" : "text-muted-foreground"
+                      )}>{num}</span>
+                    </Button>
+                  ))}
+                </div>
+                
+                <div className="flex flex-row gap-4 mt-2">
+                  <div 
+                    onClick={() => handleUpdateSlotAssignment(node.id!, {
+                      componentProps: { ...assignment.componentProps, showPrice: assignment.componentProps?.showPrice === false }
+                    })}
+                    className="flex items-center gap-2 cursor-pointer group"
+                  >
+                    <div 
+                      className={cn(
+                        "w-4 h-4 rounded border border-border flex items-center justify-center transition-colors",
+                        (assignment.componentProps?.showPrice !== false) ? "bg-sky-500 border-sky-500" : "bg-muted"
+                      )}
+                    >
+                      {(assignment.componentProps?.showPrice !== false) && <Check size={10} className="text-white" />}
+                    </div>
+                    <span className="text-[8px] font-bold uppercase text-muted-foreground group-hover:text-foreground transition-colors">Show Price</span>
+                  </div>
+
+                  <div 
+                    onClick={() => handleUpdateSlotAssignment(node.id!, {
+                      componentProps: { ...assignment.componentProps, showDescription: assignment.componentProps?.showDescription === false }
+                    })}
+                    className="flex items-center gap-2 cursor-pointer group"
+                  >
+                    <div 
+                      className={cn(
+                        "w-4 h-4 rounded border border-border flex items-center justify-center transition-colors",
+                        (assignment.componentProps?.showDescription !== false) ? "bg-sky-500 border-sky-500" : "bg-muted"
+                      )}
+                    >
+                      {(assignment.componentProps?.showDescription !== false) && <Check size={10} className="text-white" />}
+                    </div>
+                    <span className="text-[8px] font-bold uppercase text-muted-foreground group-hover:text-foreground transition-colors">Show Description</span>
+                  </div>
+                </div>
+             </View>
           </View>
         )}
 
