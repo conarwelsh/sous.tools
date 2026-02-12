@@ -223,10 +223,10 @@ export class SquareDriver implements PosInterface {
 
     // 1. Wipe existing catalog data first
     try {
-      // Use search to get ALL items and categories if possible, or just list
-      const response = (await this.client.catalog.list({
-        types: 'ITEM,CATEGORY',
+      const response = (await this.client.catalog.search({
+        objectTypes: ['ITEM', 'CATEGORY'],
       })) as any;
+      
       const body = response.result || response.data || response;
       const objects = body.objects || [];
       const idsToDelete = objects.map((obj: any) => obj.id);
@@ -235,11 +235,17 @@ export class SquareDriver implements PosInterface {
         logger.info(
           `[Square] Deleting ${idsToDelete.length} existing catalog objects...`,
         );
-        await this.client.catalog.batchDelete({
-          objectIds: idsToDelete,
-        });
+        
+        // Square batchDelete has a limit of 200 IDs
+        for (let i = 0; i < idsToDelete.length; i += 200) {
+          const batch = idsToDelete.slice(i, i + 200);
+          await this.client.catalog.batchDelete({
+            objectIds: batch,
+          });
+        }
+        
         // Small delay to let Square process the deletions
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       }
     } catch (error: any) {
       logger.warn('[Square] Pre-seed wipe failed or was empty:', error.message);
@@ -341,7 +347,7 @@ export class SquareDriver implements PosInterface {
                 name: 'Regular',
                 pricingType: 'FIXED_PRICING',
                 priceMoney: {
-                  amount: BigInt(item.price),
+                  amount: BigInt(item.price), // Square SDK v32+ actually prefers BigInt for amounts
                   currency: 'USD',
                 },
               },
@@ -352,21 +358,30 @@ export class SquareDriver implements PosInterface {
     });
 
     try {
+      const timestamp = Date.now();
+      logger.info(`[Square] Sending batch upsert with ${objects.length} objects...`);
+      
       const response = (await this.client.catalog.batchUpsert({
-        idempotencyKey: `seed_${Date.now()}`,
+        idempotencyKey: `seed_${timestamp}_${Math.random().toString(36).substring(7)}`,
         batches: [{ objects }],
       })) as any;
 
       const resultBody = response.result || response.data || response;
+      const seededCount = resultBody.objects?.length || 0;
+      
       logger.info(
-        `[Square] Batch seeded ${resultBody.objects?.length || 0} objects with proper references.`,
+        `[Square] Batch seeded ${seededCount} objects.`,
       );
+      
+      if (seededCount === 0) {
+        logger.warn('[Square] Batch seeded 0 objects. Response body:', JSON.stringify(resultBody));
+      }
     } catch (error: any) {
       const errorBody = error.result || error.data || error;
       logger.error(
         '[Square] Batch seeding failed:',
         error.message,
-        errorBody?.errors,
+        JSON.stringify(errorBody?.errors || errorBody),
       );
       throw error;
     }

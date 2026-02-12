@@ -40,30 +40,17 @@ export function createLogger(options: { name: string; config?: LoggerConfig }) {
 
   // Transports are only supported on server in Pino
   if (isServer) {
-    // 1. Local Development Pretty Printing
-    if (isDev && !useJson) {
-      transports.push({
-        target: "pino-pretty",
-        options: {
-          colorize: true,
-          translateTime: "HH:MM:ss Z",
-          ignore: "pid,hostname",
-          messageFormat: `[{name}] {msg}`,
-        },
-      });
-    }
-
-    // 2. Centralized Local Log File
+    // 1. Centralized Local Log File
     // Note: We avoid dynamic path detection here to keep it stable
     const home = process.env.HOME || process.env.USERPROFILE;
-    if (home) {
+    if (home && !isDev) { // Only file log in prod/staging to save I/O in dev
       transports.push({
         target: "pino/file",
         options: { destination: `${home}/.sous/logs/combined.log`, mkdir: true },
       });
     }
 
-    // 3. Remote Transport (Better Stack / Logtail)
+    // 2. Remote Transport (Better Stack / Logtail)
     if (logConfig.logger.logtailToken) {
       transports.push({
         target: "@logtail/pino",
@@ -81,10 +68,10 @@ export function createLogger(options: { name: string; config?: LoggerConfig }) {
         return store ? Object.fromEntries(store) : {};
       },
       browser: isServer ? undefined : { asObject: true },
-    },
-    isServer && transports.length > 0
-      ? pino.transport({ targets: transports })
-      : undefined,
+      transport: isServer && transports.length > 0
+        ? { targets: transports }
+        : undefined,
+    }
   );
 
   return baseLogger;

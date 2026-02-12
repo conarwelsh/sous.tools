@@ -106,14 +106,29 @@ async function fetchInfisicalSecrets(env: string): Promise<Record<string, string
  * Normalizes public environment variables for the client
  */
 function getPublicEnv() {
-  const envVars: any = isServer ? process.env : (globalThis as any).process?.env || {};
-  const publicEnv: Record<string, string> = {};
-  for (const key in envVars) {
-    if (key.startsWith("NEXT_PUBLIC_") || key.startsWith("VITE_")) {
-      publicEnv[key] = envVars[key]!;
+  if (isServer) {
+    const envVars: any = process.env || {};
+    const publicEnv: Record<string, string> = {};
+    for (const key in envVars) {
+      if (key.startsWith("NEXT_PUBLIC_") || key.startsWith("VITE_")) {
+        publicEnv[key] = envVars[key]!;
+      }
     }
+    return publicEnv;
+  } else {
+    // Browser side - Next.js bakes these in if we reference them explicitly
+    // This is critical for static analysis during Next.js build
+    return {
+      NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+      NEXT_PUBLIC_WEB_URL: process.env.NEXT_PUBLIC_WEB_URL,
+      NEXT_PUBLIC_DOCS_URL: process.env.NEXT_PUBLIC_DOCS_URL,
+      NEXT_PUBLIC_APP_ENV: process.env.NEXT_PUBLIC_APP_ENV,
+      NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION,
+      NEXT_PUBLIC_ENABLE_REGISTRATION: process.env.NEXT_PUBLIC_ENABLE_REGISTRATION,
+      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    };
   }
-  return publicEnv;
 }
 
 /**
@@ -122,21 +137,22 @@ function getPublicEnv() {
  */
 function buildPublicConfig(): Config {
   const envVars = getPublicEnv();
-  const env = (envVars.NEXT_PUBLIC_APP_ENV || "development") as any;
+  const env = (envVars.NEXT_PUBLIC_APP_ENV || (isServer ? process.env.NODE_ENV : "development")) as any;
+  const isDev = env === "development" || env === "dev";
 
   return {
     env,
     api: {
       port: 4000,
-      url: envVars.NEXT_PUBLIC_API_URL || "http://localhost:4000",
+      url: envVars.NEXT_PUBLIC_API_URL || (isDev ? "http://localhost:4000" : undefined),
     },
     web: {
       port: 3000,
-      url: envVars.NEXT_PUBLIC_WEB_URL || "http://localhost:3000",
+      url: envVars.NEXT_PUBLIC_WEB_URL || (isDev ? "http://localhost:3000" : undefined),
     },
     docs: {
       port: 3001,
-      url: envVars.NEXT_PUBLIC_DOCS_URL || "http://localhost:3001",
+      url: envVars.NEXT_PUBLIC_DOCS_URL || (isDev ? "http://localhost:3001" : undefined),
     },
     features: {
       enableRegistration: envVars.NEXT_PUBLIC_ENABLE_REGISTRATION !== "false",
@@ -192,6 +208,18 @@ export async function resolveConfig(): Promise<Config> {
   const env = await getEnv();
   const envVars = { ...process.env };
 
+  // 0. Dynamic WSL IP Detection
+  let wslIp = "localhost";
+  if (isServer) {
+    try {
+      const cp = await import("child_process");
+      const stdout = cp.execSync("ip route show default | awk '{print $3}'").toString().trim();
+      if (stdout) wslIp = stdout;
+    } catch (e) {
+      // Fallback to localhost
+    }
+  }
+
   // 1. Fetch from Vault if server-side and credentials exist
   if (isServer && env !== "test") {
     const vaultSecrets = await fetchInfisicalSecrets(env);
@@ -203,6 +231,13 @@ export async function resolveConfig(): Promise<Config> {
         process.env[key] = value;
       }
     }
+
+    // Ensure public equivalents are set for critical variables if they exist in vault without prefix
+    // This allows Next.js build to bake them in
+    if (process.env.API_URL && !process.env.NEXT_PUBLIC_API_URL) process.env.NEXT_PUBLIC_API_URL = process.env.API_URL;
+    if (process.env.WEB_URL && !process.env.NEXT_PUBLIC_WEB_URL) process.env.NEXT_PUBLIC_WEB_URL = process.env.WEB_URL;
+    if (process.env.DOCS_URL && !process.env.NEXT_PUBLIC_DOCS_URL) process.env.NEXT_PUBLIC_DOCS_URL = process.env.DOCS_URL;
+    if (process.env.APP_ENV && !process.env.NEXT_PUBLIC_APP_ENV) process.env.NEXT_PUBLIC_APP_ENV = process.env.APP_ENV;
   }
 
   // 2. Map environment variables to schema
@@ -211,15 +246,15 @@ export async function resolveConfig(): Promise<Config> {
     api: {
       port: Number(envVars.PORT_API || 4000),
       url: envVars.API_URL || 
-           (envVars.NEXT_PUBLIC_API_URL && envVars.NEXT_PUBLIC_API_URL !== "undefined" ? envVars.NEXT_PUBLIC_API_URL : `http://localhost:${envVars.PORT_API || 4000}`),
+           (envVars.NEXT_PUBLIC_API_URL && envVars.NEXT_PUBLIC_API_URL !== "undefined" ? envVars.NEXT_PUBLIC_API_URL : `http://${wslIp}:${envVars.PORT_API || 4000}`),
     },
     web: {
       port: Number(envVars.PORT_WEB || 3000),
-      url: envVars.WEB_URL || envVars.NEXT_PUBLIC_WEB_URL || `http://localhost:${envVars.PORT_WEB || 3000}`,
+      url: envVars.WEB_URL || envVars.NEXT_PUBLIC_WEB_URL || `http://${wslIp}:${envVars.PORT_WEB || 3000}`,
     },
     docs: {
       port: Number(envVars.PORT_DOCS || 3001),
-      url: envVars.DOCS_URL || envVars.NEXT_PUBLIC_DOCS_URL || `http://localhost:${envVars.PORT_DOCS || 3001}`,
+      url: envVars.DOCS_URL || envVars.NEXT_PUBLIC_DOCS_URL || `http://${wslIp}:${envVars.PORT_DOCS || 3001}`,
     },
     db: {
       url: envVars.DATABASE_URL || "postgres://localhost:5432/sous",

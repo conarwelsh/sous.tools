@@ -27,11 +27,6 @@ export class InstallCommand extends CommandRunner {
       rootDir = path.dirname(rootDir);
     }
 
-    if (target === 'agent') {
-      await this.installWindowsAgent(rootDir);
-      return;
-    }
-
     if (target === 'shell') {
       // Handled by subCommand, but just in case
       return;
@@ -100,52 +95,9 @@ export class InstallCommand extends CommandRunner {
     console.log('   Run: source ~/.zshrc');
     console.log('\n3. 🚀 Launch Development Tools:');
     console.log('   Run: pnpm dev');
-    console.log('\n4. 🪟 Windows Users (WSL2):');
-    console.log('   Run: sous dev install agent (to fix emulator bridge)');
-    console.log('\n5. 🪟 Login to render: render login');
+    console.log('\n4. 🪟 Login to render: render login');
     console.log('\n5. 🪟 Login to vercel: vercel login');
     console.log('\n' + '='.repeat(60) + '\n');
-  }
-
-  private async installWindowsAgent(rootDir: string) {
-    if (
-      !fs.existsSync('/proc/version') ||
-      !execSync('cat /proc/version')
-        .toString()
-        .toLowerCase()
-        .includes('microsoft')
-    ) {
-      logger.warn('⚠️  This command is only intended for WSL2 environments.');
-      return;
-    }
-
-    logger.info('🪟 Installing Sous Windows Agent (WSL Bridge)...');
-    try {
-      // 1. Ensure Windows-side directory exists
-      execSync(
-        'powershell.exe -Command "New-Item -ItemType Directory -Force -Path C:\\tools\\sous-agent" > /dev/null',
-      );
-
-      // 2. Copy files (idempotent)
-      execSync(
-        `cp ${path.join(rootDir, 'scripts/windows/*')} /mnt/c/tools/sous-agent/`,
-      );
-
-      // 3. Configure Firewall and Unblock (requires admin elevation)
-      logger.info(
-        '🛡️  Requesting admin privileges for Windows Firewall configuration...',
-      );
-      execSync(
-        'powershell.exe -Command "Start-Process powershell -Verb RunAs -ArgumentList \'New-NetFirewallRule -DisplayName \\"Sous Agent (TCP-In)\\" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 4040 -ErrorAction SilentlyContinue; Unblock-File -Path C:\\tools\\sous-agent\\sous-tray.ps1\'"',
-      );
-
-      logger.info('✅ Windows Agent files installed to C:\\tools\\sous-agent');
-      logger.info(
-        '👉 To finish, double-click C:\\tools\\sous-agent\\sous-launcher.vbs on your Windows host.',
-      );
-    } catch (e: any) {
-      logger.error(`❌ Failed to install Windows Agent: ${e.message}`);
-    }
   }
 
   @Option({

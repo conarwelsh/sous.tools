@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "test": "echo \"No tests defined\" && exit 0",
-    "dev": "next dev -H 0.0.0.0 -p ${PORT:-3000}",
+    "dev": "next dev --turbo -H 0.0.0.0 -p ${PORT:-3000}",
     "build": "next build --webpack",
     "typecheck": "tsc --noEmit",
     "start": "next start",

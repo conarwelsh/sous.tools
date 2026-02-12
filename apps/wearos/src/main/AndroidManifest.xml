@@ -32,7 +32,7 @@
                 android:resource="@xml/watch_face" />
             <meta-data
                 android:name="com.google.android.wearable.watchface.preview"
-                android:resource="@drawable/sous_watch_preview" />
+                android:resource="@mipmap/ic_launcher" />
         </service>
 
         <service
@@ -49,7 +49,7 @@
                 android:resource="@xml/watch_face" />
             <meta-data
                 android:name="com.google.android.wearable.watchface.preview"
-                android:resource="@drawable/sous_watch_preview" />
+                android:resource="@mipmap/ic_launcher" />
         </service>
 
         <service

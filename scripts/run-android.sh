@@ -1,38 +1,31 @@
 #!/bin/bash
-# Wrapper to run Capacitor Android from WSL targeting a Windows emulator
+# Wrapper to run Capacitor Android from WSL targeting a Windows emulator via Windows Agent
 
 # 1. Setup Environment
 WIN_IP=$(ip route show default | awk '{print $3}')
-export ANDROID_HOME=$HOME/Android/Sdk
-export ADBHOST=$WIN_IP
-export ADB_SERVER_SOCKET=tcp:$WIN_IP:5037
+AGENT_URL="http://$WIN_IP:4040"
 
-# 2. Fix PATH (remove Windows paths to avoid gradle conflicts if any)
+# 2. Fix PATH (remove Windows paths to avoid gradle conflicts)
 export PATH=$(echo "$PATH" | tr ":" "\n" | grep -v "mnt/c" | tr "\n" ":")
 
 # 3. Run Command
 cd apps/web || exit 1
-FLAVOR_ARG=""
-if [ ! -z "$2" ]; then
-  FLAVOR_ARG="--flavor $2"
-fi
+FLAVOR=${2:-default}
+FLAVOR_CAP=$(echo "$FLAVOR" | awk '{print toupper(substr($0,1,1))substr($0,2)}')
 
 # Set Live Reload URL to WSL IP so emulator can reach it
 WSL_IP=$(hostname -I | awk '{print $1}')
-# Ensure we don't use 127.0.0.1
 if [ "$WSL_IP" == "127.0.0.1" ] || [ -z "$WSL_IP" ]; then
   WSL_IP=$(ip route get 1 | awk '{print $7;exit}')
 fi
 export CAPACITOR_LIVE_RELOAD_URL="http://$WSL_IP:${PORT:-3000}"
 
-echo "🚀 Running Capacitor Android on target $1 with flavor ${2:-default}..."
+echo "🚀 Running Capacitor Android on target $1 with flavor $FLAVOR..."
 echo "🔗 Live Reload URL: $CAPACITOR_LIVE_RELOAD_URL"
 
-# Inject Host IP into strings.xml for native code to use
+# Inject Host IP into strings.xml
 STRINGS_FILE="android/app/src/main/res/values/strings.xml"
-if [ ! -f "$STRINGS_FILE" ]; then
-  echo "⚠️ Warning: $STRINGS_FILE not found, skipping IP injection."
-else
+if [ -f "$STRINGS_FILE" ]; then
   if grep -q "sous_host_ip" "$STRINGS_FILE"; then
     sed -i "s|<string name=\"sous_host_ip\">.*</string>|<string name=\"sous_host_ip\">$WSL_IP</string>|" "$STRINGS_FILE"
   else
@@ -41,107 +34,79 @@ else
 fi
 
 NPX_EXE="/home/conar/.nvm/versions/node/v25.2.1/bin/npx"
-PNPM_EXE="/home/conar/.local/share/pnpm/pnpm"
-
-# CRITICAL: Use a global lock for BOTH assets AND building because all flavors share the same android/ folder
 LOCK_FILE="/tmp/sous-android-build.lock"
 
 (
-  echo "⏳ [$2] Waiting for build lock..."
+  echo "⏳ [$FLAVOR] Waiting for build lock..."
   flock -x 200 || exit 1
-  echo "🔐 [$2] Lock acquired."
+  echo "🔐 [$FLAVOR] Lock acquired."
 
-  # Generate Assets (Icons, Splash)
   if [ -d "assets" ]; then
-    echo "🎨 [$2] Generating assets..."
     $NPX_EXE capacitor-assets generate --android
-  else
-    echo "⚠️ [$2] 'apps/web/assets' directory not found. Skipping icon/splash generation."
   fi
 
-  # Clean and Sync
-  echo "🔄 [$2] Cleaning and Syncing Capacitor..."
   rm -rf android/app/src/main/assets/public
   rm -rf android/app/src/main/assets/capacitor.config.json
   
-  # Ensure the config uses the correct port and IP
   export PORT=${PORT:-3000}
   export WSL_IP=$WSL_IP
   $NPX_EXE cap sync android
 
-  # Force a fresh APK build
-  FLAVOR_CAP=$(echo "${2:-default}" | awk '{print toupper(substr($0,1,1))substr($0,2)}')
   echo "🏗️ Building fresh APK for flavor $FLAVOR_CAP..."
   cd android && export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" && ./gradlew clean "assemble${FLAVOR_CAP}Debug" && cd ..
-
-  echo "📄 Verifying generated config..."
-  cat android/app/src/main/assets/capacitor.config.json
   
-  echo "🔓 [$2] Releasing lock."
+  echo "🔓 [$FLAVOR] Releasing lock."
 ) 200>$LOCK_FILE
 
-echo "📲 Reinstalling and clearing data..."
-WIN_IP=$(ip route show default | awk '{print $3}')
-AGENT_URL="http://$WIN_IP:4040"
-
-# Map flavor to package ID and Activity
-PKG_ID="com.sous.${2:-tools}"
+# Deployment via Agent
+PKG_ID="com.sous.$FLAVOR"
+if [ "$FLAVOR" == "default" ] || [ "$FLAVOR" == "tools" ]; then PKG_ID="com.sous.tools"; fi
 ACTIVITY="com.sous.tools.MainActivity"
-if [ "${2:-default}" == "default" ] || [ "${2:-default}" == "tools" ]; then PKG_ID="com.sous.tools"; fi
 
-# Helper to call agent or direct adb
-call_adb() {
-  local serial=$1
+# Helper to call agent
+call_agent() {
+  local cmd=$1
   local args=$2
-  
-  # Try direct adb first if WIN_IP is set but we want to try local connection
-  # If the user fixed interop, 'adb' command in WSL should see the devices
-  if adb -s "$serial" shell getprop ro.product.model >/dev/null 2>&1; then
-    echo "⚡ Using direct ADB for $serial"
-    adb -s "$serial" $args
-  else
-    echo "🛰️  Falling back to Agent for $serial"
-    PAYLOAD=$(python3 -c "import json; import sys; print(json.dumps({'command': 'adb', 'args': sys.argv[1]}))" "-s $serial $args")
-    curl -s -X POST -H 'Content-Type: application/json' -d "$PAYLOAD" "$AGENT_URL"
-  fi
+  local payload=$(python3 -c "import json, sys; print(json.dumps({'command': sys.argv[1], 'args': sys.argv[2]}))" "$cmd" "$args")
+  curl -s -X POST -H 'Content-Type: application/json' -d "$payload" "$AGENT_URL"
 }
 
-# Force uninstall via agent
-echo "🗑️ Force uninstalling old app ($PKG_ID) from $1..."
-call_adb "$1" "uninstall $PKG_ID"
+echo "📲 Reinstalling $PKG_ID on $1 via Agent..."
 
-# WIPE DATA to be sure (in case uninstall fails to clear some cache)
-echo "🧹 Wiping app data ($PKG_ID) on $1..."
-call_adb "$1" "shell pm clear $PKG_ID"
+# Uninstall
+echo "🗑️  Uninstalling..."
+call_agent "adb" "-s $1 uninstall $PKG_ID"
+
+# Clear (Ignore error as uninstall might have removed it already)
+echo "🧹 Wiping data..."
+call_agent "adb" "-s $1 shell pm clear $PKG_ID" > /dev/null 2>&1
 
 sleep 2
 
-# Manual install via agent - Using RAW string in Python
-APK_PATH="\\\\wsl.localhost\\Ubuntu-22.04\\home\\conar\\sous.tools\\apps\\web\\android\\app\\build\\outputs\\apk\\${2:-tools}\\debug\\app-${2:-tools}-debug.apk"
-echo "🏗️ Manually installing fresh APK ($APK_PATH) via agent..."
-# For install, we usually need the agent because the APK is on WSL but ADB is on Windows
-# UNLESS the user mapped the WSL drive
-if adb -s "$1" install -r "apps/web/android/app/build/outputs/apk/${2:-tools}/debug/app-${2:-tools}-debug.apk" >/dev/null 2>&1; then
-    echo "⚡ Direct install successful"
-else
-    echo "🛰️  Agent install fallback..."
-    PAYLOAD=$(python3 -c "import json; print(json.dumps({'command': 'adb', 'args': r'-s $1 install -r \"$APK_PATH\"'}))")
-    curl -s -X POST -H 'Content-Type: application/json' -d "$PAYLOAD" "$AGENT_URL"
-fi
+# Install
+# Note: APK path uses flavor-specific folder. POS -> posDebug
+APK_DIR=$(echo "$FLAVOR" | tr '[:upper:]' '[:lower:]')
+APK_PATH="\\\\wsl.localhost\\Ubuntu-22.04\\home\\conar\\sous.tools\\apps\\web\\android\\app\\build\\outputs\\apk\\$APK_DIR\\debug\\app-$APK_DIR-debug.apk"
+
+echo "🏗️  Installing APK from $APK_PATH..."
+PAYLOAD=$(python3 -c "import json, sys; print(json.dumps({'command': 'adb', 'args': f'-s $1 install -r \"{sys.argv[1]}\"'}))" "$APK_PATH")
+curl -s -X POST -H 'Content-Type: application/json' -d "$PAYLOAD" "$AGENT_URL"
 
 sleep 5
 
-echo "🚀 Starting app via agent ($PKG_ID/$ACTIVITY)..."
-# Pass the CAPACITOR_LIVE_RELOAD_URL as an extra string to force WebView if the baked config is stuck
-call_adb "$1" "shell am start -n $PKG_ID/$ACTIVITY --es url \"$CAPACITOR_LIVE_RELOAD_URL\""
+echo "🚀 Starting app..."
+call_agent "adb" "-s $1 shell am start -n $PKG_ID/$ACTIVITY --es url \"$CAPACITOR_LIVE_RELOAD_URL\""
 
-# Force window to foreground after a short delay
+# Foreground
 (
   sleep 10
+  # Try various titles for the emulator window
   echo "🪟 Bringing $1 to foreground..."
-  PAYLOAD=$(python3 -c "import json; print(json.dumps({'command': 'position-window', 'title': '$1', 'x': 100, 'y': 100, 'width': 1280, 'height': 800}))")
-  call_agent_json "$PAYLOAD"
+  # Common emulator titles: "Android Emulator - <serial>", "<avd_name>", etc.
+  # We try to use the serial as a fallback in the title check
+  PAYLOAD=$(python3 -c "import json, sys; print(json.dumps({'command': 'position-window', 'title': sys.argv[1], 'x': 100, 'y': 100, 'width': 1280, 'height': 800}))" "$1")
+  curl -s -X POST -H 'Content-Type: application/json' -d "$PAYLOAD" "$AGENT_URL" > /dev/null 2>&1
 ) &
 
-sleep 5
+sleep 2
 exit 0

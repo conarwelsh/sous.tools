@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { 
   View, 
   Text, 
@@ -54,6 +54,7 @@ const nestedCollisionDetection: CollisionDetection = (args) => {
   return rectIntersection(args);
 };
 
+import { MenuItemList } from "./shared/MenuItemList";
 import { TagManager } from "../../core/tags/components/TagManager";
 import { CodeEditor } from "../../../components/CodeEditor";
 import { ImageSelector } from "./shared/ImageSelector";
@@ -399,7 +400,7 @@ function ResizableWrapper({ node, parentNode, children, onResize }: any) {
 }
 
 // Custom Renderer that supports Droppables
-function DesignerRenderer({ node, parentNode, onNodeClick, onEditClick, onResize, selectedNodeId, isRoot }: any) {
+function DesignerRenderer({ node, parentNode, onNodeClick, onEditClick, onResize, selectedNodeId, isRoot, contentMap }: any) {
   const isSelected = selectedNodeId === (node as any)._internalId;
   const isFixed = node.type === 'fixed';
 
@@ -418,6 +419,7 @@ function DesignerRenderer({ node, parentNode, onNodeClick, onEditClick, onResize
       onEditClick={onEditClick}
       onNodeClick={onNodeClick}
       isRoot={isRoot}
+      contentMap={contentMap}
       renderChildren={(children: LayoutNode[]) => (
         children.map((child) => (
           <DesignerRenderer 
@@ -429,6 +431,7 @@ function DesignerRenderer({ node, parentNode, onNodeClick, onEditClick, onResize
             onResize={onResize}
             selectedNodeId={selectedNodeId}
             isRoot={false}
+            contentMap={contentMap}
           />
         ))
       )}
@@ -504,6 +507,7 @@ export function LayoutDesigner({
   const [selectedNode, setSelectedNode] = useState<LayoutNode | null>(null);
   const [editingNode, setEditingNode] = useState<LayoutNode | null>(null);
   const [categories, setCategories] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
 
   useEffect(() => {
@@ -514,9 +518,15 @@ export function LayoutDesigner({
       setIsLoadingData(true);
       try {
         const http = await getHttpClient();
-        const categoriesData = await http.get<any[]>("/culinary/categories");
+        const [categoriesData, productsData] = await Promise.all([
+          http.get<any[]>("/culinary/categories"),
+          http.get<any[]>("/culinary/products")
+        ]);
         setCategories(categoriesData);
-      } catch (e) {} finally {
+        setProducts(productsData);
+      } catch (e) {
+        console.error("[LayoutDesigner] Failed to fetch data:", e);
+      } finally {
         setIsLoadingData(false);
       }
     };
@@ -583,20 +593,48 @@ export function LayoutDesigner({
                 {categories.map(cat => (
                   <Button 
                     key={cat.id}
-                    onClick={() => handleUpdateSlotAssignment(node.id!, {
-                      dataConfig: { ...assignment.dataConfig, filters: { ...assignment.dataConfig.filters, categoryId: cat.id } }
-                    })}
+                    onClick={() => {
+                      console.log(`[LayoutDesigner] Selecting category: ${cat.name} (${cat.id})`);
+                      handleUpdateSlotAssignment(node.id!, {
+                        dataConfig: { 
+                          ...assignment.dataConfig, 
+                          filters: { 
+                            ...(assignment.dataConfig?.filters || {}), 
+                            categoryId: cat.id 
+                          } 
+                        }
+                      });
+                    }}
                     variant="outline"
                     className={cn(
                       "h-10 border-border justify-start px-3",
-                      assignment.dataConfig.filters?.categoryId === cat.id && "border-sky-500 bg-sky-500/5"
+                      assignment.dataConfig?.filters?.categoryId === cat.id && "border-sky-500 bg-sky-500/5"
                     )}
                   >
-                    <div className={cn("w-1 h-1 rounded-full mr-2", assignment.dataConfig.filters?.categoryId === cat.id ? "bg-sky-500" : "bg-muted")} />
-                    <span className="text-[8px] font-black uppercase truncate">{cat.name}</span>
+                    <div className={cn("w-1.5 h-1.5 rounded-full mr-2", assignment.dataConfig?.filters?.categoryId === cat.id ? "bg-sky-500 shadow-[0_0_8px_rgba(14,165,233,0.5)]" : "bg-muted")} />
+                    <span className={cn(
+                      "text-[8px] font-black uppercase truncate",
+                      assignment.dataConfig?.filters?.categoryId === cat.id ? "text-foreground" : "text-muted-foreground"
+                    )}>{cat.name}</span>
                   </Button>
                 ))}
              </div>
+
+             {/* Preview of items in selected category */}
+             {assignment.dataConfig?.filters?.categoryId && (
+               <View className="mt-2 p-4 bg-muted/20 border border-border rounded-xl">
+                 <Text className="text-[7px] text-muted-foreground font-black uppercase tracking-widest mb-2">Items in Category</Text>
+                 <div className="flex flex-col gap-1">
+                   {products.filter(p => p.categoryId === assignment.dataConfig?.filters?.categoryId).length > 0 ? (
+                     products.filter(p => p.categoryId === assignment.dataConfig?.filters?.categoryId).map(p => (
+                       <Text key={p.id} className="text-[8px] text-foreground/60 font-bold">• {p.name}</Text>
+                     ))
+                   ) : (
+                     <Text className="text-[8px] text-muted-foreground italic">No items found in this category</Text>
+                   )}
+                 </div>
+               </View>
+             )}
           </View>
         )}
 
@@ -684,6 +722,46 @@ export function LayoutDesigner({
       },
     })
   );
+
+  const contentMap = useMemo(() => {
+    const slots = activeLayout.content || {};
+    return Object.entries(slots).reduce((acc, [id, slot]) => {
+      if (slot.sourceType === 'POS') {
+        const filtered = products.filter(p => {
+          if (slot.dataConfig.filters?.itemIds?.length) {
+            return slot.dataConfig.filters.itemIds.includes(p.id);
+          }
+          if (slot.dataConfig.filters?.categoryId) {
+            return p.categoryId === slot.dataConfig.filters.categoryId;
+          }
+          return false;
+        });
+
+        acc[id] = (
+          <MenuItemList 
+            items={filtered} 
+            {...(slot.componentProps || {})} 
+          />
+        );
+      } else if (slot.sourceType === 'MEDIA' && slot.dataConfig.url) {
+        acc[id] = (
+          <img src={slot.dataConfig.url} className="w-full h-full object-cover" alt="Content" />
+        );
+      } else if (slot.sourceType === 'STATIC') {
+        acc[id] = (
+          <View className="flex-1 p-4">
+            <Text className="text-foreground/80 font-bold text-lg mb-2">
+              {slot.dataConfig.staticData?.title || slot.dataConfig.staticData?.text || "Static Content"}
+            </Text>
+            {slot.dataConfig.staticData?.description && (
+              <Text className="text-muted-foreground text-xs">{slot.dataConfig.staticData.description}</Text>
+            )}
+          </View>
+        );
+      }
+      return acc;
+    }, {} as Record<string, React.ReactNode>);
+  }, [activeLayout.content, products]);
 
   const handleUpdateNode = useCallback((internalId: string, updates: Partial<LayoutNode>) => {
     setActiveLayout(prev => ({
@@ -1116,6 +1194,7 @@ export function LayoutDesigner({
             <DesignerRenderer 
               node={activeLayout.structure as LayoutNode} 
               parentNode={null}
+              contentMap={contentMap}
               onNodeClick={(node: any) => {
                 setSelectedNode(node);
                 // If it's a slot and we are in a Screen/Label/Page (not Template), open edit modal automatically

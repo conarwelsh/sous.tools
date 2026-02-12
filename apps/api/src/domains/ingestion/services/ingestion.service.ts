@@ -70,9 +70,17 @@ export class IngestionService {
       );
 
       // 2. Initialize Gemini
-      const model = this.genAI.getGenerativeModel({
-        model: 'gemini-1.5-flash',
-      });
+      let model;
+      try {
+        model = this.genAI.getGenerativeModel({
+          model: 'models/gemini-1.5-flash',
+        });
+      } catch (e) {
+        logger.warn('[AI Ingestion] models/gemini-1.5-flash ID failed, falling back to alias');
+        model = this.genAI.getGenerativeModel({
+          model: 'gemini-1.5-flash',
+        });
+      }
 
       // 3. Prepare Prompt
       const prompt = `

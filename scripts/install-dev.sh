@@ -120,64 +120,9 @@ if ! command -v infisical &> /dev/null; then
   sudo apt-get update && sudo apt-get install -y infisical
 fi
 
-# 8. WSL/Windows Bridge Setup
-if [ "$IS_WSL" = true ]; then
-  echo "🪟 Setting up Windows Agent Bridge (Consolidated Elevated Setup)..."
-  
-  # Use wslpath for reliable Windows path resolution
-  WIN_SCRIPTS_PATH=$(wslpath -w "$(pwd)/scripts/windows")
-  
-  echo "🪟 Triggering elevated setup for symlinks and firewall..."
-  
-  # We use powershell to trigger elevation. 
-  # Using single quotes for the inner command to avoid shell expansion issues.
-  powershell.exe -NoProfile -NonInteractive -Command "
-    Start-Process powershell -Verb RunAs -ArgumentList '-NoProfile', '-Command', '
-      Write-Host \"👨‍🍳 Initializing Sous Windows Setup...\" -ForegroundColor Cyan;
-      
-      # 1. Create Directory
-      if (!(Test-Path \"C:\tools\sous-agent\")) { 
-        New-Item -ItemType Directory -Force -Path \"C:\tools\sous-agent\" | Out-Null 
-      };
-
-      # 2. Create Symlinks
-      \$scriptsPath = \"$WIN_SCRIPTS_PATH\";
-      \$files = @(''agent.ico'', ''agent.png'', ''sous-agent.js'', ''sous-launcher.vbs'', ''sous-tray.ps1'');
-      foreach (\$f in \$files) {
-        \$target = Join-Path \$scriptsPath \$f;
-        \$link = \"C:\tools\sous-agent\\\$f\";
-        if (Test-Path \$link) { Remove-Item \$link -Force };
-        New-Item -ItemType SymbolicLink -Path \$link -Target \$target -Force | Out-Null;
-      }
-      Write-Host \"✅ Symlinks created.\" -ForegroundColor Green;
-
-      # 3. Firewall
-      New-NetFirewallRule -DisplayName \"Sous Agent (TCP-In)\" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 4040 -ErrorAction SilentlyContinue | Out-Null;
-      Write-Host \"✅ Firewall configured.\" -ForegroundColor Green;
-
-      # 4. Unblock files
-      Unblock-File -Path \"C:\tools\sous-agent\*\" -ErrorAction SilentlyContinue;
-      Write-Host \"✅ Files unblocked.\" -ForegroundColor Green;
-
-      # 5. Startup Shortcut
-      \$ws = New-Object -ComObject WScript.Shell;
-      \$s = \$ws.CreateShortcut(\"\$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\SousAgent.lnk\");
-      \$s.TargetPath = \"C:\tools\sous-agent\sous-launcher.vbs\";
-      \$s.WorkingDirectory = \"C:\tools\sous-agent\";
-      \$s.Save();
-      Write-Host \"✅ Startup shortcut created.\" -ForegroundColor Green;
-
-      # 6. Run Now
-      if (Get-Process -Name \"wscript\" -ErrorAction SilentlyContinue | Where-Object { \$_.CommandLine -like \"*sous-launcher.vbs*\" }) {
-         Stop-Process -Name \"wscript\" -Force -ErrorAction SilentlyContinue;
-      }
-      Start-Process \"C:\tools\sous-agent\sous-launcher.vbs\" | Out-Null;
-      Write-Host \"🚀 Sous Windows Agent is now active.\" -ForegroundColor Cyan;
-      
-      Start-Sleep -Seconds 2;
-    '
-  "
-fi
+# 8. Finalizing
+echo "🐚 Finalizing shell configuration..."
+pnpm -w run sous dev install shell
 
 # 9. Android Development
 echo "🤖 Setting up Android Development environment..."
@@ -208,10 +153,6 @@ else
 fi
 EOF
 chmod +x "$HOME/.local/bin/studio"
-
-# 11. Finalizing
-echo "🐚 Finalizing shell configuration..."
-pnpm -w run sous dev install shell
 
 echo ""
 echo "✅ Sous Developer Environment Setup Complete!"

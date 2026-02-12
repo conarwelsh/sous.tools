@@ -35,13 +35,15 @@ SOUS_PINK=$'\\x1b[38;5;201m'
 SOUS_GRAY=$'\\x1b[38;5;244m'
 SOUS_RESET=$'\\x1b[0m'
 
-# Android Environment Bridge (WSL2 -> Windows)
-export WIN_IP=$(ip route show default | awk '{print $3}')
-export ADBHOST=$WIN_IP
-export ADB_SERVER_SOCKET=tcp:$WIN_IP:5037
+# Android Environment (Native Interop)
 export ANDROID_HOME="$HOME/Android/Sdk"
 export NDK_HOME="$ANDROID_HOME/ndk/28.0.12674011"
 export JAVA_HOME="/usr/lib/jvm/java-21-openjdk-amd64"
+
+# Favors adb.exe over adb if available (WSL interop)
+if command -v adb.exe >/dev/null 2>&1; then
+  alias adb="adb.exe"
+fi
 
 # WSL2 GUI Rendering Fixes (MESA/WebKit Overrides)
 export WEBKIT_DISABLE_COMPOSITING_MODE=1

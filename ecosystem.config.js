@@ -1,137 +1,99 @@
-const { localConfig } = require("./packages/config/dist/index");
-const path = require("path");
+/**
+ * Sous Dev 2.0 - Master Manifest
+ * 100% Process Management via PM2
+ */
+
+const path = require('path');
 
 module.exports = {
   apps: [
-    // --- Core Apps ---
+    // --- Infrastructure ---
+    {
+      name: "sous-db",
+      script: "docker logs -f sous-postgres",
+      autorestart: true,
+      namespace: "infra"
+    },
+    {
+      name: "sous-redis",
+      script: "docker logs -f sous-redis",
+      autorestart: true,
+      namespace: "infra"
+    },
+
+    // --- Core Services ---
     {
       name: "sous-api",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts api",
+      script: "pnpm nest start --watch",
+      cwd: "apps/api",
       env: {
         NODE_ENV: "development",
-        FORCE_COLOR: "1"
-      }
+        PORT: 4000
+      },
+      namespace: "core"
     },
     {
       name: "sous-web",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts web",
+      script: "pnpm next dev --turbo",
+      cwd: "apps/web",
       env: {
         NODE_ENV: "development",
-        PORT: 3000,
-        FORCE_COLOR: "1"
-      }
+        PORT: 3000
+      },
+      namespace: "core"
     },
     {
       name: "sous-docs",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts docs",
+      script: "pnpm next dev --turbo",
+      cwd: "apps/docs",
       env: {
         NODE_ENV: "development",
-        PORT: 3001,
-        FORCE_COLOR: "1"
-      }
+        PORT: 3001
+      },
+      namespace: "core"
     },
 
-    // --- Mobile / Flavor Apps (Serving via @sous/web + Capacitor) ---
-    {
-      name: "sous-kds",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts web",
-      env: {
-        NODE_ENV: "development",
-        PORT: 1423,
-        FLAVOR: "kds",
-        DIST_DIR: ".next-kds",
-        FORCE_COLOR: "1"
-      }
-    },
+    // --- Native Deployments (One-Shot) ---
+    // Note: These use scripts/device-manager.ts to ensure the emulator is ready and get its serial
     {
       name: "sous-pos",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts web",
+      script: "SERIAL=$(pnpm tsx scripts/device-manager.ts 'Pixel_Tablet') && bash scripts/run-android.sh $SERIAL pos",
+      cwd: ".",
+      autorestart: false,
       env: {
-        NODE_ENV: "development",
-        PORT: 1424,
         FLAVOR: "pos",
-        DIST_DIR: ".next-pos",
-        FORCE_COLOR: "1"
-      }
+        PORT: 3000
+      },
+      namespace: "native"
+    },
+    {
+      name: "sous-kds",
+      script: "SERIAL=$(pnpm tsx scripts/device-manager.ts 'Medium_Desktop') && bash scripts/run-android.sh $SERIAL kds",
+      cwd: ".",
+      autorestart: false,
+      env: {
+        FLAVOR: "kds",
+        PORT: 3000
+      },
+      namespace: "native"
     },
     {
       name: "sous-signage",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts web",
+      script: "SERIAL=$(pnpm tsx scripts/device-manager.ts 'Television_1080p') && bash scripts/run-android.sh $SERIAL signage",
+      cwd: ".",
+      autorestart: false,
       env: {
-        NODE_ENV: "development",
-        PORT: 1425,
         FLAVOR: "signage",
-        DIST_DIR: ".next-signage",
-        FORCE_COLOR: "1"
-      }
-    },
-    {
-      name: "sous-signage-android",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts signage-android",
-      autorestart: false,
-      env: {
-        NODE_ENV: "development",
-        FLAVOR: "signage",
-        FORCE_COLOR: "1"
-      }
-    },
-    {
-      name: "sous-kds-android",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts kds-android",
-      autorestart: false,
-      env: {
-        NODE_ENV: "development",
-        FLAVOR: "kds",
-        FORCE_COLOR: "1"
-      }
-    },
-    {
-      name: "sous-pos-android",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts pos-android",
-      autorestart: false,
-      env: {
-        NODE_ENV: "development",
-        FLAVOR: "pos",
-        FORCE_COLOR: "1"
-      }
-    },
-    {
-      name: "sous-tools-android",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts tools-android",
-      autorestart: false,
-      env: {
-        NODE_ENV: "development",
-        FLAVOR: "tools",
-        FORCE_COLOR: "1"
-      }
+        PORT: 3000
+      },
+      namespace: "native"
     },
     {
       name: "sous-wearos",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts wearos",
+      script: "SERIAL=$(pnpm tsx scripts/device-manager.ts 'Wear_OS_Large_Round') && bash scripts/run-wearos.sh $SERIAL",
+      cwd: ".",
       autorestart: false,
-      env: {
-        NODE_ENV: "development",
-        FORCE_COLOR: "1"
-      }
-    },
-    // The 5th mobile app could be the standard consumer app (mobile web/capacitor)
-    {
-      name: "sous-mobile-web",
-      script: "pnpm tsx /home/conar/sous.tools/scripts/dev-tools.ts web",
-      env: {
-        NODE_ENV: "development",
-        PORT: 3002,
-        DIST_DIR: ".next-mobile",
-        FORCE_COLOR: "1"
-      }
-    },
-
-    // --- Infrastructure ---
-    {
-      name: "sous-github-runner",
-      script: "./run.sh",
-      cwd: path.join(process.env.HOME, "actions-runner"),
-      autorestart: true
+      namespace: "native"
     }
   ]
 };
