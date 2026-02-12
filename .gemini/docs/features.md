@@ -41,6 +41,13 @@
   - **Multi-Channel Delivery**: Automated report routing to GitHub Issues and configured Support Email.
   - **Contextual Enrichment**: Automatic capture of app version, user ID, organization, and device metadata.
   - **SuperAdmin Configuration**: Dynamic management of support destinations via global platform settings.
+- **Pricing & Plans (ADR 048 / Spec 024)**:
+  - **Tiered Access**: Standard plans (Commis, Chef de Partie, Executive Chef) with hierarchical feature sets.
+  - **Granular Scopes**: Fine-grained control over specific module access using shared constants.
+  - **Usage Limits**: Numerical caps on resources (e.g., max recipes, monthly invoice processing).
+  - **Grace Periods**: Configurable window for payment recovery before service suspension.
+  - **Custom Overrides**: Capability to define bespoke plans for specific organizations.
+  - **Performance**: Redis-backed caching of effective scopes and limits.
 
 ## CLI Capabilities (@sous/cli)
 

@@ -1,3 +1,35 @@
+## 2026-02-12 (Database Health Check & Infrastructure Fixes)
+
+- **Infrastructure Stability & Permissions:**
+    - Resolved critical Docker permission issues that were preventing PM2 from tailing infrastructure logs (`sous-db`, `sous-redis`).
+    - **Docker Socket Access:** Added current user to the `docker` group and updated `/var/run/docker.sock` permissions for immediate non-root access.
+    - **Infrastructure Recovery:** Started all core infrastructure containers (Postgres, Redis, Traefik, Minio, etc.) via `docker compose up -d`.
+    - **PM2 Log Tailing Fixed:** Verified that `sous-db` and `sous-redis` PM2 processes are successfully tailing container logs without errors.
+- **Database Verification & Seeding:**
+    - **Schema Synchronization:** Verified database schema using `drizzle-kit check` and synchronized latest changes via `db:push`.
+    - **Data Integrity Check:** Confirmed successful seeding of "System" and "Chef Conar" organizations and the primary Superadmin user.
+    - **Connection Verification:** Successfully tested database connectivity from both a standalone script and the `@sous/api` service.
+- **Build & Quality:**
+    - Cleaned and successfully rebuilt `@sous/api` to ensure environment stability.
+    - Verified that all core services (`sous-api`, `sous-web`, `sous-docs`) are online and healthy.
+
+## 2026-02-12 (Database Reset & Seeding Fix)
+
+- **Database Reset & Seeding Robustness:**
+    - Resolved an issue where the `sous db reset` command would report success but fail to actually seed the `users` and `organizations` tables.
+    - **Robust Seeding logic:** Refactored `AuthService.seedSystem()` in `@sous/api` to use more robust `onConflictDoUpdate` logic and improved error handling for the `returning()` clause.
+    - **Improved Logging:** Added detailed logging to `SeederService` and `AuthService` to provide visibility into the progress of the seeding process.
+    - **CLI Error Handling:** Updated `DbResetCommand` in `@sous/cli` to properly detect and exit on failures during the reset sequence (Docker volume removal, schema push, or seeding).
+    - **Verified Fix:** Confirmed successful user and organization insertion via manual database inspection after running the reset sequence.
+
+## 2026-02-12 (Pricing Plans & Feature Scoping)
+
+- **Pricing Plans & Feature Scoping (ADR 048):**
+    - Established a Scope-Based Access Control (SBAC) system for tiered pricing.
+    - Defined the primary tiers: **Commis**, **Chef de Partie**, and **Executive Chef**.
+    - Outlined the implementation plan for granular scopes, organization-level plan assignments, and hierarchical inheritance.
+    - Designed the NestJS `ScopesGuard` and React `useScopes` hook for cross-platform enforcement.
+
 - **Recipe Manager AI Parsing & Structured View:**
     - Implemented a detailed Recipe view (`/operations/recipes/[id]`) that displays extracted ingredients and instructions.
     - Updated `RecipesPage` to navigate to the detailed view instead of opening the Google Drive link directly.

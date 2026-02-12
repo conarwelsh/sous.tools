@@ -41,7 +41,8 @@ export class DbResetCommand extends CommandRunner {
 
       logger.info('✅ Database reset and seeded successfully.');
     } catch (error: any) {
-      logger.error(`❌ Database reset failed.`);
+      logger.error(`❌ Database reset failed: ${error.message}`);
+      process.exit(1);
     } finally {
       process.exit(0);
     }

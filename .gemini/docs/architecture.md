@@ -25,7 +25,7 @@ Instead of using fragile cross-platform bridges like React Native Web, the platf
 
 The platform is organized by **Business Domain** using Nested Strategic Umbrellas. Following Mandate 14, each domain maintains its own **`.schema.ts`** definition, ensuring strict isolation and modularity.
 
-- **IAM**: Identity, Authentication (JWT), and Multi-tenancy.
+- **IAM**: Identity, Authentication (JWT), Multi-tenancy, and **Scope-Based Access Control (SBAC)** for tiered pricing plans.
 - **Core**: Cross-cutting utilities like the Unified Tag Engine and centralized Database services.
 - **Procurement**: Suppliers, Invoices, and Order Management.
 - **Culinary**: Recipes, Ingredients, and Unit Conversions.

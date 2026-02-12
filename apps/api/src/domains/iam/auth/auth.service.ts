@@ -23,68 +23,91 @@ export class AuthService {
   ) {}
 
   async seedSystem() {
-    console.log('🌱 Seeding IAM System & Admin Context...');
-    console.log('DEBUG: AuthService dbService:', !!this.dbService);
+    logger.info('🌱 Seeding IAM System & Admin Context...');
 
     // 1. System Organization (for templates/global data)
-    console.log('DEBUG: Inserting System Org...');
-    await this.dbService.db
-      .insert(organizations)
-      .values({ name: 'System', slug: 'system' })
-      .onConflictDoNothing();
-    console.log('DEBUG: System Org inserted.');
+    try {
+      await this.dbService.db
+        .insert(organizations)
+        .values({ name: 'System', slug: 'system' })
+        .onConflictDoNothing();
+      logger.info('  └─ System Org ensured');
+    } catch (e) {
+      logger.error('  ❌ Failed to seed System Org', e);
+    }
 
     // 2. Initial Superadmin Organization
-    console.log('DEBUG: Inserting Chef Conar Org...');
-    const [org] = await this.dbService.db
-      .insert(organizations)
-      .values({ name: 'Chef Conar', slug: 'chef-conar' })
-      .onConflictDoUpdate({
-        target: organizations.slug,
-        set: { name: 'Chef Conar' },
-      })
-      .returning();
-    console.log('DEBUG: Chef Conar Org inserted:', org.id);
+    let orgId: string;
+    try {
+      const result = await this.dbService.db
+        .insert(organizations)
+        .values({ name: 'Chef Conar', slug: 'chef-conar' })
+        .onConflictDoUpdate({
+          target: organizations.slug,
+          set: { name: 'Chef Conar' },
+        })
+        .returning();
+
+      if (result.length > 0) {
+        orgId = result[0].id;
+      } else {
+        // Fallback if returning() is empty (should not happen with onConflictDoUpdate)
+        const existing = await this.dbService.db.query.organizations.findFirst({
+          where: eq(organizations.slug, 'chef-conar'),
+        });
+        if (!existing)
+          throw new Error('Failed to create or find Chef Conar organization');
+        orgId = existing.id;
+      }
+      logger.info(`  └─ Superadmin Org ensured: ${orgId}`);
+    } catch (e) {
+      logger.error('  ❌ Failed to seed Superadmin Org', e);
+      throw e;
+    }
 
     // 3. Initial Superadmin User
-    console.log('DEBUG: Hashing password...');
-    const passwordHash = await bcrypt.hash('password', 10);
-    console.log('DEBUG: Password hashed.');
-
-    console.log('DEBUG: Inserting Superadmin User...');
-    await this.dbService.db
-      .insert(users)
-      .values({
-        email: 'conar@dtown.cafe',
-        firstName: 'Conar',
-        lastName: 'Welsh',
-        passwordHash,
-        organizationId: org.id,
-        role: 'superadmin',
-      })
-      .onConflictDoUpdate({
-        target: users.email,
-        set: {
+    try {
+      const passwordHash = await bcrypt.hash('password', 10);
+      await this.dbService.db
+        .insert(users)
+        .values({
+          email: 'conar@dtown.cafe',
           firstName: 'Conar',
           lastName: 'Welsh',
+          passwordHash,
+          organizationId: orgId,
           role: 'superadmin',
-          organizationId: org.id,
-        },
-      });
-    console.log('DEBUG: Superadmin User inserted.');
+        })
+        .onConflictDoUpdate({
+          target: users.email,
+          set: {
+            firstName: 'Conar',
+            lastName: 'Welsh',
+            role: 'superadmin',
+            organizationId: orgId,
+          },
+        });
+      logger.info('  └─ Superadmin User ensured');
+    } catch (e) {
+      logger.error('  ❌ Failed to seed Superadmin User', e);
+      throw e;
+    }
 
     // 4. Initial Location
-    console.log('DEBUG: Inserting Initial Location...');
-    await this.dbService.db
-      .insert(locations)
-      .values({
-        organizationId: org.id,
-        name: 'Dtown Café',
-      })
-      .onConflictDoNothing();
-    console.log('DEBUG: Initial Location inserted.');
+    try {
+      await this.dbService.db
+        .insert(locations)
+        .values({
+          organizationId: orgId,
+          name: 'Dtown Café',
+        })
+        .onConflictDoNothing();
+      logger.info('  └─ Initial Location ensured');
+    } catch (e) {
+      logger.error('  ❌ Failed to seed Initial Location', e);
+    }
 
-    return org.id;
+    return orgId;
   }
 
   async seedSample() {

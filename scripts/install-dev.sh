@@ -102,10 +102,15 @@ if ! command -v gh &> /dev/null; then
   sudo apt install gh -y
 fi
 
-# 6. Vercel & Render CLI
+# 6. Vercel, Render & PM2 CLI
 if ! command -v vercel &> /dev/null; then
   echo "▲ Installing Vercel CLI..."
   npm install -g vercel
+fi
+
+if ! command -v pm2 &> /dev/null; then
+  echo "⌛ Installing PM2..."
+  npm install -g pm2
 fi
 
 if ! command -v render &> /dev/null; then

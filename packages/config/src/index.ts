@@ -153,7 +153,7 @@ function getPublicEnv() {
  */
 function buildPublicConfig(): Config {
   const envVars = getPublicEnv();
-  const env = (envVars.NEXT_PUBLIC_APP_ENV || (isServer ? process.env.NODE_ENV : "development")) as any;
+  const env = (envVars.NEXT_PUBLIC_APP_ENV || process.env.NODE_ENV || "development") as any;
   const isDev = env === "development" || env === "dev";
 
   return {
@@ -176,8 +176,8 @@ function buildPublicConfig(): Config {
       appEnv: env,
     },
     // Other fields as empty/defaults for client
-    db: { url: "" },
-    redis: { url: "" },
+    db: { url: isDev ? "postgres://sous_user:sous_password@localhost:5433/sous_db" : "" },
+    redis: { url: isDev ? "redis://localhost:6380" : "" },
     iam: { jwtSecret: "" },
     storage: {
       supabase: { url: "", anonKey: "", bucket: "media" },
@@ -278,10 +278,10 @@ export async function resolveConfig(): Promise<Config> {
            `http://${wslIp}:${envVars.PORT_DOCS || 3001}`,
     },
     db: {
-      url: envVars.DATABASE_URL || "postgres://localhost:5432/sous",
+      url: envVars.DATABASE_URL || "postgres://sous_user:sous_password@localhost:5433/sous_db",
     },
     redis: {
-      url: envVars.REDIS_URL || (envVars.REDIS_HOST ? `redis://${envVars.REDIS_HOST}:${envVars.REDIS_PORT || 6379}` : "redis://localhost:6379"),
+      url: envVars.REDIS_URL || (envVars.REDIS_HOST ? `redis://${envVars.REDIS_HOST}:${envVars.REDIS_PORT || 6380}` : "redis://localhost:6380"),
     },
     iam: {
       jwtSecret: envVars.JWT_SECRET || envVars.SESSION_SECRET || "fallback-secret-too-short",
