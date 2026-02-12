@@ -226,7 +226,7 @@ export class SquareDriver implements PosInterface {
       const response = (await this.client.catalog.search({
         objectTypes: ['ITEM', 'CATEGORY'],
       })) as any;
-      
+
       const body = response.result || response.data || response;
       const objects = body.objects || [];
       const idsToDelete = objects.map((obj: any) => obj.id);
@@ -235,7 +235,7 @@ export class SquareDriver implements PosInterface {
         logger.info(
           `[Square] Deleting ${idsToDelete.length} existing catalog objects...`,
         );
-        
+
         // Square batchDelete has a limit of 200 IDs
         for (let i = 0; i < idsToDelete.length; i += 200) {
           const batch = idsToDelete.slice(i, i + 200);
@@ -243,7 +243,7 @@ export class SquareDriver implements PosInterface {
             objectIds: batch,
           });
         }
-        
+
         // Small delay to let Square process the deletions
         await new Promise((resolve) => setTimeout(resolve, 2000));
       }
@@ -359,8 +359,10 @@ export class SquareDriver implements PosInterface {
 
     try {
       const timestamp = Date.now();
-      logger.info(`[Square] Sending batch upsert with ${objects.length} objects...`);
-      
+      logger.info(
+        `[Square] Sending batch upsert with ${objects.length} objects...`,
+      );
+
       const response = (await this.client.catalog.batchUpsert({
         idempotencyKey: `seed_${timestamp}_${Math.random().toString(36).substring(7)}`,
         batches: [{ objects }],
@@ -368,13 +370,14 @@ export class SquareDriver implements PosInterface {
 
       const resultBody = response.result || response.data || response;
       const seededCount = resultBody.objects?.length || 0;
-      
-      logger.info(
-        `[Square] Batch seeded ${seededCount} objects.`,
-      );
-      
+
+      logger.info(`[Square] Batch seeded ${seededCount} objects.`);
+
       if (seededCount === 0) {
-        logger.warn('[Square] Batch seeded 0 objects. Response body:', JSON.stringify(resultBody));
+        logger.warn(
+          '[Square] Batch seeded 0 objects. Response body:',
+          JSON.stringify(resultBody),
+        );
       }
     } catch (error: any) {
       const errorBody = error.result || error.data || error;

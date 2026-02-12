@@ -1,4 +1,3 @@
-import type { NextConfig } from "next";
 import path from "path";
 import { execSync } from "child_process";
 
@@ -17,7 +16,7 @@ if (process.env.DOCS_URL && !process.env.NEXT_PUBLIC_DOCS_URL) {
 let hostIp = "localhost";
 try {
   hostIp = execSync("hostname -I").toString().split(" ")[0].trim();
-} catch (e) {
+} catch (_e) {
   // Fallback
 }
 
@@ -50,19 +49,19 @@ const nextConfig = {
     // Resolve the monorepo root for Turbopack
     root: path.join(__dirname, "../../"),
   },
-  webpack: (config: any, { isServer }: any) => {
-    if (!isServer) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        "@infisical/sdk": false,
-        dotenv: false,
-        fs: false,
-        path: false,
-        os: false,
-      };
-    }
-    return config;
-  },
-};
+      webpack: (config: any, { isServer }: any) => {
+      if (!isServer) {
+        config.resolve.alias = {
+          ...config.resolve.alias,
+          "@infisical/sdk": false,
+          dotenv: false,
+          fs: false,
+          path: false,
+          os: false,
+          child_process: false,
+        };
+      }
+      return config;
+    },};
 
 export default nextConfig;

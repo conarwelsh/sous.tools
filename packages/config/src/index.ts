@@ -21,6 +21,22 @@ export { configSchema, brandingConfigSchema, type BrandingConfig };
 let cachedConfig: Config | null = null;
 
 /**
+ * Ensures a string has a protocol, defaulting to https:// if missing
+ */
+function ensureProtocol(url: string | undefined): string | undefined {
+  if (!url) return url;
+  if (url === "undefined" || url === "null") return undefined;
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    // If it's a local address without protocol, use http
+    if (url.startsWith("localhost") || url.startsWith("127.0.0.1") || url.startsWith("172.") || url.startsWith("192.") || url.startsWith("10.")) {
+      return `http://${url}`;
+    }
+    return `https://${url}`;
+  }
+  return url;
+}
+
+/**
  * Normalizes environment name
  */
 async function getEnv(): Promise<"development" | "staging" | "production" | "test"> {
@@ -144,15 +160,15 @@ function buildPublicConfig(): Config {
     env,
     api: {
       port: 4000,
-      url: envVars.NEXT_PUBLIC_API_URL || (isDev ? "http://localhost:4000" : undefined),
+      url: ensureProtocol(envVars.NEXT_PUBLIC_API_URL) || (isDev ? "http://localhost:4000" : undefined),
     },
     web: {
       port: 3000,
-      url: envVars.NEXT_PUBLIC_WEB_URL || (isDev ? "http://localhost:3000" : undefined),
+      url: ensureProtocol(envVars.NEXT_PUBLIC_WEB_URL) || (isDev ? "http://localhost:3000" : undefined),
     },
     docs: {
       port: 3001,
-      url: envVars.NEXT_PUBLIC_DOCS_URL || (isDev ? "http://localhost:3001" : undefined),
+      url: ensureProtocol(envVars.NEXT_PUBLIC_DOCS_URL) || (isDev ? "http://localhost:3001" : undefined),
     },
     features: {
       enableRegistration: envVars.NEXT_PUBLIC_ENABLE_REGISTRATION !== "false",
@@ -245,16 +261,21 @@ export async function resolveConfig(): Promise<Config> {
     env,
     api: {
       port: Number(envVars.PORT_API || 4000),
-      url: envVars.API_URL || 
-           (envVars.NEXT_PUBLIC_API_URL && envVars.NEXT_PUBLIC_API_URL !== "undefined" ? envVars.NEXT_PUBLIC_API_URL : `http://${wslIp}:${envVars.PORT_API || 4000}`),
+      url: ensureProtocol(envVars.API_URL) || 
+           ensureProtocol(envVars.NEXT_PUBLIC_API_URL) || 
+           `http://${wslIp}:${envVars.PORT_API || 4000}`,
     },
     web: {
       port: Number(envVars.PORT_WEB || 3000),
-      url: envVars.WEB_URL || envVars.NEXT_PUBLIC_WEB_URL || `http://${wslIp}:${envVars.PORT_WEB || 3000}`,
+      url: ensureProtocol(envVars.WEB_URL) || 
+           ensureProtocol(envVars.NEXT_PUBLIC_WEB_URL) || 
+           `http://${wslIp}:${envVars.PORT_WEB || 3000}`,
     },
     docs: {
       port: Number(envVars.PORT_DOCS || 3001),
-      url: envVars.DOCS_URL || envVars.NEXT_PUBLIC_DOCS_URL || `http://${wslIp}:${envVars.PORT_DOCS || 3001}`,
+      url: ensureProtocol(envVars.DOCS_URL) || 
+           ensureProtocol(envVars.NEXT_PUBLIC_DOCS_URL) || 
+           `http://${wslIp}:${envVars.PORT_DOCS || 3001}`,
     },
     db: {
       url: envVars.DATABASE_URL || "postgres://localhost:5432/sous",

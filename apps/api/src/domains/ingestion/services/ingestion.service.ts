@@ -76,7 +76,9 @@ export class IngestionService {
           model: 'models/gemini-1.5-flash',
         });
       } catch (e) {
-        logger.warn('[AI Ingestion] models/gemini-1.5-flash ID failed, falling back to alias');
+        logger.warn(
+          '[AI Ingestion] models/gemini-1.5-flash ID failed, falling back to alias',
+        );
         model = this.genAI.getGenerativeModel({
           model: 'gemini-1.5-flash',
         });

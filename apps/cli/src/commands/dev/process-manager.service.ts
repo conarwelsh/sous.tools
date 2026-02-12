@@ -100,7 +100,7 @@ export class ProcessManager
 
         const pm2Status = p.pm2_env?.status;
         let status: ProcessStatus = 'stopped';
-        
+
         if (pm2Status === 'online') status = 'running';
         else if (pm2Status === 'launching') status = 'starting';
         else if (pm2Status === 'errored') status = 'error';
@@ -109,12 +109,19 @@ export class ProcessManager
           this.processes.set(id, {
             id,
             name: id.replace('sous-', '').toUpperCase(),
-            type: id.startsWith('sous-db') || id.startsWith('sous-redis') ? 'docker' : 'pm2',
+            type:
+              id.startsWith('sous-db') || id.startsWith('sous-redis')
+                ? 'docker'
+                : 'pm2',
             status,
             logs: [],
-            namespace: (p.pm2_env as any)?.namespace
+            namespace: (p.pm2_env as any)?.namespace,
           });
-          this.setupLogTailer(id, (p.pm2_env as any)?.pm_out_log_path, (p.pm2_env as any)?.pm_err_log_path);
+          this.setupLogTailer(
+            id,
+            (p.pm2_env as any)?.pm_out_log_path,
+            (p.pm2_env as any)?.pm_err_log_path,
+          );
           updated = true;
         } else {
           const proc = this.processes.get(id)!;
@@ -145,12 +152,12 @@ export class ProcessManager
     // For performance and to prevent flickering, we'll use a readable stream
     const tailFile = (filePath: string, level: 'info' | 'error') => {
       if (!fs.existsSync(filePath)) return;
-      
+
       // Initial read of last 50 lines
       const stats = fs.statSync(filePath);
       const start = Math.max(0, stats.size - 5000);
       const stream = fs.createReadStream(filePath, { start });
-      
+
       stream.on('data', (data) => {
         this.addLog(id, data.toString(), level);
       });
@@ -160,10 +167,15 @@ export class ProcessManager
         if (event === 'change') {
           const newStats = fs.statSync(filePath);
           const newSize = newStats.size;
-          const oldSize = (this.logTailers.get(`${id}-${level}`) || { size: start }).size;
-          
+          const oldSize = (
+            this.logTailers.get(`${id}-${level}`) || { size: start }
+          ).size;
+
           if (newSize > oldSize) {
-            const newStream = fs.createReadStream(filePath, { start: oldSize, end: newSize });
+            const newStream = fs.createReadStream(filePath, {
+              start: oldSize,
+              end: newSize,
+            });
             newStream.on('data', (data) => {
               this.addLog(id, data.toString(), level);
             });
@@ -183,19 +195,19 @@ export class ProcessManager
     const proc = this.processes.get(id);
     if (!proc) return;
 
-    const lines = message.split('\n').filter(l => l.trim());
+    const lines = message.split('\n').filter((l) => l.trim());
     for (const line of lines) {
       const log: ManagedLog = {
         id,
         name: proc.name,
         message: line.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, ''), // Strip ANSI
         timestamp: new Date(),
-        level
+        level,
       };
 
       proc.logs.push(log);
       if (proc.logs.length > 1000) proc.logs.shift();
-      
+
       this.combinedLogs.push(log);
       if (this.combinedLogs.length > 2000) this.combinedLogs.shift();
     }

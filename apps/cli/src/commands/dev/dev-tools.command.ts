@@ -47,7 +47,7 @@ export class DevToolsCommand extends CommandRunner {
 
       logger.info('🚀 Starting Sous Dev Tools in HEADLESS mode...');
       await this.manager.autoStartCore();
-      
+
       logger.info('✅ Core services orchestrated via PM2.');
       return new Promise(() => {});
     }
@@ -84,7 +84,9 @@ export class DevToolsCommand extends CommandRunner {
     } finally {
       process.stdout.write('\x1b[?1049l'); // Exit alt buffer
       logger.info('👋 Dev Tools UI closed.');
-      logger.info('✅ Services remain running in PM2. Use "pm2 list" to monitor.');
+      logger.info(
+        '✅ Services remain running in PM2. Use "pm2 list" to monitor.',
+      );
     }
   }
 
