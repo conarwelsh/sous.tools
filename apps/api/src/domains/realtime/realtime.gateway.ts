@@ -82,35 +82,28 @@ export class RealtimeGateway
   }
 
   private async pushCurrentAssignment(hardwareId: string) {
-    // 1. Find display for this hardware
-
     const display = await this.dbService.db.query.displays.findFirst({
       where: eq(displays.hardwareId, hardwareId),
     });
 
     if (!display) return;
 
-    // 2. Find active assignment with screen
     const assignment =
       (await this.dbService.db.query.displayAssignments.findFirst({
         where: eq(displayAssignments.displayId, display.id),
         orderBy: (assignments: any, { desc }: any) =>
           [desc(assignments.createdAt)] as any,
         with: {
-          screen: {
-            with: {
-              layout: true,
-            },
-          },
+          layout: true,
         },
       })) as any;
 
-    if (assignment && assignment.screen) {
+    if (assignment && assignment.layout) {
       this.emitToHardware(hardwareId, 'presentation:update', {
-        screenId: assignment.screenId,
-        structure: JSON.parse(assignment.screen.layout.structure),
-        slots: JSON.parse(assignment.screen.slots),
-        customCss: assignment.screen.customCss,
+        layoutId: assignment.layoutId,
+        structure: JSON.parse(assignment.layout.structure),
+        content: JSON.parse(assignment.layout.content),
+        config: JSON.parse(assignment.layout.config),
       });
     }
   }

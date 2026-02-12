@@ -31,7 +31,7 @@ The platform is organized by **Business Domain** using Nested Strategic Umbrella
 - **Culinary**: Recipes, Ingredients, and Unit Conversions.
 - **Intelligence**: Async Costing (BullMQ), Price Trends, and Data Pruning.
 - **Accounting**: General Ledger, COGS Reconciliation, and Statutory Reporting (P&L).
-- **Presentation**: Digital Menus (Signage), Label Templates, and Layout Editor.
+- **Presentation**: Polymorphic engine for Digital Signage, Web Pages, and Thermal Labels. Features a unified JSON layout structure and recursive visual editor.
 - **Hardware**: Node Registry, Telemetry, and Remote Configuration.
 - **Integrations**: Adapter-based syncing with third-party providers.
 - **Support**: User feedback, bug reporting, and GitHub/Email orchestration.

@@ -196,6 +196,13 @@ export async function resolveConfig(): Promise<Config> {
   if (isServer && env !== "test") {
     const vaultSecrets = await fetchInfisicalSecrets(env);
     Object.assign(envVars, vaultSecrets);
+    
+    // Export to process.env so child processes (like drizzle-kit) can see them
+    for (const [key, value] of Object.entries(vaultSecrets)) {
+      if (!process.env[key]) {
+        process.env[key] = value;
+      }
+    }
   }
 
   // 2. Map environment variables to schema
@@ -250,6 +257,23 @@ export async function resolveConfig(): Promise<Config> {
       projectId: envVars.INFISICAL_PROJECT_ID,
       clientId: envVars.INFISICAL_CLIENT_ID,
       clientSecret: envVars.INFISICAL_CLIENT_SECRET,
+    },
+    square: {
+      accessToken: envVars.SQUARE_ACCESS_TOKEN,
+      applicationId: envVars.SQUARE_APPLICATION_ID,
+      clientSecret: envVars.SQUARE_CLIENT_SECRET,
+      redirectUri: envVars.SQUARE_REDIRECT_URI,
+      merchantId: envVars.SQUARE_MERCHANT_ID,
+      endpoint: envVars.SQUARE_ENDPOINT,
+      environment: envVars.SQUARE_ENVIRONMENT === "sandbox" || (envVars.SQUARE_ENDPOINT && envVars.SQUARE_ENDPOINT.includes("sandbox")) ? "sandbox" : "production",
+    },
+    google: {
+      clientId: envVars.GOOGLE_CLIENT_ID,
+      clientSecret: envVars.GOOGLE_CLIENT_SECRET,
+      redirectUri: envVars.GOOGLE_REDIRECT_URI,
+    },
+    ai: {
+      googleGenerativeAiApiKey: envVars.GOOGLE_GENERATIVE_AI_API_KEY,
     }
   };
 

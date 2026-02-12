@@ -1,6 +1,5 @@
-import React from "react";
-import { ProcurementDashboardView } from "@sous/features";
+import { redirect } from "next/navigation";
 
 export default function ProcurementPage() {
-  return <ProcurementDashboardView />;
+  redirect("/procurement/suppliers");
 }

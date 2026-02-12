@@ -4,14 +4,16 @@ import net from "net";
 import fs from "fs";
 import path from "path";
 
-const configResolved = await resolveConfig();
 const app = process.argv[2];
 const instanceName = process.env.PM2_APP_NAME || app;
 
-if (!app) {
-  console.error("Usage: dev-tools <app_name>");
-  process.exit(1);
-}
+async function main() {
+  const configResolved = await resolveConfig();
+
+  if (!app) {
+    console.error("Usage: dev-tools <app_name>");
+    process.exit(1);
+  }
 
   // --- Configuration ---
 
@@ -419,3 +421,9 @@ process.on("SIGINT", () => {
 if (!process.env.WAIT_FOR_CONTROL) {
   void startProcess();
 }
+}
+
+main().catch(err => {
+  console.error("Fatal error in dev-tools:", err);
+  process.exit(1);
+});

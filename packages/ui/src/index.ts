@@ -9,3 +9,5 @@ export * from "./components/ui/dialog";
 export * from "./components/brand";
 export * from "./components/vendor-logos";
 export * from "./components/theme-provider";
+export * from "./components/loading-provider";
+export * from "./components/brand/GlobalLoadingBar";

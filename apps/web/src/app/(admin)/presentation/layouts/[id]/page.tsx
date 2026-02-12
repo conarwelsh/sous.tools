@@ -21,7 +21,7 @@ export default function EditLayoutPage({ params }: { params: Promise<{ id: strin
         if (found) {
           setTemplate({
             ...found,
-            root: typeof found.structure === 'string' 
+            structure: typeof found.structure === 'string' 
               ? JSON.parse(found.structure) 
               : found.structure
           });
@@ -36,17 +36,20 @@ export default function EditLayoutPage({ params }: { params: Promise<{ id: strin
     fetchTemplate();
   }, [id]);
 
-  const handleSave = async (updatedTemplate: any) => {
+  const handleSave = async (updatedLayout: any) => {
     try {
       const http = await getHttpClient();
       const payload = {
-        name: updatedTemplate.name,
-        structure: JSON.stringify(updatedTemplate.root)
+        name: updatedLayout.name,
+        type: updatedLayout.type,
+        structure: JSON.stringify(updatedLayout.structure),
+        content: JSON.stringify(updatedLayout.content || {}),
+        config: JSON.stringify(updatedLayout.config || {}),
       };
-      await http.patch(`/presentation/templates/${id}`, payload);
+      await http.patch(`/presentation/layouts/${id}`, payload);
       router.push("/presentation/layouts");
     } catch (e) {
-      console.error("Failed to update template", e);
+      console.error("Failed to update layout", e);
     }
   };
 
@@ -68,7 +71,7 @@ export default function EditLayoutPage({ params }: { params: Promise<{ id: strin
 
   return (
     <LayoutDesigner 
-      template={template} 
+      layout={template} 
       onSave={handleSave} 
       onCancel={() => router.push("/presentation/layouts")} 
     />

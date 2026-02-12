@@ -13,6 +13,7 @@ on:
 
 jobs:
   build-android-flavors:
+    if: github.ref == 'refs/heads/staging'
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
@@ -43,6 +44,12 @@ jobs:
       - name: Sync Capacitor Android
         run: npx cap sync android
         working-directory: apps/web
+        env:
+          # Bake in the PRODUCTION URL during the build. 
+          # This allows the "Staging" build (which is actually a Release Candidate) 
+          # to be promoted to Production users without rebuilding.
+          # For true staging testing, we would use a different flavor or runtime config switch.
+          CAPACITOR_SERVER_URL: "https://web.sous.tools" 
 
       - name: Build All Flavors
         run: |
@@ -77,6 +84,7 @@ jobs:
           path: apps/web/android/app/build/outputs/apk/tools/debug/app-tools-debug.apk
 
   build-wearos:
+    if: github.ref == 'refs/heads/staging'
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
@@ -132,9 +140,9 @@ jobs:
           name: sous-os-rpi4
           path: dist/sous-os-rpi4.img
 
-  publish-release:
-    needs: [build-wearos, build-android-flavors] # Removed build-os-image dependency
-    if: github.ref == 'refs/heads/main'
+  publish-staging:
+    needs: [build-wearos, build-android-flavors]
+    if: github.ref == 'refs/heads/staging'
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
@@ -155,12 +163,36 @@ jobs:
         with:
           path: dist/artifacts
 
-      - name: Publish to Supabase
+      - name: Publish to Supabase Staging
         run: |
-          infisical run --projectId d1c836b9-17fe-49ed-bf45-2966cf2591d2 --env prod -- npx tsx scripts/publish-release.ts
+          infisical run --projectId d1c836b9-17fe-49ed-bf45-2966cf2591d2 --env prod -- npx tsx scripts/publish-release.ts --channel=staging
         env:
           INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
           INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}
-          # Fallback or override if needed, but Infisical should provide them
+          CI: true
+
+  promote-production:
+    if: github.ref == 'refs/heads/main'
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Promote Staging to Production
+        run: |
+          infisical run --projectId d1c836b9-17fe-49ed-bf45-2966cf2591d2 --env prod -- npx tsx scripts/promote-release.ts
+        env:
+          INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
+          INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}
           CI: true
 

@@ -80,8 +80,9 @@ export class PresentationResolver {
     @Args('orgId') orgId: string,
     @Args('input') input: CreateTemplateInput,
   ) {
-    return this.presentationService.createTemplate({
+    return this.presentationService.createLayout({
       ...input,
+      type: 'TEMPLATE',
       organizationId: orgId,
       isSystem: false,
     });

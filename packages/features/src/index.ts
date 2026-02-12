@@ -23,6 +23,9 @@ export * from "./domains/kds/index";
 // Home Domain
 export * from "./domains/home/components/HomeView";
 
+// Integrations Domain
+export * from "./domains/integrations/components/DrivePicker";
+
 // Culinary Domain
 export * from "./domains/culinary/index";
 
@@ -51,3 +54,6 @@ export * from "./domains/branding/components/Atelier";
 // Docs Domain
 export * from "./domains/docs/components/PlaygroundController";
 export * from "./domains/docs/components/ComponentPlayground";
+
+// Shared Components
+export * from "./components/CodeEditor";

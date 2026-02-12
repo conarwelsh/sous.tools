@@ -96,25 +96,25 @@ export const HardwareManager = () => {
   }
 
   return (
-    <ScrollView className="flex-1 p-6">
+    <ScrollView className="flex-1 p-6 bg-background">
       <div className="flex flex-row justify-between items-end mb-12">
         <View>
-          <Text className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest mb-2">
+          <Text className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest mb-2">
             Domain: Physical Edge
           </Text>
-          <h1 className="text-4xl font-black text-white tracking-tighter uppercase mb-2">
+          <h1 className="text-4xl font-black text-foreground tracking-tighter uppercase mb-2">
             Hardware Fleet
           </h1>
-          <p className="text-zinc-500 font-bold uppercase tracking-widest text-[10px]">
+          <p className="text-muted-foreground font-bold uppercase tracking-widest text-[10px]">
             Manage {devices.length} active devices in your organization.
           </p>
         </View>
 
         <Button
           onClick={() => router.push("/hardware/add", { scroll: false })}
-          className="h-12 px-8 bg-sky-500 hover:bg-sky-400 transition-all"
+          className="h-12 px-8 bg-primary hover:bg-primary/90 transition-all"
         >
-          <span className="text-white font-black uppercase tracking-widest text-xs">
+          <span className="text-primary-foreground font-black uppercase tracking-widest text-xs">
             Add Device
           </span>
         </Button>
@@ -131,36 +131,36 @@ export const HardwareManager = () => {
           return (
             <Card
               key={device.id}
-              className="p-6 bg-zinc-900 border-zinc-800 border-2 hover:border-zinc-700 transition-all flex flex-col group relative overflow-hidden"
+              className="p-6 bg-card border-border border-2 hover:border-primary/50 transition-all flex flex-col group relative overflow-hidden"
             >
               {/* Background Decor */}
               <div className="absolute -right-4 -top-4 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity">
-                  <Icon size={120} color="white" />
+                  <Icon size={120} className="text-foreground" />
               </div>
 
               <div className="flex flex-row justify-between items-start mb-8 relative z-10">
-                <div className="h-14 w-14 rounded-2xl bg-black border border-zinc-800 flex items-center justify-center shadow-2xl">
-                  <Icon size={24} className={isOnline ? "text-sky-500" : "text-zinc-700"} />
+                <div className="h-14 w-14 rounded-2xl bg-muted border border-border flex items-center justify-center shadow-2xl">
+                  <Icon size={24} className={isOnline ? "text-primary" : "text-muted-foreground"} />
                 </div>
                 <div className="flex flex-col items-end">
                   <div
-                    className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 ${isOnline ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"}`}
+                    className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 ${isOnline ? "bg-emerald-500/10 text-emerald-500" : "bg-muted text-muted-foreground"}`}
                   >
                     {isOnline ? "Online" : "Offline"}
                   </div>
-                  <Text className="text-[8px] font-mono text-zinc-600 uppercase">
+                  <Text className="text-[8px] font-mono text-muted-foreground/50 uppercase">
                       {device.hardwareId}
                   </Text>
                 </div>
               </div>
 
               <View className="mb-8 relative z-10">
-                <Text className="text-xl font-black text-white uppercase tracking-tight mb-1">
+                <Text className="text-xl font-black text-foreground uppercase tracking-tight mb-1">
                   {device.name}
                 </Text>
                 <View className="flex flex-row items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
-                  <Text className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                  <div className="w-1.5 h-1.5 rounded-full bg-border" />
+                  <Text className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
                     {device.type} node
                   </Text>
                 </View>
@@ -168,37 +168,37 @@ export const HardwareManager = () => {
 
               {/* Metrics Grid */}
               <div className="grid grid-cols-2 gap-2 mb-8 relative z-10">
-                  <div className="bg-black/40 rounded-xl p-3 border border-zinc-800/50">
+                  <div className="bg-muted/40 rounded-xl p-3 border border-border/50">
                     <div className="flex flex-row items-center gap-2 mb-1">
-                        <Activity size={10} className="text-zinc-600" />
-                        <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">Health</span>
+                        <Activity size={10} className="text-muted-foreground" />
+                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Health</span>
                     </div>
-                    <span className="text-[10px] font-bold text-zinc-300 uppercase truncate block">
+                    <span className="text-[10px] font-bold text-foreground uppercase truncate block">
                         {metadata.platform || "Standard"}
                     </span>
                   </div>
-                  <div className="bg-black/40 rounded-xl p-3 border border-zinc-800/50">
+                  <div className="bg-muted/40 rounded-xl p-3 border border-border/50">
                     <div className="flex flex-row items-center gap-2 mb-1">
-                        <Wifi size={10} className="text-zinc-600" />
-                        <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">Network</span>
+                        <Wifi size={10} className="text-muted-foreground" />
+                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Network</span>
                     </div>
-                    <span className="text-[10px] font-bold text-zinc-300 uppercase truncate block">
+                    <span className="text-[10px] font-bold text-foreground uppercase truncate block">
                         {device.ipAddress || "Connected"}
                     </span>
                   </div>
               </div>
 
-              <div className="mt-auto pt-6 border-t border-zinc-800/50 flex flex-row gap-2 relative z-10">
-                <Button className="flex-1 h-10 bg-zinc-800 hover:bg-sky-500/10 group/btn border border-transparent hover:border-sky-500/20">
+              <div className="mt-auto pt-6 border-t border-border flex flex-row gap-2 relative z-10">
+                <Button className="flex-1 h-10 bg-muted hover:bg-primary/10 group/btn border border-transparent hover:border-primary/20">
                   <View className="flex flex-row items-center justify-center gap-2">
-                      <SettingsIcon size={14} className="text-zinc-500 group-hover/btn:text-sky-500" />
-                      <span className="text-zinc-400 group-hover/btn:text-white text-[10px] font-black uppercase tracking-widest">
+                      <SettingsIcon size={14} className="text-muted-foreground group-hover/btn:text-primary" />
+                      <span className="text-muted-foreground group-hover/btn:text-foreground text-[10px] font-black uppercase tracking-widest">
                         Manage
                       </span>
                   </View>
                 </Button>
-                <Button className="h-10 w-10 bg-zinc-800 hover:bg-destructive/20 flex items-center justify-center group/del">
-                  <Trash2 size={14} className="text-zinc-600 group-hover/del:text-destructive" />
+                <Button className="h-10 w-10 bg-muted hover:bg-destructive/20 flex items-center justify-center group/del">
+                  <Trash2 size={14} className="text-muted-foreground group-hover/del:text-destructive" />
                 </Button>
               </div>
             </Card>
@@ -206,16 +206,16 @@ export const HardwareManager = () => {
         })}
 
         {devices.length === 0 && (
-          <div className="col-span-full p-20 border-2 border-dashed border-zinc-800 rounded-3xl flex flex-col items-center justify-center text-center">
-            <Cpu size={48} className="text-zinc-800 mb-4" />
-            <p className="text-zinc-600 font-black uppercase tracking-widest mb-4">
+          <div className="col-span-full p-20 border-2 border-dashed border-border rounded-3xl flex flex-col items-center justify-center text-center">
+            <Cpu size={48} className="text-muted mb-4" />
+            <p className="text-muted-foreground font-black uppercase tracking-widest mb-4">
               No active devices found.
             </p>
             <Button
               onClick={() => router.push("/hardware/add", { scroll: false })}
-              className="bg-zinc-800 px-6 h-10"
+              className="bg-muted px-6 h-10"
             >
-              <span className="text-white font-black uppercase tracking-widest text-[10px]">
+              <span className="text-foreground font-black uppercase tracking-widest text-[10px]">
                 Add your first device
               </span>
             </Button>

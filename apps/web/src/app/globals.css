@@ -3,3 +3,36 @@
 @source "../../../../packages/features/src/**/*.{ts,tsx}";
 @source "../../../../packages/ui/src/**/*.{ts,tsx}";
 
+@layer utilities {
+  @keyframes chef-head {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    25% { transform: translateY(-2px) rotate(-5deg); }
+    50% { transform: translateY(0) rotate(5deg); }
+    75% { transform: translateY(2px) rotate(-5deg); }
+  }
+
+  @keyframes cloche-lift {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    30% { transform: translateY(-60px) rotate(-15deg); }
+    60% { transform: translateY(-60px) rotate(15deg); }
+    90% { transform: translateY(0) rotate(0); }
+  }
+
+  @keyframes eyebrow-move {
+    0%, 100% { transform: rotate(0); }
+    50% { transform: rotate(-10deg); }
+  }
+
+  @keyframes eyebrow-move-alt {
+    0%, 100% { transform: rotate(0); }
+    50% { transform: rotate(10deg); }
+  }
+
+  .animate-chef-head { animation: chef-head 4s infinite ease-in-out; }
+  .animate-cloche-lift { 
+    animation: cloche-lift 4s infinite ease-in-out; 
+    transform-origin: 120px 180px; 
+  }
+  .animate-eyebrow { animation: eyebrow-move 2s infinite ease-in-out; }
+  .animate-eyebrow-alt { animation: eyebrow-move-alt 2s infinite ease-in-out; }
+}

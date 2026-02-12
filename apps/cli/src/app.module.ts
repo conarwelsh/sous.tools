@@ -7,6 +7,7 @@ import { SyncCommand } from './commands/dev/sync.command.js';
 import { EnvCommand } from './commands/env/env.command.js';
 import { ConfigCommand } from './commands/env/config/config.command.js';
 import { ConfigAddCommand } from './commands/env/config/config-add.command.js';
+import { ConfigListCommand } from './commands/env/config/config-list.command.js';
 import { LogsCommand } from './commands/env/logs/logs.command.js';
 import { LogsTailCommand } from './commands/env/logs/logs-tail.command.js';
 import { LogsWipeCommand } from './commands/env/logs/logs-wipe.command.js';
@@ -32,7 +33,8 @@ import { HardwareCommand } from './commands/hardware/hardware.command.js';
 import { HardwareListCommand } from './commands/hardware/hardware-list.command.js';
 import { IntelCommand } from './commands/intel/intel.command.js';
 import { IntelCostCommand } from './commands/intel/intel-cost.command.js';
-import { ConfigListCommand } from './commands/env/config/config-list.command.js';
+import { IntegrationsCommand } from './commands/integrations/integrations.command.js';
+import { IntegrationsSyncCommand } from './commands/integrations/sync.command.js';
 import { ProcessManager } from './commands/dev/process-manager.service.js';
 
 @Module({
@@ -59,6 +61,8 @@ import { ProcessManager } from './commands/dev/process-manager.service.js';
     HardwareListCommand,
     IntelCommand,
     IntelCostCommand,
+    IntegrationsCommand,
+    IntegrationsSyncCommand,
     QualityCommand,
     TestCommand,
     CheckCommand,

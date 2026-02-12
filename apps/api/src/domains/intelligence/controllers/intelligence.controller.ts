@@ -11,7 +11,7 @@ export class IntelligenceController {
   async recalculate(@Body() body: { recipeId: string }, @Req() req: any) {
     await this.intelligenceService.queueRecipeCosting(
       body.recipeId,
-      req.user.orgId,
+      req.user.organizationId,
     );
     return { status: 'queued' };
   }

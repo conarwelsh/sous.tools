@@ -16,6 +16,7 @@ import { CulinaryModule } from './domains/culinary/culinary.module.js';
 import { InventoryModule } from './domains/inventory/inventory.module.js';
 import { AccountingModule } from './domains/accounting/accounting.module.js';
 import { IntegrationsModule } from './domains/integrations/integrations.module.js';
+import { IngestionModule } from './domains/ingestion/ingestion.module.js';
 import { MaintenanceModule } from './domains/maintenance/maintenance.module.js';
 import { TagsModule } from './domains/core/tags/tags.module.js';
 import { MetricsModule } from './domains/metrics/metrics.module';
@@ -51,6 +52,7 @@ import { join } from 'path';
     InventoryModule,
     AccountingModule,
     IntegrationsModule,
+    IngestionModule,
     MaintenanceModule,
     TagsModule,
     MetricsModule,

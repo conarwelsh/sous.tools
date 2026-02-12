@@ -52,6 +52,27 @@ export const configSchema = z.object({
     logtailToken: z.string().optional(),
   }),
 
+  // Integrations
+  square: z.object({
+    accessToken: z.string().optional(),
+    applicationId: z.string().optional(),
+    clientSecret: z.string().optional(),
+    redirectUri: z.string().optional(),
+    environment: z.enum(["production", "sandbox"]).default("production"),
+    merchantId: z.string().optional(),
+    endpoint: z.string().optional(),
+  }).default({}),
+
+  google: z.object({
+    clientId: z.string().optional(),
+    clientSecret: z.string().optional(),
+    redirectUri: z.string().optional(),
+  }).default({}),
+
+  ai: z.object({
+    googleGenerativeAiApiKey: z.string().optional(),
+  }).default({}),
+
   // Feature Flags & Environment Context
   features: z.object({
     enableRegistration: z.boolean().default(true),

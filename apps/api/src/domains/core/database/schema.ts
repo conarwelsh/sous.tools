@@ -28,8 +28,7 @@ export * from '../../intelligence/intelligence.schema';
 import { organizations } from '../../iam/organizations/organizations.schema';
 import { users } from '../../iam/users/users.schema';
 import { displays } from '../../presentation/presentation.schema';
-import { templates } from '../../presentation/presentation.schema';
-import { screens } from '../../presentation/presentation.schema';
+import { layouts } from '../../presentation/presentation.schema';
 import { displayAssignments } from '../../presentation/presentation.schema';
 import { recipes } from '../../culinary/culinary.schema';
 import { recipeIngredients } from '../../culinary/culinary.schema';
@@ -102,14 +101,14 @@ export const displaysRelations = relations(displays, ({ many }) => ({
   assignments: many(displayAssignments),
 }));
 
-export const templatesRelations = relations(templates, ({ many }) => ({
-  screens: many(screens),
-}));
-
-export const screensRelations = relations(screens, ({ one, many }) => ({
-  layout: one(templates, {
-    fields: [screens.layoutId],
-    references: [templates.id],
+export const layoutsRelations = relations(layouts, ({ one, many }) => ({
+  parent: one(layouts, {
+    fields: [layouts.parentId],
+    references: [layouts.id],
+    relationName: 'derivatives',
+  }),
+  derivatives: many(layouts, {
+    relationName: 'derivatives',
   }),
   assignments: many(displayAssignments),
 }));
@@ -121,15 +120,16 @@ export const displayAssignmentsRelations = relations(
       fields: [displayAssignments.displayId],
       references: [displays.id],
     }),
-    screen: one(screens, {
-      fields: [displayAssignments.screenId],
-      references: [screens.id],
+    layout: one(layouts, {
+      fields: [displayAssignments.layoutId],
+      references: [layouts.id],
     }),
   }),
 );
 
 export const recipesRelations = relations(recipes, ({ many }) => ({
   ingredients: many(recipeIngredients),
+  steps: many(recipeSteps),
 }));
 
 export const recipeIngredientsRelations = relations(
@@ -145,6 +145,13 @@ export const recipeIngredientsRelations = relations(
     }),
   }),
 );
+
+export const recipeStepsRelations = relations(recipeSteps, ({ one }) => ({
+  recipe: one(recipes, {
+    fields: [recipeSteps.recipeId],
+    references: [recipes.id],
+  }),
+}));
 
 export const tagsRelations = relations(tags, ({ one, many }) => ({
   organization: one(organizations, {

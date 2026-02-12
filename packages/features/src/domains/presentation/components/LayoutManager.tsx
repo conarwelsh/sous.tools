@@ -5,19 +5,20 @@ import { View, Text, Card, Button, ScrollView, Logo } from "@sous/ui";
 import { getHttpClient } from "@sous/client-sdk";
 import { useRouter } from "next/navigation";
 import { TemplateSkeletonRenderer } from "./shared/TemplateSkeletonRenderer";
-import { Layout } from "lucide-react";
+import { Layout } from "../types/presentation.types";
+import { Layout as LayoutIcon } from "lucide-react";
 
 export const LayoutManager = () => {
   const router = useRouter();
-  const [templates, setTemplates] = useState<any[]>([]);
+  const [layouts, setLayouts] = useState<Layout[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchTemplates = async () => {
+  const fetchLayouts = async () => {
     setIsLoading(true);
     try {
       const http = await getHttpClient();
-      const data = await http.get<any[]>("/presentation/templates");
-      setTemplates(data);
+      const data = await http.get<Layout[]>("/presentation/templates");
+      setLayouts(data);
     } catch (e) {
       console.error("Failed to fetch templates", e);
     } finally {
@@ -26,15 +27,11 @@ export const LayoutManager = () => {
   };
 
   useEffect(() => {
-    fetchTemplates();
+    fetchLayouts();
   }, []);
 
   const countSlots = (node: any): number => {
     if (!node) return 0;
-    // Handle old structure: { slots: [...] }
-    if (node.slots && Array.isArray(node.slots)) return node.slots.length;
-    
-    // Handle new structure: LayoutNode tree
     let count = node.type === 'slot' ? 1 : 0;
     if (node.children && Array.isArray(node.children)) {
       count += node.children.reduce((acc: number, child: any) => acc + countSlots(child), 0);
@@ -55,10 +52,10 @@ export const LayoutManager = () => {
     
     try {
       const http = await getHttpClient();
-      await http.delete(`/presentation/templates/${id}`);
-      void fetchTemplates();
+      await http.delete(`/presentation/layouts/${id}`);
+      void fetchLayouts();
     } catch (e) {
-      console.error("Failed to delete template", e);
+      console.error("Failed to delete layout", e);
     }
   };
 
@@ -87,23 +84,23 @@ export const LayoutManager = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {templates.map((template) => {
-            const structure = typeof template.structure === 'string' 
-              ? JSON.parse(template.structure) 
-              : template.structure;
+          {layouts.map((layout) => {
+            const structure = typeof layout.structure === 'string' 
+              ? JSON.parse(layout.structure) 
+              : layout.structure;
             
             return (
               <Card
-                key={template.id}
+                key={layout.id}
                 className="p-6 bg-card border-border border-2 hover:border-primary/50 transition-all group overflow-hidden"
               >
                 <div className="aspect-video bg-black rounded-xl border border-border mb-6 flex items-center justify-center overflow-hidden relative">
                    <div className="scale-[0.4] w-[250%] h-[250%] origin-top-left pointer-events-none">
-                      {structure.type ? (
+                      {structure && structure.type ? (
                         <TemplateSkeletonRenderer node={structure} />
                       ) : (
                         <View className="flex-1 items-center justify-center bg-muted/10">
-                          <Layout className="text-muted-foreground/20" size={120} />
+                          <LayoutIcon className="text-muted-foreground/20" size={120} />
                         </View>
                       )}
                    </div>
@@ -114,9 +111,9 @@ export const LayoutManager = () => {
 
                 <div className="flex flex-row justify-between items-start mb-2">
                   <Text className="text-lg font-black text-foreground uppercase tracking-tight">
-                      {template.name}
+                      {layout.name}
                   </Text>
-                  {template.isSystem && (
+                  {layout.isSystem && (
                      <div className="bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 rounded text-[8px] font-black text-sky-500 uppercase tracking-widest">
                         System
                      </div>
@@ -124,18 +121,18 @@ export const LayoutManager = () => {
                 </div>
                 
                 <Text className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-6">
-                  {structure.layout || (structure.type === 'container' ? (structure.styles?.display === 'grid' ? 'Grid' : 'Flex') : 'Flex')} layout • {countSlots(structure)} Slots
+                  {structure?.layout || (structure?.type === 'container' ? (structure?.styles?.display === 'grid' ? 'Grid' : 'Flex') : 'Flex')} layout • {countSlots(structure)} Slots
                 </Text>
 
                 <div className="flex flex-row gap-2">
-                  <Button onClick={() => handleEdit(template.id)} className="flex-1 h-10 bg-muted hover:bg-muted/80">
+                  <Button onClick={() => handleEdit(layout.id)} className="flex-1 h-10 bg-muted hover:bg-muted/80">
                     <span className="text-foreground text-[10px] font-black uppercase tracking-widest">
                       Edit Structure
                     </span>
                   </Button>
-                                  {!template.isSystem && (
+                                  {!layout.isSystem && (
                                      <Button 
-                                      onClick={() => handleDelete(template.id)}
+                                      onClick={() => handleDelete(layout.id)}
                                       className="h-10 w-10 bg-muted hover:bg-destructive/20 flex items-center justify-center border-none"
                                      >
                                        <span className="text-foreground text-[10px] font-black">×</span>

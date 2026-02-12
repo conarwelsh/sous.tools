@@ -6,6 +6,7 @@ import {
   timestamp,
   integer,
   boolean,
+  unique,
 } from 'drizzle-orm/pg-core';
 import { organizations } from '../iam/organizations/organizations.schema';
 import { users } from '../iam/users/users.schema';
@@ -24,20 +25,31 @@ export const ingredients = pgTable('ingredients', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const recipes = pgTable('recipes', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id')
-    .references(() => organizations.id)
-    .notNull(),
-  name: varchar('name', { length: 255 }).notNull(),
-  description: text('description'),
-  yieldAmount: integer('yield_amount'),
-  yieldUnit: varchar('yield_unit', { length: 50 }),
-  isBakersPercentage: boolean('is_bakers_percentage').default(false).notNull(),
-  linkedPosItemId: varchar('linked_pos_item_id', { length: 255 }), // Link to Square/Toast item
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+export const recipes = pgTable(
+  'recipes',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organizationId: uuid('organization_id')
+      .references(() => organizations.id)
+      .notNull(),
+    name: varchar('name', { length: 255 }).notNull(),
+    description: text('description'),
+    yieldAmount: integer('yield_amount'),
+    yieldUnit: varchar('yield_unit', { length: 50 }),
+    isBakersPercentage: boolean('is_bakers_percentage')
+      .default(false)
+      .notNull(),
+    linkedPosItemId: varchar('linked_pos_item_id', { length: 255 }), // Link to Square/Toast item
+    sourceType: varchar('source_type', { length: 50 }), // e.g. "google-drive"
+    sourceId: varchar('source_id', { length: 255 }),
+    sourceUrl: text('source_url'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    unqSource: unique().on(table.organizationId, table.sourceId),
+  }),
+);
 
 export const recipeIngredients = pgTable('recipe_ingredients', {
   id: uuid('id').primaryKey().defaultRandom(),

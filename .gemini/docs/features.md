@@ -21,19 +21,22 @@
   - `@sous/ui`: Standard React UI component library (Shadcn pattern).
   - `@sous/features`: Shared business logic and "Organisms".
 - **Shared Ingestion Engine (Spec 013)**:
-  - **Document Capture**: Multi-source support (Camera/Upload) with pre-processing.
-  - **Smart Mapping**: Fuzzy-matching and automated alias learning for catalog items.
-  - **Verification Flow**: Split-screen reviewer for AI extraction results.
+  - **Gemini AI Integration**: Uses Google Gemini 1.5 Flash for high-accuracy extraction of recipe data from unstructured documents.
+  - **Interactive Drive Picker**: Browse and select specific files/folders from Google Drive for ingestion.
+  - **Multi-Format Support**: Automated processing of PDFs, Images (JPG/PNG/HEIC), and native Google Docs.
+  - **AI Recipe Extraction**: Automatically extract recipe names, yields, and ingredient lists into structured database records.
+  - **Smart Mapping**: Fuzzy-matching and automated creation of catalog items for extracted ingredients.
 - **Mobile Background Update System (Spec 023)**:
   - **Autonomous Discovery**: Periodically checks Supabase-hosted `manifest.json` for new builds.
   - **Scheduled Updates**: Allows users to schedule installations outside of business hours.
   - **Background Download**: Downloads APK artifacts in the background via Capacitor plugins.
 - **Presentation Engine (Spec 006/007)**:
-  - **Layout Designer**: Recursive, visual editor for display skeletons with Flexbox/Grid support. Full light/dark mode compatibility.
-  - **Screen Manager**: Data-binding interface for mapping POS Catalog and Media assets to layout slots.
-  - **Grouped Navigation**: Direct sidebar access to Screens, Layouts, and Labels under the Presentation section.
+  - **Unified Layout Architecture**: Single polymorphic engine for Digital Signage, Web Pages, and Thermal Labels.
+  - **Polymorphic Designer**: Recursive, visual editor for both structural blueprints (Templates) and live data-bound instances.
+  - **Contextual Binding**: Data-binding interface for mapping POS Catalog and Media assets to specific slots within a layout.
+  - **Type-Specific Config**: Support for web slugs, custom dimensions (mm/in), and refresh intervals per layout type.
   - **Real-time Synchronization**: Zero-refresh updates pushed to hardware displays via Socket.io.
-  - **Multi-Output Support**: Assign screens to physical HDMI ports or unique web slugs.
+  - **Multi-Output Support**: Assign layouts to physical HDMI ports or unique web slugs.
 - **Support & Feedback System (Spec 022)**:
   - **Multi-Channel Delivery**: Automated report routing to GitHub Issues and configured Support Email.
   - **Contextual Enrichment**: Automatic capture of app version, user ID, organization, and device metadata.
@@ -66,3 +69,4 @@
 - **Hardware Simulation**: Dockerized Android OS (Redroid) for signage verification.
 - **Unified Tag Engine (Spec 017)**: Polymorphic tagging system with organization-level isolation and color-coding for any UUID-based entity.
 - **Domains**: IAM, Procurement, Culinary, Intelligence, Accounting, Presentation, Hardware, Integrations.
+  - **Integrations**: Robust OAuth handling for Square and Google Drive with automatic token refresh and detailed error reporting.

@@ -40,4 +40,9 @@ export class AuthService {
     const http = await getHttpClient();
     return http.get("/auth/me");
   }
+
+  static async changePassword(data: { currentPass: string; newPass: string }): Promise<{ success: boolean }> {
+    const http = await getHttpClient();
+    return http.patch("/auth/change-password", data);
+  }
 }

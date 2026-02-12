@@ -155,10 +155,34 @@ export class CulinaryService {
   }
 
   async getRecipes(organizationId: string) {
-    return this.dbService.db
-      .select()
-      .from(recipes)
-      .where(eq(recipes.organizationId, organizationId));
+    return this.dbService.db.query.recipes.findMany({
+      where: eq(recipes.organizationId, organizationId),
+      with: {
+        ingredients: {
+          with: {
+            ingredient: true,
+          },
+        },
+        steps: true,
+      },
+    });
+  }
+
+  async getRecipe(id: string, organizationId: string) {
+    return this.dbService.db.query.recipes.findFirst({
+      where: and(
+        eq(recipes.id, id),
+        eq(recipes.organizationId, organizationId),
+      ),
+      with: {
+        ingredients: {
+          with: {
+            ingredient: true,
+          },
+        },
+        steps: true,
+      },
+    });
   }
 
   async createRecipe(

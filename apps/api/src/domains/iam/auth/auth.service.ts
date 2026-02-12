@@ -145,6 +145,66 @@ export class AuthService {
     return null;
   }
 
+  async validateGoogleUser(profile: {
+    id: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+  }) {
+    // 1. Try to find by googleId
+    let user = await this.dbService.db.query.users.findFirst({
+      where: eq(users.googleId, profile.id),
+    });
+
+    // 2. If not found, try to find by email
+    if (!user) {
+      user = await this.dbService.db.query.users.findFirst({
+        where: eq(users.email, profile.email),
+      });
+
+      // 3. Link googleId to existing user if email matches
+      if (user) {
+        await this.dbService.db
+          .update(users)
+          .set({ googleId: profile.id, updatedAt: new Date() })
+          .where(eq(users.id, user.id));
+      }
+    }
+
+    // 4. If still no user, we could potentially create one (Registration via Google)
+    // For now, we only link or allow login for existing users to keep it controlled
+    if (!user) {
+      throw new UnauthorizedException(
+        'Please register an account before linking with Google.',
+      );
+    }
+
+    return user;
+  }
+
+  async changePassword(
+    userId: string,
+    data: { currentPass: string; newPass: string },
+  ) {
+    const user = await this.dbService.db.query.users.findFirst({
+      where: eq(users.id, userId),
+    });
+
+    if (!user || !(await bcrypt.compare(data.currentPass, user.passwordHash))) {
+      throw new BadRequestException('Invalid current password');
+    }
+
+    const salt = await bcrypt.genSalt();
+    const hash = await bcrypt.hash(data.newPass, salt);
+
+    await this.dbService.db
+      .update(users)
+      .set({ passwordHash: hash, updatedAt: new Date() })
+      .where(eq(users.id, userId));
+
+    return { success: true };
+  }
+
   async login(user: any) {
     const payload = {
       email: user.email,

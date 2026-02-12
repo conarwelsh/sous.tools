@@ -46,6 +46,7 @@ pnpm sous dev install shell
 ```
 
 This will configure your ZSH environment with brand-aligned prompts and useful shortcuts.
+When the CLI starts, you will see a branded banner with the current environment and version information.
 
 ## Standard Aliases
 

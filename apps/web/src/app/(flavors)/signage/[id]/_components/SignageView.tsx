@@ -4,30 +4,81 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Logo, KioskLoading } from "@sous/ui";
 import { PresentationRenderer, DevicePairingFlow } from "@sous/features";
 import { useSearchParams } from "next/navigation";
+import { getHttpClient } from "@sous/client-sdk";
 
 export const SignageView = ({ id }: { id: string }) => {
-  const searchParams = useSearchParams();
-  const displayId = searchParams.get("displayId") || "primary";
-  
-  const [presentation, setPresentation] = useState<{
-    structure: any;
-    content: any;
-  } | null>(null);
+  const [publicPresentation, setPublicPresentation] = useState<any>(null);
+  const [isPublicLoading, setIsPublicLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPublicScreen = async () => {
+      // 1. Detect subdomain
+      const hostname = window.location.hostname;
+      const parts = hostname.split('.');
+      let orgSlug: string | undefined;
+      
+      // Handle local and production subdomains
+      if (parts.length >= 3 && parts[0] !== 'web' && parts[0] !== 'api' && parts[0] !== 'docs') {
+        orgSlug = parts[0];
+      }
+
+      if (!orgSlug && !id) {
+        setIsPublicLoading(false);
+        return;
+      }
+
+      try {
+        const http = await getHttpClient();
+        // Pass org slug in header for verification
+        const config: any = {
+          headers: orgSlug ? { 'x-org-slug': orgSlug } : {}
+        };
+        
+        const data = await http.get<any>(`/public/presentation/signage/${id}`, config);
+        setPublicPresentation(data);
+      } catch (e) {
+        // Fallback to pairing if public fetch fails
+        console.log("Public screen fetch failed, falling back to pairing mode.");
+      } finally {
+        setIsPublicLoading(false);
+      }
+    };
+
+    fetchPublicScreen();
+  }, [id]);
+
+  if (publicPresentation) {
+    return (
+      <PresentationRenderer
+        structure={publicPresentation.structure}
+        slots={publicPresentation.content}
+        customCss={publicPresentation.customCss}
+      />
+    );
+  }
+
+  // Only show pairing flow if public fetch is done and found nothing
+  if (isPublicLoading) {
+    return <KioskLoading suffix="signage" />;
+  }
 
   return (
     <DevicePairingFlow type="signage">
       {({ socket }) => (
         <SignageContent 
           socket={socket} 
-          presentation={presentation} 
-          setPresentation={setPresentation} 
         />
       )}
     </DevicePairingFlow>
   );
 };
 
-const SignageContent = ({ socket, presentation, setPresentation }: any) => {
+const SignageContent = ({ socket }: any) => {
+  const [presentation, setPresentation] = useState<{
+    structure: any;
+    content: any;
+  } | null>(null);
+
   useEffect(() => {
     if (!socket) return;
 
@@ -42,7 +93,7 @@ const SignageContent = ({ socket, presentation, setPresentation }: any) => {
     return () => {
       socket.off("presentation:update");
     };
-  }, [socket, setPresentation]);
+  }, [socket]);
 
   if (!presentation) {
     return (
@@ -58,7 +109,8 @@ const SignageContent = ({ socket, presentation, setPresentation }: any) => {
   return (
     <PresentationRenderer
       structure={presentation.structure}
-      content={presentation.content}
+      slots={presentation.content}
+      customCss={(presentation as any).customCss}
     />
   );
 };

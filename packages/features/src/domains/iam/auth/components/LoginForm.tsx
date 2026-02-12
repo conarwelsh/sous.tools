@@ -1,20 +1,62 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { Button, Card, Input, Logo, View, Text, DialogClose } from "@sous/ui";
-import { useRouter } from "next/navigation";
+import {
+  Button,
+  Card,
+  Input,
+  Logo,
+  DialogClose,
+  CardHeader,
+  CardContent,
+  GoogleLogo,
+} from "@sous/ui";
+import { useRouter, useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
+import { getHttpClient } from "@sous/client-sdk";
 
-export const LoginForm = ({ onSuccess, showClose = false }: { onSuccess?: () => void, showClose?: boolean }) => {
+export const LoginForm = ({
+  onSuccess,
+  showClose = false,
+}: {
+  onSuccess?: () => void;
+  showClose?: boolean;
+}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, refresh } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const handleSubmit = async () => {
+  useEffect(() => {
+    const token = searchParams.get("token");
+    const errorParam = searchParams.get("error");
+
+    if (token) {
+      localStorage.setItem("token", token);
+      void (async () => {
+        setLoading(true);
+        const http = await getHttpClient();
+        http.setToken(token);
+        await refresh();
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          router.push("/dashboard");
+        }
+      })();
+    }
+
+    if (errorParam) {
+      setError(errorParam);
+    }
+  }, [searchParams, refresh, onSuccess, router]);
+
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     setError(null);
     setLoading(true);
     try {
@@ -31,69 +73,122 @@ export const LoginForm = ({ onSuccess, showClose = false }: { onSuccess?: () => 
     }
   };
 
+  const handleGoogleLogin = () => {
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google-login`;
+  };
+
   return (
-    <Card className="p-12 w-full max-w-md mx-auto shadow-[0_0_50px_rgba(0,0,0,0.1)] dark:shadow-[0_0_50px_rgba(0,0,0,0.5)] bg-card border-border/50 rounded-[2.5rem] relative">
-      {showClose && (
-        <DialogClose className="absolute right-8 top-8 rounded-full p-2 bg-secondary/50 hover:bg-secondary transition-colors">
-          <X className="h-5 w-5 text-muted-foreground" />
-        </DialogClose>
+    <div className="relative">
+      {/* Reference-inspired Frosted Glass Overlay */}
+      {loading && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="flex flex-col items-center gap-8">
+            <Logo size={120} animate loading showWordmark={false} />
+            <div className="text-center space-y-3">
+              <p className="font-black italic uppercase tracking-tighter text-2xl text-foreground animate-pulse">
+                Authenticating...
+              </p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-muted-foreground ml-1">
+                Secure Access in Progress
+              </p>
+            </div>
+          </div>
+        </div>
       )}
 
-      <div className="flex flex-col items-center mb-16">
-        <Logo size={60} />
-      </div>
-
-      <div className="flex flex-col gap-8">
-        <div>
-          <label className="text-[10px] font-black text-foreground uppercase mb-3 ml-1 block tracking-[0.15em]">
-            Email Address
-          </label>
-          <Input
-            placeholder="chef@dtown.cafe"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            type="email"
-            className="h-16 bg-muted/30 border-border/50 rounded-2xl px-6 text-foreground text-base focus:border-primary/50 focus:ring-primary/20"
-          />
-        </div>
-
-        <div>
-          <label className="text-[10px] font-black text-foreground uppercase mb-3 ml-1 block tracking-[0.15em]">
-            Password
-          </label>
-          <Input
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            type="password"
-            className="h-16 bg-muted/30 border-border/50 rounded-2xl px-6 text-foreground text-base focus:border-primary/50 focus:ring-primary/20"
-          />
-        </div>
-
-        {error && (
-          <div className="bg-destructive/10 border border-destructive/20 p-4 rounded-2xl">
-            <p className="text-destructive text-xs font-bold text-center uppercase tracking-widest">
-              {error}
-            </p>
-          </div>
+      <Card className="w-full max-w-md mx-auto shadow-2xl shadow-primary/5 bg-card border-border/50 rounded-[2.5rem] overflow-hidden">
+        {showClose && (
+          <DialogClose className="absolute right-8 top-8 z-10 rounded-full p-2 bg-secondary/50 hover:bg-secondary transition-colors">
+            <X className="h-5 w-5 text-muted-foreground" />
+          </DialogClose>
         )}
 
-        <Button
-          onClick={handleSubmit}
-          disabled={loading}
-          className="h-16 mt-4 bg-sky-500 w-full rounded-2xl shadow-[0_8px_30px_rgba(14,165,233,0.3)] hover:shadow-[0_8px_40px_rgba(14,165,233,0.4)] transition-all"
-        >
-          <span className="text-white font-black italic uppercase tracking-widest text-lg">
-            {loading ? "AUTHENTICATING..." : "LOGIN"}
-          </span>
-        </Button>
+        <CardHeader className="flex flex-col items-center pt-12 pb-8 bg-muted/30 border-b border-border/50">
+          <Logo size={60} showWordmark variant="neon" />
+        </CardHeader>
 
-        <button className="flex flex-col items-center mt-4">
-          <span className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] hover:text-foreground transition-colors">
-            Lost Access?
-          </span>
-        </button>
-      </div>
-    </Card>
+        <CardContent className="p-10 space-y-8">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-8"
+            autoComplete="off"
+          >
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-foreground uppercase ml-1 block tracking-[0.2em]">
+                Email Address
+              </label>
+              <Input
+                placeholder="chef@dtown.cafe"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                type="email"
+                required
+                className="h-14 bg-muted/20 border-border/50 rounded-2xl px-6 text-foreground text-base focus:border-primary/50 transition-all"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-foreground uppercase ml-1 block tracking-[0.2em]">
+                Password
+              </label>
+              <Input
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                type="password"
+                required
+                className="h-14 bg-muted/20 border-border/50 rounded-2xl px-6 text-foreground text-base focus:border-primary/50 transition-all"
+              />
+            </div>
+
+            {error && (
+              <div className="bg-destructive/10 border border-destructive/20 p-4 rounded-2xl">
+                <p className="text-destructive text-[10px] font-black text-center uppercase tracking-widest">
+                  {error}
+                </p>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <Button
+                type="submit"
+                disabled={loading}
+                className="h-14 w-full rounded-2xl shadow-xl shadow-primary/10 transition-all hover:scale-[1.01] active:scale-[0.99] font-black italic uppercase tracking-tighter text-lg"
+              >
+                Login
+              </Button>
+
+              <div className="relative py-2">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-border/50" />
+                </div>
+                <div className="relative flex justify-center text-[8px] uppercase font-black">
+                  <span className="bg-card px-4 text-muted-foreground tracking-[0.3em]">Identity Hub</span>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                onClick={handleGoogleLogin}
+                variant="outline"
+                className="h-14 w-full rounded-2xl border-border/50 bg-muted/10 hover:bg-muted transition-all font-black uppercase tracking-widest text-[10px] flex-row gap-3"
+              >
+                <GoogleLogo size={18} />
+                Continue with Google
+              </Button>
+            </div>
+
+            <button
+              type="button"
+              className="w-full flex flex-col items-center pt-2"
+            >
+              <span className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] hover:text-primary transition-colors cursor-pointer">
+                Lost Access?
+              </span>
+            </button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 };

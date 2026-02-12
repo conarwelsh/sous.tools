@@ -1,9 +1,11 @@
+import React, { Suspense } from "react";
 import type { Metadata } from "next";
 import { Inter, Outfit, Geist_Mono } from "next/font/google";
 import { FlavorGate } from "../components/FlavorGate";
 import { GraphQLProvider } from "../lib/apollo-provider";
 import { AuthProvider } from "@sous/features";
-import { ThemeProvider } from "@sous/ui";
+import { ThemeProvider, LoadingProvider, GlobalLoadingBar } from "@sous/ui";
+import { RouterChangeTracker } from "../components/RouterChangeTracker";
 
 import "./globals.css";
 const inter = Inter({
@@ -42,13 +44,19 @@ export default function RootLayout({
     >
       <body className="antialiased overflow-x-hidden">
         <ThemeProvider>
-          <AuthProvider>
-            <GraphQLProvider>
-              <FlavorGate />
-              {children}
-              {modal}
-            </GraphQLProvider>
-          </AuthProvider>
+          <LoadingProvider>
+            <AuthProvider>
+              <GraphQLProvider>
+                <FlavorGate />
+                <GlobalLoadingBar />
+                <Suspense fallback={null}>
+                  <RouterChangeTracker />
+                </Suspense>
+                {children}
+                {modal}
+              </GraphQLProvider>
+            </AuthProvider>
+          </LoadingProvider>
         </ThemeProvider>
       </body>
     </html>

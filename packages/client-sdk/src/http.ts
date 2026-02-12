@@ -17,6 +17,7 @@ export class HttpClient {
     options: RequestInit = {},
   ): Promise<T> {
     const url = `${this.baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
+    console.log(`[HttpClient] Requesting: ${url}`);
     const headers = new Headers(options.headers);
 
     if (this.token) {
@@ -27,24 +28,40 @@ export class HttpClient {
       headers.set("Content-Type", "application/json");
     }
 
-    const response = await fetch(url, { ...options, headers });
-
-    if (!response.ok) {
-      const error = await response
-        .json()
-        .catch(() => ({ message: "An unknown error occurred" }));
-      throw new Error(error.message || "API Request failed");
+    // Trigger global loading start
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("sous:loading", { detail: { active: true } }),
+      );
     }
 
-    if (response.status === 204) return {} as T;
-
-    const text = await response.text();
-    if (!text) return {} as T;
-
     try {
-      return JSON.parse(text);
-    } catch (e) {
-      return text as unknown as T;
+      const response = await fetch(url, { ...options, headers });
+
+      if (!response.ok) {
+        const error = await response
+          .json()
+          .catch(() => ({ message: "An unknown error occurred" }));
+        throw new Error(error.message || "API Request failed");
+      }
+
+      if (response.status === 204) return {} as T;
+
+      const text = await response.text();
+      if (!text) return {} as T;
+
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        return text as unknown as T;
+      }
+    } finally {
+      // Trigger global loading end
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("sous:loading", { detail: { active: false } }),
+        );
+      }
     }
   }
 
@@ -75,9 +92,20 @@ export class HttpClient {
 
 let clientInstance: HttpClient | null = null;
 
-export const getHttpClient = async () => {
+export const getHttpClient = async (): Promise<HttpClient> => {
+  if (typeof window !== "undefined") {
+    if ((window as any).__SOUS_HTTP_CLIENT__) {
+      return (window as any).__SOUS_HTTP_CLIENT__;
+    }
+  }
+
   if (clientInstance) return clientInstance;
   const { config } = await import("@sous/config");
   clientInstance = new HttpClient(config.api.url || "http://localhost:4000");
+
+  if (typeof window !== "undefined") {
+    (window as any).__SOUS_HTTP_CLIENT__ = clientInstance;
+  }
+
   return clientInstance;
 };

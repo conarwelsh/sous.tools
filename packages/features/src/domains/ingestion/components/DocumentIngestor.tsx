@@ -72,15 +72,15 @@ export function DocumentIngestor({
   };
 
   return (
-    <Card className="w-full max-w-2xl bg-zinc-900 border-zinc-800 p-8">
+    <Card className="w-full max-w-2xl bg-card border-border p-8">
       <View className="items-center text-center mb-8">
-        <View className="p-4 bg-sky-500/10 rounded-2xl mb-4">
-          <Upload size={32} className="text-sky-500" />
+        <View className="p-4 bg-primary/10 rounded-2xl mb-4">
+          <Upload size={32} className="text-primary" />
         </View>
-        <Text className="text-2xl font-black text-white uppercase tracking-tight mb-2">
+        <Text className="text-2xl font-black text-foreground uppercase tracking-tight mb-2">
           {title}
         </Text>
-        <Text className="text-zinc-500 text-sm max-w-sm">
+        <Text className="text-muted-foreground text-sm max-w-sm">
           {description}
         </Text>
       </View>
@@ -92,8 +92,8 @@ export function DocumentIngestor({
         onDrop={handleDrop}
         className={`relative border-2 border-dashed rounded-3xl p-12 transition-all flex flex-col items-center justify-center ${
           dragActive
-            ? "border-sky-500 bg-sky-500/5"
-            : "border-zinc-800 bg-black/20 hover:border-zinc-700"
+            ? "border-primary bg-primary/5"
+            : "border-border bg-muted/20 hover:border-border/80"
         }`}
       >
         <input
@@ -110,11 +110,11 @@ export function DocumentIngestor({
             <Button
               onClick={onButtonClick}
               variant="outline"
-              className="bg-zinc-800 border-zinc-700 px-6 h-12"
+              className="bg-muted/50 border-border px-6 h-12"
             >
               <View className="flex-row items-center gap-2">
-                <File size={18} className="text-zinc-400" />
-                <Text className="text-white font-bold uppercase text-[10px] tracking-widest">
+                <File size={18} className="text-muted-foreground" />
+                <Text className="text-foreground font-bold uppercase text-[10px] tracking-widest">
                   Choose Files
                 </Text>
               </View>
@@ -123,17 +123,17 @@ export function DocumentIngestor({
             {/* Camera action would be Capacitor specific, but we can mock it here */}
             <Button
               onClick={onButtonClick}
-              className="bg-sky-500 px-6 h-12"
+              className="bg-primary px-6 h-12"
             >
               <View className="flex-row items-center gap-2">
-                <Camera size={18} color="white" />
-                <Text className="text-white font-bold uppercase text-[10px] tracking-widest">
+                <Camera size={18} className="text-primary-foreground" />
+                <Text className="text-primary-foreground font-bold uppercase text-[10px] tracking-widest">
                   Use Camera
                 </Text>
               </View>
             </Button>
           </View>
-          <Text className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest">
+          <Text className="text-muted-foreground/60 text-[10px] font-bold uppercase tracking-widest">
             or drag and drop here
           </Text>
         </View>
@@ -141,29 +141,29 @@ export function DocumentIngestor({
 
       {selectedFiles.length > 0 && (
         <View className="mt-8">
-          <Text className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest mb-4">
+          <Text className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest mb-4">
             Selected Documents ({selectedFiles.length}/{maxFiles})
           </Text>
           <View className="gap-2">
             {selectedFiles.map((file, index) => (
               <View
                 key={`${file.name}-${index}`}
-                className="flex-row items-center justify-between bg-zinc-800/50 border border-zinc-800 p-3 rounded-xl"
+                className="flex-row items-center justify-between bg-muted/50 border border-border p-3 rounded-xl"
               >
                 <View className="flex-row items-center gap-3 overflow-hidden">
-                  <File size={16} className="text-sky-500 flex-shrink-0" />
-                  <Text className="text-zinc-300 text-xs font-medium truncate">
+                  <File size={16} className="text-primary flex-shrink-0" />
+                  <Text className="text-foreground text-xs font-medium truncate">
                     {file.name}
                   </Text>
-                  <Text className="text-zinc-600 text-[10px] font-mono">
+                  <Text className="text-muted-foreground text-[10px] font-mono">
                     {(file.size / 1024 / 1024).toFixed(2)}MB
                   </Text>
                 </View>
                 <button
                   onClick={() => removeFile(index)}
-                  className="p-1 hover:bg-zinc-700 rounded-lg transition-colors"
+                  className="p-1 hover:bg-muted rounded-lg transition-colors"
                 >
-                  <X size={14} className="text-zinc-500" />
+                  <X size={14} className="text-muted-foreground" />
                 </button>
               </View>
             ))}
@@ -172,12 +172,12 @@ export function DocumentIngestor({
           <Button
             onClick={handleProcess}
             disabled={isLoading}
-            className="w-full mt-8 bg-white h-14"
+            className="w-full mt-8 h-14"
           >
             {isLoading ? (
-              <Loader2 className="animate-spin text-black" size={20} />
+              <Loader2 className="animate-spin text-primary-foreground" size={20} />
             ) : (
-              <Text className="text-black font-black uppercase tracking-widest text-xs">
+              <Text className="text-primary-foreground font-black uppercase tracking-widest text-xs">
                 Start AI Ingestion
               </Text>
             )}

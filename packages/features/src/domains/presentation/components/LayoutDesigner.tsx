@@ -16,7 +16,7 @@ import {
 } from "@sous/ui";
 import { TemplateStage } from "./shared/TemplateStage";
 import { TemplateSkeletonRenderer } from "./shared/TemplateSkeletonRenderer";
-import { LayoutNode, LayoutTemplate, LayoutNodeType } from "../types/presentation.types";
+import { LayoutNode, Layout, LayoutNodeType, SlotAssignment, LayoutType } from "../types/presentation.types";
 import { 
   DndContext, 
   DragOverlay, 
@@ -55,6 +55,9 @@ const nestedCollisionDetection: CollisionDetection = (args) => {
 };
 
 import { TagManager } from "../../core/tags/components/TagManager";
+import { CodeEditor } from "../../../components/CodeEditor";
+import { ImageSelector } from "./shared/ImageSelector";
+import { getHttpClient } from "@sous/client-sdk";
 import { 
   ChevronLeft, 
   Save, 
@@ -68,12 +71,15 @@ import {
   MoreVertical,
   X,
   Pencil,
-  Plus
+  Plus,
+  Database,
+  Image as ImageIcon,
+  Check
 } from "lucide-react";
 
 export interface LayoutDesignerProps {
-  template?: LayoutTemplate;
-  onSave: (template: LayoutTemplate) => void;
+  layout?: Layout;
+  onSave: (layout: Partial<Layout>) => void;
   onCancel: () => void;
 }
 
@@ -467,27 +473,204 @@ function DesignerRenderer({ node, parentNode, onNodeClick, onEditClick, onResize
 }
 
 export function LayoutDesigner({
-  template,
+  layout,
   onSave,
   onCancel,
 }: LayoutDesignerProps) {
-  const [activeTemplate, setActiveTemplate] = useState<LayoutTemplate>(() => {
-    const base = template || {
-      id: "new-layout",
-      name: "Untitled Layout",
-      tags: [],
-      root: DEFAULT_ROOT,
-    };
+  const [activeLayout, setActiveLayout] = useState<Partial<Layout>>(() => {
+    if (layout) {
+      return {
+        ...layout,
+        structure: ensureInternalIds(
+          typeof layout.structure === 'string' 
+            ? JSON.parse(layout.structure) 
+            : layout.structure || DEFAULT_ROOT
+        ),
+        content: typeof layout.content === 'string' ? JSON.parse(layout.content) : layout.content || {},
+        config: typeof layout.config === 'string' ? JSON.parse(layout.config) : layout.config || {},
+      };
+    }
     return {
-      ...base,
-      root: ensureInternalIds(base.root)
+      id: "new",
+      name: "Untitled Layout",
+      type: 'TEMPLATE',
+      structure: ensureInternalIds(DEFAULT_ROOT),
+      content: {},
+      config: {},
+      isSystem: false,
     };
   });
 
   const [selectedNode, setSelectedNode] = useState<LayoutNode | null>(null);
   const [editingNode, setEditingNode] = useState<LayoutNode | null>(null);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // Only fetch data if we are editing something that has content (SCREEN, LABEL, PAGE)
+      if (activeLayout.type === 'TEMPLATE') return;
+      
+      setIsLoadingData(true);
+      try {
+        const http = await getHttpClient();
+        const categoriesData = await http.get<any[]>("/culinary/categories");
+        setCategories(categoriesData);
+      } catch (e) {} finally {
+        setIsLoadingData(false);
+      }
+    };
+    fetchData();
+  }, [activeLayout.type]);
+
+  const handleUpdateSlotAssignment = (slotId: string, updates: Partial<SlotAssignment>) => {
+    setActiveLayout(prev => {
+      const currentContent = prev.content || {};
+      return {
+        ...prev,
+        content: {
+          ...currentContent,
+          [slotId]: {
+            ...(currentContent[slotId] || { sourceType: 'STATIC', component: 'Custom', dataConfig: {}, componentProps: {} }),
+            ...updates
+          }
+        }
+      };
+    });
+  };
+
+  const renderSlotConfig = (node: LayoutNode) => {
+    if (activeLayout.type === 'TEMPLATE' || !node.id) return null;
+    
+    const content = activeLayout.content || {};
+    const assignment = content[node.id] || { sourceType: 'STATIC', component: 'Custom', dataConfig: {}, componentProps: {} };
+
+    return (
+      <View className="gap-6 border-t border-border mt-6 pt-6">
+        <Text className="text-sky-500 font-black uppercase text-[10px] tracking-widest">Data Binding ({node.id})</Text>
+        
+        <View className="gap-2">
+          <Text className="text-muted-foreground font-bold uppercase text-[8px] tracking-widest">Source Provider</Text>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { id: 'POS', icon: Database, label: 'POS' },
+              { id: 'MEDIA', icon: ImageIcon, label: 'Media' },
+              { id: 'STATIC', icon: Code, label: 'JSON' },
+            ].map(s => (
+              <Button 
+                key={s.id}
+                onClick={() => handleUpdateSlotAssignment(node.id!, { 
+                  sourceType: s.id as any,
+                  component: s.id === 'POS' ? 'MenuItemList' : s.id === 'MEDIA' ? 'Image' : 'Custom'
+                })}
+                variant="outline"
+                className={cn(
+                  "h-12 border-border gap-2 p-0",
+                  assignment.sourceType === s.id && "border-sky-500 bg-sky-500/5"
+                )}
+              >
+                <s.icon size={12} className={assignment.sourceType === s.id ? "text-sky-500" : "text-muted-foreground"} />
+                <span className="text-[8px] font-black uppercase">{s.label}</span>
+              </Button>
+            ))}
+          </div>
+        </View>
+
+        {assignment.sourceType === 'POS' && (
+          <View className="gap-4">
+             <Text className="text-muted-foreground font-bold uppercase text-[8px] tracking-widest">Menu Category</Text>
+             <div className="grid grid-cols-2 gap-2">
+                {categories.map(cat => (
+                  <Button 
+                    key={cat.id}
+                    onClick={() => handleUpdateSlotAssignment(node.id!, {
+                      dataConfig: { ...assignment.dataConfig, filters: { ...assignment.dataConfig.filters, categoryId: cat.id } }
+                    })}
+                    variant="outline"
+                    className={cn(
+                      "h-10 border-border justify-start px-3",
+                      assignment.dataConfig.filters?.categoryId === cat.id && "border-sky-500 bg-sky-500/5"
+                    )}
+                  >
+                    <div className={cn("w-1 h-1 rounded-full mr-2", assignment.dataConfig.filters?.categoryId === cat.id ? "bg-sky-500" : "bg-muted")} />
+                    <span className="text-[8px] font-black uppercase truncate">{cat.name}</span>
+                  </Button>
+                ))}
+             </div>
+          </View>
+        )}
+
+        {assignment.sourceType === 'MEDIA' && (
+          <View className="gap-4">
+            <Text className="text-muted-foreground font-bold uppercase text-[8px] tracking-widest">Select Image Asset</Text>
+            {assignment.dataConfig?.url ? (
+              <Card className="p-2 border-border bg-muted/20 relative group overflow-hidden">
+                <img src={assignment.dataConfig.url} className="w-full h-32 object-cover rounded-lg" alt="Preview" />
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <Button 
+                    onClick={() => setShowImageSelector(true)}
+                    className="h-10 bg-white hover:bg-white/90"
+                  >
+                    <span className="text-black font-black uppercase text-[10px]">Change Asset</span>
+                  </Button>
+                </div>
+              </Card>
+            ) : (
+              <Button 
+                onClick={() => setShowImageSelector(true)}
+                variant="outline"
+                className="h-24 border-border border-dashed gap-3 flex flex-col hover:border-sky-500 hover:bg-sky-500/5 transition-all"
+              >
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                  <ImageIcon size={18} className="text-muted-foreground" />
+                </div>
+                <span className="text-[10px] font-black uppercase text-muted-foreground">Select Image</span>
+              </Button>
+            )}
+            
+            <ImageSelector 
+              open={showImageSelector}
+              selectedId={assignment.dataConfig?.mediaId}
+              onSelect={(mediaId, url) => {
+                handleUpdateSlotAssignment(node.id!, {
+                  dataConfig: { ...assignment.dataConfig, mediaId, url }
+                });
+                setShowImageSelector(false);
+              }}
+              onCancel={() => setShowImageSelector(false)}
+            />
+          </View>
+        )}
+
+        {assignment.sourceType === 'STATIC' && (
+          <View className="gap-2">
+            <Text className="text-muted-foreground font-bold uppercase text-[8px] tracking-widest">Static JSON Data</Text>
+            <div className="h-48 border border-border rounded-xl overflow-hidden">
+              <CodeEditor 
+                value={typeof assignment.dataConfig === 'string' ? assignment.dataConfig : JSON.stringify(assignment.dataConfig || {}, null, 2)}
+                onChange={(val) => {
+                  try {
+                    const parsed = JSON.parse(val);
+                    handleUpdateSlotAssignment(node.id!, { dataConfig: parsed });
+                  } catch (e) {
+                    // Don't update state on invalid JSON to avoid losing work while typing
+                  }
+                }}
+                language="json"
+              />
+            </div>
+            <Text className="text-[7px] text-muted-foreground font-bold uppercase tracking-widest italic">
+              Use this for manual data overrides or custom component props.
+            </Text>
+          </View>
+        )}
+      </View>
+    );
+  };
+
   const [showJson, setShowJson] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showImageSelector, setShowImageSelector] = useState(false);
   const [activeDragType, setActiveDragType] = useState<LayoutNodeType | null>(null);
   const [showMenu, setShowMenu] = useState(false);
   
@@ -503,30 +686,25 @@ export function LayoutDesigner({
   );
 
   const handleUpdateNode = useCallback((internalId: string, updates: Partial<LayoutNode>) => {
-    setActiveTemplate(prev => ({
+    setActiveLayout(prev => ({
       ...prev,
-      root: updateNodeById(prev.root, internalId, updates)
+      structure: updateNodeById(prev.structure as LayoutNode, internalId, updates)
     }));
     
-    // Update selected node if it's the one being modified
     if (selectedNode && (selectedNode as any)._internalId === internalId) {
       setSelectedNode(prev => prev ? { ...prev, ...updates } : null);
     }
 
-    // Update editing node if it's the one being modified
     if (editingNode && (editingNode as any)._internalId === internalId) {
       setEditingNode(prev => prev ? { ...prev, ...updates } : null);
     }
   }, [selectedNode, editingNode]);
 
   const handleDeleteNode = (internalId: string) => {
-    if (internalId === (activeTemplate.root as any)._internalId) {
-      // Cannot delete root
-      return;
-    }
-    const newRoot = deleteNodeById(activeTemplate.root, internalId);
+    if (internalId === (activeLayout.structure as any)._internalId) return;
+    const newRoot = deleteNodeById(activeLayout.structure as LayoutNode, internalId);
     if (newRoot) {
-      setActiveTemplate(prev => ({ ...prev, root: newRoot }));
+      setActiveLayout(prev => ({ ...prev, structure: newRoot }));
       setSelectedNode(null);
       setEditingNode(null);
     }
@@ -536,7 +714,6 @@ export function LayoutDesigner({
     const { active, over } = event;
     setActiveDragType(null);
 
-    // Case 1: Moving an existing fixed element
     if (active.data.current?.isMove) {
       const node = active.data.current.node;
       const delta = event.delta;
@@ -551,7 +728,6 @@ export function LayoutDesigner({
         const dxPercent = (delta.x / stageRect.width) * 100;
         const dyPercent = (delta.y / stageRect.height) * 100;
         
-        // Clamp to screen (0 to 100 minus element dimension)
         const nextLeft = Math.max(0, Math.min(100 - width, currentLeft + dxPercent));
         const nextTop = Math.max(0, Math.min(100 - height, currentTop + dyPercent));
 
@@ -566,7 +742,6 @@ export function LayoutDesigner({
       return;
     }
 
-    // Case 2: Dropping a new element from palette
     if (over && active.data.current?.isNew) {
       const type = active.data.current.type as LayoutNodeType;
       const isGrid = active.data.current.isGrid;
@@ -585,14 +760,12 @@ export function LayoutDesigner({
       if (type === 'fixed') {
         const stageRect = document.querySelector('.template-stage')?.getBoundingClientRect();
         if (stageRect && event.activatorEvent instanceof MouseEvent) {
-          // Calculate drop position precisely
           const dropX = event.activatorEvent.clientX + event.delta.x;
           const dropY = event.activatorEvent.clientY + event.delta.y;
           
           const xPercent = ((dropX - stageRect.left) / stageRect.width) * 100;
           const yPercent = ((dropY - stageRect.top) / stageRect.height) * 100;
 
-          // Center the box on the drop point (assuming 20% width/height)
           newNode.styles.left = `${Math.max(0, Math.min(80, xPercent - 10)).toFixed(1)}%`;
           newNode.styles.top = `${Math.max(0, Math.min(80, yPercent - 10)).toFixed(1)}%`;
         }
@@ -612,7 +785,7 @@ export function LayoutDesigner({
         ));
       }
 
-      const targetNode = findNode(activeTemplate.root, targetId);
+      const targetNode = findNode(activeLayout.structure as LayoutNode, targetId);
       if (targetNode) {
         const currentChildren = targetNode.children || [];
         const nodeWithId = ensureInternalIds(newNode);
@@ -643,8 +816,8 @@ export function LayoutDesigner({
     };
 
     onSave({
-      ...activeTemplate,
-      root: stripInternal(activeTemplate.root)
+      ...activeLayout,
+      structure: stripInternal(activeLayout.structure as LayoutNode)
     });
   };
 
@@ -708,36 +881,36 @@ export function LayoutDesigner({
           <Text className="text-sky-500 font-black uppercase text-[10px] tracking-widest">
             Type: {node.type === 'container' ? (node.styles.display === 'grid' ? 'grid' : 'flex') : node.type}
           </Text>
-          {node !== activeTemplate.root && (
+          {node !== activeLayout.structure && (
             <button 
               onClick={() => handleDeleteNode(internalId)}
-              className="px-3 py-1 bg-red-500/10 hover:bg-red-500/20 rounded-lg flex flex-row items-center gap-2 transition-colors border border-red-500/20"
+              className="px-3 py-1 bg-destructive/10 hover:bg-destructive/20 rounded-lg flex flex-row items-center gap-2 transition-colors border border-destructive/20"
             >
-              <Trash2 size={12} className="text-red-500" />
-              <span className="text-[8px] font-black uppercase tracking-widest text-red-500">Delete</span>
+              <Trash2 size={12} className="text-destructive" />
+              <span className="text-[8px] font-black uppercase tracking-widest text-destructive">Delete</span>
             </button>
           )}
         </View>
 
         <View className="gap-4">
           <View className="gap-2">
-            <Text className="text-zinc-400 font-bold uppercase text-[8px] tracking-widest">Name</Text>
+            <Text className="text-muted-foreground font-bold uppercase text-[8px] tracking-widest">Name</Text>
             <Input 
               key={`${internalId}-name`}
               value={node.name || ""}
               onChange={(e) => handleUpdateNode(internalId, { name: e.target.value })}
-              className="h-10 bg-black/40 border-zinc-800 text-xs" 
+              className="h-10 bg-muted/50 border-border text-xs" 
             />
           </View>
 
           {node.type === "slot" && (
             <View className="gap-2">
-              <Text className="text-zinc-400 font-bold uppercase text-[8px] tracking-widest">Slot ID</Text>
+              <Text className="text-muted-foreground font-bold uppercase text-[8px] tracking-widest">Slot ID</Text>
               <Input 
                 key={`${internalId}-slot-id`}
                 value={node.id || ""}
                 onChange={(e) => handleUpdateNode(internalId, { id: e.target.value })}
-                className="h-10 bg-black/40 border-zinc-800 text-xs font-mono" 
+                className="h-10 bg-muted/50 border-border text-xs font-mono" 
               />
             </View>
           )}
@@ -746,30 +919,30 @@ export function LayoutDesigner({
             <View className="gap-4">
               <View className="grid grid-cols-2 gap-4">
                 <View className="gap-2">
-                  <Text className="text-zinc-400 font-bold uppercase text-[8px] tracking-widest">Columns</Text>
+                  <Text className="text-muted-foreground font-bold uppercase text-[8px] tracking-widest">Columns</Text>
                   <Input 
                     key={`${internalId}-cols`}
                     type="number"
                     min="1"
                     value={getGridCount(node.styles.gridTemplateColumns as string)}
                     onChange={(e) => setGridCount('cols', e.target.value)}
-                    className="h-10 bg-black/40 border-zinc-800 text-xs" 
+                    className="h-10 bg-muted/50 border-border text-xs" 
                   />
                 </View>
                 <View className="gap-2">
-                  <Text className="text-zinc-400 font-bold uppercase text-[8px] tracking-widest">Rows</Text>
+                  <Text className="text-muted-foreground font-bold uppercase text-[8px] tracking-widest">Rows</Text>
                   <Input 
                     key={`${internalId}-rows`}
                     type="number"
                     min="1"
                     value={getGridCount(node.styles.gridTemplateRows as string)}
                     onChange={(e) => setGridCount('rows', e.target.value)}
-                    className="h-10 bg-black/40 border-zinc-800 text-xs" 
+                    className="h-10 bg-muted/50 border-border text-xs" 
                   />
                 </View>
               </View>
               
-              <Button onClick={generateSlots} className="bg-sky-500/10 border border-sky-500/20 h-10 gap-2">
+              <Button onClick={generateSlots} className="bg-sky-500/10 border border-sky-500/20 h-10 gap-2 hover:bg-sky-500/20">
                 <Plus size={14} className="text-sky-500" />
                 <span className="text-sky-500 font-black uppercase tracking-widest text-[8px]">Auto-Fill with Slots</span>
               </Button>
@@ -778,59 +951,61 @@ export function LayoutDesigner({
 
           <View className="grid grid-cols-2 gap-4">
             <View className="gap-2">
-              <Text className="text-zinc-400 font-bold uppercase text-[8px] tracking-widest">Width (%)</Text>
+              <Text className="text-muted-foreground font-bold uppercase text-[8px] tracking-widest">Width (%)</Text>
               <Input 
                 key={`${internalId}-width`}
                 value={String(node.styles.width || "")}
                 onChange={(e) => handleUpdateNode(internalId, { styles: { ...node.styles, width: e.target.value } })}
-                className="h-10 bg-black/40 border-zinc-800 text-xs" 
+                className="h-10 bg-muted/50 border-border text-xs" 
               />
             </View>
             <View className="gap-2">
-              <Text className="text-zinc-400 font-bold uppercase text-[8px] tracking-widest">Height (%)</Text>
+              <Text className="text-muted-foreground font-bold uppercase text-[8px] tracking-widest">Height (%)</Text>
               <Input 
                 key={`${internalId}-height`}
                 value={String(node.styles.height || "")}
                 onChange={(e) => handleUpdateNode(internalId, { styles: { ...node.styles, height: e.target.value } })}
-                className="h-10 bg-black/40 border-zinc-800 text-xs" 
+                className="h-10 bg-muted/50 border-border text-xs" 
               />
             </View>
           </View>
 
           <View className="grid grid-cols-2 gap-4">
             <View className="gap-2">
-              <Text className="text-zinc-400 font-bold uppercase text-[8px] tracking-widest">Gap</Text>
+              <Text className="text-muted-foreground font-bold uppercase text-[8px] tracking-widest">Gap</Text>
               <Input 
                 value={String(node.styles.gap || "")}
                 onChange={(e) => handleUpdateNode(internalId, { 
                   styles: { ...node.styles, gap: e.target.value } 
                 })}
-                className="h-10 bg-black/40 border-zinc-800 text-xs" 
+                className="h-10 bg-muted/50 border-border text-xs" 
               />
             </View>
             <View className="gap-2">
-              <Text className="text-zinc-400 font-bold uppercase text-[8px] tracking-widest">Padding</Text>
+              <Text className="text-muted-foreground font-bold uppercase text-[8px] tracking-widest">Padding</Text>
               <Input 
                 value={String(node.styles.padding || "")}
                 onChange={(e) => handleUpdateNode(internalId, { 
                   styles: { ...node.styles, padding: e.target.value } 
                 })}
-                className="h-10 bg-black/40 border-zinc-800 text-xs" 
+                className="h-10 bg-muted/50 border-border text-xs" 
               />
             </View>
           </View>
 
           <View className="gap-2">
-            <Text className="text-zinc-400 font-bold uppercase text-[8px] tracking-widest">Background</Text>
+            <Text className="text-muted-foreground font-bold uppercase text-[8px] tracking-widest">Background</Text>
             <Input 
               value={String(node.styles.backgroundColor || node.styles.background || "")}
               onChange={(e) => handleUpdateNode(internalId, { 
                 styles: { ...node.styles, background: e.target.value } 
               })}
-              className="h-10 bg-black/40 border-zinc-800 text-xs" 
+              className="h-10 bg-muted/50 border-border text-xs" 
               placeholder="#000000 or url(...)"
             />
           </View>
+
+          {node.type === 'slot' && renderSlotConfig(node)}
         </View>
       </View>
     );
@@ -850,16 +1025,16 @@ export function LayoutDesigner({
             <Button 
               onClick={onCancel}
               variant="ghost" 
-              className="w-10 h-10 rounded-xl bg-background border border-border items-center justify-center p-0"
+              className="w-10 h-10 rounded-xl bg-background border border-border items-center justify-center p-0 hover:bg-muted"
             >
               <ChevronLeft size={20} className="text-muted-foreground" />
             </Button>
             <View>
               <Text className="text-sky-500 font-black uppercase text-[10px] tracking-widest mb-1">
-                Layout Designer
+                {activeLayout.type} Designer
               </Text>
               <Text className="text-foreground font-black uppercase tracking-tight truncate w-40">
-                {activeTemplate.name}
+                {activeLayout.name}
               </Text>
             </View>
           </View>
@@ -886,7 +1061,7 @@ export function LayoutDesigner({
                 </Text>
                 <View className="bg-muted/20 rounded-xl border border-border/50 p-2">
                   <ElementTreeItem 
-                    node={activeTemplate.root}
+                    node={activeLayout.structure as LayoutNode}
                     selectedNodeId={selectedNode ? (selectedNode as any)._internalId : undefined}
                     onSelect={(node) => setSelectedNode(node)}
                     onEdit={(node) => setEditingNode(node)}
@@ -894,6 +1069,7 @@ export function LayoutDesigner({
                   />
                 </View>
               </View>
+
 
               {/* Selection Info */}
               <View className="border-t border-border pt-8 gap-4">
@@ -915,11 +1091,11 @@ export function LayoutDesigner({
                       variant="ghost" 
                       className="w-8 h-8 p-0 bg-muted hover:bg-sky-500 transition-colors"
                     >
-                      <Pencil size={12} className="text-white" />
+                      <Pencil size={12} className="text-foreground group-hover:text-white" />
                     </Button>
                   </Card>
                 ) : (
-                  <Text className="text-zinc-600 text-[8px] uppercase font-black italic">Select an element to view info</Text>
+                  <Text className="text-muted-foreground text-[8px] uppercase font-black italic">Select an element to view info</Text>
                 )}
               </View>
             </View>
@@ -938,12 +1114,18 @@ export function LayoutDesigner({
         >
           <TemplateStage isEditMode className="template-stage">
             <DesignerRenderer 
-              node={activeTemplate.root} 
+              node={activeLayout.structure as LayoutNode} 
               parentNode={null}
-              onNodeClick={(node: any) => setSelectedNode(node)}
+              onNodeClick={(node: any) => {
+                setSelectedNode(node);
+                // If it's a slot and we are in a Screen/Label/Page (not Template), open edit modal automatically
+                if (node.type === 'slot' && activeLayout.type !== 'TEMPLATE') {
+                  setEditingNode(node);
+                }
+              }}
               onEditClick={(node: any) => setEditingNode(node)}
               onResize={(id: string, size: any, parentNode?: LayoutNode) => {
-                const node = findNode(activeTemplate.root, id);
+                const node = findNode(activeLayout.structure as LayoutNode, id);
                 if (node) {
                   const isParentGrid = parentNode?.styles?.display === 'grid';
                   
@@ -1000,11 +1182,11 @@ export function LayoutDesigner({
                     setShowSettings(true);
                     setShowMenu(false);
                   }}
-                  className="bg-zinc-900 border border-zinc-800 h-12 px-6 hover:bg-zinc-800 shadow-2xl"
+                  className="bg-card border border-border h-12 px-6 hover:bg-muted shadow-2xl"
                 >
                   <div className="flex flex-row items-center gap-3">
-                    <Settings size={16} className="text-zinc-400" />
-                    <span className="text-white font-black uppercase tracking-widest text-[10px]">
+                    <Settings size={16} className="text-muted-foreground" />
+                    <span className="text-foreground font-black uppercase tracking-widest text-[10px]">
                       Settings
                     </span>
                   </div>
@@ -1015,11 +1197,11 @@ export function LayoutDesigner({
                     setShowJson(!showJson);
                     setShowMenu(false);
                   }}
-                  className="bg-zinc-900 border border-zinc-800 h-12 px-6 hover:bg-zinc-800 shadow-2xl"
+                  className="bg-card border border-border h-12 px-6 hover:bg-muted shadow-2xl"
                 >
                   <div className="flex flex-row items-center gap-3">
                     <Code size={16} className="text-sky-500" />
-                    <span className="text-white font-black uppercase tracking-widest text-[10px]">
+                    <span className="text-foreground font-black uppercase tracking-widest text-[10px]">
                       {showJson ? "Hide JSON" : "View JSON"}
                     </span>
                   </div>
@@ -1030,12 +1212,12 @@ export function LayoutDesigner({
                     handleSave();
                     setShowMenu(false);
                   }}
-                  className="bg-white h-12 px-6 hover:bg-zinc-200 shadow-2xl"
+                  className="bg-primary h-12 px-6 hover:bg-primary/90 shadow-2xl"
                 >
                   <div className="flex flex-row items-center gap-3">
-                    <Save size={16} className="text-black" />
-                    <span className="text-black font-black uppercase tracking-widest text-[10px]">
-                      Save Template
+                    <Save size={16} className="text-primary-foreground" />
+                    <span className="text-primary-foreground font-black uppercase tracking-widest text-[10px]">
+                      Save {activeLayout.type}
                     </span>
                   </div>
                 </Button>
@@ -1048,26 +1230,27 @@ export function LayoutDesigner({
               }}
               className={cn(
                 "w-16 h-16 rounded-full shadow-2xl items-center justify-center p-0 transition-all duration-300",
-                showMenu ? "bg-zinc-800 rotate-90" : "bg-sky-500 hover:bg-sky-400"
+                showMenu ? "bg-card border border-border rotate-90" : "bg-sky-500 hover:bg-sky-400"
               )}
             >
-              {showMenu ? <X size={24} className="text-white" /> : <MoreVertical size={24} className="text-white" />}
+              {showMenu ? <X size={24} className="text-foreground" /> : <MoreVertical size={24} className="text-white" />}
             </Button>
           </div>
 
           {/* JSON Editor Modal */}
           {showJson && (
-            <View className="absolute inset-0 bg-black/90 z-[110] p-12">
-              <View className="w-full h-full max-w-4xl mx-auto bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden">
-                <View className="p-6 border-b border-zinc-800 flex-row justify-between items-center">
-                  <Text className="text-white font-black uppercase tracking-widest text-xs">Template Definition (JSON)</Text>
-                  <Button onClick={() => setShowJson(false)} variant="ghost" className="text-zinc-500 hover:text-white">Close</Button>
+            <View className="absolute inset-0 bg-background/90 z-[110] p-12">
+              <View className="w-full h-full max-w-4xl mx-auto bg-card border border-border rounded-3xl overflow-hidden shadow-2xl">
+                <View className="p-6 border-b border-border flex-row justify-between items-center">
+                  <Text className="text-foreground font-black uppercase tracking-widest text-xs">{activeLayout.type} Definition (JSON)</Text>
+                  <Button onClick={() => setShowJson(false)} variant="ghost" className="text-muted-foreground hover:text-foreground">Close</Button>
                 </View>
                 <View className="flex-1 p-6">
-                  <textarea 
-                    readOnly
-                    className="w-full h-full bg-black/40 border border-zinc-800 rounded-xl p-6 font-mono text-xs text-sky-500 outline-none"
-                    value={JSON.stringify(activeTemplate, null, 2)}
+                  <CodeEditor 
+                    value={JSON.stringify(activeLayout, null, 2)}
+                    onChange={() => {}}
+                    language="json"
+                    className="flex-1"
                   />
                 </View>
               </View>
@@ -1076,22 +1259,102 @@ export function LayoutDesigner({
 
           {/* Settings Modal */}
           <Dialog open={showSettings} onOpenChange={setShowSettings}>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md bg-card border-border">
               <DialogHeader>
-                <DialogTitle className="text-white font-black uppercase tracking-widest text-sm">Layout Settings</DialogTitle>
+                <DialogTitle className="text-foreground font-black uppercase tracking-widest text-sm">{activeLayout.type} Settings</DialogTitle>
               </DialogHeader>
               <View className="gap-6 py-4">
                 <View className="gap-2">
-                  <Text className="text-zinc-400 font-bold uppercase text-[10px] tracking-widest">Layout Name</Text>
+                  <Text className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">Name</Text>
                   <Input 
-                    value={activeTemplate.name}
-                    onChange={(e) => setActiveTemplate(prev => ({ ...prev, name: e.target.value }))}
-                    className="h-12 bg-black/40 border-zinc-800 text-sm" 
-                    placeholder="Enter layout name..."
+                    value={activeLayout.name}
+                    onChange={(e) => setActiveLayout(prev => ({ ...prev, name: e.target.value }))}
+                    className="h-12 bg-muted/50 border-border text-sm" 
                   />
                 </View>
+
                 <View className="gap-2">
-                  <TagManager entityType="layout" entityId={activeTemplate.id} />
+                  <Text className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">Type</Text>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['TEMPLATE', 'SCREEN', 'LABEL', 'PAGE'].map(t => (
+                      <Button
+                        key={t}
+                        onClick={() => setActiveLayout(prev => ({ ...prev, type: t as any }))}
+                        variant="outline"
+                        className={cn(
+                          "h-10 border-border",
+                          activeLayout.type === t && "border-primary bg-primary/5"
+                        )}
+                      >
+                        <span className="text-[8px] font-black uppercase">{t}</span>
+                      </Button>
+                    ))}
+                  </div>
+                </View>
+
+                {activeLayout.type === 'PAGE' && (
+                  <View className="gap-2">
+                    <Text className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">Web Slug</Text>
+                    <Input 
+                      value={activeLayout.config?.webSlug || ""}
+                      onChange={(e) => setActiveLayout(prev => ({ ...prev, config: { ...prev.config, webSlug: e.target.value } }))}
+                      className="h-12 bg-muted/50 border-border text-sm" 
+                      placeholder="e.g. menu-display"
+                    />
+                  </View>
+                )}
+
+                {activeLayout.type === 'LABEL' && (
+                  <View className="grid grid-cols-2 gap-4">
+                    <View className="gap-2">
+                      <Text className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">Width (mm)</Text>
+                      <Input 
+                        type="number"
+                        value={activeLayout.config?.dimensions?.width || 50}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value);
+                          setActiveLayout(prev => ({
+                            ...prev,
+                            config: {
+                              ...prev.config,
+                              dimensions: {
+                                width: val,
+                                height: prev.config?.dimensions?.height || 30,
+                                unit: prev.config?.dimensions?.unit || 'mm'
+                              }
+                            }
+                          }));
+                        }}
+                        className="h-12 bg-muted/50 border-border text-sm" 
+                      />
+                    </View>
+                    <View className="gap-2">
+                      <Text className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">Height (mm)</Text>
+                      <Input 
+                        type="number"
+                        value={activeLayout.config?.dimensions?.height || 30}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value);
+                          setActiveLayout(prev => ({
+                            ...prev,
+                            config: {
+                              ...prev.config,
+                              dimensions: {
+                                height: val,
+                                width: prev.config?.dimensions?.width || 50,
+                                unit: prev.config?.dimensions?.unit || 'mm'
+                              }
+                            }
+                          }));
+                        }}
+                        className="h-12 bg-muted/50 border-border text-sm" 
+                      />
+                    </View>
+                  </View>
+                )}
+
+                <View className="gap-2">
+                  <TagManager entityType="layout" entityId={activeLayout.id!} />
                 </View>
               </View>
               <div className="flex flex-row justify-end mt-4">
@@ -1104,9 +1367,9 @@ export function LayoutDesigner({
 
           {/* Element Properties Modal */}
           <Dialog open={!!editingNode} onOpenChange={(open) => !open && setEditingNode(null)}>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md bg-card border-border">
               <DialogHeader>
-                <DialogTitle className="text-white font-black uppercase tracking-widest text-sm">Element Properties</DialogTitle>
+                <DialogTitle className="text-foreground font-black uppercase tracking-widest text-sm">Element Properties</DialogTitle>
               </DialogHeader>
               <ScrollView className="max-h-[60vh]" key={editingNode ? (editingNode as any)._internalId : 'none'}>
                 {editingNode && renderPropertyEditor(editingNode)}

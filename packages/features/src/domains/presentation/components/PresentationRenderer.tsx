@@ -1,67 +1,109 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect, useMemo } from "react";
 import { View, Text } from "@sous/ui";
-import {
-  TemplateStructure,
-  AssignmentContent,
+import { Loader2 } from "lucide-react";
+import { getHttpClient } from "@sous/client-sdk";
+import { TemplateSkeletonRenderer } from "./shared/TemplateSkeletonRenderer";
+import { MenuItemList } from "./shared/MenuItemList";
+import { 
+  LayoutNode, 
+  SlotAssignment 
 } from "../types/presentation.types";
 
 interface Props {
-  structure: TemplateStructure;
-  content: AssignmentContent;
+  structure: LayoutNode;
+  slots: Record<string, SlotAssignment>;
+  customCss?: string;
 }
 
 export const PresentationRenderer: React.FC<Props> = ({
   structure,
-  content,
+  slots,
+  customCss,
 }) => {
-  const V = View as any;
-  const T = Text as any;
-  const renderSlot = (slotId: string) => {
-    const binding = content.bindings[slotId];
-    const slot = structure.slots.find((s) => s.id === slotId);
+  const [products, setProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-    if (!binding) {
-      return (
-        <V className="bg-zinc-900/50 border border-zinc-800 border-dashed rounded-lg p-4 items-center justify-center">
-          <T className="text-zinc-600 text-xs uppercase tracking-widest">
-            {slot?.name || slotId}
-          </T>
-        </V>
-      );
-    }
+  useEffect(() => {
+    const fetchRequiredData = async () => {
+      const hasPosSlots = Object.values(slots).some(s => s.sourceType === 'POS');
+      if (!hasPosSlots) return;
 
-    switch (binding.type) {
-      case "text":
-        return <T className="text-white text-2xl font-bold">{binding.value}</T>;
-      case "image":
-        return (
-          <V className="w-full h-full bg-zinc-800 rounded-lg overflow-hidden">
-            {/* Image component would go here */}
-            <T className="text-zinc-500 m-auto">Image: {binding.value}</T>
-          </V>
+      setIsLoading(true);
+      try {
+        const http = await getHttpClient();
+        // In a real public view, we might need a public endpoint for products
+        // for now we assume the client has access or we use the authenticated one
+        const data = await http.get<any[]>("/culinary/products");
+        setProducts(data);
+      } catch (e) {
+        console.error("Failed to fetch products for presentation", e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRequiredData();
+  }, [slots]);
+
+  const contentMap = useMemo(() => {
+    return Object.entries(slots).reduce((acc, [id, slot]) => {
+      if (slot.sourceType === 'POS') {
+        const filtered = products.filter(p => {
+          if (slot.dataConfig.filters?.itemIds?.length) {
+            return slot.dataConfig.filters.itemIds.includes(p.id);
+          }
+          if (slot.dataConfig.filters?.categoryId) {
+            return p.categoryId === slot.dataConfig.filters.categoryId;
+          }
+          return false;
+        });
+
+        acc[id] = (
+          <MenuItemList 
+            items={filtered} 
+            {...(slot.componentProps || {})} 
+          />
         );
-      default:
-        return (
-          <T className="text-zinc-400">Unsupported Type: {binding.type}</T>
+      } else if (slot.sourceType === 'MEDIA' && slot.dataConfig.mediaId) {
+        acc[id] = (
+          <View className="flex-1 overflow-hidden">
+             {/* In a real app, we'd fetch the media URL here */}
+             <View className="flex-1 bg-muted/20 items-center justify-center">
+                <Text className="text-[8px] font-black uppercase text-muted-foreground/50">Media: {slot.dataConfig.mediaId.substring(0, 8)}</Text>
+             </View>
+          </View>
         );
-    }
-  };
+      } else if (slot.sourceType === 'STATIC') {
+        acc[id] = (
+          <View className="flex-1 p-8">
+            <Text className="text-white text-2xl font-bold">
+              {slot.dataConfig.staticData?.title || slot.dataConfig.staticData?.text || JSON.stringify(slot.dataConfig.staticData)}
+            </Text>
+          </View>
+        );
+      }
+      return acc;
+    }, {} as Record<string, React.ReactNode>);
+  }, [slots, products]);
 
-  if (structure.layout === "fullscreen") {
+  if (isLoading) {
     return (
-      <V className="flex-1 bg-black">{renderSlot(structure.slots[0]?.id)}</V>
+      <View className="flex-1 bg-background items-center justify-center">
+        <Loader2 className="animate-spin text-primary" size={48} />
+      </View>
     );
   }
 
   return (
-    <V className="flex-1 bg-black p-4">
-      <V className="flex-row flex-wrap gap-4">
-        {structure.slots.map((slot) => (
-          <V key={slot.id} className="flex-1 min-w-[300px] h-[400px]">
-            {renderSlot(slot.id)}
-          </V>
-        ))}
-      </V>
-    </V>
+    <View className="flex-1 bg-background overflow-hidden relative">
+      {customCss && <style dangerouslySetInnerHTML={{ __html: customCss }} />}
+      <TemplateSkeletonRenderer 
+        node={structure}
+        contentMap={contentMap}
+        isEditMode={false}
+      />
+    </View>
   );
 };

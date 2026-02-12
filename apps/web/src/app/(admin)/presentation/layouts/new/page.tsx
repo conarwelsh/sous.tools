@@ -8,17 +8,20 @@ import { getHttpClient } from "@sous/client-sdk";
 export default function NewLayoutPage() {
   const router = useRouter();
 
-  const handleSave = async (template: any) => {
+  const handleSave = async (layout: any) => {
     try {
       const http = await getHttpClient();
       const payload = {
-        name: template.name,
-        structure: JSON.stringify(template.root)
+        name: layout.name,
+        type: layout.type || 'TEMPLATE',
+        structure: JSON.stringify(layout.structure),
+        content: JSON.stringify(layout.content || {}),
+        config: JSON.stringify(layout.config || {}),
       };
-      await http.post("/presentation/templates", payload);
+      await http.post("/presentation/layouts", payload);
       router.push("/presentation/layouts");
     } catch (e) {
-      console.error("Failed to create template", e);
+      console.error("Failed to create layout", e);
     }
   };
 

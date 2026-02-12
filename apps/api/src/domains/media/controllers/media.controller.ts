@@ -25,7 +25,7 @@ export class MediaController {
   @Get()
   @UseGuards(JwtAuthGuard)
   async getMedia(@Req() req: any) {
-    return this.mediaService.getMedia(req.user.orgId);
+    return this.mediaService.getMedia(req.user.organizationId);
   }
 
   @Post('upload')
@@ -36,7 +36,7 @@ export class MediaController {
       throw new BadRequestException('No file uploaded');
     }
 
-    const orgId = req.user.orgId;
+    const orgId = req.user.organizationId;
     if (!orgId) {
       throw new BadRequestException('Organization context missing');
     }

@@ -1,15 +1,16 @@
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { DatabaseService } from '../../core/database/database.service.js';
 import {
-  templates,
+  layouts,
   displays,
   displayAssignments,
   organizations,
-  screens,
 } from '../../core/database/schema.js';
 import { eq, and, or } from 'drizzle-orm';
 import { logger } from '@sous/logger';
 import { RealtimeGateway } from '../../realtime/realtime.gateway.js';
+
+import { users } from '../../core/database/schema.js';
 
 @Injectable()
 export class PresentationService {
@@ -18,109 +19,137 @@ export class PresentationService {
     @Inject(RealtimeGateway) private readonly realtimeGateway: RealtimeGateway,
   ) {}
 
-  // --- Screens ---
-  async createScreen(data: typeof screens.$inferInsert) {
+  async getUserOrganizationId(userId: string) {
+    const user = await this.dbService.db.query.users.findFirst({
+      where: eq(users.id, userId),
+      columns: { organizationId: true },
+    });
+    return user?.organizationId;
+  }
+
+  // --- Layout Management (Unified) ---
+
+  async createLayout(data: typeof layouts.$inferInsert) {
     const result = await this.dbService.db
-      .insert(screens)
+      .insert(layouts)
       .values(data)
       .returning();
     return result[0];
   }
 
-  async updateScreen(
+  async updateLayout(
     id: string,
     organizationId: string,
-    data: Partial<typeof screens.$inferInsert> & { assignments?: any },
+    data: Partial<typeof layouts.$inferInsert> & { assignments?: any },
   ) {
-    const { assignments, ...screenData } = data;
+    const { assignments, ...layoutData } = data;
 
     const result = await this.dbService.db
-      .update(screens)
-      .set({ ...screenData, updatedAt: new Date() })
+      .update(layouts)
+      .set({ ...layoutData, updatedAt: new Date() })
       .where(
-        and(eq(screens.id, id), eq(screens.organizationId, organizationId)),
+        and(eq(layouts.id, id), eq(layouts.organizationId, organizationId)),
       )
       .returning();
 
-    if (!result[0]) throw new NotFoundException('Screen not found');
+    if (!result[0]) throw new NotFoundException('Layout not found');
 
-    const updatedScreen = result[0];
+    const updatedLayout = result[0];
 
-    // Handle Display Assignments if provided
-    if (assignments?.hardware && Array.isArray(assignments.hardware)) {
+    // Handle Display Assignments if provided (specifically for type 'SCREEN')
+    if (
+      updatedLayout.type === 'SCREEN' &&
+      assignments?.hardware &&
+      Array.isArray(assignments.hardware)
+    ) {
       for (const displayId of assignments.hardware) {
-        // Upsert assignment for this display
-        await this.dbService.db
-          .insert(displayAssignments)
-          .values({
-            displayId,
-            screenId: id,
-          })
-          .onConflictDoUpdate({
-            target: [displayAssignments.displayId],
-            set: { screenId: id, updatedAt: new Date() },
-          });
-
-        // Trigger Real-time update for the display
-        const display = await this.dbService.db.query.displays.findFirst({
-          where: eq(displays.id, displayId),
+        await this.assignLayoutToDisplay({
+          displayId,
+          layoutId: id,
         });
-
-        if (display?.hardwareId) {
-          // We need the layout structure too
-          const layout = await this.dbService.db.query.templates.findFirst({
-            where: eq(templates.id, updatedScreen.layoutId),
-          });
-
-          if (layout) {
-            this.realtimeGateway.emitToHardware(
-              display.hardwareId,
-              'presentation:update',
-              {
-                screenId: id,
-                structure: JSON.parse(layout.structure),
-                slots: JSON.parse(updatedScreen.slots),
-                customCss: updatedScreen.customCss,
-              },
-            );
-          }
-        }
       }
     }
 
-    return updatedScreen;
+    return updatedLayout;
   }
 
-  async deleteScreen(id: string, organizationId: string) {
+  async deleteLayout(id: string, organizationId: string) {
     await this.dbService.db
-      .delete(screens)
+      .delete(layouts)
       .where(
-        and(eq(screens.id, id), eq(screens.organizationId, organizationId)),
+        and(eq(layouts.id, id), eq(layouts.organizationId, organizationId)),
       );
     return { success: true };
   }
 
-  async getScreens(organizationId: string) {
+  async getLayouts(organizationId: string, type?: string) {
+    const conditions = [eq(layouts.organizationId, organizationId)];
+    if (type) conditions.push(eq(layouts.type, type));
+
     return this.dbService.db
       .select()
-      .from(screens)
-      .where(eq(screens.organizationId, organizationId));
+      .from(layouts)
+      .where(and(...conditions));
   }
 
-  async getScreenById(id: string, organizationId: string) {
+  async getLayoutById(id: string, organizationId: string) {
     const result = await this.dbService.db
       .select()
-      .from(screens)
+      .from(layouts)
       .where(
-        and(eq(screens.id, id), eq(screens.organizationId, organizationId)),
+        and(eq(layouts.id, id), eq(layouts.organizationId, organizationId)),
       );
     return result[0];
   }
 
-  async seedSystem(orgId: string) {
-    console.log('🌱 Seeding Presentation System Templates...');
+  async getTemplates(organizationId: string) {
+    return this.dbService.db
+      .select()
+      .from(layouts)
+      .where(
+        and(
+          eq(layouts.type, 'TEMPLATE'),
+          or(
+            eq(layouts.organizationId, organizationId),
+            eq(layouts.isSystem, true),
+          ),
+        ),
+      );
+  }
 
-    // Find the 'system' organization
+  async getLayoutBySlug(slug: string, organizationId?: string) {
+    // webSlug is stored in the 'config' JSON field
+    const organizationLayouts = await this.dbService.db
+      .select()
+      .from(layouts)
+      .where(
+        and(
+          eq(layouts.type, 'PAGE'),
+          organizationId
+            ? eq(layouts.organizationId, organizationId)
+            : undefined,
+        ),
+      );
+
+    const layout = organizationLayouts.find((l) => {
+      try {
+        const config = JSON.parse(l.config);
+        return config && config.webSlug === slug;
+      } catch (e) {
+        return false;
+      }
+    });
+
+    if (!layout) {
+      throw new NotFoundException('Page not found');
+    }
+
+    return layout;
+  }
+
+  async seedSystem(orgId: string) {
+    logger.info('🌱 Seeding Presentation System Templates...');
+
     const systemOrg = await this.dbService.db.query.organizations.findFirst({
       where: eq(organizations.slug, 'system'),
     });
@@ -130,6 +159,7 @@ export class PresentationService {
     const systemTemplates = [
       {
         name: 'Fullscreen Content',
+        type: 'TEMPLATE',
         structure: JSON.stringify({
           type: 'container',
           styles: { display: 'flex', flex: 1 },
@@ -147,6 +177,7 @@ export class PresentationService {
       },
       {
         name: 'Two Column Grid',
+        type: 'TEMPLATE',
         structure: JSON.stringify({
           type: 'container',
           styles: { display: 'flex', flexDirection: 'row', flex: 1 },
@@ -171,7 +202,7 @@ export class PresentationService {
     ];
 
     for (const t of systemTemplates) {
-      await this.dbService.db.insert(templates).values(t).onConflictDoNothing();
+      await this.dbService.db.insert(layouts).values(t).onConflictDoNothing();
     }
   }
 
@@ -184,63 +215,6 @@ export class PresentationService {
         organizationId: orgId,
       })
       .onConflictDoNothing();
-  }
-
-  // --- Templates ---
-  async createTemplate(data: typeof templates.$inferInsert) {
-    const result = await this.dbService.db
-      .insert(templates)
-      .values(data)
-      .returning();
-    return result[0];
-  }
-
-  async getTemplates(organizationId: string) {
-    return this.dbService.db
-      .select()
-      .from(templates)
-      .where(
-        or(
-          eq(templates.organizationId, organizationId),
-          eq(templates.isSystem, true),
-        ),
-      );
-  }
-
-  async updateTemplate(
-    id: string,
-    organizationId: string,
-    data: Partial<typeof templates.$inferInsert>,
-  ) {
-    const result = await this.dbService.db
-      .update(templates)
-      .set({ ...data, updatedAt: new Date() })
-      .where(
-        and(eq(templates.id, id), eq(templates.organizationId, organizationId)),
-      )
-      .returning();
-    return result[0];
-  }
-
-  async getTemplateById(id: string, organizationId: string) {
-    const result = await this.dbService.db
-      .select()
-      .from(templates)
-      .where(
-        and(eq(templates.id, id), eq(templates.organizationId, organizationId)),
-      );
-    return result[0];
-  }
-
-  async deleteTemplate(id: string, organizationId: string) {
-    await this.dbService.db.delete(templates).where(
-      and(
-        eq(templates.id, id),
-        eq(templates.organizationId, organizationId),
-        eq(templates.isSystem, false), // Prevent deleting system templates
-      ),
-    );
-    return { success: true };
   }
 
   // --- Displays ---
@@ -270,13 +244,13 @@ export class PresentationService {
   }
 
   // --- Assignments ---
-  async assignScreenToDisplay(data: typeof displayAssignments.$inferInsert) {
+  async assignLayoutToDisplay(data: typeof displayAssignments.$inferInsert) {
     const result = await this.dbService.db
       .insert(displayAssignments)
       .values(data)
       .onConflictDoUpdate({
         target: [displayAssignments.displayId],
-        set: { screenId: data.screenId, updatedAt: new Date() },
+        set: { layoutId: data.layoutId, updatedAt: new Date() },
       })
       .returning();
 
@@ -285,23 +259,19 @@ export class PresentationService {
     });
 
     if (display?.hardwareId) {
-      // Find the screen and layout to push full config
-      const screen = await this.dbService.db.query.screens.findFirst({
-        where: eq(screens.id, data.screenId),
-        with: {
-          layout: true,
-        },
+      const layout = await this.dbService.db.query.layouts.findFirst({
+        where: eq(layouts.id, data.layoutId),
       });
 
-      if (screen) {
+      if (layout) {
         this.realtimeGateway.emitToHardware(
           display.hardwareId,
           'presentation:update',
           {
-            screenId: data.screenId,
-            structure: JSON.parse(screen.layout.structure),
-            slots: JSON.parse(screen.slots),
-            customCss: screen.customCss,
+            layoutId: layout.id,
+            structure: JSON.parse(layout.structure),
+            content: JSON.parse(layout.content),
+            config: JSON.parse(layout.config),
           },
         );
       }

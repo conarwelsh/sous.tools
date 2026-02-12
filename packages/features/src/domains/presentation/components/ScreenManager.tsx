@@ -4,25 +4,25 @@ import React, { useState, useEffect } from "react";
 import { View, Text, Card, Button, ScrollView, Logo } from "@sous/ui";
 import { getHttpClient } from "@sous/client-sdk";
 import { Monitor, Plus, Settings, ExternalLink, Trash2 } from "lucide-react";
-import { ScreenConfig } from "../types/presentation.types";
+import { Layout } from "../types/presentation.types";
 import { ScreenEditor } from "./ScreenEditor";
 
 export const ScreenManager = () => {
-  const [screens, setScreens] = useState<ScreenConfig[]>([]);
+  const [screens, setScreens] = useState<Layout[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [editingScreen, setEditingScreen] = useState<ScreenConfig | null>(null);
+  const [editingScreen, setEditingScreen] = useState<Layout | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
   const fetchScreens = async () => {
     setIsLoading(true);
     try {
       const http = await getHttpClient();
-      const data = await http.get<any[]>("/presentation/screens");
-      // Map to proper ScreenConfig type if needed
+      const data = await http.get<Layout[]>("/presentation/layouts?type=SCREEN");
       setScreens(data.map(s => ({
         ...s,
-        slots: typeof s.slots === 'string' ? JSON.parse(s.slots) : (s.slots || {}),
-        assignments: typeof s.assignments === 'string' ? JSON.parse(s.assignments) : (s.assignments || {})
+        structure: typeof s.structure === 'string' ? JSON.parse(s.structure) : s.structure,
+        content: typeof s.content === 'string' ? JSON.parse(s.content) : (s.content || {}),
+        config: typeof s.config === 'string' ? JSON.parse(s.config) : (s.config || {})
       })));
     } catch (e) {
       console.error("Failed to fetch screens", e);
@@ -35,19 +35,21 @@ export const ScreenManager = () => {
     fetchScreens();
   }, []);
 
-  const handleSave = async (screen: ScreenConfig) => {
+  const handleSave = async (screen: Partial<Layout>) => {
     try {
       const http = await getHttpClient();
       const payload = {
         ...screen,
-        slots: JSON.stringify(screen.slots),
-        assignments: JSON.stringify(screen.assignments)
+        type: 'SCREEN',
+        structure: JSON.stringify(screen.structure),
+        content: JSON.stringify(screen.content),
+        config: JSON.stringify(screen.config)
       };
 
-      if (editingScreen?.id && editingScreen.id !== 'new') {
-        await http.patch(`/presentation/screens/${editingScreen.id}`, payload);
+      if (screen.id && screen.id !== 'new') {
+        await http.patch(`/presentation/layouts/${screen.id}`, payload);
       } else {
-        await http.post("/presentation/screens", payload);
+        await http.post("/presentation/layouts", payload);
       }
       setEditingScreen(null);
       setIsCreating(false);
@@ -61,7 +63,7 @@ export const ScreenManager = () => {
     if (!confirm("Are you sure you want to delete this screen?")) return;
     try {
       const http = await getHttpClient();
-      await http.delete(`/presentation/screens/${id}`);
+      await http.delete(`/presentation/layouts/${id}`);
       void fetchScreens();
     } catch (e) {
       console.error("Failed to delete screen", e);
@@ -73,11 +75,12 @@ export const ScreenManager = () => {
       <ScreenEditor 
         screen={editingScreen || {
           id: "new",
-          name: "New Screen",
-          layoutId: "",
-          slots: {},
-          assignments: {}
-        }} 
+          name: "New Display",
+          type: 'SCREEN',
+          structure: { type: 'container', styles: { flex: 1 }, children: [] },
+          content: {},
+          config: {}
+        } as any} 
         onSave={handleSave} 
         onCancel={() => {
           setEditingScreen(null);
@@ -92,7 +95,7 @@ export const ScreenManager = () => {
       <div className="flex flex-row justify-between items-end mb-12">
         <View>
           <h1 className="text-4xl font-black text-foreground tracking-tighter uppercase mb-2">
-            Screen Manager
+            Signage Manager
           </h1>
           <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">
             Manage your digital signage content and hardware assignments.
@@ -103,7 +106,7 @@ export const ScreenManager = () => {
           <View className="flex-row items-center gap-2">
             <Plus size={16} className="text-primary-foreground" />
             <span className="text-primary-foreground font-black uppercase tracking-widest text-xs">
-              New Screen
+              New Display
             </span>
           </View>
         </Button>
@@ -114,13 +117,20 @@ export const ScreenManager = () => {
           <Logo size={48} animate />
         </div>
       ) : screens.length === 0 ? (
-        <Card className="p-20 bg-muted/50 border-border border-2 items-center justify-center border-dashed">
-          <Monitor size={48} className="text-muted-foreground/20 mb-4" />
-          <Text className="text-muted-foreground font-bold uppercase tracking-widest text-sm mb-6">
-            No screens configured yet
+        <Card className="p-20 bg-card border-border border items-center justify-center">
+          <div className="p-6 bg-muted rounded-full mb-6">
+            <Monitor size={48} className="text-primary" />
+          </div>
+          <Text className="text-foreground font-black uppercase tracking-tight text-xl mb-2">
+            No Signage Configured
           </Text>
-          <Button onClick={() => setIsCreating(true)} variant="outline" className="border-border">
-            Create your first screen
+          <Text className="text-muted-foreground text-sm font-medium mb-8 max-w-sm text-center">
+            Connect your physical displays to digital signage content. Manage layouts, schedules, and device assignments in one place.
+          </Text>
+          <Button onClick={() => setIsCreating(true)} className="h-12 px-8 bg-primary hover:bg-primary/90">
+            <span className="text-primary-foreground font-black uppercase tracking-widest text-xs">
+              Create Your First Signage
+            </span>
           </Button>
         </Card>
       ) : (
@@ -140,7 +150,7 @@ export const ScreenManager = () => {
                     {screen.name}
                 </Text>
                 <View className="flex-row gap-1">
-                  {screen.assignments.webSlug && (
+                  {screen.config?.webSlug && (
                     <div className="bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded text-[8px] font-black text-emerald-500 uppercase tracking-widest">
                       Live
                     </div>
@@ -149,7 +159,7 @@ export const ScreenManager = () => {
               </div>
               
               <Text className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-6">
-                {Object.keys(screen.slots).length} Slots Populated
+                {Object.keys(screen.content || {}).length} Slots Populated
               </Text>
 
               <div className="flex flex-row gap-2">

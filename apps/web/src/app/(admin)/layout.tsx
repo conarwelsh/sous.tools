@@ -25,6 +25,7 @@ import {
   Palette,
   Sun,
   Moon,
+  Globe,
 } from "lucide-react";
 
 function AdminContent({ children }: { children: React.ReactNode }) {
@@ -67,33 +68,25 @@ function AdminContent({ children }: { children: React.ReactNode }) {
     {
       title: "Procurement",
       items: [
-        { label: "Overview", icon: ShoppingCart, href: "/procurement" },
         { label: "Suppliers", icon: UtensilsCrossed, href: "/procurement/suppliers" },
         { label: "Invoices", icon: FileText, href: "/procurement/invoices" },
         { label: "Orders", icon: ShoppingCart, href: "/procurement/orders" },
       ]
     },
     {
-      title: "Culinary",
-      items: [
-        { label: "Overview", icon: UtensilsCrossed, href: "/culinary" },
-        { label: "Recipes", icon: UtensilsCrossed, href: "/culinary/recipes" },
-        { label: "Ingredients", icon: Package, href: "/culinary/ingredients" },
-      ]
-    },
-    {
       title: "Operations",
       items: [
+        { label: "Recipes", icon: UtensilsCrossed, href: "/operations/recipes" },
+        { label: "Ingredients", icon: Package, href: "/operations/ingredients" },
         { label: "Inventory", icon: Package, href: "/inventory" },
-        { label: "Intelligence", icon: Activity, href: "/intelligence" },
-        { label: "Accounting", icon: FileText, href: "/accounting" },
+        { label: "Finances", icon: Activity, href: "/operations/intelligence" },
       ]
     },
     {
       title: "Presentation",
       items: [
-        { label: "Overview", icon: Monitor, href: "/presentation" },
-        { label: "Screens", icon: Monitor, href: "/presentation/screens" },
+        { label: "Signage", icon: Monitor, href: "/presentation/signage" },
+        { label: "Web Pages", icon: Globe, href: "/presentation/pages" },
         { label: "Layouts", icon: LayoutDashboard, href: "/presentation/layouts" },
         { label: "Labels", icon: Palette, href: "/presentation/labels" },
       ]
@@ -101,9 +94,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
     {
       title: "System",
       items: [
-        { label: "Hardware", icon: Cpu, href: "/hardware" },
-        { label: "Integrations", icon: LinkIcon, href: "/integrations" },
-        { label: "Settings", icon: Settings, href: "/settings" },
+        { label: "Settings", icon: Settings, href: "/settings/organization" },
       ]
     },
   ];
@@ -169,21 +160,36 @@ function AdminContent({ children }: { children: React.ReactNode }) {
       {/* Desktop Sidebar */}
       <View 
         className={cn(
-          "border-r border-border/50 p-6 flex flex-col hidden md:flex shrink-0 h-screen sticky top-0 transition-all duration-300 ease-in-out group/sidebar relative",
+          "border-r border-border/50 flex flex-col hidden md:flex shrink-0 h-screen sticky top-0 transition-all duration-300 ease-in-out group/sidebar relative",
           isCollapsed ? "w-24" : "w-72"
         )}
       >
-        <ScrollView className="flex-1 -mx-6 px-6">
-          <SidebarContent 
+        {/* Header (Fixed) */}
+        <View className="p-6">
+          <SidebarHeader 
             isCollapsed={isCollapsed} 
             theme={theme} 
             toggleTheme={toggleTheme} 
+          />
+        </View>
+
+        {/* Menu (Scrollable) */}
+        <ScrollView className="flex-1 px-6">
+          <SidebarMenu 
+            isCollapsed={isCollapsed} 
             menuGroups={menuGroups} 
             pathname={pathname} 
             router={router} 
-            setIsMobileMenuOpen={setIsMobileMenuOpen} 
           />
         </ScrollView>
+
+        {/* Footer (Fixed) */}
+        <View className="p-6">
+          <SidebarFooter 
+            isCollapsed={isCollapsed} 
+            router={router} 
+          />
+        </View>
 
         {/* Collapse Toggle Button */}
         <button
@@ -209,6 +215,128 @@ function AdminContent({ children }: { children: React.ReactNode }) {
   );
 }
 
+function SidebarHeader({ 
+  mobile = false, 
+  isCollapsed, 
+  theme, 
+  toggleTheme 
+}: any) {
+  return (
+    <View className={cn("mb-6 transition-all duration-300 flex flex-row items-center justify-between", isCollapsed && !mobile ? "ml-0 justify-center" : "ml-2")}>
+      <Logo variant="cloud" size={24} suffix={isCollapsed && !mobile ? undefined : "tools"} showWordmark={!isCollapsed || mobile} />
+      {(!isCollapsed || mobile) && (
+        <button
+          onClick={toggleTheme}
+          className="p-2 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all mr-2"
+        >
+          {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+        </button>
+      )}
+    </View>
+  );
+}
+
+function SidebarMenu({ 
+  mobile = false, 
+  isCollapsed, 
+  menuGroups, 
+  pathname, 
+  router, 
+  setIsMobileMenuOpen 
+}: any) {
+  return (
+    <View className="flex flex-col gap-8 pb-8">
+      {menuGroups.map((group: any) => (
+        <View key={group.title} className="flex flex-col gap-2">
+          {(!isCollapsed || mobile) && (
+            <Text className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 mb-1">
+              {group.title}
+            </Text>
+          )}
+          <View className="flex flex-col gap-1">
+            {group.items.map((item: any) => {
+              const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+              return (
+                <Button
+                  key={item.label}
+                  variant="ghost"
+                  onClick={() => {
+                    router.push(item.href);
+                    if (mobile) setIsMobileMenuOpen(false);
+                  }}
+                  className={cn(
+                    "flex items-center p-3 rounded-xl transition-all w-full group relative",
+                    isActive
+                      ? "bg-primary/10 border border-primary/20"
+                      : "hover:bg-muted/50 border border-transparent",
+                    isCollapsed && !mobile ? "justify-center px-0" : "justify-between"
+                  )}
+                >
+                  <View className="flex flex-row items-center gap-3">
+                    <item.icon
+                      size={18}
+                      className={isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}
+                    />
+                    {(!isCollapsed || mobile) && (
+                      <Text
+                        className={cn(
+                          "font-bold uppercase text-[10px] tracking-[0.1em] whitespace-nowrap",
+                          isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                        )}
+                      >
+                        {item.label}
+                      </Text>
+                    )}
+                  </View>
+                  {!isCollapsed || mobile ? (
+                    isActive && <ChevronRight size={12} className="text-primary" />
+                  ) : null}
+
+                  {/* Tooltip for collapsed state */}
+                  {isCollapsed && !mobile && (
+                    <div className="absolute left-full ml-4 px-3 py-2 bg-card border border-border rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl">
+                      <Text className="text-[10px] font-bold uppercase tracking-widest text-foreground whitespace-nowrap">
+                        {item.label}
+                      </Text>
+                    </div>
+                  )}
+                </Button>
+              );
+            })}
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function SidebarFooter({ 
+  mobile = false, 
+  isCollapsed, 
+  router 
+}: any) {
+  return (
+    <Button
+      variant="ghost"
+      onClick={() => router.push("/logout")}
+      className={cn(
+        "flex items-center p-4 rounded-xl hover:bg-destructive/10 group w-full transition-all",
+        isCollapsed && !mobile ? "justify-center" : "gap-4"
+      )}
+    >
+      <LogOut
+        size={20}
+        className="text-muted-foreground group-hover:text-destructive transition-colors"
+      />
+      {(!isCollapsed || mobile) && (
+        <Text className="text-muted-foreground group-hover:text-destructive font-bold uppercase text-[10px] tracking-widest transition-colors">
+          Sign Out
+        </Text>
+      )}
+    </Button>
+  );
+}
+
 function SidebarContent({ 
   mobile = false, 
   isCollapsed, 
@@ -222,101 +350,28 @@ function SidebarContent({
   return (
     <View className="flex flex-col h-full justify-between pb-8">
       <View>
-        <View className={cn("mb-12 transition-all duration-300 flex flex-row items-center justify-between", isCollapsed && !mobile ? "ml-0 justify-center" : "ml-2")}>
-          <Logo variant="cloud" size={24} suffix={isCollapsed && !mobile ? undefined : "tools"} showWordmark={!isCollapsed || mobile} />
-          {(!isCollapsed || mobile) && (
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all mr-2"
-            >
-              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-            </button>
-          )}
-        </View>
-
-        <View className="flex flex-col gap-8">
-          {menuGroups.map((group: any) => (
-            <View key={group.title} className="flex flex-col gap-2">
-              {(!isCollapsed || mobile) && (
-                <Text className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 mb-1">
-                  {group.title}
-                </Text>
-              )}
-              <View className="flex flex-col gap-1">
-                {group.items.map((item: any) => {
-                  const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
-                  return (
-                    <Button
-                      key={item.label}
-                      variant="ghost"
-                      onClick={() => {
-                        router.push(item.href);
-                        if (mobile) setIsMobileMenuOpen(false);
-                      }}
-                      className={cn(
-                        "flex items-center p-3 rounded-xl transition-all w-full group relative",
-                        isActive
-                          ? "bg-primary/10 border border-primary/20"
-                          : "hover:bg-muted/50 border border-transparent",
-                        isCollapsed && !mobile ? "justify-center px-0" : "justify-between"
-                      )}
-                    >
-                      <View className="flex flex-row items-center gap-3">
-                        <item.icon
-                          size={18}
-                          className={isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}
-                        />
-                        {(!isCollapsed || mobile) && (
-                          <Text
-                            className={cn(
-                              "font-bold uppercase text-[10px] tracking-[0.1em] whitespace-nowrap",
-                              isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
-                            )}
-                          >
-                            {item.label}
-                          </Text>
-                        )}
-                      </View>
-                      {!isCollapsed || mobile ? (
-                        isActive && <ChevronRight size={12} className="text-primary" />
-                      ) : null}
-
-                      {/* Tooltip for collapsed state */}
-                      {isCollapsed && !mobile && (
-                        <div className="absolute left-full ml-4 px-3 py-2 bg-card border border-border rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl">
-                          <Text className="text-[10px] font-bold uppercase tracking-widest text-foreground whitespace-nowrap">
-                            {item.label}
-                          </Text>
-                        </div>
-                      )}
-                    </Button>
-                  );
-                })}
-              </View>
-            </View>
-          ))}
-        </View>
+        <SidebarHeader 
+          mobile={mobile} 
+          isCollapsed={isCollapsed} 
+          theme={theme} 
+          toggleTheme={toggleTheme} 
+        />
+        <SidebarMenu 
+          mobile={mobile} 
+          isCollapsed={isCollapsed} 
+          menuGroups={menuGroups} 
+          pathname={pathname} 
+          router={router} 
+          setIsMobileMenuOpen={setIsMobileMenuOpen} 
+        />
       </View>
 
       <View>
-        <Button
-          variant="ghost"
-          onClick={() => router.push("/logout")}
-          className={cn(
-            "flex items-center p-4 rounded-xl hover:bg-destructive/10 group w-full transition-all",
-            isCollapsed && !mobile ? "justify-center" : "gap-4"
-          )}
-        >
-          <LogOut
-            size={20}
-            className="text-muted-foreground group-hover:text-destructive transition-colors"
-          />
-          {(!isCollapsed || mobile) && (
-            <Text className="text-muted-foreground group-hover:text-destructive font-bold uppercase text-[10px] tracking-widest transition-colors">
-              Sign Out
-            </Text>
-          )}
-        </Button>
+        <SidebarFooter 
+          mobile={mobile} 
+          isCollapsed={isCollapsed} 
+          router={router} 
+        />
       </View>
     </View>
   );

@@ -9,11 +9,11 @@ export class AccountingController {
 
   @Get('ledger')
   async getLedger(@Req() req: any) {
-    return this.accountingService.getLedger(req.user.orgId);
+    return this.accountingService.getLedger(req.user.organizationId);
   }
 
   @Get('pl')
   async getPL(@Req() req: any) {
-    return this.accountingService.generatePL(req.user.orgId);
+    return this.accountingService.generatePL(req.user.organizationId);
   }
 }

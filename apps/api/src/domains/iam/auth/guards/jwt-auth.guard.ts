@@ -34,9 +34,13 @@ export class JwtAuthGuard implements CanActivate {
         throw new UnauthorizedException('Token revoked');
       }
 
-      // Assigning the payload to the request object here
-      // so that we can access it in our route handlers
-      request['user'] = payload;
+      // Assigning the mapped payload to the request object here
+      // so that we can access it in our route handlers with consistent naming
+      request['user'] = {
+        ...payload,
+        id: payload.sub,
+        organizationId: payload.orgId,
+      };
     } catch {
       throw new UnauthorizedException();
     }

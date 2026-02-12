@@ -4,44 +4,12 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
-import android.graphics.RectF
 import android.view.SurfaceHolder
 import androidx.wear.watchface.*
-import androidx.wear.watchface.complications.*
-import androidx.wear.watchface.complications.data.*
-import androidx.wear.watchface.complications.rendering.*
 import androidx.wear.watchface.style.*
 import java.time.ZonedDateTime
 
 class ExecutiveWatchFaceService : WatchFaceService() {
-
-    override fun createComplicationSlotsManager(
-        currentUserStyleRepository: CurrentUserStyleRepository
-    ): ComplicationSlotsManager {
-        val defaultDataSourcePolicy = DefaultComplicationDataSourcePolicy(SystemDataSources.NO_DATA_SOURCE)
-        
-        val complicationSlot = ComplicationSlot.createCanvasComplicationSlotBuilder(
-            id = 1,
-            canvasComplicationFactory = { _, _ ->
-                object : CanvasComplication {
-                    private var _data: ComplicationData = NoDataComplicationData()
-                    override fun render(canvas: Canvas, bounds: Rect, zonedDateTime: ZonedDateTime, renderParameters: RenderParameters, slotId: Int) {}
-                    override fun drawHighlight(canvas: Canvas, bounds: Rect, boundsType: Int, zonedDateTime: ZonedDateTime, color: Int) {}
-                    override fun getData(): ComplicationData = _data
-                    override fun loadData(complicationData: ComplicationData, loadDrawablesAsynchronous: Boolean) {
-                        _data = complicationData
-                    }
-                }
-            },
-            complicationSlotBounds = ComplicationSlotBounds(RectF(0.2f, 0.7f, 0.4f, 0.9f)),
-            supportedTypes = listOf(ComplicationType.SHORT_TEXT)
-        ).setDefaultDataSourcePolicy(defaultDataSourcePolicy).build()
-        
-        return ComplicationSlotsManager(
-            listOf(complicationSlot),
-            currentUserStyleRepository
-        )
-    }
 
     override suspend fun createWatchFace(
         surfaceHolder: SurfaceHolder,

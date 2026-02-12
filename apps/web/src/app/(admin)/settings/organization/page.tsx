@@ -9,20 +9,20 @@ export default function OrganizationSettingsPage() {
   const { user } = useAuth();
 
   return (
-    <View className="flex-1 bg-[#0a0a0a] p-8">
+    <View className="flex-1 bg-background p-8">
       <View className="flex-row justify-between items-end mb-12">
         <View>
-          <Text className="text-zinc-500 font-bold uppercase text-xs tracking-widest mb-2">
+          <Text className="text-muted-foreground font-bold uppercase text-xs tracking-widest mb-2">
             Settings / Governance
           </Text>
-          <Text className="text-4xl font-black text-white uppercase tracking-tighter">
+          <Text className="text-4xl font-black text-foreground uppercase tracking-tighter">
             Organization
           </Text>
         </View>
-        <Button className="bg-sky-500 px-6 h-12">
+        <Button className="bg-primary hover:bg-primary/90 px-6 h-12">
           <View className="flex-row items-center gap-2">
-            <Save size={18} color="white" />
-            <Text className="text-white font-bold uppercase text-xs tracking-widest">
+            <Save size={18} className="text-primary-foreground" />
+            <Text className="text-primary-foreground font-bold uppercase text-xs tracking-widest">
               Save Changes
             </Text>
           </View>
@@ -30,16 +30,16 @@ export default function OrganizationSettingsPage() {
       </View>
 
       <View className="gap-8 max-w-4xl">
-        <Card className="p-8 bg-zinc-900 border-zinc-800">
+        <Card className="p-8 bg-card border-border">
           <View className="flex-row items-center gap-4 mb-8">
-            <View className="p-3 bg-zinc-800 rounded-xl">
-              <Building2 size={24} className="text-sky-500" />
+            <View className="p-3 bg-muted rounded-xl">
+              <Building2 size={24} className="text-primary" />
             </View>
             <View>
-              <Text className="text-white font-bold uppercase text-lg tracking-tight">
+              <Text className="text-foreground font-bold uppercase text-lg tracking-tight">
                 General Information
               </Text>
-              <Text className="text-zinc-500 text-xs uppercase tracking-widest">
+              <Text className="text-muted-foreground text-xs uppercase tracking-widest">
                 Public identity and branding
               </Text>
             </View>
@@ -47,18 +47,18 @@ export default function OrganizationSettingsPage() {
 
           <View className="gap-6">
             <View>
-              <Text className="text-zinc-600 font-bold uppercase text-[10px] tracking-widest mb-2 ml-1">
+              <Text className="text-muted-foreground/60 font-bold uppercase text-[10px] tracking-widest mb-2 ml-1">
                 Organization Name
               </Text>
-              <View className="h-12 bg-zinc-950 border border-zinc-800 rounded-xl px-4 justify-center">
-                <Text className="text-zinc-300">
+              <View className="h-12 bg-muted/20 border border-border rounded-xl px-4 justify-center">
+                <Text className="text-foreground/80">
                   {(user as any)?.organization?.name || "Loading..."}
                 </Text>
               </View>
             </View>
 
             <View>
-              <Text className="text-zinc-600 font-bold uppercase text-[10px] tracking-widest mb-2 ml-1">
+              <Text className="text-muted-foreground/60 font-bold uppercase text-[10px] tracking-widest mb-2 ml-1">
                 Logo Variant
               </Text>
               <View className="flex-row gap-4">

@@ -1,6 +1,5 @@
-import React from "react";
-import { PresentationDashboardView } from "@sous/features";
+import { redirect } from "next/navigation";
 
 export default function PresentationPage() {
-  return <PresentationDashboardView />;
+  redirect("/presentation/signage");
 }

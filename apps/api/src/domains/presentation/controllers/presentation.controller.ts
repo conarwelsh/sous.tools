@@ -9,6 +9,7 @@ import {
   UseGuards,
   Req,
   BadRequestException,
+  Query,
 } from '@nestjs/common';
 import { PresentationService } from '../services/presentation.service.js';
 import { JwtAuthGuard } from '../../iam/auth/guards/jwt-auth.guard.js';
@@ -18,73 +19,77 @@ import { JwtAuthGuard } from '../../iam/auth/guards/jwt-auth.guard.js';
 export class PresentationController {
   constructor(private readonly presentationService: PresentationService) {}
 
-  // --- Screens ---
-  @Post('screens')
-  async createScreen(@Body() body: any, @Req() req: any) {
-    return this.presentationService.createScreen({
-      ...body,
+  // --- Layouts (Polymorphic) ---
+
+  @Post('layouts')
+  async createLayout(@Body() body: any, @Req() req: any) {
+    const { id, ...layoutData } = body;
+    const finalData = {
+      ...layoutData,
       organizationId: req.user.organizationId,
-    });
+    };
+
+    if (id && id !== 'new') {
+      finalData.id = id;
+    }
+
+    return this.presentationService.createLayout(finalData);
   }
 
-  @Patch('screens/:id')
-  async updateScreen(
+  @Patch('layouts/:id')
+  async updateLayout(
     @Param('id') id: string,
     @Body() body: any,
     @Req() req: any,
   ) {
-    return this.presentationService.updateScreen(
+    return this.presentationService.updateLayout(
       id,
       req.user.organizationId,
       body,
     );
   }
 
-  @Get('screens')
-  async getScreens(@Req() req: any) {
-    return this.presentationService.getScreens(req.user.organizationId);
+  @Get('layouts')
+  async getLayouts(@Query('type') type: string, @Req() req: any) {
+    return this.presentationService.getLayouts(req.user.organizationId, type);
   }
 
-  @Get('screens/:id')
-  async getScreenById(@Param('id') id: string, @Req() req: any) {
-    return this.presentationService.getScreenById(id, req.user.organizationId);
+  @Get('layouts/:id')
+  async getLayoutById(@Param('id') id: string, @Req() req: any) {
+    return this.presentationService.getLayoutById(id, req.user.organizationId);
   }
 
-  @Delete('screens/:id')
-  async deleteScreen(@Param('id') id: string, @Req() req: any) {
-    return this.presentationService.deleteScreen(id, req.user.organizationId);
+  @Delete('layouts/:id')
+  async deleteLayout(@Param('id') id: string, @Req() req: any) {
+    return this.presentationService.deleteLayout(id, req.user.organizationId);
   }
 
-  // --- Templates ---
-  @Post('templates')
-  async createTemplate(@Body() body: any, @Req() req: any) {
-    return this.presentationService.createTemplate({
-      ...body,
-      organizationId: req.user.organizationId,
-    });
-  }
+  // --- Legacy / Specific Helper Endpoints ---
 
   @Get('templates')
   async getTemplates(@Req() req: any) {
     return this.presentationService.getTemplates(req.user.organizationId);
   }
 
-  @Patch('templates/:id')
-  async updateTemplate(
-    @Param('id') id: string,
-    @Body() body: any,
-    @Req() req: any,
-  ) {
-    return this.presentationService.updateTemplate(
-      id,
+  @Get('signage')
+  async getSignage(@Req() req: any) {
+    return this.presentationService.getLayouts(
       req.user.organizationId,
-      body,
+      'SCREEN',
     );
   }
 
-  @Delete('templates/:id')
-  async deleteTemplate(@Param('id') id: string, @Req() req: any) {
-    return this.presentationService.deleteTemplate(id, req.user.organizationId);
+  @Get('pages')
+  async getPages(@Req() req: any) {
+    return this.presentationService.getLayouts(req.user.organizationId, 'PAGE');
+  }
+
+  @Get('labels')
+  async getLabels(@Req() req: any) {
+    return this.presentationService.getLayouts(
+      req.user.organizationId,
+      'LABEL',
+    );
   }
 
   // --- Displays ---
@@ -104,14 +109,13 @@ export class PresentationController {
   // --- Assignments ---
   @Post('assignments')
   async createAssignment(@Body() body: any, @Req() req: any) {
-    // Basic validation: Verify display belongs to org
     const display = await this.presentationService.getDisplayById(
       body.displayId,
       req.user.organizationId,
     );
     if (!display) throw new BadRequestException('Invalid Display ID');
 
-    return this.presentationService.assignScreenToDisplay({
+    return this.presentationService.assignLayoutToDisplay({
       ...body,
     });
   }

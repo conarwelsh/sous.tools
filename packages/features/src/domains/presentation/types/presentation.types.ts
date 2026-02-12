@@ -1,4 +1,5 @@
 export type LayoutNodeType = "container" | "slot" | "fixed";
+export type LayoutType = 'TEMPLATE' | 'SCREEN' | 'LABEL' | 'PAGE';
 
 export interface LayoutNode {
   type: LayoutNodeType;
@@ -6,56 +7,49 @@ export interface LayoutNode {
   name?: string; // Display name
   styles: Record<string, string | number>;
   children?: LayoutNode[];
-  content?: {
-    type: string;
-    props?: Record<string, any>;
-  };
-}
-
-export interface LayoutTemplate {
-  id: string;
-  name: string;
-  tags: string[];
-  root: LayoutNode;
-  isSystem?: boolean;
-}
-
-export interface AssignmentContent {
-  bindings: Record<
-    string,
-    {
-      type: string;
-      value: any;
-      props?: Record<string, any>;
-    }
-  >;
 }
 
 export interface SlotAssignment {
   sourceType: 'POS' | 'MEDIA' | 'STATIC';
   dataConfig: {
-    filters?: { categoryId?: string; tags?: string[] };
+    filters?: { categoryId?: string; tags?: string[]; itemIds?: string[] };
     overrides?: Record<string, { featured?: boolean; soldOut?: boolean; hidden?: boolean }>;
     staticData?: any;
     mediaId?: string;
+    url?: string;
   };
   component: string; // e.g., 'MenuItemList'
   componentProps: Record<string, any>;
 }
 
-export interface ScreenConfig {
-  id: string;
-  name: string;
-  layoutId: string; // Reference to Layout Template
+export interface LayoutConfig {
+  webSlug?: string;
+  isPublic?: boolean;
+  dimensions?: { width: number; height: number; unit: 'px' | 'mm' | 'in' };
+  refreshInterval?: number;
   customCss?: string;
-  slots: Record<string, SlotAssignment>; // Keyed by Slot ID from Layout
-  // Target Configuration
-  assignments: {
-    hardware?: string[]; // Array of Display IDs (HDMI ports)
-    webSlug?: string;    // URL slug
-    isPublic?: boolean;  // Access control
-  }
+  hardware?: string[]; // Display IDs for Screen assignments
+  [key: string]: any;
 }
+
+export interface Layout {
+  id: string;
+  organizationId: string;
+  parentId?: string;
+  name: string;
+  type: LayoutType;
+  structure: LayoutNode;
+  content: Record<string, SlotAssignment>;
+  config: LayoutConfig;
+  isSystem: boolean;
+  createdAt: string;
+  updatedAt: string;
+  tags?: string[]; // Added by API if TagManager is used
+}
+
+// Legacy Aliases for gradual refactoring
+export type LayoutTemplate = Layout;
+export type ScreenConfig = Layout;
 
 // Legacy support (will be refactored as we implement the new engine)
 export interface TemplateSlot {
@@ -70,3 +64,4 @@ export interface TemplateStructure {
   config: Record<string, any>;
   slots: TemplateSlot[];
 }
+

@@ -5,7 +5,7 @@ import { DbCommand } from './db/db.command.js';
 @Command({
   name: 'maintenance',
   description: 'System maintenance and cleanup tasks',
-  subCommands: [HousekeepCommand],
+  subCommands: [HousekeepCommand, DbCommand],
 })
 export class MaintenanceCommand extends CommandRunner {
   async run(passedParam: string[]): Promise<void> {

@@ -40,7 +40,6 @@
   },
   "include": [
     "next-env.d.ts",
-    "nativewind-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     "**/*.mts",

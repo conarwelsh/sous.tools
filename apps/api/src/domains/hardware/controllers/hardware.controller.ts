@@ -9,7 +9,7 @@ export class HardwareController {
   @Get()
   @UseGuards(JwtAuthGuard)
   async getDevices(@Req() req: any) {
-    return this.hardwareService.getDevicesByOrg(req.user.orgId);
+    return this.hardwareService.getDevicesByOrg(req.user.organizationId);
   }
 
   @Post('pairing-code')
@@ -34,7 +34,7 @@ export class HardwareController {
   ) {
     return this.hardwareService.pairDevice(
       body.code,
-      req.user.orgId,
+      req.user.organizationId,
       body.locationId,
     );
   }

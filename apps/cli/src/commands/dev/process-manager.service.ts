@@ -130,11 +130,17 @@ export class ProcessManager
       if (!resp.ok) return;
       const data = await resp.json();
       if (data.logs && data.logs.length > 0) {
+        let added = false;
         for (const log of data.logs) {
-          // Check if log is new to avoid duplication if agent sends full history
-          // Simple heuristic: agents usually send since last fetch
-          this.addLog('agent', `[AGENT] ${log.message}`, log.level || 'info');
+          this.addLog(
+            'agent',
+            `[AGENT] ${log.message}`,
+            log.level || 'info',
+            false,
+          );
+          added = true;
         }
+        if (added) this.emit('update');
       }
     } catch (e) {
       // Agent likely not running, ignore
@@ -160,7 +166,7 @@ export class ProcessManager
     // 2. Check PM2 processes
     pm2.list((err, list) => {
       if (err) {
-        console.error('[ProcessManager] PM2 List error:', err);
+        this.addLog('db', `❌ PM2 List error: ${err.message}`, 'error');
         return;
       }
       let updated = false;
@@ -169,9 +175,6 @@ export class ProcessManager
         const proc = id ? this.processes.get(id) : null;
         if (proc && proc.type === 'pm2') {
           const pm2Status = p.pm2_env?.status;
-          console.log(
-            `[ProcessManager] Found PM2 process: ${p.name} (${id}), status: ${pm2Status}`,
-          );
           if (pm2Status !== 'online') {
             if (proc.status !== 'stopped') {
               proc.status = 'stopped';
@@ -184,9 +187,6 @@ export class ProcessManager
         }
       }
       if (updated) {
-        console.log(
-          '[ProcessManager] Process statuses updated, emitting update',
-        );
         this.emit('update');
       }
     });
@@ -385,7 +385,6 @@ export class ProcessManager
       this.emit('update');
     } catch (e: any) {
       this.addLog('db', `❌ Auto-start failed: ${e.message}`, 'error');
-      console.error('[ProcessManager] Auto-start failed:', e);
     }
   }
 
@@ -702,6 +701,7 @@ export class ProcessManager
     id: string,
     rawMessage: string,
     defaultLevel: 'info' | 'error' | 'warn',
+    shouldEmit = true,
   ) {
     const proc = this.processes.get(id);
     if (!proc) return;
@@ -756,7 +756,7 @@ export class ProcessManager
       this.combinedLogs.push(logEntry);
       if (this.combinedLogs.length > 10000) this.combinedLogs.shift();
     }
-    this.emit('update');
+    if (shouldEmit) this.emit('update');
   }
 
   private mapPinoLevel(

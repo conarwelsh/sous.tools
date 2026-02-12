@@ -1,6 +1,71 @@
-# History
+- **Recipe Manager AI Parsing & Structured View:**
+    - Implemented a detailed Recipe view (`/operations/recipes/[id]`) that displays extracted ingredients and instructions.
+    - Updated `RecipesPage` to navigate to the detailed view instead of opening the Google Drive link directly.
+    - Enhanced `CulinaryService` and GraphQL resolvers to support deep fetching of recipe relations (ingredients and steps).
+    - Added a manual "Parse with AI" trigger to the recipe detail page to re-process or initially process recipe documents.
+    - Improved `IngestionService` JSON parsing robustness for Gemini AI responses.
+    - Connected `triggerRecipeAiIngestion` mutation to wait for the ingestion process and refresh the UI upon completion.
 
-## 2026-02-11 (Sidebar Refactor & Theme Stability)
+- **GraphQL Schema Alignment:**
+    - Resolved `Cannot query field "sourceType" on type "RecipeType"` and similar errors by aligning NestJS GraphQL `ObjectType` definitions with the Drizzle database schema.
+    - Updated `RecipeType` to include `sourceType`, `sourceId`, and `sourceUrl`.
+    - Enhanced `IngredientType` with `description` and `lastPurchasedAt` fields.
+
+- **Full AI Recipe Ingestion Workflow:**
+    - Integrated Google Gemini AI (Gemini 1.5 Flash) for automated recipe extraction.
+    - Implemented `downloadFile` in `GoogleDriveDriver` to fetch content from Google Drive, including binary files (PDF/Images) and Google Docs (text export).
+    - Refactored `IngestionService` to process downloaded content with Gemini using structured prompt engineering for highly accurate extraction of recipe name, yield, ingredients, and steps.
+    - Added automated entity mapping: Missing ingredients are automatically created in the organization's catalog during ingestion.
+    - Updated `@sous/config` to securely handle `GOOGLE_GENERATIVE_AI_API_KEY` from Infisical.
+
+- **Interactive Google Drive Recipe Ingestion:**
+    - Replaced the bulk "Sync Recipes" button with a new "Upload From Google Drive" interactive flow.
+    - Implemented `DrivePicker` component in `@sous/features` allowing users to browse their Google Drive folders and select specific files for import.
+    - Added `IngestionService` in `@sous/api` to handle structured data extraction from imported documents.
+    - Implemented a simulated AI processing pipeline that strips file extensions, detects yields, and automatically extracts ingredients into the database.
+    - Updated `IntegrationsService` to facilitate targeted file ingestion via an optional `fileId` parameter in the sync endpoint.
+
+## 2026-02-11 (Presentation Domain Pivot & Unified Layouts)
+
+- **Presentation Architecture Pivot:**
+    - Refactored the presentation domain from separate `templates` and `screens` tables into a single, unified polymorphic `layouts` table.
+    - Added a `type` column to support `TEMPLATE`, `SCREEN`, `LABEL`, and `PAGE` entities within the same schema.
+    - Consolidated `structure` (JSON tree), `content` (data bindings), and `config` (metadata) into the core `layouts` record.
+    - Updated `display_assignments` to link physical hardware directly to polymorphic `SCREEN` layouts.
+- **Polymorphic LayoutDesigner:**
+    - Refactored the `LayoutDesigner` component in `@sous/features` to contextually handle all layout types.
+    - The editor now supports both blueprint design (Templates) and live data mapping (Screens/Labels/Pages) in a single visual interface.
+    - Integrated conditional property editing based on the active layout type (e.g., Web Slugs for Pages, Dimensions for Labels).
+- **Service & API Consolidation:**
+    - Refactored `PresentationService` and `PresentationController` to use unified CRUD logic for all visual entities.
+    - Updated `RealtimeGateway` to push integrated structure and content payloads to hardware nodes, enabling faster and more reliable updates.
+- **Google Drive Integration Fix:**
+    - Resolved the "insufficient authentication scopes" error by adding `drive.metadata.readonly` to requested OAuth scopes.
+    - Implemented automatic token refresh with rotation support and forced consent prompts to ensure healthy session persistence.
+    - Verified successful synchronization of over 100 recipe files from Google Drive to the local database.
+
+## 2026-02-11 (CLI TUI Stability & Polling Fixes)
+
+- **TUI Stability Fix:**
+    - Resolved the "flashing and shifting" issue in `sous dev` (Ink TUI) occurring every 5 seconds.
+    - **Removed Polling Noise:** Eliminated raw `console.log` and `console.error` calls within the `ProcessManager` polling loops that were interfering with the terminal buffer.
+    - **Batched UI Updates:** Refactored `addLog` to support optional emission, allowing `pollAgentLogs` to batch multiple log entries into a single UI update.
+    - **Status Detection Persistence:** Maintained real-time process state detection (e.g., detecting "Ready" or "Compiling" from log streams) while reducing re-render frequency.
+    - **Standardized Icon Imports:**
+    - Fixed build error where `Loader2` was incorrectly imported from `@sous/ui` instead of `lucide-react`.
+    - Updated `presentation/layouts/page.tsx` and `operations/intelligence/reports/page.tsx` to use the correct icon source.
+- **Sidebar UX Improvement:**
+    - Moved branding (Logo/Theme Toggle) and Sign Out button outside the sidebar's `ScrollView`.
+    - Branding and navigation actions now remain fixed at the top and bottom of the sidebar, with only the menu items being scrollable.
+- **UI Simplification:**
+    - Renamed "Intelligence & Finance" to "Finances" across the sidebar and all hub subpages for better UX clarity.
+- **Web Pages Implementation:**
+    - Extended the Presentation domain to support general-purpose Web Pages alongside Digital Signage.
+    - Updated the `screens` database schema with a `type` column to differentiate between entity types.
+    - Implemented `PageManager` in `@sous/features` for managing web-facing content.
+    - Added `/presentation/pages` route to the admin dashboard and linked it in the sidebar.
+    - Enhanced `PresentationController` and `PresentationService` to handle multi-type presentation entities.
+
 
 - **Sidebar Navigation Overhaul:**
     - Refactored the admin sidebar to support grouped sections (Core, Procurement, Culinary, Operations, Presentation, System).

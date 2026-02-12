@@ -30,13 +30,13 @@ export function EntityMapper({
   };
 
   return (
-    <View className="bg-zinc-900/50 border border-zinc-800 p-4 rounded-2xl">
+    <View className="bg-card/50 border border-border p-4 rounded-2xl">
       <View className="flex-row justify-between items-start mb-4">
         <View className="flex-1">
-          <Text className="text-zinc-500 font-bold uppercase text-[8px] tracking-widest mb-1">
+          <Text className="text-muted-foreground font-bold uppercase text-[8px] tracking-widest mb-1">
             Detected Text
           </Text>
-          <Text className="text-white font-mono text-xs uppercase">
+          <Text className="text-foreground font-mono text-xs uppercase">
             {originalText}
           </Text>
         </View>
@@ -51,7 +51,7 @@ export function EntityMapper({
             </View>
             <button 
               onClick={() => setIsEditing(true)}
-              className="text-zinc-600 hover:text-sky-500 text-[8px] font-bold uppercase tracking-widest underline transition-colors"
+              className="text-muted-foreground hover:text-primary text-[8px] font-bold uppercase tracking-widest underline transition-colors"
             >
               Change
             </button>
@@ -62,12 +62,12 @@ export function EntityMapper({
       {isEditing ? (
         <View className="gap-3">
           <View className="relative">
-            <Search size={14} className="absolute left-3 top-3 text-zinc-500" />
+            <Search size={14} className="absolute left-3 top-3 text-muted-foreground" />
             <Input
               value={searchTerm}
               onChange={(e) => setSearchText(e.target.value)}
               placeholder="Search catalog..."
-              className="pl-10 h-10 bg-black/40 border-zinc-800 text-xs"
+              className="pl-10 h-10 bg-muted/40 border-border text-xs"
             />
           </View>
           
@@ -75,9 +75,9 @@ export function EntityMapper({
             <Button
               onClick={() => setIsEditing(false)}
               variant="outline"
-              className="flex-1 h-10 border-zinc-800 hover:bg-zinc-800"
+              className="flex-1 h-10 border-border hover:bg-muted"
             >
-              <Text className="text-zinc-400 font-bold uppercase text-[10px] tracking-widest">
+              <Text className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">
                 Cancel
               </Text>
             </Button>
@@ -85,11 +85,11 @@ export function EntityMapper({
             {onCreateNew && (
               <Button
                 onClick={() => onCreateNew(searchTerm)}
-                className="flex-1 h-10 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20"
+                className="flex-1 h-10 bg-primary/10 border border-primary/20 hover:bg-primary/20"
               >
                 <View className="flex-row items-center gap-2">
-                  <Plus size={12} className="text-sky-500" />
-                  <Text className="text-sky-500 font-bold uppercase text-[10px] tracking-widest">
+                  <Plus size={12} className="text-primary" />
+                  <Text className="text-primary font-bold uppercase text-[10px] tracking-widest">
                     Create New
                   </Text>
                 </View>
@@ -98,17 +98,17 @@ export function EntityMapper({
           </View>
         </View>
       ) : (
-        <View className="bg-black/40 border border-sky-500/20 p-3 rounded-xl flex-row items-center justify-between">
+        <View className="bg-muted/40 border border-primary/20 p-3 rounded-xl flex-row items-center justify-between">
           <View className="flex-row items-center gap-3">
-            <View className="w-8 h-8 rounded-lg bg-sky-500/10 items-center justify-center">
-              <Check size={16} className="text-sky-500" />
+            <View className="w-8 h-8 rounded-lg bg-primary/10 items-center justify-center">
+              <Check size={16} className="text-primary" />
             </View>
-            <Text className="text-zinc-200 font-bold text-sm uppercase">
+            <Text className="text-foreground font-bold text-sm uppercase">
               {suggestedMatch?.name}
             </Text>
           </View>
-          <View className="px-2 py-1 rounded bg-sky-500/10 border border-sky-500/20">
-             <Text className="text-sky-500 font-mono text-[8px] uppercase tracking-widest">Linked</Text>
+          <View className="px-2 py-1 rounded bg-primary/10 border border-primary/20">
+             <Text className="text-primary font-mono text-[8px] uppercase tracking-widest">Linked</Text>
           </View>
         </View>
       )}

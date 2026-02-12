@@ -5,6 +5,7 @@ export * from "./components/LayoutManager";
 export * from "./components/LayoutDesigner";
 export * from "./components/ScreenManager";
 export * from "./components/ScreenEditor";
+export * from "./components/PageManager";
 export * from "./components/KioskManager";
 export * from "./components/LabelEditor";
 export * from "./components/shared/TemplateStage";

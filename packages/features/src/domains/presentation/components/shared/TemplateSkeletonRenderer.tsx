@@ -116,11 +116,11 @@ export function TemplateSkeletonRenderer({
       return (
         <View className="flex-1 relative">
           <View className="absolute inset-0 items-center justify-center p-4 pointer-events-none">
-            <Text className="text-zinc-700 font-black uppercase text-[10px] tracking-widest text-center">
+            <Text className="text-muted-foreground/50 font-black uppercase text-[10px] tracking-widest text-center">
               {name || "Empty Slot"}
             </Text>
             {id && (
-              <Text className="text-zinc-800 font-mono text-[8px] mt-1">
+              <Text className="text-muted-foreground/30 font-mono text-[8px] mt-1">
                 ID: {id}
               </Text>
             )}
@@ -139,11 +139,11 @@ export function TemplateSkeletonRenderer({
     "relative flex flex-col transition-all",
     (type === "container" || type === "slot") && "flex-1 w-full h-full",
     styles.display === 'grid' && "layout-grid-container",
-    type === "slot" && "border-2 border-dashed border-zinc-800 bg-zinc-900/20 hover:border-sky-500/50 hover:bg-sky-500/5 cursor-pointer",
-    type === "fixed" && "border-2 border-sky-500/30 bg-zinc-900 shadow-2xl rounded-lg overflow-hidden",
-    isEditMode && type === "container" && "border border-zinc-800/50 p-1 cursor-pointer hover:border-sky-500/30",
+    type === "slot" && "border-2 border-dashed border-border bg-muted/20 hover:border-primary/50 hover:bg-primary/5 cursor-pointer",
+    type === "fixed" && "border-2 border-primary/30 bg-card shadow-2xl rounded-lg overflow-hidden",
+    isEditMode && type === "container" && "border border-border/50 p-1 cursor-pointer hover:border-primary/30",
     isEditMode && type === "slot" && "p-1",
-    isSelected && "ring-2 ring-sky-500 z-50 bg-sky-500/10 shadow-[0_0_25px_rgba(14,165,233,0.4)]"
+    isSelected && "ring-2 ring-primary z-50 bg-primary/10 shadow-[0_0_25px_rgba(14,165,233,0.4)]"
   );
 
   return (
@@ -166,15 +166,15 @@ export function TemplateSkeletonRenderer({
           {Array.from({ 
             length: getGridCount(styles.gridTemplateColumns as string) * getGridCount(styles.gridTemplateRows as string) 
           }).map((_, i) => (
-            <div key={i} className="border border-sky-500 min-h-[40px] min-w-[40px]" />
+            <div key={i} className="border border-primary min-h-[40px] min-w-[40px]" />
           ))}
         </div>
       )}
 
       {/* Label for Edit Mode */}
       {isEditMode && !isRoot && (
-        <div className="absolute top-0 left-0 bg-zinc-800/80 px-1.5 py-0.5 rounded-br z-20 pointer-events-none flex flex-row items-center gap-1.5">
-          <span className="text-zinc-500 font-black uppercase text-[6px] tracking-tighter">
+        <div className="absolute top-0 left-0 bg-muted/80 px-1.5 py-0.5 rounded-br z-20 pointer-events-none flex flex-row items-center gap-1.5">
+          <span className="text-muted-foreground font-black uppercase text-[6px] tracking-tighter">
             {type === 'container' ? (styles.display === 'grid' ? 'grid' : 'flex') : type}{name ? `: ${name}` : ''}
           </span>
         </div>
@@ -186,9 +186,9 @@ export function TemplateSkeletonRenderer({
           {/* Edit Icon */}
           <button 
             onClick={handleEdit}
-            className="absolute top-1 right-1 w-5 h-5 bg-zinc-800 hover:bg-sky-500 rounded flex items-center justify-center z-30 transition-colors border border-zinc-700"
+            className="absolute top-1 right-1 w-5 h-5 bg-muted hover:bg-primary rounded flex items-center justify-center z-30 transition-colors border border-border"
           >
-            <Pencil size={10} className="text-white" />
+            <Pencil size={10} className="text-foreground group-hover:text-primary-foreground" />
           </button>
         </>
       )}
