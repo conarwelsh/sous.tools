@@ -8,7 +8,7 @@ import { RealtimeModule } from '../realtime/realtime.module.js';
 import { CoreModule } from '../core/core.module.js';
 
 @Module({
-  imports: [AuthModule, RealtimeModule, CoreModule],
+  imports: [AuthModule, CoreModule],
   providers: [PresentationService, PresentationResolver],
   controllers: [PresentationController, PublicPresentationController],
   exports: [PresentationService],

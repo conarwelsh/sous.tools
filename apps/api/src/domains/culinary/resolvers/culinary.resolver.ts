@@ -123,6 +123,48 @@ export class CreateRecipeInput {
   yieldUnit?: string;
 }
 
+@InputType()
+export class RecipeIngredientInput {
+  @Field()
+  ingredientId: string;
+
+  @Field(() => Int)
+  amount: number;
+
+  @Field()
+  unit: string;
+}
+
+@InputType()
+export class RecipeStepInput {
+  @Field(() => Int)
+  order: number;
+
+  @Field()
+  instruction: string;
+
+  @Field(() => Int, { nullable: true })
+  timerDuration?: number;
+}
+
+@InputType()
+export class UpdateRecipeInput {
+  @Field({ nullable: true })
+  name?: string;
+
+  @Field(() => Int, { nullable: true })
+  yieldAmount?: number;
+
+  @Field({ nullable: true })
+  yieldUnit?: string;
+
+  @Field(() => [RecipeIngredientInput], { nullable: true })
+  ingredients?: RecipeIngredientInput[];
+
+  @Field(() => [RecipeStepInput], { nullable: true })
+  steps?: RecipeStepInput[];
+}
+
 @Resolver()
 export class CulinaryResolver {
   constructor(
@@ -138,8 +180,13 @@ export class CulinaryResolver {
   }
 
   @Query(() => [RecipeType])
-  async recipes(@Args('orgId') orgId: string) {
-    return this.culinaryService.getRecipes(orgId);
+  async recipes(
+    @Args('orgId') orgId: string,
+    @Args('search', { nullable: true }) search?: string,
+    @Args('source', { nullable: true }) source?: string,
+    @Args('tags', { type: () => [String], nullable: true }) tags?: string[],
+  ) {
+    return this.culinaryService.getRecipes(orgId, { search, source, tags });
   }
 
   @Query(() => RecipeType, { nullable: true })
@@ -167,6 +214,24 @@ export class CulinaryResolver {
       { ...input, organizationId: orgId },
       [],
     );
+  }
+
+  @Mutation(() => RecipeType)
+  async updateRecipe(
+    @Args('orgId') orgId: string,
+    @Args('id') id: string,
+    @Args('input') input: UpdateRecipeInput,
+  ) {
+    const { ingredients, steps, ...data } = input;
+    return this.culinaryService.updateRecipe(id, orgId, data, ingredients as any, steps as any);
+  }
+
+  @Mutation(() => RecipeType, { nullable: true })
+  async deleteRecipe(
+    @Args('orgId') orgId: string,
+    @Args('id') id: string,
+  ) {
+    return this.culinaryService.deleteRecipe(id, orgId);
   }
 
   @Mutation(() => Boolean)

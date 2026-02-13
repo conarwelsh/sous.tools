@@ -2,6 +2,12 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddToShoppingListInput {
+  ingredientId: ID!
+  quantity: Int!
+  unit: String!
+}
+
 input CreateDisplayInput {
   name: String!
   orientation: String
@@ -20,15 +26,17 @@ input CreateRecipeInput {
   yieldUnit: String
 }
 
-input CreateSupplierInput {
-  email: String
-  name: String!
-  phone: String
-}
-
 input CreateTemplateInput {
   name: String!
   structure: String!
+}
+
+type DashboardMetrics {
+  connectedNodesCount: MetricValue!
+  dailySales: MetricValue!
+  ingredientsCount: MetricValue!
+  pendingInvoicesCount: MetricValue!
+  recipesCount: MetricValue!
 }
 
 type DashboardStats {
@@ -70,24 +78,49 @@ type IngredientType {
   name: String!
 }
 
+type MetricValue {
+  unit: String
+  value: Float!
+}
+
 type Mutation {
+  addToShoppingList(input: AddToShoppingListInput!, orgId: String!): [ShoppingListItemType!]!
   createDisplay(input: CreateDisplayInput!, orgId: String!): DisplayType!
   createIngredient(input: CreateIngredientInput!, orgId: String!): IngredientType!
   createRecipe(input: CreateRecipeInput!, orgId: String!): RecipeType!
-  createSupplier(input: CreateSupplierInput!, orgId: String!): SupplierType!
   createTemplate(input: CreateTemplateInput!, orgId: String!): TemplateType!
+  deleteRecipe(id: String!, orgId: String!): RecipeType
+  placeOrder(itemIds: [ID!]!, orgId: String!, supplierId: ID!): PurchaseOrderType!
   triggerRecipeAiIngestion(orgId: String!, recipeId: String!): Boolean!
+  updateRecipe(id: String!, input: UpdateRecipeInput!, orgId: String!): RecipeType!
+  updateShoppingListItem(id: ID!, input: UpdateShoppingListItemInput!, orgId: String!): [ShoppingListItemType!]!
+}
+
+type PurchaseOrderType {
+  createdAt: String!
+  id: ID!
+  status: String!
+  supplierId: ID!
+  totalAmount: Int!
 }
 
 type Query {
+  dashboardMetrics(orgId: String!): DashboardMetrics!
   dashboardStats: DashboardStats!
   devices(orgId: String!): [DeviceType!]!
   displays(orgId: String!): [DisplayType!]!
   ingredients(orgId: String!): [IngredientType!]!
   recipe(id: String!, orgId: String!): RecipeType
-  recipes(orgId: String!): [RecipeType!]!
+  recipes(orgId: String!, search: String, source: String, tags: [String!]): [RecipeType!]!
+  shoppingList(orgId: String!): [ShoppingListItemType!]!
   suppliers(orgId: String!): [SupplierType!]!
   templates(orgId: String!): [TemplateType!]!
+}
+
+input RecipeIngredientInput {
+  amount: Int!
+  ingredientId: String!
+  unit: String!
 }
 
 type RecipeIngredientType {
@@ -96,6 +129,12 @@ type RecipeIngredientType {
   ingredient: IngredientType!
   unit: String!
   wastageFactor: Int!
+}
+
+input RecipeStepInput {
+  instruction: String!
+  order: Int!
+  timerDuration: Int
 }
 
 type RecipeStepType {
@@ -117,17 +156,27 @@ type RecipeType {
   yieldUnit: String
 }
 
+type ShoppingListItemType {
+  createdAt: String!
+  id: ID!
+  ingredient: IngredientType!
+  preferredSupplier: SupplierType
+  quantity: Int!
+  source: String!
+  status: String!
+  unit: String!
+}
+
 type Subscription {
   deviceUpdated(orgId: String!): DeviceType!
 }
 
 type SupplierType {
-  address: String
-  email: String
+  contactEmail: String
+  cutoffTime: String
+  deliveryDays: [Int!]
   id: ID!
   name: String!
-  phone: String
-  status: String
 }
 
 type TemplateType {
@@ -135,4 +184,18 @@ type TemplateType {
   isSystem: Boolean!
   name: String!
   structure: String!
+}
+
+input UpdateRecipeInput {
+  ingredients: [RecipeIngredientInput!]
+  name: String
+  steps: [RecipeStepInput!]
+  yieldAmount: Int
+  yieldUnit: String
+}
+
+input UpdateShoppingListItemInput {
+  preferredSupplierId: ID
+  quantity: Int
+  status: String
 }

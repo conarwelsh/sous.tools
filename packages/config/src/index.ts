@@ -19,6 +19,7 @@ export { configSchema, brandingConfigSchema, type BrandingConfig };
  * Singleton configuration instance
  */
 let cachedConfig: Config | null = null;
+let isFullyResolved = false;
 
 /**
  * Ensures a string has a protocol, defaulting to https:// if missing
@@ -80,40 +81,14 @@ async function findProjectRoot(): Promise<string> {
 }
 
 /**
- * Fetches secrets from Infisical using the SDK (Server only)
+ * Fetches secrets from Infisical using the SecretManager (Server only)
  */
-async function fetchInfisicalSecrets(env: string): Promise<Record<string, string>> {
+async function fetchVaultSecrets(env: string): Promise<Record<string, string>> {
   if (!isServer) return {};
-
-  const projectId = process.env.INFISICAL_PROJECT_ID;
-  const clientId = process.env.INFISICAL_CLIENT_ID;
-  const clientSecret = process.env.INFISICAL_CLIENT_SECRET;
-
-  if (!projectId || !clientId || !clientSecret) {
-    // If no credentials, we might be in a CI or local environment already populated
-    return {};
-  }
-
   try {
-    const { InfisicalSDK } = await import("@infisical/sdk");
-    const client = new InfisicalSDK();
-    await client.auth().universalAuth.login({
-      clientId,
-      clientSecret,
-    });
-
-    const secrets = await client.secrets().listSecrets({
-      environment: env === "development" ? "dev" : env === "staging" ? "staging" : "prod",
-      projectId,
-    });
-
-    const secretMap: Record<string, string> = {};
-    for (const secret of secrets.secrets) {
-      secretMap[secret.secretKey] = secret.secretValue;
-    }
-    return secretMap;
+    return await secrets.listSecrets(env);
   } catch (error) {
-    console.warn("⚠️ [@sous/config] Infisical SDK fetch failed, falling back to process.env/cli", error);
+    console.warn("⚠️  [@sous/config] Vault fetch failed, falling back to process.env/cli");
     return {};
   }
 }
@@ -190,7 +165,7 @@ function buildPublicConfig(): Config {
  * Resolves the configuration object
  */
 export async function resolveConfig(): Promise<Config> {
-  if (cachedConfig) return cachedConfig;
+  if (isFullyResolved && cachedConfig) return cachedConfig;
 
   // Load .env from project root if server-side
   if (isServer) {
@@ -200,16 +175,16 @@ export async function resolveConfig(): Promise<Config> {
       const fs = await import("fs");
       const root = await findProjectRoot();
       
-      // 1. Load from root
-      const rootEnvPath = path.join(root, ".env");
-      if (fs.existsSync(rootEnvPath)) {
-        loadDotenv({ path: rootEnvPath });
-      }
-
-      // 2. Load from package (overrides root if exists)
+      // 1. Load from package (defaults)
       const envPath = path.join(root, "packages/config/.env");
       if (fs.existsSync(envPath)) {
-        loadDotenv({ path: envPath });
+        loadDotenv({ path: envPath, override: true });
+      }
+
+      // 2. Load from root (overrides package)
+      const rootEnvPath = path.join(root, ".env");
+      if (fs.existsSync(rootEnvPath)) {
+        loadDotenv({ path: rootEnvPath, override: true });
       }
     } catch (e) {
       // Ignore errors loading .env
@@ -218,6 +193,7 @@ export async function resolveConfig(): Promise<Config> {
 
   if (!isServer) {
     cachedConfig = buildPublicConfig();
+    isFullyResolved = true;
     return cachedConfig;
   }
 
@@ -238,7 +214,7 @@ export async function resolveConfig(): Promise<Config> {
 
   // 1. Fetch from Vault if server-side and credentials exist
   if (isServer && env !== "test") {
-    const vaultSecrets = await fetchInfisicalSecrets(env);
+    const vaultSecrets = await fetchVaultSecrets(env);
     Object.assign(envVars, vaultSecrets);
     
     // Export to process.env so child processes (like drizzle-kit) can see them
@@ -249,7 +225,6 @@ export async function resolveConfig(): Promise<Config> {
     }
 
     // Ensure public equivalents are set for critical variables if they exist in vault without prefix
-    // This allows Next.js build to bake them in
     if (process.env.API_URL && !process.env.NEXT_PUBLIC_API_URL) process.env.NEXT_PUBLIC_API_URL = process.env.API_URL;
     if (process.env.WEB_URL && !process.env.NEXT_PUBLIC_WEB_URL) process.env.NEXT_PUBLIC_WEB_URL = process.env.WEB_URL;
     if (process.env.DOCS_URL && !process.env.NEXT_PUBLIC_DOCS_URL) process.env.NEXT_PUBLIC_DOCS_URL = process.env.DOCS_URL;
@@ -307,7 +282,7 @@ export async function resolveConfig(): Promise<Config> {
     features: {
       enableRegistration: envVars.ENABLE_REGISTRATION !== "false",
       appVersion: envVars.NEXT_PUBLIC_APP_VERSION || envVars.APP_VERSION || "0.1.0",
-      appEnv: envVars.APP_ENV || env,
+      appEnv: env,
     },
     infisical: {
       projectId: envVars.INFISICAL_PROJECT_ID,
@@ -315,7 +290,7 @@ export async function resolveConfig(): Promise<Config> {
       clientSecret: envVars.INFISICAL_CLIENT_SECRET,
     },
     square: {
-      accessToken: envVars.SQUARE_ACCESS_TOKEN,
+      accessToken: envVars.SQUARE_ACCESS_TOKEN || envVars.SQUARE_CLIENT_SECRET,
       applicationId: envVars.SQUARE_APPLICATION_ID,
       clientSecret: envVars.SQUARE_CLIENT_SECRET,
       redirectUri: envVars.SQUARE_REDIRECT_URI,
@@ -335,23 +310,12 @@ export async function resolveConfig(): Promise<Config> {
 
   const result = configSchema.safeParse(rawConfig);
   if (!result.success) {
-    const error = result.error.format();
-    console.error("❌ [@sous/config] Invalid Configuration:", JSON.stringify(error, null, 2));
-    
-    const isBuild = process.env.SKIP_CONFIG_VALIDATION === "true" || 
-                    process.env.CI === "true" || 
-                    process.env.NODE_ENV === "production"; // During Next.js build, NODE_ENV is production
-
-    // In production runtime, we should probably throw here to prevent inconsistent state
-    // but during build we might not have all secrets
-    if (env === "production" && !isBuild) {
-      throw new Error("Invalid production configuration");
-    }
     cachedConfig = rawConfig as any;
   } else {
     cachedConfig = result.data;
   }
 
+  isFullyResolved = true;
   return cachedConfig!;
 }
 
@@ -362,12 +326,12 @@ export const configPromise = resolveConfig();
 
 /**
  * Synchronous access to configuration. 
- * WARNING: Requires resolveConfig() to have been called once at startup.
  */
 export const config = (() => {
   // Client-side initialization: if we're in the browser, we can pre-build
   if (!isServer && !cachedConfig) {
     cachedConfig = buildPublicConfig();
+    isFullyResolved = true;
   }
 
   return new Proxy({} as Config, {
@@ -375,11 +339,10 @@ export const config = (() => {
       if (!cachedConfig) {
         if (!isServer) {
            cachedConfig = buildPublicConfig();
+           isFullyResolved = true;
         } else {
-           // Fallback to public config even on server if it's accessed during build/prerender 
-           // and resolveConfig hasn't finished yet.
-           console.warn("[@sous/config] Configuration accessed synchronously before resolution. Using public defaults.");
-           cachedConfig = buildPublicConfig();
+           // Fallback to public config even on server if it's accessed before resolveConfig
+           return buildPublicConfig()[prop as keyof Config];
         }
       }
       return (cachedConfig as any)[prop];

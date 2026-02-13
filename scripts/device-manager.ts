@@ -46,9 +46,34 @@ async function main() {
   console.error(`🚀 Launching emulator: ${AVD_NAME}...`);
   
   if (IS_WSL) {
+    // Attempt to find emulator.exe robustly
+    let emulatorCmd = 'emulator.exe';
+    
+    // Check if emulator is in PATH
+    try {
+      execSync('cmd.exe /c where emulator.exe', { stdio: 'ignore' });
+    } catch {
+      // Not in path, search standard locations
+      const userProfile = execSync('cmd.exe /c echo %USERPROFILE%').toString().trim();
+      const candidates = [
+        `${userProfile}\\AppData\\Local\\Android\\Sdk\\emulator\\emulator.exe`,
+        `C:\\Users\\${process.env.USER}\\AppData\\Local\\Android\\Sdk\\emulator\\emulator.exe`,
+        `C:\\Android\\emulator\\emulator.exe`
+      ];
+
+      for (const candidate of candidates) {
+        try {
+          // Check if file exists via cmd
+          execSync(`cmd.exe /c if exist "${candidate}" echo found`);
+          emulatorCmd = `"${candidate}"`;
+          console.log(`Found emulator at: ${emulatorCmd}`);
+          break;
+        } catch {}
+      }
+    }
+
     // Launch via cmd.exe to ensure it's a Windows process that survives WSL session
-    // We use the full path to emulator.exe if possible, or assume it's in Windows PATH
-    spawn('cmd.exe', ['/c', 'start', '/b', 'emulator', '-avd', AVD_NAME, '-no-snapshot-load'], {
+    spawn('cmd.exe', ['/c', 'start', '/b', 'cmd', '/c', `${emulatorCmd} -avd ${AVD_NAME} -no-snapshot-load`], {
       detached: true,
       stdio: 'ignore'
     }).unref();

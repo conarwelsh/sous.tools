@@ -3,6 +3,8 @@
 import React from "react";
 import { useAuth } from "@sous/features";
 import { View, Text, Button, Card } from "@sous/ui";
+import { gql } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
 
 import {
   LayoutGrid,
@@ -13,35 +15,78 @@ import {
   HardDrive,
   Utensils,
   Box,
+  DollarSign,
+  Loader2
 } from "lucide-react";
+
+const GET_DASHBOARD_METRICS = gql`
+  query GetDashboardMetrics($orgId: String!) {
+    dashboardMetrics(orgId: $orgId) {
+      dailySales {
+        value
+        unit
+      }
+      recipesCount {
+        value
+      }
+      ingredientsCount {
+        value
+      }
+      pendingInvoicesCount {
+        value
+      }
+      connectedNodesCount {
+        value
+      }
+    }
+  }
+`;
+
+interface DashboardData {
+  dashboardMetrics: {
+    dailySales: { value: number; unit: string };
+    recipesCount: { value: number };
+    ingredientsCount: { value: number };
+    pendingInvoicesCount: { value: number };
+    connectedNodesCount: { value: number };
+  };
+}
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const orgId = user?.organizationId || "";
+
+  const { data, loading } = useQuery<DashboardData>(GET_DASHBOARD_METRICS, {
+    variables: { orgId },
+    skip: !orgId,
+  });
+
+  const metrics = data?.dashboardMetrics;
 
   const stats = [
     {
+      label: "Today's Sales",
+      value: metrics ? `$${metrics.dailySales.value.toFixed(2)}` : "...",
+      icon: DollarSign,
+      color: "text-blue-500",
+    },
+    {
       label: "Active Recipes",
-      value: "42",
+      value: metrics?.recipesCount.value.toString() || "...",
       icon: Utensils,
       color: "text-emerald-500",
     },
     {
       label: "Inventory Items",
-      value: "128",
+      value: metrics?.ingredientsCount.value.toString() || "...",
       icon: Box,
       color: "text-sky-500",
     },
     {
       label: "Pending Invoices",
-      value: "5",
+      value: metrics?.pendingInvoicesCount.value.toString() || "...",
       icon: FileText,
       color: "text-amber-500",
-    },
-    {
-      label: "Connected Nodes",
-      value: "3",
-      icon: HardDrive,
-      color: "text-purple-500",
     },
   ];
 
@@ -71,20 +116,27 @@ export default function DashboardPage() {
         {stats.map((s, i) => (
           <Card
             key={i}
-            className="p-6 bg-card border-border"
+            className="p-6 bg-card border-border relative overflow-hidden"
           >
-            <View className="flex flex-row justify-between items-start mb-4">
+            <View className="flex flex-row justify-between items-start mb-4 relative z-10">
               <View className="p-3 bg-muted rounded-xl">
                 <s.icon size={20} className={s.color} />
               </View>
               <Text className="text-muted-foreground/50 font-mono text-[10px]">LIVE</Text>
             </View>
-            <Text className="text-3xl font-black text-foreground block">
-              {s.value}
-            </Text>
-            <Text className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest mt-1 block">
-              {s.label}
-            </Text>
+            <View className="relative z-10">
+              <Text className="text-3xl font-black text-foreground block">
+                {loading ? <Loader2 className="animate-spin text-muted-foreground" size={24} /> : s.value}
+              </Text>
+              <Text className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest mt-1 block">
+                {s.label}
+              </Text>
+            </View>
+            
+            {/* Background Accent */}
+            <div className={`absolute -right-4 -bottom-4 opacity-5 ${s.color}`}>
+               <s.icon size={120} />
+            </div>
           </Card>
         ))}
       </View>
@@ -107,14 +159,18 @@ export default function DashboardPage() {
               Quick Actions
             </Text>
             <View className="flex flex-col gap-3">
-              {["Scan Invoice", "Add Recipe", "New Inventory Count"].map(
+              {[
+                { label: "Scan Invoice", href: "/procurement/invoices" },
+                { label: "Add Recipe", href: "/operations/recipes" },
+                { label: "New Inventory Count", href: "/inventory" }
+              ].map(
                 (action) => (
                   <Button
-                    key={action}
+                    key={action.label}
                     className="p-4 bg-muted rounded-xl border border-border hover:bg-muted/80 transition-colors text-left"
                   >
                     <Text className="text-foreground font-bold text-sm uppercase tracking-tight">
-                      {action}
+                      {action.label}
                     </Text>
                   </Button>
                 ),

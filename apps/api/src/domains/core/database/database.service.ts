@@ -10,38 +10,29 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private pool!: Pool;
   public db!: NodePgDatabase<typeof schema>;
 
-  constructor() {
-    try {
-      if (config.db.url) {
-        this.initializePool(config.db.url);
-      }
-    } catch (e) {
-      // Configuration likely not resolved yet, will try again in onModuleInit
-    }
-  }
+  constructor() {}
 
   private initializePool(url: string) {
+    logger.info(`🐘 Initializing Database Pool: ${url.replace(/:.*@/, ':****@')}`);
     this.pool = new Pool({
       connectionString: url,
     });
     this.db = drizzle(this.pool, { schema });
 
-    // Test connection asynchronously without blocking startup
+    // Test connection
     void this.testConnection();
   }
 
   async onModuleInit() {
-    if (!this.pool) {
-      logger.info('⏳ Waiting for configuration to load...');
-      const resolved = await resolveConfig();
-      if (!resolved.db.url) {
-        logger.error(
-          '❌ Database URL is still undefined after waiting for configuration',
-        );
-        throw new Error('Database configuration missing');
-      }
-      this.initializePool(resolved.db.url);
+    logger.info('🔌 Initializing Database service...');
+    const resolved = await resolveConfig();
+    if (!resolved.db.url) {
+      logger.error(
+        '❌ Database URL is undefined after resolving configuration',
+      );
+      throw new Error('Database configuration missing');
     }
+    this.initializePool(resolved.db.url);
     logger.info('🔌 Database service initialized');
   }
 

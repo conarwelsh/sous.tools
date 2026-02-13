@@ -36,10 +36,10 @@ export class DbResetCommand extends CommandRunner {
       logger.info('  └─ Pushing schema...');
       runCommand('pnpm --filter @sous/api run db:push');
 
-      logger.info('  └─ Seeding database...');
-      runCommand('pnpm --filter @sous/api run db:seed');
+      logger.info('  └─ Seeding database (system + sample)...');
+      runCommand('pnpm --filter @sous/api run db:seed sample');
 
-      logger.info('✅ Database reset and seeded successfully.');
+      logger.info('✅ Database reset and seeded with sample data successfully.');
     } catch (error: any) {
       logger.error(`❌ Database reset failed: ${error.message}`);
       process.exit(1);

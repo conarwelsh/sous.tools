@@ -17,6 +17,7 @@ export * from '../ingestion/ingestion.schema';
 
 // 3. Mixed Dependencies
 export * from '../../procurement/procurement.schema';
+export * from '../../pos/pos.schema';
 export * from '../../hardware/hardware.schema';
 export * from '../../presentation/presentation.schema';
 
@@ -43,7 +44,12 @@ import {
   purchaseOrders,
   poItems,
   vendorMappings,
+  shoppingList,
 } from '../../procurement/procurement.schema';
+import {
+  posOrders,
+  posOrderItems,
+} from '../../pos/pos.schema';
 import {
   stockAudits,
   stockAuditItems,
@@ -165,5 +171,46 @@ export const tagAssignmentsRelations = relations(tagAssignments, ({ one }) => ({
   tag: one(tags, {
     fields: [tagAssignments.tagId],
     references: [tags.id],
+  }),
+}));
+
+export const shoppingListRelations = relations(shoppingList, ({ one }) => ({
+  ingredient: one(ingredients, {
+    fields: [shoppingList.ingredientId],
+    references: [ingredients.id],
+  }),
+  preferredSupplier: one(suppliers, {
+    fields: [shoppingList.preferredSupplierId],
+    references: [suppliers.id],
+  }),
+}));
+
+export const invoicesRelations = relations(invoices, ({ one, many }) => ({
+  supplier: one(suppliers, {
+    fields: [invoices.supplierId],
+    references: [suppliers.id],
+  }),
+  items: many(invoiceItems),
+}));
+
+export const invoiceItemsRelations = relations(invoiceItems, ({ one }) => ({
+  invoice: one(invoices, {
+    fields: [invoiceItems.invoiceId],
+    references: [invoices.id],
+  }),
+  ingredient: one(ingredients, {
+    fields: [invoiceItems.ingredientId],
+    references: [ingredients.id],
+  }),
+}));
+
+export const posOrdersRelations = relations(posOrders, ({ many }) => ({
+  items: many(posOrderItems),
+}));
+
+export const posOrderItemsRelations = relations(posOrderItems, ({ one }) => ({
+  order: one(posOrders, {
+    fields: [posOrderItems.orderId],
+    references: [posOrders.id],
   }),
 }));

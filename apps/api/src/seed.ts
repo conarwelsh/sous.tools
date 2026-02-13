@@ -14,11 +14,6 @@ async function bootstrap() {
     await app.init();
     logger.info('✅ Application Context Created and Initialized.');
 
-    const dbUrl = config.db.url;
-    logger.info(
-      `🐘 Database URL: ${dbUrl ? dbUrl.replace(/:.*@/, ':****@') : 'MISSING'}`,
-    );
-
     const seeder = app.get(SeederService);
 
     const type = process.argv[2] || 'system';

@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Inject,
+  Optional,
+} from '@nestjs/common';
 import { DatabaseService } from '../../core/database/database.service.js';
 import {
   layouts,
@@ -16,7 +21,9 @@ import { users } from '../../core/database/schema.js';
 export class PresentationService {
   constructor(
     @Inject(DatabaseService) private readonly dbService: DatabaseService,
-    @Inject(RealtimeGateway) private readonly realtimeGateway: RealtimeGateway,
+    @Optional()
+    @Inject(RealtimeGateway)
+    private readonly realtimeGateway?: RealtimeGateway,
   ) {}
 
   async getUserOrganizationId(userId: string) {
@@ -44,9 +51,21 @@ export class PresentationService {
   ) {
     const { assignments, ...layoutData } = data;
 
+    // Ensure JSON fields are stringified if they came in as objects
+    const safeData = { ...layoutData };
+    if (typeof safeData.structure === 'object') {
+      safeData.structure = JSON.stringify(safeData.structure);
+    }
+    if (typeof safeData.content === 'object') {
+      safeData.content = JSON.stringify(safeData.content);
+    }
+    if (typeof safeData.config === 'object') {
+      safeData.config = JSON.stringify(safeData.config);
+    }
+
     const result = await this.dbService.db
       .update(layouts)
-      .set({ ...layoutData, updatedAt: new Date() })
+      .set({ ...safeData, updatedAt: new Date() })
       .where(
         and(eq(layouts.id, id), eq(layouts.organizationId, organizationId)),
       )
@@ -263,7 +282,7 @@ export class PresentationService {
         where: eq(layouts.id, data.layoutId),
       });
 
-      if (layout) {
+      if (layout && this.realtimeGateway) {
         this.realtimeGateway.emitToHardware(
           display.hardwareId,
           'presentation:update',

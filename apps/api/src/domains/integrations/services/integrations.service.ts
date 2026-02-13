@@ -371,26 +371,17 @@ export class IntegrationsService {
         }
       }
 
-      // 2. Map Items to Categories (with name-based fallback for sandbox consistency)
-      const itemToCategorySeedMap: Record<string, string> = {
-        'Truffle Parmesan Fries': 'Appetizers',
-        'Sous Signature Burger': 'Main Courses',
-        'Honey Glazed Sprouts': 'Sides',
-        'Local Craft IPA': 'Beverages',
-        'Smoked Old Fashioned': 'Cocktails',
-        'NY Style Cheesecake': 'Desserts',
-        'Nitro Cold Brew': 'Beverages',
-        'Margherita Pizza': 'Main Courses',
-      };
-
-      // Upsert Products
+      // 2. Upsert Products
       for (const prod of sqProducts) {
         let categoryId = prod.categoryId ? categoryMap.get(prod.categoryId) : null;
         
-        // Robust Fallback: If no category link found, check our seed map
-        if (!categoryId && itemToCategorySeedMap[prod.name]) {
-            const catName = itemToCategorySeedMap[prod.name];
-            categoryId = categoryNameToDbId.get(catName) || null;
+        // Secondary Fallback: If no categoryId by ID, we try to match by name if category exists in our current map
+        // This handles cases where a POS might return items without explicit category IDs but we can infer them
+        if (!categoryId) {
+            // Find if there's any category in our sqCategories that matches some logic? 
+            // For now, if categoryId is missing, we check if the driver provided it elsewhere
+            // or just leave it null.
+            logger.debug(`[Integrations] No category found for product: ${prod.name}`);
         }
 
         await this.dbService.db

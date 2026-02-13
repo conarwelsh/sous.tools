@@ -7,7 +7,9 @@ import pm2 from 'pm2';
 import * as fs from 'fs';
 import * as os from 'os';
 import path from 'path';
+import { createRequire } from 'module';
 
+const require = createRequire(import.meta.url);
 const execAsync = promisify(exec);
 
 export type ProcessStatus =
@@ -44,9 +46,36 @@ export class ProcessManager
   private isPm2Connected = false;
   private pollInterval: NodeJS.Timeout | null = null;
   private logTailers: Map<string, any> = new Map();
+  private ecosystemApps: any[] = [];
+  private rootDir: string;
 
   constructor() {
     super();
+    this.rootDir = this.findRootDir();
+    this.loadEcosystemConfig();
+  }
+
+  private findRootDir(): string {
+    let curr = process.cwd();
+    while (curr !== path.parse(curr).root) {
+      if (fs.existsSync(path.join(curr, 'pnpm-workspace.yaml'))) {
+        return curr;
+      }
+      curr = path.join(curr, '..');
+    }
+    return process.cwd();
+  }
+
+  private loadEcosystemConfig() {
+    try {
+      const configPath = path.join(this.rootDir, 'ecosystem.config.js');
+      if (fs.existsSync(configPath)) {
+        const config = require(configPath);
+        this.ecosystemApps = config.apps || [];
+      }
+    } catch (e) {
+      logger.error(`❌ Failed to load ecosystem config: ${e.message}`);
+    }
   }
 
   async onModuleInit() {
@@ -91,12 +120,13 @@ export class ProcessManager
     pm2.list((err, list) => {
       if (err) return;
 
-      const currentIds = new Set<string>();
+      const pm2Ids = new Set<string>();
       let updated = false;
 
+      // 1. Map running/stopped PM2 processes
       for (const p of list) {
         const id = p.name || 'unknown';
-        currentIds.add(id);
+        pm2Ids.add(id);
 
         const pm2Status = p.pm2_env?.status;
         let status: ProcessStatus = 'stopped';
@@ -132,9 +162,34 @@ export class ProcessManager
         }
       }
 
-      // Cleanup removed processes
+      // 2. Add "ghost" processes from ecosystem config that aren't in PM2 yet
+      for (const app of this.ecosystemApps) {
+        const id = app.name;
+        if (!pm2Ids.has(id)) {
+          if (!this.processes.has(id)) {
+            this.processes.set(id, {
+              id,
+              name: id.replace('sous-', '').toUpperCase(),
+              type: id.startsWith('sous-db') || id.startsWith('sous-redis') ? 'docker' : 'pm2',
+              status: 'stopped',
+              logs: [],
+              namespace: app.namespace,
+            });
+            updated = true;
+          } else {
+            const proc = this.processes.get(id)!;
+            if (proc.status !== 'stopped') {
+              proc.status = 'stopped';
+              updated = true;
+            }
+          }
+        }
+      }
+
+      // 3. Cleanup removed processes (not in PM2 AND not in Ecosystem)
+      const ecosystemIds = new Set(this.ecosystemApps.map(a => a.name));
       for (const id of this.processes.keys()) {
-        if (!currentIds.has(id)) {
+        if (!pm2Ids.has(id) && !ecosystemIds.has(id)) {
           this.processes.delete(id);
           updated = true;
         }
@@ -224,7 +279,10 @@ export class ProcessManager
 
   async startProcess(id: string) {
     return new Promise<void>((resolve) => {
-      pm2.start(id, (err) => {
+      const configPath = path.join(this.rootDir, 'ecosystem.config.js');
+      // Use ecosystem config to ensure all settings are applied even if starting for the first time
+      // PM2 programmatic API expects 'only' to be a string
+      pm2.start(configPath, { only: id } as any, (err) => {
         if (err) logger.error(`Failed to start ${id}: ${err.message}`);
         resolve();
       });
@@ -258,13 +316,19 @@ export class ProcessManager
   }
 
   async autoStartCore() {
-    // 2.0 Approach: Just ensure docker is up, then PM2 takes over via ecosystem
+    // 2.0 Approach: Ensure docker is up, then start ONLY core services via PM2
     try {
       await execAsync('docker compose up -d');
-      // PM2 should already be running these if started via 'pm2 start ecosystem.config.js'
-      // But we can trigger a start all if needed
+      
       return new Promise<void>((resolve) => {
-        pm2.start('ecosystem.config.js', (err) => {
+        const configPath = path.join(this.rootDir, 'ecosystem.config.js');
+        // Only start infrastructure and core (api, web)
+        // Docs and Native remain 'stopped' in our UI until manually started
+        // PM2 programmatic API expects 'only' to be a string
+        pm2.start(configPath, { 
+          only: 'sous-db,sous-redis,sous-api,sous-web'
+        } as any, (err) => {
+          if (err) logger.error(`Core PM2 start failed: ${err.message}`);
           resolve();
         });
       });

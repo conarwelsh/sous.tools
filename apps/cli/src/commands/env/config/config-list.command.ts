@@ -22,6 +22,8 @@ export class ConfigListCommand extends CommandRunner {
     console.log(`JWT Secret:      ${mask(config.iam.jwtSecret)}`);
     console.log(`Supabase Key:    ${mask(config.storage.supabase?.anonKey)}`);
     console.log(`Redis URL:       ${mask(config.redis.url)}`);
+    console.log(`Square Token:    ${mask(config.square.accessToken)}`);
+    console.log(`Gemini API Key:  ${mask(config.ai.googleGenerativeAiApiKey)}`);
 
     console.log(chalk.bold('\n[Context]'));
     console.log(`Environment:     ${config.env.toUpperCase()}`);

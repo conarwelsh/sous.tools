@@ -72,15 +72,17 @@ export class IngestionService {
       // 2. Initialize Gemini
       let model;
       try {
+        // Use gemini-1.5-flash without models/ prefix if that's what SDK expects
+        // or ensure it is exactly 'gemini-1.5-flash'
         model = this.genAI.getGenerativeModel({
-          model: 'models/gemini-1.5-flash',
+          model: 'gemini-1.5-flash',
         });
       } catch (e) {
         logger.warn(
-          '[AI Ingestion] models/gemini-1.5-flash ID failed, falling back to alias',
+          '[AI Ingestion] gemini-1.5-flash ID failed, falling back to older model',
         );
         model = this.genAI.getGenerativeModel({
-          model: 'gemini-1.5-flash',
+          model: 'gemini-pro',
         });
       }
 
@@ -119,6 +121,8 @@ export class IngestionService {
             status: aiError.status,
             statusText: aiError.statusText,
             details: aiError.errorDetails,
+            model: 'gemini-1.5-flash',
+            stack: aiError.stack
           },
         );
 

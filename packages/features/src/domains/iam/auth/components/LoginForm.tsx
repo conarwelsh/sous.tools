@@ -13,15 +13,17 @@ import {
   GoogleLogo,
 } from "@sous/ui";
 import { useRouter, useSearchParams } from "next/navigation";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { getHttpClient } from "@sous/client-sdk";
 
-export const LoginForm = ({
+const LoginFormContent = ({
   onSuccess,
   showClose = false,
+  callbackUrl = "/dashboard",
 }: {
   onSuccess?: () => void;
   showClose?: boolean;
+  callbackUrl?: string;
 }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,7 +47,7 @@ export const LoginForm = ({
         if (onSuccess) {
           onSuccess();
         } else {
-          router.push("/dashboard");
+          router.push(callbackUrl);
         }
       })();
     }
@@ -53,7 +55,7 @@ export const LoginForm = ({
     if (errorParam) {
       setError(errorParam);
     }
-  }, [searchParams, refresh, onSuccess, router]);
+  }, [searchParams, refresh, onSuccess, router, callbackUrl]);
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -64,7 +66,7 @@ export const LoginForm = ({
       if (onSuccess) {
         onSuccess();
       } else {
-        router.push("/dashboard");
+        router.push(callbackUrl);
       }
     } catch (e: any) {
       setError(e.message || "Login failed");
@@ -192,3 +194,13 @@ export const LoginForm = ({
     </div>
   );
 };
+
+export const LoginForm = (props: {
+  onSuccess?: () => void;
+  showClose?: boolean;
+  callbackUrl?: string;
+}) => (
+  <React.Suspense fallback={<div className="flex items-center justify-center p-12"><Loader2 className="animate-spin text-primary" size={32} /></div>}>
+    <LoginFormContent {...props} />
+  </React.Suspense>
+);

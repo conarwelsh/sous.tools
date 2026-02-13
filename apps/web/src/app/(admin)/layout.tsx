@@ -46,9 +46,10 @@ function AdminContent({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isMounted && !loading && !isAuthenticated) {
       console.log("[AdminLayout] User not authenticated, redirecting to login...");
-      router.replace("/login");
+      const callbackUrl = encodeURIComponent(pathname);
+      router.replace(`/login?callbackUrl=${callbackUrl}`);
     }
-  }, [isMounted, loading, isAuthenticated, router]);
+  }, [isMounted, loading, isAuthenticated, router, pathname]);
 
   if (loading || !isMounted || !isAuthenticated) {
     return (

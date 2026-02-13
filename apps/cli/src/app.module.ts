@@ -29,6 +29,7 @@ import { DashboardCommand } from './commands/env/dashboard.command.js';
 import { ContextCommand } from './commands/env/context/context.command.js';
 import { WhoamiCommand } from './commands/env/context/whoami.command.js';
 import { SwitchEnvCommand } from './commands/env/context/switch-env.command.js';
+import { LoginAsCommand } from './commands/env/context/login-as.command.js';
 import { HardwareCommand } from './commands/hardware/hardware.command.js';
 import { HardwareListCommand } from './commands/hardware/hardware-list.command.js';
 import { IntelCommand } from './commands/intel/intel.command.js';
@@ -57,6 +58,7 @@ import { ProcessManager } from './commands/dev/process-manager.service.js';
     ContextCommand,
     WhoamiCommand,
     SwitchEnvCommand,
+    LoginAsCommand,
     HardwareCommand,
     HardwareListCommand,
     IntelCommand,

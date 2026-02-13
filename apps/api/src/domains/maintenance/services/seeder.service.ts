@@ -1,4 +1,4 @@
-import { Injectable, Inject, Optional } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { DatabaseService } from '../../core/database/database.service.js';
 import { organizations, locations, users } from '../../core/database/schema.js';
 import { eq } from 'drizzle-orm';
@@ -7,37 +7,17 @@ import { PresentationService } from '../../presentation/services/presentation.se
 import { ProcurementService } from '../../procurement/services/procurement.service.js';
 import { CulinaryService } from '../../culinary/services/culinary.service.js';
 import { AuthService } from '../../iam/auth/auth.service.js';
+import { ModuleRef } from '@nestjs/core';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class SeederService {
   constructor(
     @Inject(DatabaseService) private readonly dbService: DatabaseService,
-    @Optional()
-    @Inject(PresentationService)
-    private readonly presentationService: PresentationService,
-    @Optional()
-    @Inject(ProcurementService)
-    private readonly procurementService: ProcurementService,
-    @Optional()
-    @Inject(CulinaryService)
-    private readonly culinaryService: CulinaryService,
-    @Inject(AuthService) private readonly authService: AuthService,
+    private readonly authService: AuthService,
+    private readonly moduleRef: ModuleRef,
   ) {
     logger.info('🏗️ SeederService: constructor');
-    void this.dbService.db
-      .execute('SELECT 1')
-      .then(() => {
-        logger.info(
-          '🐘 SeederService: Database connection verified in constructor',
-        );
-      })
-      .catch((e) => {
-        logger.error(
-          '🐘 SeederService: Database connection failed in constructor',
-          e,
-        );
-      });
   }
 
   async seedSystem() {
@@ -46,21 +26,37 @@ export class SeederService {
     const orgId = await this.authService.seedSystem();
     logger.info(`🌱 SeederService: IAM seeded, orgId: ${orgId}`);
 
+    // Resolve domain services on demand
+    const presentationService = this.moduleRef.get(PresentationService, { strict: false });
+    const procurementService = this.moduleRef.get(ProcurementService, { strict: false });
+    const culinaryService = this.moduleRef.get(CulinaryService, { strict: false });
+
     // 5. Delegate to Domain Services
-    logger.info('🌱 SeederService: Seeding Presentation...');
-    await this.presentationService.seedSystem(orgId);
+    if (presentationService) {
+      logger.info('🌱 SeederService: Seeding Presentation...');
+      await presentationService.seedSystem(orgId);
+    }
 
-    logger.info('🌱 SeederService: Seeding Procurement...');
-    await this.procurementService.seedSystem(orgId);
+    if (procurementService) {
+      logger.info('🌱 SeederService: Seeding Procurement...');
+      await procurementService.seedSystem(orgId);
+    }
 
-    logger.info('🌱 SeederService: Seeding Culinary...');
-    await this.culinaryService.seedSystem(orgId);
+    if (culinaryService) {
+      logger.info('🌱 SeederService: Seeding Culinary...');
+      await culinaryService.seedSystem(orgId);
+    }
 
     logger.info('✅ SeederService: System seeding complete.');
   }
 
   async seedSample() {
     logger.info('🧪 Seeding sample data for development...');
+
+    // Resolve domain services on demand
+    const presentationService = this.moduleRef.get(PresentationService, { strict: false });
+    const procurementService = this.moduleRef.get(ProcurementService, { strict: false });
+    const culinaryService = this.moduleRef.get(CulinaryService, { strict: false });
 
     // 1. IAM (Org & User)
     await this.authService.seedSample();
@@ -81,9 +77,9 @@ export class SeederService {
       .onConflictDoNothing();
 
     // 3. Delegate to Domain Services
-    await this.presentationService.seedSample(sampleOrg.id);
-    await this.procurementService.seedSample(sampleOrg.id);
-    await this.culinaryService.seedSample(sampleOrg.id);
+    if (presentationService) await presentationService.seedSample(sampleOrg.id);
+    if (procurementService) await procurementService.seedSample(sampleOrg.id);
+    if (culinaryService) await culinaryService.seedSample(sampleOrg.id);
 
     logger.info('✅ Sample seeding complete.');
   }

@@ -4,10 +4,12 @@ import {
   ingredients,
   recipes,
   recipeIngredients,
+  recipeSteps,
   categories,
   products,
 } from '../../core/database/schema.js';
-import { eq, and } from 'drizzle-orm';
+import { tags, tagAssignments } from '../../core/tags/tags.schema.js';
+import { eq, and, ilike, exists } from 'drizzle-orm';
 import { logger } from '@sous/logger';
 
 @Injectable()
@@ -45,7 +47,6 @@ export class CulinaryService {
   }
 
   async getProductByName(organizationId: string, name: string) {
-      // Simple lookup, could use ilike or lower() for true case-insensitivity if needed
       return this.dbService.db.query.products.findFirst({
           where: and(
               eq(products.organizationId, organizationId),
@@ -164,9 +165,35 @@ export class CulinaryService {
     return result[0];
   }
 
-  async getRecipes(organizationId: string) {
+  async getRecipes(organizationId: string, options?: { search?: string; source?: string; tags?: string[] }) {
+    const filters = [eq(recipes.organizationId, organizationId)];
+    
+    if (options?.source) {
+      filters.push(eq(recipes.sourceType, options.source));
+    }
+
+    if (options?.tags && options.tags.length > 0) {
+      filters.push(
+        exists(
+          this.dbService.db
+            .select()
+            .from(tagAssignments)
+            .innerJoin(tags, eq(tagAssignments.tagId, tags.id))
+            .where(
+              and(
+                eq(tagAssignments.entityType, 'recipe'),
+                eq(tagAssignments.entityId, recipes.id),
+                and(...options.tags.map(t => eq(tags.name, t)))
+              )
+            )
+        )
+      );
+    }
+
     return this.dbService.db.query.recipes.findMany({
-      where: eq(recipes.organizationId, organizationId),
+      where: options?.search 
+        ? and(...filters, ilike(recipes.name, `%${options.search}%`))
+        : and(...filters),
       with: {
         ingredients: {
           with: {
@@ -211,6 +238,61 @@ export class CulinaryService {
       }
 
       return recipe;
+    });
+  }
+
+  async updateRecipe(
+    id: string,
+    organizationId: string,
+    data: Partial<typeof recipes.$inferInsert>,
+    ingredientsList?: (typeof recipeIngredients.$inferInsert)[],
+    stepsList?: (typeof recipeSteps.$inferInsert)[],
+  ) {
+    return await this.dbService.db.transaction(async (tx) => {
+      // 1. Update recipe metadata
+      const [recipe] = await tx
+        .update(recipes)
+        .set({ ...data, updatedAt: new Date() })
+        .where(and(eq(recipes.id, id), eq(recipes.organizationId, organizationId)))
+        .returning();
+
+      if (!recipe) throw new Error('Recipe not found or access denied');
+
+      // 2. Update ingredients if provided
+      if (ingredientsList) {
+        await tx.delete(recipeIngredients).where(eq(recipeIngredients.recipeId, id));
+        if (ingredientsList.length > 0) {
+          await tx
+            .insert(recipeIngredients)
+            .values(ingredientsList.map((ri) => ({ ...ri, recipeId: id })));
+        }
+      }
+
+      // 3. Update steps if provided
+      if (stepsList) {
+        await tx.delete(recipeSteps).where(eq(recipeSteps.recipeId, id));
+        if (stepsList.length > 0) {
+          await tx
+            .insert(recipeSteps)
+            .values(stepsList.map((rs) => ({ ...rs, recipeId: id })));
+        }
+      }
+
+      return recipe;
+    });
+  }
+
+  async deleteRecipe(id: string, organizationId: string) {
+    return await this.dbService.db.transaction(async (tx) => {
+      await tx.delete(recipeIngredients).where(eq(recipeIngredients.recipeId, id));
+      await tx.delete(recipeSteps).where(eq(recipeSteps.recipeId, id));
+      
+      const [deleted] = await tx
+        .delete(recipes)
+        .where(and(eq(recipes.id, id), eq(recipes.organizationId, organizationId)))
+        .returning();
+        
+      return deleted;
     });
   }
 }

@@ -13,6 +13,7 @@ export interface SlotAssignment {
   sourceType: 'POS' | 'MEDIA' | 'STATIC';
   dataConfig: {
     filters?: { categoryId?: string; tags?: string[]; itemIds?: string[] };
+    sortOrder?: string[];
     overrides?: Record<string, { featured?: boolean; soldOut?: boolean; hidden?: boolean }>;
     staticData?: any;
     mediaId?: string;

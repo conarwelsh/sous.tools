@@ -1,4 +1,85 @@
-## 2026-02-12 (Square Integration Stability & Catalog Fixes)
+## 2026-02-13 (Recipe Cook Mode, Inline UX, and Screen Designer Polish)
+
+- **Recipe Cook Mode:**
+    - Implemented a high-readability, full-screen "Execution Protocol" view (`/cook`) optimized for tablets.
+    - Integrated browser **Wake Lock API** to keep screens active during culinary operations.
+    - Built a **Baker's Math & Scaling Engine**: users can lock a specific ingredient weight or target yield, and the system automatically recalculates the entire formula.
+    - Added interactive **Phase Timers** that can be triggered directly from the instruction steps.
+- **Inline Recipe Editing:**
+    - Refactored `RecipeDetailPage` into a seamless inline form.
+    - Created `InlineInput` and `InlineTextArea` components in `@sous/ui` that mimic static text until hovered or focused.
+    - Implemented a "Commit Changes" FAB (Floating Action Button) that appears only when the recipe state is dirty.
+- **Screen Designer Enhancements:**
+    - Renamed "Library" to "Layout Design" for clarity.
+    - Added an **"Editor vs. Preview"** toggle to the canvas, allowing designers to view a 1:1 representation of the final output.
+    - Enabled **Hierarchy Reparenting**: users can now drag-and-drop elements within the tree view to change their parents.
+    - Forced floating elements to remain children of the root Flex container to prevent layout fragmentation.
+    - Resolved an "Internal Server Error" during sync by sanitizing and stringifying complex JSON structures before database insertion.
+- **Dev & Infrastructure:**
+    - Refined Android Emulator startup logic in `device-manager.ts` to fallback to standard Windows SDK paths when environment variables are missing.
+    - Fixed Dashboard Metrics rendering by handling bigint-to-string conversion in Postgres aggregations.
+    - Implemented `sous context login-as <orgId>` CLI command for rapid cross-organizational debugging.
+
+## 2026-02-12 (Dashboard Metrics & OrderManager Implementation)
+
+- **Real-time Dashboard Metrics:**
+    - Replaced all mock statistics on the Dashboard with live data derived from the database via GraphQL.
+    - Added a new **"Today's Sales"** metric, calculating aggregated completed POS transactions for the current date.
+    - Implemented a centralized `MetricsResolver` and `MetricsService` to provide performant, organization-scoped analytics.
+    - Enhanced the Dashboard UI with loading states and background icon accents for each metric card.
+- **Login Persistence & Return URL:**
+    - Implemented a "Return URL" flow to improve User Experience during session expiration.
+    - Updated `AdminLayout` to capture the intended destination and append it as a `callbackUrl` query parameter when redirecting to login.
+    - Refactored `LoginPage` and `LoginForm` to utilize `Suspense` boundaries for search parameter parsing, ensuring compatibility with Next.js CSR bailout rules.
+    - Verified that users are seamlessly redirected back to their original route upon successful authentication.
+- **OrderManager "Living List":**
+    - Established the **"Living Order List"** infrastructure, replacing manual/whiteboard-based procurement tracking.
+    - Implemented a "Quick Add" search bar for adding ingredients to the procurement queue with smart vendor auto-association based on historical purchase data.
+    - Developed a vendor-grouped interface that calculates the **Next Delivery Day** dynamically based on supplier-specific schedules and cutoff times.
+    - Implemented batch ordering functionality, allowing users to convert selection groups into formal Purchase Orders with a single click.
+- **Schema & Database:**
+    - Expanded the POS domain with `pos_orders` and `pos_order_items` tables to track real sales data.
+    - Introduced the `shopping_list` table in the Procurement domain to manage the "living" state of pending orders.
+    - Optimized relational mappings in `schema.ts` to support deep queries for metrics and procurement grouping.
+
+## 2026-02-12 (RecipeManager & AI Ingestion Enhancements)
+
+- **Manual Recipe CRUD:**
+    - Implemented `RecipeForm` component in `@sous/features` for structured manual entry and editing of recipes.
+    - Added `updateRecipe` and `deleteRecipe` methods to `CulinaryService` with transaction-based relational cleanup.
+    - Exposed manual CRUD operations via GraphQL mutations (`updateRecipe`, `deleteRecipe`) and REST endpoints.
+    - Added "Edit Manually" and "Wipe IP" (Delete) actions to `RecipeDetailPage`.
+- **Search & Filter Overhaul:**
+    - Enhanced `getRecipes` with multi-dimensional filtering: text search (ilike), source type (Manual vs. Drive), and tag-based refinement.
+    - Implemented a new search toolbar in `RecipesPage` with quick-filter chips for sources and a horizontally scrollable tag cloud.
+    - Added "Clear All" functionality to reset the culinary exploration context instantly.
+- **AI Ingestion Stability:**
+    - Resolved Gemini 404 error by normalizing the model ID to `gemini-1.5-flash` (removing the `models/` prefix required by some older SDK versions).
+    - Improved AI ingestion logging with comprehensive error object serialization and stack trace visibility.
+    - Added an "older model" fallback to `gemini-pro` to ensure parsing availability during upstream service transitions.
+- **UI & Infrastructure:**
+    - Extended `@sous/ui` with `Sheet`, `Tabs`, and `Checkbox` components to support advanced layout requirements.
+    - Improved `ScrollView` with support for horizontal orientation and hidden scrollbars.
+    - Verified full monorepo build and cross-package type safety.
+
+## 2026-02-12 (Square Seeding & Sync Robustness)
+
+- **Atomic Catalog Seeding:**
+    - Refactored `SquareDriver.seedCatalog` to use `batchUpsert`, ensuring categories and items are created and linked in a single atomic transaction.
+    - Improved catalog wiping by using `catalog.list()` instead of `search`, ensuring ALL objects (including inactive ones) are identified for deletion.
+    - Replaced sequential individual upserts with a batched approach, significantly reducing API overhead and improving reliability in Sandbox environments.
+- **Dynamic Synchronization:**
+    - Removed hardcoded `itemToCategorySeedMap` from `IntegrationsService.sync`.
+    - The synchronization engine now relies exclusively on live category links provided by the Square API.
+    - Maintained a clean, decoupled architecture by utilizing the `categoryMap` generated during the sync session.
+- **Environment & CLI:**
+    - Fixed ESM `require` and PM2 programmatic API compatibility in `@sous/cli`.
+    - Enhanced `ProcessManager` with absolute path resolution for `ecosystem.config.js`.
+    - Resolved Windows emulator path discovery issues in `device-manager.ts`.
+- **Infrastructure:**
+    - Verified full environment restart and verified build of `@sous/api` and `@sous/cli`.
+
+## 2026-02-12 (Dev Environment & Emulator Robustness)
 
 - **Square Catalog Seeding Robustness:**
     - Resolved issues where items were not being correctly assigned to categories during Square sandbox seeding.

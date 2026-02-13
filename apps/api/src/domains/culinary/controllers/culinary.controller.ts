@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Req, UseGuards, Query, Param } from '@nestjs/common';
 import { CulinaryService } from '../services/culinary.service.js';
 import { JwtAuthGuard } from '../../iam/auth/guards/jwt-auth.guard.js';
 
@@ -21,8 +21,14 @@ export class CulinaryController {
   }
 
   @Get('recipes')
-  async getRecipes(@Req() req: any) {
-    return this.culinaryService.getRecipes(req.user.organizationId);
+  async getRecipes(
+    @Req() req: any,
+    @Query('search') search?: string,
+    @Query('source') source?: string,
+    @Query('tags') tags?: string,
+  ) {
+    const tagList = tags ? tags.split(',') : undefined;
+    return this.culinaryService.getRecipes(req.user.organizationId, { search, source, tags: tagList });
   }
 
   @Post('recipes')
@@ -32,6 +38,23 @@ export class CulinaryController {
       { ...recipeData, organizationId: req.user.organizationId },
       ingredients || [],
     );
+  }
+
+  @Patch('recipes/:id')
+  async updateRecipe(@Param('id') id: string, @Body() body: any, @Req() req: any) {
+    const { ingredients, steps, ...recipeData } = body;
+    return this.culinaryService.updateRecipe(
+      id,
+      req.user.organizationId,
+      recipeData,
+      ingredients,
+      steps,
+    );
+  }
+
+  @Delete('recipes/:id')
+  async deleteRecipe(@Param('id') id: string, @Req() req: any) {
+    return this.culinaryService.deleteRecipe(id, req.user.organizationId);
   }
 
   // --- Catalog ---
