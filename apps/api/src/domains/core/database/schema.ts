@@ -3,6 +3,8 @@ import { relations } from 'drizzle-orm';
 // 1. Base / Independent
 export * from '../../iam/iam.schema';
 export * from '../../iam/organizations/organizations.schema';
+export * from '../../iam/invitations/invitations.schema';
+export * from '../../iam/auth/password-reset.schema';
 
 // 2. Depends on Organizations
 export * from '../../iam/locations/locations.schema';
@@ -57,7 +59,31 @@ import {
 } from '../../inventory/inventory.schema';
 import { recipeSteps, cookNotes } from '../../culinary/culinary.schema';
 
+import { invitations } from '../../iam/invitations/invitations.schema';
+import { passwordResetTokens } from '../../iam/auth/password-reset.schema';
+
 // --- Relations ---
+
+export const invitationsRelations = relations(invitations, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [invitations.organizationId],
+    references: [organizations.id],
+  }),
+  invitedBy: one(users, {
+    fields: [invitations.invitedById],
+    references: [users.id],
+  }),
+}));
+
+export const passwordResetTokensRelations = relations(
+  passwordResetTokens,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [passwordResetTokens.userId],
+      references: [users.id],
+    }),
+  }),
+);
 
 export const organizationsRelations = relations(organizations, ({ many }) => ({
   users: many(users),

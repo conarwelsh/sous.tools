@@ -175,7 +175,7 @@ export function RecipeForm({ initialData, ingredients, onSave, onCancel }: Recip
                 placeholder="Unit"
                 className="w-24 h-10 bg-background border-border text-center uppercase text-[10px] font-bold"
               />
-              <Button size="sm" variant="ghost" onClick={() => removeIngredient(idx)} className="h-10 w-10 p-0 hover:bg-red-500/10 hover:text-red-500">
+              <Button size="sm" variant="ghost" onClick={() => removeIngredient(idx)} className="h-10 w-10 p-0 hover:bg-destructive/10 hover:text-destructive">
                 <Trash2 size={14} />
               </Button>
             </Card>
@@ -227,7 +227,7 @@ export function RecipeForm({ initialData, ingredients, onSave, onCancel }: Recip
                       className="w-24 h-7 bg-background border-border text-[9px] text-center font-mono"
                     />
                   </View>
-                  <Button size="sm" variant="ghost" onClick={() => removeStep(idx)} className="h-8 px-2 hover:bg-red-500/10 hover:text-red-500 gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button size="sm" variant="ghost" onClick={() => removeStep(idx)} className="h-8 px-2 hover:bg-destructive/10 hover:text-destructive gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Trash2 size={12} />
                     <span className="text-[9px] font-black uppercase">Remove</span>
                   </Button>

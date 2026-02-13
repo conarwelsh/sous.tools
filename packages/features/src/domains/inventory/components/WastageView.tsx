@@ -16,10 +16,10 @@ export function WastageView() {
             Wastage
           </Text>
         </View>
-        <Button className="bg-sky-500 hover:bg-sky-600 px-6 h-12">
+        <Button className="bg-primary hover:bg-primary/90 px-6 h-12 shadow-xl shadow-primary/10">
           <View className="flex-row items-center gap-2">
-            <Plus size={18} color="white" />
-            <Text className="text-white font-bold uppercase text-xs tracking-widest">
+            <Plus size={18} className="text-primary-foreground" />
+            <Text className="text-primary-foreground font-bold uppercase text-xs tracking-widest">
               Record Waste
             </Text>
           </View>

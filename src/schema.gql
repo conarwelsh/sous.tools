@@ -1,0 +1,138 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CreateDisplayInput {
+  name: String!
+  orientation: String
+  resolution: String
+}
+
+input CreateIngredientInput {
+  baseUnit: String!
+  currentPrice: Int
+  name: String!
+}
+
+input CreateRecipeInput {
+  name: String!
+  yieldAmount: Int
+  yieldUnit: String
+}
+
+input CreateSupplierInput {
+  email: String
+  name: String!
+  phone: String
+}
+
+input CreateTemplateInput {
+  name: String!
+  structure: String!
+}
+
+type DashboardStats {
+  activeRecipes: Int!
+  connectedNodes: Int!
+  inventoryItems: Int!
+  pendingInvoices: Int!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type DeviceType {
+  hardwareId: String!
+  id: ID!
+  lastHeartbeat: DateTime
+  metadata: String
+  name: String!
+  organizationId: String
+  status: String!
+  type: String!
+}
+
+type DisplayType {
+  id: ID!
+  name: String!
+  orientation: String
+  resolution: String
+}
+
+type IngredientType {
+  baseUnit: String!
+  currentPrice: Int
+  description: String
+  id: ID!
+  lastPurchasedAt: String
+  name: String!
+}
+
+type Mutation {
+  createDisplay(input: CreateDisplayInput!, orgId: String!): DisplayType!
+  createIngredient(input: CreateIngredientInput!, orgId: String!): IngredientType!
+  createRecipe(input: CreateRecipeInput!, orgId: String!): RecipeType!
+  createSupplier(input: CreateSupplierInput!, orgId: String!): SupplierType!
+  createTemplate(input: CreateTemplateInput!, orgId: String!): TemplateType!
+  triggerRecipeAiIngestion(orgId: String!, recipeId: String!): Boolean!
+}
+
+type Query {
+  dashboardStats: DashboardStats!
+  devices(orgId: String!): [DeviceType!]!
+  displays(orgId: String!): [DisplayType!]!
+  ingredients(orgId: String!): [IngredientType!]!
+  recipe(id: String!, orgId: String!): RecipeType
+  recipes(orgId: String!): [RecipeType!]!
+  suppliers(orgId: String!): [SupplierType!]!
+  templates(orgId: String!): [TemplateType!]!
+}
+
+type RecipeIngredientType {
+  amount: Int!
+  id: ID!
+  ingredient: IngredientType!
+  unit: String!
+  wastageFactor: Int!
+}
+
+type RecipeStepType {
+  id: ID!
+  instruction: String!
+  order: Int!
+  timerDuration: Int
+}
+
+type RecipeType {
+  id: ID!
+  ingredients: [RecipeIngredientType!]!
+  name: String!
+  sourceId: String
+  sourceType: String
+  sourceUrl: String
+  steps: [RecipeStepType!]!
+  yieldAmount: Int
+  yieldUnit: String
+}
+
+type Subscription {
+  deviceUpdated(orgId: String!): DeviceType!
+}
+
+type SupplierType {
+  address: String
+  email: String
+  id: ID!
+  name: String!
+  phone: String
+  status: String
+}
+
+type TemplateType {
+  id: ID!
+  isSystem: Boolean!
+  name: String!
+  structure: String!
+}

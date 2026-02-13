@@ -62,11 +62,17 @@ export const useAuth = () => {
     setUser(null);
   };
 
+  const register = async (data: any) => {
+    const user = await AuthService.register(data);
+    return user;
+  };
+
   return {
     user,
     loading: loading || !isInitialized,
     login,
     logout,
+    register,
     isAuthenticated: !!user,
     refresh: fetchMe,
     isInitialized,

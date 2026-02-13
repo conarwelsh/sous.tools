@@ -16,6 +16,8 @@ export const users = pgTable('users', {
   firstName: varchar('first_name', { length: 255 }),
   lastName: varchar('last_name', { length: 255 }),
   googleId: varchar('google_id', { length: 255 }).unique(),
+  githubId: varchar('github_id', { length: 255 }).unique(),
+  facebookId: varchar('facebook_id', { length: 255 }).unique(),
   role: roleEnum('role').default('user').notNull(),
   organizationId: uuid('organization_id').references(() => organizations.id),
   isActive: boolean('is_active').default(true).notNull(),

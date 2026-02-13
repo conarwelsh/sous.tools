@@ -55,8 +55,8 @@ function SortableItem({ item, showPrice, showDescription, isEditMode, override, 
   return (
     <div ref={setNodeRef} style={style} className={cn(
       "relative group/item rounded-2xl transition-all",
-      isDragging && "opacity-50 scale-95 shadow-2xl ring-2 ring-sky-500",
-      isFeatured && "bg-sky-500/5 ring-1 ring-sky-500/20 p-4 -m-4",
+      isDragging && "opacity-50 scale-95 shadow-2xl ring-2 ring-primary",
+      isFeatured && "bg-primary/5 ring-1 ring-primary/20 p-4 -m-4",
       isSoldOut && "opacity-40 grayscale"
     )}>
       {isEditMode && (
@@ -74,9 +74,9 @@ function SortableItem({ item, showPrice, showDescription, isEditMode, override, 
             size="sm" 
             variant={isFeatured ? "default" : "secondary"}
             onClick={() => onUpdateOverrides(item.id, { featured: !isFeatured })}
-            className={cn("h-8 w-8 p-0 rounded-full border border-border shadow-lg", isFeatured && "bg-sky-500 hover:bg-sky-400")}
+            className={cn("h-8 w-8 p-0 rounded-full border border-border shadow-lg", isFeatured && "bg-primary hover:bg-primary/90")}
           >
-            <Star size={14} className={cn(isFeatured ? "text-white" : "text-muted-foreground")} fill={isFeatured ? "currentColor" : "none"} />
+            <Star size={14} className={cn(isFeatured ? "text-primary-foreground" : "text-muted-foreground")} fill={isFeatured ? "currentColor" : "none"} />
           </Button>
           <Button 
             size="sm" 
@@ -91,8 +91,8 @@ function SortableItem({ item, showPrice, showDescription, isEditMode, override, 
 
       {isFeatured && (
         <div className="flex flex-row items-center gap-1.5 mb-2">
-          <Flame size={12} className="text-sky-500 fill-sky-500" />
-          <Text className="text-[8px] font-black uppercase tracking-widest text-sky-500">Chef Featured</Text>
+          <Flame size={12} className="text-primary fill-primary" />
+          <Text className="text-[8px] font-black uppercase tracking-widest text-primary">Chef Featured</Text>
         </div>
       )}
 
@@ -106,7 +106,7 @@ function SortableItem({ item, showPrice, showDescription, isEditMode, override, 
           </Text>
           {showPrice && (
             <Text className={cn(
-              "font-mono font-bold text-sky-500",
+              "font-mono font-bold text-primary",
               columns > 3 ? "text-xs" : "text-lg"
             )}>
               ${(item.price / 100).toFixed(2)}
@@ -125,8 +125,8 @@ function SortableItem({ item, showPrice, showDescription, isEditMode, override, 
 
       {isSoldOut && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="px-4 py-1 bg-red-500 rounded-full shadow-lg rotate-[-12deg] border-2 border-white/20">
-            <Text className="text-white font-black uppercase text-[10px] tracking-widest">Sold Out</Text>
+          <div className="px-4 py-1 bg-destructive rounded-full shadow-lg rotate-[-12deg] border-2 border-white/20">
+            <Text className="text-destructive-foreground font-black uppercase text-[10px] tracking-widest">Sold Out</Text>
           </div>
         </div>
       )}

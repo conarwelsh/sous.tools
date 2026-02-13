@@ -13,6 +13,9 @@ The core intelligence and data gateway for the `sous.tools` platform.
 
 - [x] Multi-tenant data isolation (RLS).
 - [x] Hybrid API (REST + GraphQL + WebSockets).
+- [x] Robust Authentication & IAM (JWT, RBAC, OAuth2: Google, GitHub, Facebook).
+- [x] User Invitation System with token-based joining.
+- [x] Account Recovery (Password Reset) with secure tokens.
 - [x] AI-powered recipe and invoice extraction (Schema & Logic).
 - [x] Real-time Menuboard/Signage synchronization.
 - [x] Asynchronous background job processing (BullMQ).

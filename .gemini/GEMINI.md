@@ -181,6 +181,16 @@
 - **Action (Not Found):** Every route that uses dynamic parameters (e.g., `[id]`) MUST utilize `not-found.tsx`. Controllers should trigger this via `notFound()` from `next/navigation` if a requested resource does not exist.
 - **Goal:** Provide a consistent, high-fidelity user experience with instant feedback and graceful error handling.
 
+### 26. Design System Adherence (MANDATE)
+
+**Rule:** ALL UI components and views MUST strictly adhere to the established design system tokens and conventions defined in `@sous/ui`.
+
+- **Action (Semantic Colors):** Hardcoding Tailwind color scales (e.g., `bg-blue-500`, `text-zinc-400`) is FORBIDDEN. Use semantic tokens ONLY (e.g., `bg-primary`, `text-muted-foreground`, `border-border`).
+- **Action (Radius):** Hardcoding specific pixel or fixed Tailwind radius values (e.g., `rounded-[10px]`, `rounded-xl`) is FORBIDDEN. Use standardized tokens (`rounded-lg`, `rounded-md`, `rounded-sm`) which map to the global `--radius` variable.
+- **Action (Fonts):** Font variable names MUST NOT be hardcoded as strings. Use the centralized constants exported from `@sous/ui` (e.g., `FONT_SANS_VAR`, `FONT_BRAND_VAR`).
+- **Action (Icons):** Icons MUST use semantic color classes and consistent sizing tokens (`size-4`, `size-5`) to maintain visual harmony.
+- **Goal:** Ensure the UI remains modern, visually consistent, and 100% themeable via centralized variables in `@sous/ui`.
+
 ## Documentation Index
 
 - `docs/ADRs/`: Folder containing Architectural Decision Records (one file per decision).

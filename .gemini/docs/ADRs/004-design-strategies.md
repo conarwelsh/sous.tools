@@ -61,6 +61,23 @@ For `@sous/web` (and other UI apps), we strictly separate **Logic** from **Rende
   - **Visuals Only:** Focused on layout, styling (`@sous/ui`), and user interaction.
   - **Callbacks:** Delegates actions back to the Controller via props (e.g., `onSave`, `onCancel`).
 
+### 3. Scalability & Seeding Mandates
+
+To ensure the platform can scale to multi-server architectures and automated environments, we enforce:
+
+#### A. The Partition Key Mandate (ADR 058)
+Every domain entity (Database Table) MUST include an `organization_id` column.
+- **Why**: Allows for future database sharding (splitting data across servers by tenant).
+- **Exceptions**: Global system configuration tables (e.g., `feature_flags`).
+
+#### B. The Decentralized Seeding Mandate (ADR 055)
+Every tactical domain folder in `@sous/api` MUST contain a `[domain].seed.ts` file.
+- **Role**: Exports a class implementing `IDomainSeeder` to handle:
+  - `seedSystem`: Global defaults.
+  - `seedSample`: Development dummy data.
+  - `seedExternal`: Synchronizing sample data to external providers (e.g., Square Sandbox).
+- **Goal**: Decentralizes the massive `SeederService` and allows domain owners to manage their own test data.
+
 ### Example Structure (`@sous/web`)
 
 ```text

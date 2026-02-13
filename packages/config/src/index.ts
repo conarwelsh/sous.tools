@@ -305,7 +305,11 @@ export async function resolveConfig(): Promise<Config> {
     },
     ai: {
       googleGenerativeAiApiKey: envVars.GOOGLE_GENERATIVE_AI_API_KEY,
-    }
+    },
+    resend: {
+      apiKey: envVars.RESEND_API_KEY,
+      from: envVars.RESEND_FROM_EMAIL || "Sous <notifications@sous.tools>",
+    },
   };
 
   const result = configSchema.safeParse(rawConfig);

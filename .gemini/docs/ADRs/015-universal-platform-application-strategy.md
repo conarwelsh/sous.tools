@@ -1,8 +1,12 @@
-# ADR 015: Universal Platform Strategy (SUPERSEDED)
+# ADR 015: Universal Platform Strategy [SUPERSEDED]
+
+> **Status: SUPERSEDED by [ADR 041: Web-First Pivot](./041-web-first-pivot.md) and Mandate 15 (The Shell Pattern)**
+>
+> **Reason:** The complexity of maintaining "React Native Web" compatibility proved too high for Next.js 16 integration. The platform now uses a **Web-First** strategy where Capacitor wraps the standard Next.js application for mobile targets.
 
 ## Status
 
-Superseded by [ADR 041](./041-web-first-pivot.md) - Using standard Web + Capacitor.
+Superseded
 
 ## Date
 

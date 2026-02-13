@@ -1,8 +1,12 @@
-# ADR 014: POS Strategy (SUPERSEDED)
+# ADR 014: POS Strategy [SUPERSEDED]
+
+> **Status: SUPERSEDED by [Spec 027: POS Payment Engine](../specs/027-pos-payment-engine.md) and [ADR 050: Financial Safety & Transaction Integrity](./050-financial-safety-and-transaction-integrity.md)**
+>
+> **Reason:** The architectural direction for the POS has shifted to a **Ledger-First** immutable financial model. While the high-level UI goals remain, the underlying data flow and payment integration logic described here are obsolete.
 
 ## Status
 
-Superseded by [ADR 041](./041-web-first-pivot.md) - POS is now a web view.
+Superseded
 
 ## Date
 

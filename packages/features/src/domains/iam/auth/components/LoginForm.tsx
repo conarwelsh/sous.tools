@@ -11,6 +11,8 @@ import {
   CardHeader,
   CardContent,
   GoogleLogo,
+  GithubLogo,
+  FacebookLogo,
 } from "@sous/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { X, Loader2 } from "lucide-react";
@@ -77,6 +79,14 @@ const LoginFormContent = ({
 
   const handleGoogleLogin = () => {
     window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google-login`;
+  };
+
+  const handleGithubLogin = () => {
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/github-login`;
+  };
+
+  const handleFacebookLogin = () => {
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/facebook-login`;
   };
 
   return (
@@ -169,25 +179,59 @@ const LoginFormContent = ({
                 </div>
               </div>
 
-              <Button
-                type="button"
-                onClick={handleGoogleLogin}
-                variant="outline"
-                className="h-14 w-full rounded-2xl border-border/50 bg-muted/10 hover:bg-muted transition-all font-black uppercase tracking-widest text-[10px] flex-row gap-3"
-              >
-                <GoogleLogo size={18} />
-                Continue with Google
-              </Button>
+              <div className="grid grid-cols-1 gap-3">
+                <Button
+                  type="button"
+                  onClick={handleGoogleLogin}
+                  variant="outline"
+                  className="h-14 w-full rounded-2xl border-border/50 bg-muted/10 hover:bg-muted transition-all font-black uppercase tracking-widest text-[10px] flex-row gap-3"
+                >
+                  <GoogleLogo size={18} />
+                  Google
+                </Button>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    type="button"
+                    onClick={handleGithubLogin}
+                    variant="outline"
+                    className="h-14 w-full rounded-2xl border-border/50 bg-muted/10 hover:bg-muted transition-all font-black uppercase tracking-widest text-[10px] flex-row gap-3"
+                  >
+                    <GithubLogo size={18} />
+                    GitHub
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={handleFacebookLogin}
+                    variant="outline"
+                    className="h-14 w-full rounded-2xl border-border/50 bg-muted/10 hover:bg-muted transition-all font-black uppercase tracking-widest text-[10px] flex-row gap-3"
+                  >
+                    <FacebookLogo size={18} />
+                    Facebook
+                  </Button>
+                </div>
+              </div>
             </div>
 
-            <button
-              type="button"
-              className="w-full flex flex-col items-center pt-2"
-            >
-              <span className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] hover:text-primary transition-colors cursor-pointer">
+            <div className="flex flex-col gap-4 items-center pt-2">
+              <button
+                type="button"
+                onClick={() => router.push("/forgot-password")}
+                className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] hover:text-primary transition-colors cursor-pointer"
+              >
                 Lost Access?
-              </span>
-            </button>
+              </button>
+              <div className="flex flex-row gap-2 items-center">
+                <span className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest opacity-40">New to Sous?</span>
+                <button
+                  type="button"
+                  onClick={() => router.push("/register")}
+                  className="text-primary text-[10px] font-black uppercase tracking-[0.2em] hover:underline transition-all cursor-pointer"
+                >
+                  Join the Kitchen
+                </button>
+              </div>
+            </div>
           </form>
         </CardContent>
       </Card>

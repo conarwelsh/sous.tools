@@ -69,8 +69,25 @@ export const configSchema = z.object({
     redirectUri: z.string().optional(),
   }).default({}),
 
+  github: z.object({
+    clientId: z.string().optional(),
+    clientSecret: z.string().optional(),
+    redirectUri: z.string().optional(),
+  }).default({}),
+
+  facebook: z.object({
+    clientId: z.string().optional(),
+    clientSecret: z.string().optional(),
+    redirectUri: z.string().optional(),
+  }).default({}),
+
   ai: z.object({
     googleGenerativeAiApiKey: z.string().optional(),
+  }).default({}),
+
+  resend: z.object({
+    apiKey: z.string().optional(),
+    from: z.string().default("Sous <notifications@sous.tools>"),
   }).default({}),
 
   // Feature Flags & Environment Context

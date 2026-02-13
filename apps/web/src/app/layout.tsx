@@ -4,7 +4,14 @@ import { Inter, Outfit, Geist_Mono } from "next/font/google";
 import { FlavorGate } from "../components/FlavorGate";
 import { GraphQLProvider } from "../lib/apollo-provider";
 import { AuthProvider } from "@sous/features";
-import { ThemeProvider, LoadingProvider, GlobalLoadingBar } from "@sous/ui";
+import {
+  ThemeProvider,
+  LoadingProvider,
+  GlobalLoadingBar,
+  FONT_SANS_VAR,
+  FONT_BRAND_VAR,
+  FONT_MONO_VAR,
+} from "@sous/ui";
 import { RouterChangeTracker } from "../components/RouterChangeTracker";
 
 import "./globals.css";

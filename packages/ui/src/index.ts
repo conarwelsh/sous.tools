@@ -1,4 +1,5 @@
 export * from "./lib/utils";
+export * from "./lib/fonts";
 export * from "./components/ui/view";
 export * from "./components/ui/text";
 export * from "./components/ui/button";

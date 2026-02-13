@@ -1,8 +1,12 @@
-# ADR 003: Centralized Logger Strategy
+# ADR 003: Centralized Logger Strategy [SUPERSEDED]
+
+> **Status: SUPERSEDED by [ADR 056: Unified Observability & Internal Telemetry](./056-unified-observability-and-metrics-dashboard.md)**
+>
+> **Reason:** While Pino and Better Stack are still functional components, the platform's observability strategy has evolved to prioritize **OpenTelemetry (OTel)** and **HyperDX** for a unified view of logs, traces, and errors. This ADR is retained for historical context on the logger's internal structure.
 
 ## Status
 
-Proposed
+Superseded
 
 ## Date
 

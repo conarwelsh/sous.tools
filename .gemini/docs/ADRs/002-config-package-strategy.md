@@ -1,8 +1,12 @@
-# ADR 002: Centralized Configuration & Infisical Abstraction
+# ADR 002: Centralized Configuration & Infisical Abstraction [SUPERSEDED]
+
+> **Status: SUPERSEDED by [ADR 057: Sync-Only Config & Process Injection](./057-sync-only-config-and-process-injection.md)**
+>
+> **Reason:** The async resolution pattern defined here caused race conditions during application boot. The new strategy uses a synchronous-only runtime config with a CLI-based environment injector.
 
 ## Status
 
-Decided (Updated Feb 9, 2026)
+Superseded
 
 ## Date
 

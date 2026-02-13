@@ -1,0 +1,24 @@
+{
+  "name": "@sous/emails",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "dev": "email dev -d src/templates",
+    "lint": "eslint src/**/*.ts*"
+  },
+  "dependencies": {
+    "@react-email/components": "0.0.32",
+    "react": "19.2.3"
+  },
+  "devDependencies": {
+    "@sous/typescript-config": "workspace:*",
+    "@types/react": "^19.0.8",
+    "react-email": "3.0.6",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.3"
+  }
+}

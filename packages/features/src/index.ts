@@ -1,8 +1,13 @@
 // IAM Domain
 export * from "./domains/iam/auth/components/AuthProvider";
 export * from "./domains/iam/auth/components/LoginForm";
+export * from "./domains/iam/auth/components/RegisterForm";
+export * from "./domains/iam/auth/components/ForgotPasswordForm";
+export * from "./domains/iam/auth/components/ResetPasswordForm";
 export * from "./domains/iam/auth/hooks/useAuth";
 export * from "./domains/iam/auth/services/auth.service";
+export * from "./domains/iam/invitations/components/InvitationManager";
+export * from "./domains/iam/users/components/TeamList";
 
 // Knowledge Domain
 export * from "./domains/knowledge/components/KnowledgeShell";
