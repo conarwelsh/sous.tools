@@ -16,9 +16,7 @@ async function bootstrap() {
   await configPromise;
 
   // Print Banner
-  // Note: The textual line below currently prints "SOUS OS", which is not part of the new banner art.
-  // If "SOUS LIKE" is intended as the primary title, this line might need adjustment or removal.
-  // For now, keeping it as is to not alter unrelated parts unless requested.
+  // Note: The textual line below prints "SOUS.TOOLS" metadata.
   const envColor =
     config.env === 'production'
       ? chalk.red
