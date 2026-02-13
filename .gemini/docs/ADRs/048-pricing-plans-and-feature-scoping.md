@@ -1,71 +1,62 @@
-# ADR 048: Pricing Plans and Feature Scoping
+# ADR 048: Unified Authorization & Scoping Strategy
 
 ## Status
 
-Proposed
+Accepted (Refined Feb 13, 2026)
 
 ## Context
 
-The Sous platform needs to support tiered pricing plans to monetize different feature sets. The three primary tiers are:
-1.  **Commis** (Entry Level)
-2.  **Chef de Partie** (Standard)
-3.  **Executive Chef** (Premium)
-
-Features should be hierarchical, meaning higher tiers include all features of lower tiers. Additionally, the system must support **Custom Plans** for enterprise or early-adopter organizations that don't fit into the standard tiers.
+The Sous platform needs to support tiered pricing plans, internal role-based access (RBAC), and future 3rd-party developer access (OAuth2).
+Checking for specific roles (`if admin`) or plans (`if executive`) in code is brittle and fails to handle the intersection of these vectors (e.g., an Admin on a Basic plan, or a 3rd-party app acting on behalf of a User).
 
 ## Decision
 
-We will implement a **Scope-Based Access Control (SBAC)** system where pricing plans are mapped to a collection of granular "Scopes".
+We will adopt a **Pure Capability-Based Authorization** model using Scope-Based Access Control (SBAC).
 
-### 1. Granular Scopes
-Features will be identified by unique strings (e.g., `procurement:invoices`, `culinary:recipes:advanced`, `intelligence:analytics`).
+### 1. The "Scope" as the Atom
+Authorization checks will **ONLY** ever validate against a Scope string (e.g., `culinary:recipes:create`, `pos:orders:read`).
+- **Granular Scopes**: Features will be identified by unique, namespaced strings defined in a shared `FeatureScope` enum.
 
-### 2. Database Schema
+### 2. Forbidden: Magic Checks
+Code must **NEVER** check `user.role === 'admin'` or `org.plan === 'pro'` to determine feature access.
+- **Bad**: `<if plan="executive">`
+- **Good**: `<if scope="analytics:advanced">`
+
+### 3. The Intersection Rule
+To determine if a request is authorized, the system calculates `EffectiveScopes` by intersecting the user's entitlements with the access method's permissions.
+
+`EffectiveScopes = (RolePermissions ∪ PlanPermissions) ∩ TokenDelegations`
+
+- **RolePermissions**: What the user's role (Admin/Member) allows.
+- **PlanPermissions**: What the organization's billing plan allows (including Custom plans).
+- **TokenDelegations**:
+    - For **Standard Login**: Effectively `*` (All).
+    - For **3rd Party OAuth**: The specific subset of scopes granted by the user to the external app.
+
+### 4. Database Schema
 - **`plans` table**: Defines standard tiers with a name, slug, and a JSONB array of `baseScopes`.
-- **`organizations` table**: Added `planId` (foreign key) and `scopeOverrides` (JSONB array for custom additions or removals).
+- **`organizations` table**: Added `planId` (foreign key) and `scopeOverrides` (JSONB array for custom additions/removals).
 
-### 3. Hierarchical Logic
-Standard plans will be defined with their specific scopes. A helper utility `getEffectiveScopes(org)` will merge the base scopes from the organization's plan with any `scopeOverrides`.
-
-### 4. API Enforcement (NestJS)
-A `@RequiredScopes(...scopes: string[])` decorator and a corresponding `ScopesGuard` will be used to protect endpoints.
-```typescript
-@Get('analytics')
-@RequiredScopes('intelligence:analytics')
-export class AnalyticsController { ... }
-```
-
-### 5. Web/Frontend Enforcement
-A `useScopes()` hook and a `<Feature scope="...">` component will be provided in `@sous/features` to conditionally render UI elements.
-```tsx
-const { hasScope } = useScopes();
-if (!hasScope('procurement:invoices')) return null;
-```
+### 5. Enforcement
+- **API**: A `@RequiredScopes(...scopes: string[])` decorator and a corresponding `ScopesGuard`.
+- **Frontend**: A `useScopes()` hook and a `<Feature scope="...">` component in `@sous/features`.
 
 ## Consequences
 
 - **Pros**: 
-    - Decouples business pricing logic from code implementation.
-    - High flexibility with custom plans and overrides.
-    - Clear path for future "Add-on" features.
+    - **Universal**: Internal users and 3rd-party apps are treated identically by the authorization engine.
+    - **Decoupled**: Business pricing logic is separated from code.
+    - **Flexible**: "Custom Plans" are natively supported by simply adjusting the `scopeOverrides` JSON.
 - **Cons**: 
-    - Requires careful management of scope strings to avoid typos (should use a shared constant or enum).
-    - Slightly increases complexity of the authentication/authorization flow.
-    - Initial effort to map existing features to scopes.
+    - Requires maintaining a comprehensive "Scope Registry" to avoid typos.
+    - Initial effort to map every existing feature to a scope.
 
 ## Implementation Details
 
 ### API Adjustments
-- Update `organizations` schema.
-- Implement `PlanService` and `ScopesGuard`.
-- Integrate scope check into `JwtStrategy` validation or a dedicated middleware.
+- Update `AuthService` to calculate `EffectiveScopes` during token generation.
+- Implement `ScopesGuard` to check the JWT payload for the required scopes.
 
 ### Web Adjustments
-- Update `AuthContext` to store effective scopes.
-- Update navigation components to filter links based on scopes.
-- Implement "Upgrade Required" placeholders for restricted features.
-
-## Improvements & Considerations
-- **Usage Limits**: Future expansion should allow plans to define numeric limits (e.g., `limit:monthly_invoices: 100`).
-- **Caching**: Effective scopes should be cached in Redis to minimize DB lookups per request.
-- **Grace Periods**: Implement a status field on organizations to handle subscription expiration or payment failures without immediate lockout.
+- Update `AuthContext` to store the calculated scope list.
+- Update navigation and UI components to conditionally render based on `hasScope()`.

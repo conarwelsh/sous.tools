@@ -9,7 +9,12 @@ This document serves as the "Source of Truth" for the gap between our current co
 - [ ] **Database Scalability (Spec 035)**: Update `DatabaseService` to support `reader`/`writer` separation.
 - [ ] **Observability (Spec 033)**: Replace `pino-pretty` with OpenTelemetry + HyperDX integration.
 
-### 2. POS Financial Engine (Spec 027)
+### 2. Authorization Engine (ADR 048)
+- [ ] **Unified Scopes**: Implement `EffectiveScopes` calculation in `AuthService`.
+- [ ] **Universal Guard**: Create `ScopesGuard` that checks `(Role U Plan) ∩ Token`.
+- [ ] **OAuth2 Provider (Spec 037)**: Build the `/oauth` endpoints and Developer Portal.
+
+### 3. POS Financial Engine (Spec 027)
 - [ ] **Ledger Schema**: Add `pos_ledgers` and `financial_transactions` tables to `pos.schema.ts`.
 - [ ] **Idempotency**: Implement `IdempotencyGuard` using Redis.
 - [ ] **Offline Sync**: Create the local-first "Store and Forward" logic in `@sous/client-sdk`.
