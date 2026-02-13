@@ -17,9 +17,14 @@ async function main() {
   const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
   const prompt = `
-    You are an expert software engineering agent triaging a new GitHub issue.
+    You are an expert software engineering agent triaging a new GitHub issue for the 'sous.tools' platform.
     
-    Repo: ${repo}
+    Project Context:
+    - Namespace: @sous
+    - Apps: @sous/web (Next.js 16), @sous/api (NestJS), @sous/cli (NestJS CLI), @sous/wearos, @sous/docs
+    - Packages: @sous/client-sdk, @sous/config, @sous/logger, @sous/ui (Component library), @sous/emails
+    - Stack: Drizzle ORM, PostgreSQL, BullMQ, Tailwind CSS, Radix UI.
+
     Issue Title: ${title}
     Issue Body:
     ${body}
@@ -27,7 +32,7 @@ async function main() {
     Your goal is to:
     1. Analyze the issue.
     2. Suggest labels (comma-separated list). Available labels: bug, enhancement, documentation, question, help wanted, invalid, wontfix, high-priority, low-priority.
-    3. Provide a helpful initial comment summarizing the issue and suggesting potential areas of the codebase to investigate or asking clarifying questions.
+    3. Provide a helpful initial comment summarizing the issue, suggesting potential areas of the codebase to investigate (e.g. apps/api/src/domains/...), or asking clarifying questions.
 
     Output STRICT JSON format:
     {

@@ -1,15 +1,17 @@
-name: Issue Triage Agent
+name: Gemini PR Review
 
 on:
-  issues:
-    types: [opened, reopened]
+  pull_request:
+    types: [opened, synchronize]
 
 jobs:
-  triage:
+  review:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -19,11 +21,11 @@ jobs:
       - name: Install Dependencies
         run: npm install -g tsx @google/generative-ai
 
-      - name: Analyze Issue
+      - name: Analyze PR
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          ISSUE_TITLE: ${{ github.event.issue.title }}
-          ISSUE_BODY: ${{ github.event.issue.body }}
-        run: tsx scripts/gemini-triage.ts
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: tsx scripts/gemini-pr-review.ts

@@ -1,5 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { execSync } from "child_process";
+import fs from "fs";
+import path from "path";
 
 async function main() {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -7,95 +9,118 @@ async function main() {
   const commentBody = process.env.COMMENT_BODY;
   const issueNumber = process.env.ISSUE_NUMBER;
   const repoFull = process.env.GITHUB_REPOSITORY; // "owner/repo"
+  const issueTitle = process.env.ISSUE_TITLE || "Issue Action";
   
-  if (!apiKey || !githubToken || !commentBody) {
+  if (!apiKey || !githubToken || !commentBody || !repoFull) {
     console.error("Missing required environment variables.");
     process.exit(1);
   }
 
-  // Only process if addressed to @gemini
-  if (!commentBody.includes("@gemini")) {
-    console.log("Not addressed to Gemini.");
-    return;
-  }
+  const prompt = commentBody.replace("@gemini", "").trim();
+  console.log(`Processing prompt: ${prompt}`);
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+  // Using 1.5 Flash for speed and large context
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-  const prompt = `
-    You are an expert autonomous software engineer named Gemini.
-    You have been invoked in a GitHub comment.
+  // Gather some context: File list
+  const fileList = execSync("find . -maxdepth 3 -not -path '*/.*'").toString();
+
+  const systemPrompt = `
+    You are Gemini, an expert autonomous software engineer.
+    You are running in a GitHub Action. You have access to the repository filesystem.
     
-    Comment: "${commentBody}"
+    Current File Structure (limited depth):
+    ${fileList}
+
+    User Request: "${prompt}"
+    Issue Context: #${issueNumber} - ${issueTitle}
+
+    Your goal is to fulfill the user's request.
+    If the user wants a fix or feature:
+    1. Identify relevant files.
+    2. Suggest specific changes.
+    3. Generate a branch name.
     
-    If the user is asking for a code change (e.g. "/fix", "please fix", "implement this"), 
-    you should generate a git branch name and a set of instructions for what to change.
-    
-    Since you are running in a CI environment without full repo context access in this prompt, 
-    you must decide if you can perform the action.
-    
-    For this MVP, if the command is "/fix" or implies a fix, assume you would generate a branch named 'gemini/fix-{issueNumber}-{timestamp}'.
-    
+    If the user wants research:
+    1. Search the codebase (you can suggest commands to run, but here you should just reason about it).
+    2. Provide a detailed report.
+
     Output STRICT JSON:
     {
-      "action": "fix" | "reply",
-      "branchName": "string (if fix)",
-      "reply": "Markdown response to the user"
+      "action": "fix" | "research",
+      "thought": "Your reasoning...",
+      "branchName": "gemini/action-...",
+      "filesToModify": [
+        { "path": "string", "content": "FULL new content of the file" }
+      ],
+      "report": "Markdown response for the user",
+      "prTitle": "short title",
+      "prBody": "detailed description"
     }
   `;
 
   try {
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    const result = await model.generateContent(systemPrompt);
+    const response = await result.response;
+    const text = response.text();
     const jsonStr = text.replace(/```json/g, "").replace(/```/g, "").trim();
     const data = JSON.parse(jsonStr);
 
-    if (data.action === "fix") {
+    console.log(`Action: ${data.action}`);
+    console.log(`Thought: ${data.thought}`);
+
+    if (data.action === "fix" && data.filesToModify && data.filesToModify.length > 0) {
         const branch = data.branchName || `gemini/fix-${issueNumber}-${Date.now()}`;
-        
-        // In a real scenario, the Agent would actually MODIFY code here based on the request.
-        // For this MVP, we will just create the branch and push a dummy change or just the branch itself.
-        // To truly "fix" it, we'd need to pass file contents to the LLM and get back diffs.
         
         console.log(`Creating branch ${branch}...`);
         execSync(`git checkout -b ${branch}`);
         
-        // Simulate a fix
-        execSync(`echo "// Gemini fix for issue #${issueNumber}" >> GEMINI_FIX_LOG.md`);
-        execSync(`git add GEMINI_FIX_LOG.md`);
-        execSync(`git commit -m "feat: Gemini agent fix for #${issueNumber}"`);
+        for (const file of data.filesToModify) {
+            console.log(`Modifying ${file.path}...`);
+            const dir = path.dirname(file.path);
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true });
+            }
+            fs.writeFileSync(file.path, file.content);
+            execSync(`git add "${file.path}"`);
+        }
+
+        execSync(`git commit -m "${data.prTitle || `fix: Gemini action for #${issueNumber}`}"`);
         execSync(`git push origin ${branch}`);
 
         // Create PR
-        const prBody = JSON.stringify({
-            title: `fix: Gemini Agent for #${issueNumber}`,
-            body: `Automated fix generated by Gemini Agent.
-
-${data.reply}`,
+        const prPayload = {
+            title: data.prTitle || `fix: Gemini Agent for #${issueNumber}`,
+            body: `${data.prBody || "Automated fix generated by Gemini."}\n\nCloses #${issueNumber}`,
             head: branch,
-            base: "staging"
-        });
+            base: "development" // Our standard dev branch
+        };
 
-        await fetch(`https://api.github.com/repos/${repoFull}/pulls`, {
+        const prRes = await fetch(`https://api.github.com/repos/${repoFull}/pulls`, {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${githubToken}`,
                 "Content-Type": "application/json",
                 "User-Agent": "Gemini-Agent"
             },
-            body: prBody
+            body: JSON.stringify(prPayload)
         });
 
-        // Reply to issue confirming PR
-        await postComment(repoFull, issueNumber!, githubToken, `🚀 I have created a PR with the requested changes: (PR link will appear here once created).`);
+        const prData = await prRes.json() as any;
+        const prUrl = prData.html_url || "PR created";
+
+        // Reply to issue
+        await postComment(repoFull, issueNumber!, githubToken, `🚀 **I have applied the fix!**\n\n${data.thought}\n\nView PR: ${prUrl}`);
 
     } else {
-        // Just reply
-        await postComment(repoFull, issueNumber!, githubToken, data.reply);
+        // Just reply/report
+        await postComment(repoFull, issueNumber!, githubToken, `📋 **Gemini Report:**\n\n${data.report || data.thought}`);
     }
 
   } catch (error) {
     console.error("Error:", error);
+    await postComment(repoFull, issueNumber!, githubToken, `❌ **Error encountered during action:**\n\n\`\`\`\n${error}\n\`\`\``);
     process.exit(1);
   }
 }
