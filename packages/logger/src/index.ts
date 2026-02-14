@@ -18,7 +18,6 @@ interface LoggerConfig {
   logger: {
     level: string;
     json: boolean;
-    logtailToken?: string;
     hyperdxApiKey?: string;
   };
 }
@@ -28,6 +27,13 @@ interface LoggerConfig {
  */
 export async function initObservability(config: LoggerConfig) {
   if (!isServer) return;
+  
+  const isDev = config.env === "development";
+  const forceHyperDX = process.env.FORCE_HYPERDX === "true";
+
+  if (isDev && !forceHyperDX) {
+    return;
+  }
   
   const apiKey = config.logger.hyperdxApiKey;
   if (!apiKey) {
@@ -74,7 +80,6 @@ export function createLogger(options: { name: string; config?: LoggerConfig }) {
     logger: {
       level: isServer ? (process.env.LOG_LEVEL || "info") : "info",
       json: isServer ? (process.env.SOUS_JSON_LOGS === "true") : false,
-      logtailToken: isServer ? process.env.LOGTAIL_SOURCE_TOKEN : undefined,
       hyperdxApiKey: isServer ? process.env.HYPERDX_API_KEY : undefined,
     }
   };
@@ -91,19 +96,6 @@ export function createLogger(options: { name: string; config?: LoggerConfig }) {
         options: { destination: `${home}/.sous/logs/combined.log`, mkdir: true },
       });
     }
-
-    // 2. Remote Transport (Better Stack / Logtail)
-    if (logConfig.logger.logtailToken) {
-      transports.push({
-        target: "@logtail/pino",
-        options: { sourceToken: logConfig.logger.logtailToken },
-      });
-    }
-
-    // 3. HyperDX / OpenTelemetry
-    // Note: If initObservability was called, consoleCapture: true will already pipe logs.
-    // However, for more structured pino logs, we could add a specific transport here.
-    // For now, consoleCapture is sufficient for a basic replacement.
   }
 
   const baseLogger = pino(

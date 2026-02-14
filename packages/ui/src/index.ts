@@ -3,6 +3,7 @@ export * from "./lib/fonts";
 export * from "./components/ui/view";
 export * from "./components/ui/text";
 export * from "./components/ui/button";
+export * from "./components/ui/badge";
 export * from "./components/ui/card";
 export * from "./components/ui/scrollview";
 export * from "./components/ui/input";

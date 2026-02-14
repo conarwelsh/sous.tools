@@ -71,6 +71,9 @@ export * from "./domains/docs/components/ComponentPlayground";
 // Shared Components
 export * from "./components/CodeEditor";
 
+// Constants
+export * from "./constants/plans";
+
 // Support Domain
 export * from "./domains/support/components/SupportForm";
 export * from "./domains/support/components/FeedbackModal";

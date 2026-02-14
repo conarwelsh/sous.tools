@@ -19,7 +19,6 @@
   },
   "dependencies": {
     "@hyperdx/node-opentelemetry": "^0.10.2",
-    "@logtail/pino": "^0.5.7",
     "@opentelemetry/api": "^1.9.0",
     "pino": "^10.2.0",
     "pino-pretty": "^13.1.3"

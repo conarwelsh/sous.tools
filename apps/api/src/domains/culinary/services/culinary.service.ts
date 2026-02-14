@@ -242,6 +242,36 @@ export class CulinaryService {
     });
   }
 
+  async getRecipeCost(id: string, organizationId: string) {
+    const recipe = await this.getRecipe(id, organizationId);
+    if (!recipe) throw new Error('Recipe not found');
+
+    let totalCost = 0;
+    for (const ri of recipe.ingredients) {
+      if (ri.ingredient?.currentPrice) {
+        // Simple logic: assume price is per base unit and amount matches
+        // Real implementation requires unit conversion (e.g. kg to g)
+        // For now, we assume 1:1 if unit matches, or just raw calc
+        totalCost += (ri.amount * ri.ingredient.currentPrice);
+      }
+    }
+    return totalCost;
+  }
+
+  async scaleRecipe(id: string, organizationId: string, factor: number) {
+    const recipe = await this.getRecipe(id, organizationId);
+    if (!recipe) throw new Error('Recipe not found');
+
+    return {
+      ...recipe,
+      yieldAmount: (recipe.yieldAmount || 0) * factor,
+      ingredients: recipe.ingredients.map(ri => ({
+        ...ri,
+        amount: ri.amount * factor,
+      }))
+    };
+  }
+
   async createRecipe(
     data: typeof recipes.$inferInsert,
     ingredientsList: (typeof recipeIngredients.$inferInsert)[],

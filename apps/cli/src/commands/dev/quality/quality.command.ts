@@ -1,0 +1,19 @@
+import { SubCommand, CommandRunner } from 'nest-commander';
+import { TestCommand } from './test/test.command.js';
+import { CheckCommand } from './check/check.command.js';
+import { ForgeCommand } from './forge.command.js';
+import { AuditCommand } from './audit.command.js';
+
+@SubCommand({
+  name: 'quality',
+  description: 'Code quality and testing tools',
+  subCommands: [TestCommand, CheckCommand, ForgeCommand, AuditCommand],
+})
+export class QualityCommand extends CommandRunner {
+  async run(passedParam: string[]): Promise<void> {
+    if (passedParam.length > 0 && ['test', 'check', 'forge', 'audit'].includes(passedParam[0])) {
+      return;
+    }
+    console.log('Please specify a subcommand: test, check, forge, audit');
+  }
+}

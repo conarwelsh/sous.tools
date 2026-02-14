@@ -6,8 +6,9 @@ import {
   Optional,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { DatabaseService } from '../../../domains/core/database/database.service.js';
-import { MailService } from '../../../domains/core/mail/mail.service.js';
+import * as crypto from 'node:crypto';
+import { DatabaseService } from '../../core/database/database.service.js';
+import { MailService } from '../../core/mail/mail.service.js';
 import {
   users,
   organizations,
@@ -15,7 +16,7 @@ import {
   invitations,
   passwordResetTokens,
   plans,
-} from '../../../domains/core/database/schema.js';
+} from '../../core/database/schema.js';
 import { eq, and, gt } from 'drizzle-orm';
 import * as bcrypt from 'bcrypt';
 import { logger } from '@sous/logger';
@@ -405,7 +406,7 @@ export class AuthService {
   }) {
     return await this.dbService.db.transaction(async (tx) => {
       let orgId: string;
-      let role: 'user' | 'admin' | 'superadmin' = 'admin';
+      let role: 'user' | 'admin' | 'salesman' | 'superadmin' = 'admin';
 
       // 1. Handle Invitation Flow
       if (data.inviteToken) {
@@ -418,7 +419,7 @@ export class AuthService {
         }
 
         orgId = invite.organizationId;
-        role = invite.role;
+        role = invite.role as any;
 
         // Mark invite as accepted
         await tx
@@ -459,9 +460,10 @@ export class AuthService {
         })
         .returning();
 
-      // 5. Trigger Welcome Email (Async via Queue)
+      // 5. Trigger Verification Email (Async via Queue)
       if (this.mailService) {
-        void this.mailService.sendWelcomeEmail(user.email, user.firstName || 'Chef');
+        const verificationLink = `${config.web.url}/verify-email?token=${crypto.randomBytes(32).toString('hex')}`;
+        void this.mailService.sendVerificationEmail(user.email, user.firstName || 'Chef', verificationLink);
       }
 
       return user;

@@ -242,4 +242,36 @@ export class IngestionService {
       throw error;
     }
   }
+
+  async processInvoice(organizationId: string, textContent: string) {
+    logger.info(`[AI Ingestion] Processing Invoice for org ${organizationId}`);
+
+    if (!this.genAI) {
+      throw new Error('AI_NOT_CONFIGURED');
+    }
+
+    try {
+      const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const prompt = `
+        Extract the following invoice data into JSON:
+        - supplierName (string)
+        - invoiceDate (ISO string)
+        - totalAmount (number, in cents)
+        - items: array of { name, quantity, unit, unitPrice (cents), totalPrice (cents) }
+
+        Input Text:
+        ${textContent}
+      `;
+
+      const result = await model.generateContent(prompt);
+      const text = result.response.text();
+      
+      // Basic cleanup
+      const jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim();
+      return JSON.parse(jsonStr);
+    } catch (e: any) {
+      logger.error(`[AI Ingestion] Invoice extraction failed: ${e.message}`);
+      throw e;
+    }
+  }
 }

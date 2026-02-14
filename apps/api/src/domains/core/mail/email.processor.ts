@@ -14,6 +14,8 @@ import {
   SupportTicketEmail,
   SupportNotificationEmail,
   SubscriptionConfirmedEmail,
+  EmailVerificationEmail,
+  WeeklyDigestEmail,
 } from '@sous/emails';
 import { EmailJobData } from './mail.service.js';
 
@@ -59,6 +61,12 @@ export class EmailProcessor extends WorkerHost {
         break;
       case 'subscription-confirmed':
         component = React.createElement(SubscriptionConfirmedEmail, context as any);
+        break;
+      case 'verification':
+        component = React.createElement(EmailVerificationEmail, context as any);
+        break;
+      case 'weekly-digest':
+        component = React.createElement(WeeklyDigestEmail, context as any);
         break;
       default:
         throw new Error(`Unknown template: ${template}`);

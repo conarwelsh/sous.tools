@@ -78,7 +78,9 @@ export default function RecipesPage() {
         const http = await getHttpClient();
         const data = await http.get<any[]>("/integrations");
         setHasGDrive(data.some(i => i.provider === 'google-drive' && (i.isActive || i.is_active)));
-      } catch (e) {}
+          } catch (e) {
+            // Ignore error
+          }
     };
     if (orgId) checkIntegrations();
   }, [orgId]);

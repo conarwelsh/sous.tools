@@ -6,6 +6,8 @@ import { LowStockEmail } from "./templates/LowStockEmail";
 import { SupportTicketEmail } from "./templates/SupportTicketEmail";
 import { SupportNotificationEmail } from "./templates/SupportNotificationEmail";
 import { SubscriptionConfirmedEmail } from "./templates/SubscriptionConfirmedEmail";
+import { EmailVerificationEmail } from "./templates/EmailVerificationEmail";
+import { WeeklyDigestEmail } from "./templates/WeeklyDigestEmail";
 
 export {
   InvitationEmail,
@@ -16,4 +18,6 @@ export {
   SupportTicketEmail,
   SupportNotificationEmail,
   SubscriptionConfirmedEmail,
+  EmailVerificationEmail,
+  WeeklyDigestEmail,
 };

@@ -324,7 +324,11 @@ export class IntegrationsService {
     return this.driverFactory.getStorageDriver(provider, credentials);
   }
 
-  async sync(organizationId: string, provider: string, fileId?: string) {
+  async sync(
+    organizationId: string,
+    provider: string,
+    options?: { syncType?: 'CATALOG' | 'SALES'; dateRange?: { start: Date; end: Date }; fileId?: string },
+  ) {
     const configEntry = await this.getIntegration(organizationId, provider);
     if (!configEntry) throw new Error('Integration not found');
 
@@ -336,13 +340,25 @@ export class IntegrationsService {
     }
 
     if (provider === 'square') {
-      logger.info(
-        `[Integrations] Starting Square sync for org ${organizationId}`,
-      );
       const driver = this.driverFactory.getPOSDriver(provider, credentials);
+      const syncType = options?.syncType || 'CATALOG';
 
-      // 1. Sync Catalog
-      const catalogItems = await driver.fetchCatalog();
+      if (syncType === 'SALES') {
+        logger.info(`[Integrations] Starting Square SALES sync for org ${organizationId}`);
+        const startDate = options?.dateRange?.start || new Date(Date.now() - 24 * 60 * 60 * 1000); // Default 24h
+        const endDate = options?.dateRange?.end || new Date();
+
+        if (driver instanceof SquareDriver) {
+          const orders = await driver.fetchSales(startDate, endDate);
+          logger.info(`[Integrations] Fetched ${orders.length} orders from Square`);
+          
+          // Here we would upsert these orders into posOrders
+          // For now, we log the count. Implementing full Order Upsert logic requires mapping items.
+        }
+      } else {
+        logger.info(`[Integrations] Starting Square CATALOG sync for org ${organizationId}`);
+        // 1. Sync Catalog
+        const catalogItems = await driver.fetchCatalog();
 
       const sqCategories = catalogItems.filter(
         (item: any) => item.type === 'CATEGORY',
@@ -402,21 +418,23 @@ export class IntegrationsService {
             price: prod.price,
             categoryId,
             organizationId,
-            linkedPosItemId: prod.id,
+            linkedPosProductId: prod.id,
           })
           .onConflictDoUpdate({
             target: [products.name, products.organizationId],
             set: {
               price: prod.price,
               categoryId,
-              linkedPosItemId: prod.id,
+              linkedPosProductId: prod.id,
               updatedAt: new Date(),
             },
           });
       }
     }
+  }
 
     if (provider === 'google-drive') {
+      const fileId = options?.fileId;
       logger.info(
         `[Integrations] Starting Google Drive sync for org ${organizationId} (File: ${fileId || 'ALL'})`,
       );
@@ -484,18 +502,22 @@ export class IntegrationsService {
           })
           .returning();
 
-        // Trigger AI Ingestion for this recipe
+        // Trigger Background Ingestion for this recipe
         const recipe = result[0];
-        if (recipe && this.ingestionService) {
-          // Note: In production this should be a background job (BullMQ)
-          this.ingestionService
-            .processGoogleDriveRecipe(recipe.id, organizationId, driver)
-            .catch((err) =>
-              logger.error(
-                `[Integrations] Background ingestion failed for recipe ${recipe.id}`,
-                err,
-              ),
-            );
+        if (recipe && this.moduleRef) {
+          const { Queue } = await import('bullmq');
+          try {
+            const ingestionQueue = this.moduleRef.get('BullQueue_ingestion-queue', { strict: false });
+            if (ingestionQueue) {
+              await ingestionQueue.add('process-recipe', {
+                recipeId: recipe.id,
+                organizationId,
+              });
+              logger.info(`[Integrations] Queued ingestion for recipe ${recipe.id}`);
+            }
+          } catch (e) {
+            logger.warn(`[Integrations] Failed to queue ingestion: ${e.message}`);
+          }
         }
       }
     }

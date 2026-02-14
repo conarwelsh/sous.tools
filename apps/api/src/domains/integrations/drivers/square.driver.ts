@@ -156,7 +156,7 @@ export class SquareDriver implements PosInterface {
     }
   }
 
-  async createItem(data: {
+  async createProduct(data: {
     name: string;
     categoryId?: string;
     price: number;
@@ -194,34 +194,34 @@ export class SquareDriver implements PosInterface {
       const body = response.result || response.data || response;
       return body.catalogObject;
     } catch (error) {
-      logger.error(`[Square] Failed to create item ${data.name}:`, error);
+      logger.error(`[Square] Failed to create product ${data.name}:`, error);
       throw error;
     }
   }
 
-  async updateItem(itemId: string, itemData: any) {
+  async updateProduct(productId: string, productData: any) {
     try {
       const response = (await this.client.catalog.object.upsert({
-        idempotencyKey: `update_${Date.now()}_${itemId}`,
+        idempotencyKey: `update_${Date.now()}_${productId}`,
         object: {
-          ...itemData,
-          id: itemId,
+          ...productData,
+          id: productId,
         },
       })) as any;
       const body = response.result || response.data || response;
       return body.catalogObject;
     } catch (error) {
-      logger.error(`[Square] Failed to update item ${itemId}:`, error);
+      logger.error(`[Square] Failed to update product ${productId}:`, error);
       throw error;
     }
   }
 
-  async deleteItem(itemId: string) {
+  async deleteProduct(productId: string) {
     try {
-      await this.client.catalog.object.delete({ objectId: itemId });
+      await this.client.catalog.object.delete({ objectId: productId });
       return { success: true };
     } catch (error) {
-      logger.error(`[Square] Failed to delete item ${itemId}:`, error);
+      logger.error(`[Square] Failed to delete product ${productId}:`, error);
       throw error;
     }
   }
@@ -357,7 +357,7 @@ export class SquareDriver implements PosInterface {
     for (const item of itemConfigs) {
       const categoryId = catIdMap.get(item.categoryName);
       try {
-        await this.createItem({
+        await this.createProduct({
           name: item.name,
           price: item.price,
           categoryId,

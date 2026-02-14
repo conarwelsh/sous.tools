@@ -83,6 +83,8 @@ export class MetricsService {
     const orgsResult = await this.dbService.db.select({ count: sql<number>`count(*)` }).from(organizations);
     const usersResult = await this.dbService.db.select({ count: sql<number>`count(*)` }).from(users);
     const ordersResult = await this.dbService.db.select({ count: sql<number>`count(*)` }).from(posOrders);
+    const recipesResult = await this.dbService.db.select({ count: sql<number>`count(*)` }).from(recipes);
+    const nodesResult = await this.dbService.db.select({ count: sql<number>`count(*)` }).from(displays);
     
     // Revenue across all orgs (last 30 days)
     const monthAgo = new Date();
@@ -98,6 +100,8 @@ export class MetricsService {
       totalOrganizations: orgsResult[0]?.count || 0,
       totalUsers: usersResult[0]?.count || 0,
       totalOrders: ordersResult[0]?.count || 0,
+      totalRecipes: recipesResult[0]?.count || 0,
+      totalNodes: nodesResult[0]?.count || 0,
       monthlyRevenue: totalCents / 100,
     };
   }

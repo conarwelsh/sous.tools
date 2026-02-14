@@ -54,7 +54,7 @@ import {
 } from '../../procurement/procurement.schema';
 import {
   posOrders,
-  posOrderItems,
+  posOrderProducts,
 } from '../../pos/pos.schema';
 import {
   stockAudits,
@@ -247,12 +247,12 @@ export const invoiceItemsRelations = relations(invoiceItems, ({ one }) => ({
 }));
 
 export const posOrdersRelations = relations(posOrders, ({ many }) => ({
-  items: many(posOrderItems),
+  items: many(posOrderProducts),
 }));
 
-export const posOrderItemsRelations = relations(posOrderItems, ({ one }) => ({
+export const posOrderProductsRelations = relations(posOrderProducts, ({ one }) => ({
   order: one(posOrders, {
-    fields: [posOrderItems.orderId],
+    fields: [posOrderProducts.orderId],
     references: [posOrders.id],
   }),
 }));

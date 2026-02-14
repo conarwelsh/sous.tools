@@ -6,11 +6,12 @@ export interface User {
   firstName: string;
   lastName: string;
   organizationId: string;
-  role: "user" | "admin" | "superadmin";
+  role: "user" | "admin" | "salesman" | "superadmin";
   organization?: {
     id: string;
     name: string;
     slug: string;
+    planStatus?: string;
   };
 }
 

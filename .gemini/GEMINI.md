@@ -202,6 +202,14 @@
 - **Action (Overloading):** Use the `--env` flag in the CLI to overload the target environment (e.g., `sous env exec --env=production -- db:migrate`).
 - **Goal:** Eliminate race conditions, ensure secret security, and provide a unified entry point for all environment-aware operations.
 
+### 28. Changelog Maintenance (MANDATE)
+
+**Rule:** You MUST keep the `CHANGELOG.md` file up to date with every significant change.
+
+- **Action:** Whenever you complete a feature, fix a bug, or perform a refactor, you must append an entry to the `[Unreleased]` or current version section of `CHANGELOG.md` following the Keep a Changelog format.
+- **Content:** Include links to relevant specs or issue numbers if available.
+- **Trigger:** Any code modification that impacts the user or developer experience.
+
 ## Documentation Index
 
 - `docs/ADRs/`: Folder containing Architectural Decision Records (one file per decision).

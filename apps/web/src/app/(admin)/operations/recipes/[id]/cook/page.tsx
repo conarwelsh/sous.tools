@@ -69,7 +69,7 @@ function StepTimer({ duration, label }: { duration: number, label: string }) {
     let interval: any;
     if (isRunning && timeLeft > 0) {
       interval = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
-    } else if (timeLeft === 0) {
+    } else if (timeLeft === 0 && isRunning) {
       setIsRunning(false);
     }
     return () => clearInterval(interval);
@@ -132,7 +132,9 @@ export default function RecipeCookPage({ params }: { params: Promise<{ id: strin
           wakeLock = await (navigator as any).wakeLock.request('screen');
           console.log('[CookMode] Wake Lock Active');
         }
-      } catch (err) {}
+          } catch (err) {
+            // Ignore
+          }
     };
     requestWakeLock();
     return () => {

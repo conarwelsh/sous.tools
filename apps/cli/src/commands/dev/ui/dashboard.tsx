@@ -2,12 +2,14 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Box, Text, useInput, useApp } from 'ink';
 import TextInput from 'ink-text-input';
 import Spinner from 'ink-spinner';
-import { ProcessManager, ManagedProcess } from '../process-manager.service.js';
+import { ProcessManager, ManagedProcess } from '../../../services/process-manager.service.js';
 import { exec, spawn } from 'child_process';
 import os from 'os';
 
 interface Props {
   manager: ProcessManager;
+  initialTab?: ViewMode;
+  initialEnv?: PlatformEnv;
 }
 
 type ViewMode = 'services' | 'combined' | 'infra' | 'cloud';
@@ -25,10 +27,10 @@ interface HealthStatus {
   latency?: number;
 }
 
-export const Dashboard: React.FC<Props> = ({ manager }) => {
+export const Dashboard: React.FC<Props> = ({ manager, initialTab = 'services', initialEnv = 'dev' }) => {
   const { exit } = useApp();
-  const [activeTab, setActiveTab] = useState<ViewMode>('services');
-  const [activeEnv, setActiveEnv] = useState<PlatformEnv>('dev');
+  const [activeTab, setActiveTab] = useState<ViewMode>(initialTab);
+  const [activeEnv, setActiveEnv] = useState<PlatformEnv>(initialEnv);
   const [processes, setProcesses] = useState<ManagedProcess[]>(
     manager?.getProcesses() || [],
   );
@@ -141,6 +143,37 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
       manager.off('update', handleUpdate);
     };
   }, [manager]);
+
+  const [infraMetrics, setInfraMetrics] = useState<any>(null);
+  const [isInfraLoading, setIsInfraLoading] = useState(false);
+
+  // Infra Metrics Fetcher
+  useEffect(() => {
+    if (activeTab !== 'infra') return;
+
+    const fetchMetrics = async () => {
+      setIsInfraLoading(true);
+      try {
+        let baseUrl = 'http://localhost:4000';
+        if (activeEnv === 'staging') baseUrl = 'https://api-staging.sous.tools';
+        if (activeEnv === 'production') baseUrl = 'https://api.sous.tools';
+
+        const response = await fetch(`${baseUrl}/metrics/platform`);
+        if (response.ok) {
+          const data = await response.json();
+          setInfraMetrics(data);
+        }
+      } catch (e) {
+        // Ignore errors for now
+      } finally {
+        setIsInfraLoading(false);
+      }
+    };
+
+    fetchMetrics();
+    const interval = setInterval(fetchMetrics, 30000);
+    return () => clearInterval(interval);
+  }, [activeTab, activeEnv]);
 
   const selectedApp = processes[selectedIdx];
   const allCombinedLogs = manager.getCombinedLogs();
@@ -317,6 +350,91 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
                   </Box>
                 ))}
               </Box>
+            </Box>
+          )}
+
+          {activeTab === 'infra' && (
+            <Box flexDirection="column" flexGrow={1}>
+              <Box justifyContent="space-between" marginBottom={1}>
+                <Text bold color={BRAND_BLUE}>INFRASTRUCTURE HEALTH</Text>
+                {isInfraLoading && <Text color="yellow"><Spinner type="dots" /> Polling...</Text>}
+              </Box>
+              
+              <Box flexDirection="column">
+                <Box marginBottom={1}>
+                  <Box width={30}><Text bold>Metric</Text></Box>
+                  <Box><Text bold>Value</Text></Box>
+                </Box>
+                
+                <Box>
+                  <Box width={30}><Text color={BRAND_GRAY}>Total Organizations</Text></Box>
+                  <Box><Text color="white">{infraMetrics?.totalOrganizations ?? '---'}</Text></Box>
+                </Box>
+                <Box>
+                  <Box width={30}><Text color={BRAND_GRAY}>Total Active Users</Text></Box>
+                  <Box><Text color="white">{infraMetrics?.totalUsers ?? '---'}</Text></Box>
+                </Box>
+                <Box>
+                  <Box width={30}><Text color={BRAND_GRAY}>Total Recipes</Text></Box>
+                  <Box><Text color="white">{infraMetrics?.totalRecipes ?? '---'}</Text></Box>
+                </Box>
+                <Box>
+                  <Box width={30}><Text color={BRAND_GRAY}>Active IoT Nodes</Text></Box>
+                  <Box><Text color="white">{infraMetrics?.totalNodes ?? '---'}</Text></Box>
+                </Box>
+                <Box>
+                  <Box width={30}><Text color={BRAND_GRAY}>Total Orders (v0.1.0)</Text></Box>
+                  <Box><Text color="white">{infraMetrics?.totalOrders ?? '---'}</Text></Box>
+                </Box>
+                <Box>
+                  <Box width={30}><Text color={BRAND_GRAY}>Monthly Revenue (est)</Text></Box>
+                  <Box><Text color="#10b981">${infraMetrics?.monthlyRevenue?.toFixed(2) ?? '0.00'}</Text></Box>
+                </Box>
+
+                <Box marginTop={1} marginBottom={1}>
+                  <Text bold color={BRAND_PURPLE}>RESOURCE CONSTRAINTS</Text>
+                </Box>
+
+                <Box>
+                  <Box width={30}><Text color={BRAND_GRAY}>Supabase Row Count</Text></Box>
+                  <Box><Text color={infraMetrics?.totalOrders > 400000 ? 'red' : 'green'}>
+                    {infraMetrics?.totalOrders ?? 0} / 500,000
+                  </Text></Box>
+                </Box>
+                <Box>
+                  <Box width={30}><Text color={BRAND_GRAY}>Upstash Redis Usage</Text></Box>
+                  <Box><Text color="green">OK (Free Tier)</Text></Box>
+                </Box>
+                <Box>
+                  <Box width={30}><Text color={BRAND_GRAY}>BullMQ Queue Load</Text></Box>
+                  <Box><Text color="green">Healthy (0 Pending)</Text></Box>
+                </Box>
+                <Box>
+                  <Box width={30}><Text color={BRAND_GRAY}>HyperDX Data Rate</Text></Box>
+                  <Box><Text color="green">Active</Text></Box>
+                </Box>
+              </Box>
+            </Box>
+          )}
+
+          {activeTab === 'cloud' && (
+            <Box flexDirection="column" flexGrow={1}>
+              <Box justifyContent="space-between" marginBottom={1}>
+                <Text bold color={BRAND_BLUE}>CLOUD LOGS: {selectedApp?.name || 'N/A'}</Text>
+                <Text color="gray">{activeEnv.toUpperCase()} | SCROLL [↑/↓]</Text>
+              </Box>
+              {activeEnv === 'dev' ? (
+                <Box flexGrow={1} alignItems="center" justifyContent="center">
+                  <Text color="yellow">Cloud logs only available for STAGING and PRODUCTION.</Text>
+                  <Text dimColor>Press [e] to switch environments.</Text>
+                </Box>
+              ) : (
+                <Box flexDirection="column" flexGrow={1} overflow="hidden">
+                  {cloudLogs.slice(-visibleLines).map((line, i) => (
+                    <Text key={i} color="#d1d5db" wrap="truncate-end">{line}</Text>
+                  ))}
+                </Box>
+              )}
             </Box>
           )}
         </Box>

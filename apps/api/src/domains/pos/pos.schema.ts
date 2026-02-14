@@ -20,7 +20,7 @@ export const posOrders = pgTable('pos_orders', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const posOrderItems = pgTable('pos_order_items', {
+export const posOrderProducts = pgTable('pos_order_products', {
   id: uuid('id').primaryKey().defaultRandom(),
   orderId: uuid('order_id')
     .references(() => posOrders.id, { onDelete: 'cascade' })

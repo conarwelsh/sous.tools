@@ -29,6 +29,7 @@ import {
   LifeBuoy,
   ShieldAlert,
   Code2,
+  TrendingUp,
 } from "lucide-react";
 import { FeedbackModal } from "@sous/features";
 

@@ -1,5 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { IntegrationsService } from './services/integrations.service.js';
+import { IntegrationsResolver } from './resolvers/integrations.resolver.js';
 import { IntegrationsController } from './controllers/integrations.controller.js';
 import { DriverFactory } from './drivers/driver.factory.js';
 import { CulinaryModule } from '../culinary/culinary.module.js';
@@ -12,7 +13,7 @@ const skipIngestion = process.env.SKIP_INGESTION === 'true';
     forwardRef(() => CulinaryModule),
     ...(skipIngestion ? [] : [IngestionModule])
   ],
-  providers: [IntegrationsService, DriverFactory],
+  providers: [IntegrationsService, IntegrationsResolver, DriverFactory],
   controllers: [IntegrationsController],
   exports: [IntegrationsService],
 })

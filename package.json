@@ -23,6 +23,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "prepare": "husky",
     "sous": "pnpm --filter @sous/cli run start --",
+    "audit:codebase": "pnpm sous dev quality audit",
     "dev-tools": "pnpm sous dev",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",

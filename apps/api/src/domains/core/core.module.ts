@@ -43,8 +43,7 @@ const skipBull = process.env.SKIP_BULL === 'true';
     DatabaseService, 
     PlatformService,
     CacheService,
-    ...(skipMail || skipBull ? [] : [MailService]),
-    // EmailProcessor,
+    ...(skipMail || skipBull ? [] : [MailService, EmailProcessor]),
     DashboardResolver
   ],
   controllers: [AppController, PlatformController],

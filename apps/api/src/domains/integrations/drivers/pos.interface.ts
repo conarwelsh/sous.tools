@@ -25,9 +25,9 @@ export interface PosInterface {
   createCategory(name: string): Promise<any>;
 
   /**
-   * Create a new item/product
+   * Create a new product
    */
-  createItem(itemData: {
+  createProduct(productData: {
     name: string;
     categoryId?: string;
     price: number;
@@ -36,14 +36,14 @@ export interface PosInterface {
   }): Promise<any>;
 
   /**
-   * Update an existing item
+   * Update an existing product
    */
-  updateItem(itemId: string, itemData: any): Promise<any>;
+  updateProduct(productId: string, productData: any): Promise<any>;
 
   /**
-   * Delete/Archive an item
+   * Delete/Archive a product
    */
-  deleteItem(itemId: string): Promise<any>;
+  deleteProduct(productId: string): Promise<any>;
 
   /**
    * Process an order through the POS

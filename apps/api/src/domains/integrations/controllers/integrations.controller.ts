@@ -118,7 +118,7 @@ export class IntegrationsController {
     return this.integrationsService.sync(
       req.user.organizationId,
       body.provider,
-      body.fileId,
+      { fileId: body.fileId },
     );
   }
 

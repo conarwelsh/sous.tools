@@ -20,6 +20,8 @@ export const ingredients = pgTable('ingredients', {
   description: text('description'),
   baseUnit: varchar('base_unit', { length: 50 }).notNull(), // e.g. "g", "ml", "each"
   currentPrice: integer('current_price'), // Latest price per base unit in cents
+  parLevel: integer('par_level'), // Minimum stock level before alert
+  lastAlertAt: timestamp('last_alert_at'), // Last time low stock email was sent
   lastPurchasedAt: timestamp('last_purchased_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -39,7 +41,7 @@ export const recipes = pgTable(
     isBakersPercentage: boolean('is_bakers_percentage')
       .default(false)
       .notNull(),
-    linkedPosItemId: varchar('linked_pos_item_id', { length: 255 }), // Link to Square/Toast item
+    linkedPosProductId: varchar('linked_pos_product_id', { length: 255 }), // Link to Square/Toast product
     sourceType: varchar('source_type', { length: 50 }), // e.g. "google-drive"
     sourceId: varchar('source_id', { length: 255 }),
     sourceUrl: text('source_url'),

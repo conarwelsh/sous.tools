@@ -1,12 +1,14 @@
 import { Command, CommandRunner, Option } from 'nest-commander';
 import { SyncCommand } from './sync.command.js';
 import { InstallCommand } from './install.command.js';
-import { KillCommand } from './kill.command.js';
+import { GenerateCommand } from './generate/generate.command.js';
+import { WorkspaceCommand } from './workspace.command.js';
+import { QualityCommand } from './quality/quality.command.js';
 import { execSync } from 'child_process';
 import React from 'react';
 import { render } from 'ink';
 import { Dashboard } from './ui/dashboard.js';
-import { ProcessManager } from './process-manager.service.js';
+import { ProcessManager } from '../../services/process-manager.service.js';
 import { Inject } from '@nestjs/common';
 import { logger } from '@sous/logger';
 
@@ -19,7 +21,13 @@ interface DevOptions {
 @Command({
   name: 'dev',
   description: 'Manage development environment',
-  subCommands: [InstallCommand, SyncCommand, KillCommand],
+  subCommands: [
+    InstallCommand,
+    SyncCommand,
+    GenerateCommand,
+    WorkspaceCommand,
+    QualityCommand,
+  ],
 })
 export class DevToolsCommand extends CommandRunner {
   constructor(

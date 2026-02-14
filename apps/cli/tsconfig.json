@@ -21,7 +21,8 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": true,
     "strictBindCallApply": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "rootDir": "src"
   },
   "exclude": ["node_modules", "dist", "../../node_modules", "../../apps/api", "../../apps/web", "../../packages/features"]
 }

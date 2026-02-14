@@ -50,7 +50,6 @@ export const configSchema = z.object({
   logger: z.object({
     level: z.enum(["debug", "info", "warn", "error"]).default("info"),
     json: z.boolean().default(false),
-    logtailToken: z.string().optional(),
     hyperdxApiKey: z.string().optional(),
   }),
 

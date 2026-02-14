@@ -1,7 +1,7 @@
 import { logger } from '@sous/logger';
 import { SubCommand, CommandRunner, Option } from 'nest-commander';
 import { execSync } from 'child_process';
-import { ShellInstallCommand } from './shell-install.command.js';
+import { ShellInstallCommand } from '../ops/shell-install.command.js';
 import * as path from 'path';
 import * as fs from 'fs';
 

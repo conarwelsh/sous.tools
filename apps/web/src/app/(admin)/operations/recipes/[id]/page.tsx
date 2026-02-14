@@ -80,11 +80,10 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
   const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
-    if (data?.recipe) {
+    if (data?.recipe && !isDirty) {
       setFormData(JSON.parse(JSON.stringify(data.recipe)));
-      setIsDirty(false);
     }
-  }, [data]);
+  }, [data, isDirty]);
 
   const handleFieldChange = (updates: any) => {
     setFormData((prev: any) => ({ ...prev, ...updates }));

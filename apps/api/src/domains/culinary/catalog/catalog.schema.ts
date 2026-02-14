@@ -47,7 +47,7 @@ export const products = pgTable(
     isSoldOut: boolean('is_sold_out').default(false).notNull(),
     isActive: boolean('is_active').default(true).notNull(),
     sortOrder: integer('sort_order').default(0).notNull(),
-    linkedPosItemId: varchar('linked_pos_item_id', { length: 255 }), // External ID mapping
+    linkedPosProductId: varchar('linked_pos_product_id', { length: 255 }), // External ID mapping
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
