@@ -18,7 +18,7 @@ import {
   Layout as LayoutIcon,
   MonitorPlay,
 } from "lucide-react";
-import { TagManager } from "../../../core/tags/components/TagManager";
+import { TagManager } from "../../../../core/tags/components/TagManager";
 import { cn } from "@sous/ui";
 import { Layout } from "../../../types/presentation.types";
 
