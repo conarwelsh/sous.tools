@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useDraggable } from "@dnd-kit/core";
 import { motion, AnimatePresence } from "framer-motion";
-import { LayoutNode, LayoutNodeType, Layout } from "../../types/presentation.types";
+import { LayoutNode, LayoutNodeType, Layout } from "../../../types/presentation.types";
 
 interface SidebarProps {
   layout: Partial<Layout>;

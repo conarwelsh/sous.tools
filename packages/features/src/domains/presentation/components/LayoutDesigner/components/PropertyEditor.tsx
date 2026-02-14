@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { MenuItemList } from "../../shared/MenuItemList";
 import { ImageSelector } from "../../shared/ImageSelector";
-import { CodeEditor } from "../../../../components/CodeEditor";
+import { CodeEditor } from "../../../../../components/CodeEditor";
 import { LayoutNode, SlotAssignment, Layout } from "../../../types/presentation.types";
 import { cn } from "@sous/ui";
 

@@ -34,7 +34,7 @@ import { Canvas } from "./components/Canvas";
 import { ActionMenu } from "./components/ActionMenu";
 import { SettingsDialog } from "./components/SettingsDialog";
 import { PropertyEditor } from "./components/PropertyEditor";
-import { CodeEditor } from "../../../components/CodeEditor";
+import { CodeEditor } from "../../../../components/CodeEditor";
 import { MenuItemList } from "../shared/MenuItemList";
 
 import {
