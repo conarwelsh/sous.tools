@@ -15,6 +15,7 @@ export const deviceTypeEnum = pgEnum('device_type', [
   'pos',
   'gateway',
   'watch',
+  'kiosk',
 ]);
 
 export const devices = pgTable('devices', {

@@ -113,16 +113,18 @@ export function TemplateSkeletonRenderer({
     if (type === "slot") {
       return (
         <View className="flex-1 relative">
-          <View className="absolute inset-0 items-center justify-center p-4 pointer-events-none">
-            <Text className="text-muted-foreground/50 font-black uppercase text-[10px] tracking-widest text-center">
-              {name || "Empty Slot"}
-            </Text>
-            {id && (
-              <Text className="text-muted-foreground/30 font-mono text-[8px] mt-1">
-                ID: {id}
+          {isEditMode && (
+            <View className="absolute inset-0 items-center justify-center p-4 pointer-events-none">
+              <Text className="text-muted-foreground/50 font-black uppercase text-[10px] tracking-widest text-center">
+                {name || "Empty Slot"}
               </Text>
-            )}
-          </View>
+              {id && (
+                <Text className="text-muted-foreground/30 font-mono text-[8px] mt-1">
+                  ID: {id}
+                </Text>
+              )}
+            </View>
+          )}
           {childrenContent}
         </View>
       );
@@ -140,6 +142,7 @@ export function TemplateSkeletonRenderer({
     (type === "container" || type === "slot") && "flex-1 w-full h-full",
     styles.display === "grid" && "layout-grid-container",
     type === "slot" &&
+      isEditMode &&
       "border-2 border-dashed border-border/50 bg-muted/5 hover:border-primary/50 hover:bg-primary/5 cursor-pointer",
     type === "fixed" &&
       "border-2 border-white/10 bg-card shadow-2xl rounded-2xl overflow-hidden",

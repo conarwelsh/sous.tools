@@ -73,6 +73,15 @@ export class RealtimeGateway
     logger.info(`Client disconnected: ${client.id}`);
   }
 
+  @SubscribeMessage('presentation:request_sync')
+  async handleRequestSync(client: Socket) {
+    const hardwareId = client.data.hardwareId;
+    if (hardwareId) {
+      logger.info(`📟 Hardware ${hardwareId} requested presentation sync`);
+      await this.pushCurrentAssignment(hardwareId);
+    }
+  }
+
   emitToOrg(orgId: string, event: string, data: any) {
     this.server.to(`org:${orgId}`).emit(event, data);
   }

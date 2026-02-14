@@ -1,10 +1,21 @@
-## 2026-02-14 (Marketing Restoration & Design Fidelity)
+## 2026-02-14 (Marketing Restoration, Design Fidelity & Bug Fixes)
 
 - **Marketing Page Restoration:**
     - Reverted the main landing page (`apps/web/src/app/(public)/page.tsx`) to its previous industrial design version.
     - Restored the use of the `@sous/ui` design system components (`Logo`, `View`, `Text` with uppercase tracking) for better alignment with the project's brand identity.
     - Re-introduced the interactive "Culinary Intelligence" features grid and tiered pricing section with "Most Popular" badges.
     - Restored the dynamic theme-aware radial background gradients for enhanced visual depth.
+- **Native Orchestration & CLI Polish:**
+    - Updated `ecosystem.config.js` to include the full suite of native application targets: **POS**, **KDS**, **Signage**, **Kiosk**, and **Tools**.
+    - Reconfigured emulator mappings to match hardware profiles: POS/Kiosk use `Pixel_Tablet`, KDS uses `Medium_Desktop`, Signage uses `Television_1080p`, and Tools uses `Pixel_9`.
+    - Hardened the `device-manager.ts` and `run-android.sh` scripts with mandatory **60s timeouts** for all Windows interop (ADB/Emulator) calls to prevent WSL hangs.
+    - Improved the **Sous Dev Dashboard** with a scrollable sidebar and visual indicators for native processes, ensuring all 10+ services are accessible in standard terminal sizes.
+- **Bug Fixes:**
+    - Fixed a critical `ReferenceError: localConfig is not defined` in the `DevicePairingFlow` component.
+    - Fixed `ReferenceError: apiUrl is not defined` in the `useHardware` hook.
+    - Resolved a database crash (`22P02: invalid input value for enum device_type`) by adding `kiosk` to the allowed device types.
+    - **Fixed POS/Kiosk Data Failure**: Added missing `products` and `categories` queries to the GraphQL schema in `CulinaryResolver`.
+    - **Stabilized Screen Designer**: Implemented defensive JSON parsing and error logging in `PresentationService` to resolve "Internal server error" crashes during layout saves.
 
 ## 2026-02-13 (Smart Seeding Refactor & Support UI 100% Completion)
 

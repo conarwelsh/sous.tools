@@ -8,18 +8,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Signage GraphQL Subscriptions**: Implemented backend support for real-time signage updates via GraphQL Subscriptions in `PresentationResolver` and `PresentationService`.
+- **Culinary GraphQL**: Added missing `products` and `categories` queries to `CulinaryResolver`, enabling POS and Kiosk data fetching.
+- **Resilient Data Parsing**: Implemented defensive JSON parsing in `PresentationService` to prevent server crashes during screen layout updates.
 - Real-time GraphQL Subscriptions for KDS and POS status updates.
 - Framer Motion animations for KDS ticket layout and POS category transitions.
 - ADR 003: Real-time GraphQL Subscriptions.
 - Descriptive JSDoc blocks for core POS and KDS logic.
 
 ### Changed
+- **CLI/Dev Tools:** Updated `ecosystem.config.js` to include all native app targets (POS, KDS, Signage, Kiosk, Tools) with correct emulator mappings.
+- **Native Experience:** Renamed `POS_Android` to just `POS` for a cleaner UI.
+- **Infrastructure Stabilization:** Decommissioned the deprecated Windows Agent (port 4040) in favor of direct Windows-WSL interop.
+- **CLI/Scripts:** Updated `device-manager.ts` and `run-android.sh` to use absolute Windows paths and enforced a strict 60s timeout for all interop calls to prevent hangs.
+- **Dashboard UI:** Added scrolling support to the service sidebar and namespace markers for native applications.
 - Restored the main marketing page to the industrial design version, reverting recent layout changes.
 - Standardized CLI build to pure ESM/CJS based on environment stability.
 - Refactored `ecosystem.config.js` to support direct dev server execution.
 - Updated project documentation and README files.
 
 ### Fixed
+- **Signage Persistence**: Fixed a `TypeError` (value.toISOString is not a function) when saving signage layouts by hardening `PresentationService` to strip immutable timestamp fields before database updates.
+- **API Build Stability**: Resolved syntax errors and truncated code in `PresentationResolver` that were blocking incremental compilation.
+- Fixed `ReferenceError: apiUrl is not defined` in `useHardware` hook by moving declaration outside of `try` block.
+- Fixed `ReferenceError: localConfig is not defined` in `DevicePairingFlow` component.
+- Added missing `kiosk` device type to `device_type` enum in database and updated `DevicePairingFlow` to support `kiosk`, `gateway`, and `watch` flavors.
 - Fixed `SupportService` configuration access.
 - Restored `MetricsModule` to API module graph.
 - Resolved PM2 crash loop caused by CLI artifact mismatches.

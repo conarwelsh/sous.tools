@@ -22,7 +22,12 @@ try {
 
 const nextConfig = {
   distDir: process.env.DIST_DIR || ".next",
-  allowedDevOrigins: [`http://${hostIp}:3000`, `http://localhost:3000`],
+  allowedDevOrigins: [
+    `http://${hostIp}:3000`,
+    `http://${hostIp}:4000`,
+    `http://localhost:3000`,
+    `http://localhost:4000`,
+  ],
   experimental: {
     serverActions: {
       allowedOrigins: [

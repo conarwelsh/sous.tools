@@ -29,6 +29,7 @@ const GET_DEVICES = gql`
       metadata
       lastHeartbeat
       organizationId
+      currentAssignment
     }
   }
 `;
@@ -44,6 +45,7 @@ const DEVICE_UPDATED_SUBSCRIPTION = gql`
       metadata
       lastHeartbeat
       organizationId
+      currentAssignment
     }
   }
 `;
@@ -116,7 +118,7 @@ export const HardwareManager = () => {
         </View>
 
         <Button
-          onClick={() => router.push("/hardware/add", { scroll: false })}
+          onClick={() => router.push("/settings/hardware/add", { scroll: false })}
           className="h-12 px-8 bg-primary hover:bg-primary/90 transition-all"
         >
           <span className="text-primary-foreground font-black uppercase tracking-widest text-xs">
@@ -207,6 +209,19 @@ export const HardwareManager = () => {
                 </div>
               </div>
 
+              {/* Active Assignment */}
+              <div className="bg-sky-500/5 rounded-xl p-4 border border-sky-500/10 mb-8 relative z-10">
+                <div className="flex flex-row items-center gap-2 mb-2">
+                  <Monitor size={12} className="text-sky-500" />
+                  <span className="text-[8px] font-black text-sky-500 uppercase tracking-widest">
+                    Currently Playing
+                  </span>
+                </div>
+                <Text className="text-xs font-black text-foreground uppercase tracking-tight">
+                  {device.currentAssignment || "Awaiting Content"}
+                </Text>
+              </div>
+
               <div className="mt-auto pt-6 border-t border-border flex flex-row gap-2 relative z-10">
                 <Button className="flex-1 h-10 bg-muted hover:bg-primary/10 group/btn border border-transparent hover:border-primary/20">
                   <View className="flex flex-row items-center justify-center gap-2">
@@ -237,7 +252,7 @@ export const HardwareManager = () => {
               No active devices found.
             </p>
             <Button
-              onClick={() => router.push("/hardware/add", { scroll: false })}
+              onClick={() => router.push("/settings/hardware/add", { scroll: false })}
               className="bg-muted px-6 h-10"
             >
               <span className="text-foreground font-black uppercase tracking-widest text-[10px]">

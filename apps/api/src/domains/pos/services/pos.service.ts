@@ -53,6 +53,23 @@ export class PosService {
   }
 
   /**
+   * Fetches orders for an organization with optional status filtering.
+   */
+  async getOrders(organizationId: string, status?: string, limit: number = 50) {
+    return this.dbService.readDb.query.posOrders.findMany({
+      where: and(
+        eq(posOrders.organizationId, organizationId),
+        status ? eq(posOrders.status, status) : undefined,
+      ),
+      with: {
+        items: true,
+      },
+      orderBy: [desc(posOrders.createdAt)],
+      limit,
+    });
+  }
+
+  /**
    * Updates an order's status and returns the updated record.
    */
   async updateOrderStatus(orderId: string, status: string) {

@@ -341,33 +341,53 @@ export const Dashboard: React.FC<Props> = ({ manager, initialTab = 'services', i
         {/* Sidebar */}
         <Box
           flexDirection="column"
-          width={20}
+          width={24}
           borderStyle="round"
           borderColor={DARK_GRAY}
           paddingX={1}
         >
-          <Box marginBottom={1}>
+          <Box marginBottom={1} justifyContent="space-between">
             <Text bold color={BRAND_GRAY}>
               STATUS
             </Text>
+            <Text color="gray" dimColor size="tiny">
+              {processes.length}
+            </Text>
           </Box>
-          {processes.map((p, idx) => (
-            <Box key={p.id} justifyContent="space-between">
-              <Text
-                color={
-                  idx === selectedIdx
-                    ? BRAND_BLUE
-                    : p.type === 'docker'
-                      ? '#6366f1'
-                      : 'white'
-                }
-                bold={idx === selectedIdx}
-              >
-                {p.name.slice(0, 12)}
-              </Text>
-              {getStatusIcon(p.status)}
-            </Box>
-          ))}
+          <Box flexDirection="column" overflow="hidden">
+            {processes
+              .slice(
+                Math.max(0, Math.min(selectedIdx - 5, processes.length - visibleLines)),
+                Math.max(visibleLines, selectedIdx + 5)
+              )
+              .map((p, idx) => {
+                const actualIdx = processes.indexOf(p);
+                return (
+                  <Box key={p.id} justifyContent="space-between">
+                    <Box>
+                      <Text
+                        color={
+                          actualIdx === selectedIdx
+                            ? BRAND_BLUE
+                            : p.type === 'docker'
+                              ? '#6366f1'
+                              : 'white'
+                        }
+                        bold={actualIdx === selectedIdx}
+                      >
+                        {p.name.slice(0, 14)}
+                      </Text>
+                      {p.namespace === 'native' && (
+                        <Text color="yellow" dimColor>
+                          *
+                        </Text>
+                      )}
+                    </Box>
+                    {getStatusIcon(p.status)}
+                  </Box>
+                );
+              })}
+          </Box>
         </Box>
 
         {/* Main Content Area */}

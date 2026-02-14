@@ -2,12 +2,7 @@
 # Wrapper to run Capacitor Android from WSL targeting a Windows emulator via Windows Agent
 
 # 1. Setup Environment
-WIN_IP=$(ip route show default | awk '{print $3}')
-AGENT_URL="http://$WIN_IP:4040"
-
-# 2. Fix PATH (remove Windows paths to avoid gradle conflicts)
-export PATH=$(echo "$PATH" | tr ":" "\n" | grep -v "mnt/c" | tr "\n" ":")
-
+ROOT_DIR=$(pwd)
 # 3. Run Command
 cd apps/web || exit 1
 FLAVOR=${2:-default}
@@ -20,18 +15,24 @@ if [ "$WSL_IP" == "127.0.0.1" ] || [ -z "$WSL_IP" ]; then
 fi
 export CAPACITOR_LIVE_RELOAD_URL="http://$WSL_IP:${PORT:-3000}"
 
+ADB="/mnt/c/Users/conar/AppData/Local/Android/Sdk/platform-tools/adb.exe"
+
 echo "🚀 Resolving target device $1..."
-SERIAL=$(pnpm tsx scripts/device-manager.ts "$1" | tail -n 1)
-if [ -z "$SERIAL" ] || [[ "$SERIAL" == *"Failed"* ]]; then
+# Increase timeout for device manager since it may need to launch emulator
+SERIAL=$(timeout 150s pnpm tsx "$ROOT_DIR/scripts/device-manager.ts" "$1" | tail -n 1)
+if [ -z "$SERIAL" ] || [[ "$SERIAL" == *"Failed"* ]] || [[ "$SERIAL" == *"Usage"* ]]; then
   echo "❌ Could not resolve or start device: $1"
+  echo "DEBUG: SERIAL output was: $SERIAL"
   exit 1
 fi
 echo "✅ Target resolved to: $SERIAL"
 
+# 4. Fix PATH (remove Windows paths to avoid gradle conflicts)
+# We do this AFTER resolving the device because device-manager needs cmd.exe/adb.exe
+export PATH=$(echo "$PATH" | tr ":" "\n" | grep -v "mnt/c" | tr "\n" ":")
+
 echo "🚀 Running Capacitor Android on target $SERIAL with flavor $FLAVOR..."
 echo "🔗 Live Reload URL: $CAPACITOR_LIVE_RELOAD_URL"
-
-# ... (rest of the script uses $SERIAL instead of $1)
 
 # Inject Host IP into strings.xml
 STRINGS_FILE="android/app/src/main/res/values/strings.xml"
@@ -52,7 +53,8 @@ LOCK_FILE="/tmp/sous-android-build.lock"
   echo "🔐 [$FLAVOR] Lock acquired."
 
   if [ -d "assets" ]; then
-    $NPX_EXE capacitor-assets generate --android
+    echo "🏗️ Generating assets..."
+    $NPX_EXE capacitor-assets generate --android || true
   fi
 
   rm -rf android/app/src/main/assets/public
@@ -60,6 +62,7 @@ LOCK_FILE="/tmp/sous-android-build.lock"
   
   export PORT=${PORT:-3000}
   export WSL_IP=$WSL_IP
+  echo "🏗️ Syncing Capacitor..."
   $NPX_EXE cap sync android
 
   echo "🏗️ Building fresh APK for flavor $FLAVOR_CAP..."
@@ -68,55 +71,39 @@ LOCK_FILE="/tmp/sous-android-build.lock"
   echo "🔓 [$FLAVOR] Releasing lock."
 ) 200>$LOCK_FILE
 
-# Deployment via Agent
+# 5. Deployment
 PKG_ID="com.sous.$FLAVOR"
 if [ "$FLAVOR" == "default" ] || [ "$FLAVOR" == "tools" ]; then PKG_ID="com.sous.tools"; fi
 ACTIVITY="com.sous.tools.MainActivity"
 
-# Helper to call agent
-call_agent() {
-  local cmd=$1
-  local args=$2
-  local payload=$(python3 -c "import json, sys; print(json.dumps({'command': sys.argv[1], 'args': sys.argv[2]}))" "$cmd" "$args")
-  curl -s -X POST -H 'Content-Type: application/json' -d "$payload" "$AGENT_URL"
-}
-
-echo "📲 Reinstalling $PKG_ID on $SERIAL via Agent..."
+echo "📲 Reinstalling $PKG_ID on $SERIAL..."
 
 # Uninstall
 echo "🗑️  Uninstalling..."
-call_agent "adb" "-s $SERIAL uninstall $PKG_ID"
+timeout 60s $ADB -s "$SERIAL" uninstall "$PKG_ID" || true
 
-# Clear (Ignore error as uninstall might have removed it already)
+# Clear
 echo "🧹 Wiping data..."
-call_agent "adb" "-s $SERIAL shell pm clear $PKG_ID" > /dev/null 2>&1
+timeout 60s $ADB -s "$SERIAL" shell pm clear "$PKG_ID" || true
 
 sleep 2
 
-# Install
-# Note: APK path uses flavor-specific folder. POS -> posDebug
+# APK Path
 APK_DIR=$(echo "$FLAVOR" | tr '[:upper:]' '[:lower:]')
-APK_PATH="\\\\wsl.localhost\\Ubuntu-22.04\\home\\conar\\sous.tools\\apps\\web\\android\\app\\build\\outputs\\apk\\$APK_DIR\\debug\\app-$APK_DIR-debug.apk"
+APK_PATH="android/app/build/outputs/apk/$APK_DIR/debug/app-$APK_DIR-debug.apk"
+
+if [ ! -f "$APK_PATH" ]; then
+  echo "❌ APK not found: $APK_PATH"
+  exit 1
+fi
 
 echo "🏗️  Installing APK from $APK_PATH..."
-PAYLOAD=$(python3 -c "import json, sys; print(json.dumps({'command': 'adb', 'args': f'-s $SERIAL install -r \"{sys.argv[1]}\"'}))" "$APK_PATH")
-curl -s -X POST -H 'Content-Type: application/json' -d "$PAYLOAD" "$AGENT_URL"
+timeout 60s $ADB -s "$SERIAL" install -r "$APK_PATH"
 
 sleep 5
 
 echo "🚀 Starting app..."
-call_agent "adb" "-s $SERIAL shell am start -n $PKG_ID/$ACTIVITY --es url \"$CAPACITOR_LIVE_RELOAD_URL\""
-
-# Foreground
-(
-  sleep 10
-  # Try various titles for the emulator window
-  echo "🪟 Bringing $SERIAL to foreground..."
-  # Common emulator titles: "Android Emulator - <serial>", "<avd_name>", etc.
-  # We try to use the serial as a fallback in the title check
-  PAYLOAD=$(python3 -c "import json, sys; print(json.dumps({'command': 'position-window', 'title': sys.argv[1], 'x': 100, 'y': 100, 'width': 1280, 'height': 800}))" "$SERIAL")
-  curl -s -X POST -H 'Content-Type: application/json' -d "$PAYLOAD" "$AGENT_URL" > /dev/null 2>&1
-) &
+timeout 60s $ADB -s "$SERIAL" shell am start -a android.intent.action.MAIN -n "$PKG_ID/com.sous.tools.MainActivity" --es url "$CAPACITOR_LIVE_RELOAD_URL"
 
 sleep 2
 exit 0

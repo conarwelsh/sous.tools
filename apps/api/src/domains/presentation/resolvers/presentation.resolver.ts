@@ -6,96 +6,75 @@ import {
   ObjectType,
   Field,
   ID,
-  InputType,
+  Subscription,
 } from '@nestjs/graphql';
 import { PresentationService } from '../services/presentation.service.js';
+import { Inject } from '@nestjs/common';
+import { PubSub } from 'graphql-subscriptions';
 
 @ObjectType()
-export class TemplateType {
+export class LayoutType {
   @Field(() => ID)
   id: string;
 
-  @Field()
-  name: string;
-
-  @Field()
-  structure: string; // JSON string
-
-  @Field()
-  isSystem: boolean;
-}
-
-@ObjectType()
-export class DisplayType {
-  @Field(() => ID)
-  id: string;
-
-  @Field()
-  name: string;
-
-  @Field({ nullable: true })
-  resolution?: string;
-
-  @Field({ nullable: true })
-  orientation?: string;
-}
-
-@InputType()
-export class CreateTemplateInput {
   @Field()
   name: string;
 
   @Field()
   structure: string;
+
+  @Field()
+  content: string;
+
+  @Field({ nullable: true })
+  config?: string;
 }
 
-@InputType()
-export class CreateDisplayInput {
+@ObjectType()
+export class PresentationDisplayType {
+  @Field(() => ID)
+  id: string;
+
   @Field()
   name: string;
 
   @Field({ nullable: true })
-  resolution?: string;
+  hardwareId?: string;
 
-  @Field({ nullable: true })
-  orientation?: string;
+  @Field(() => LayoutType, { nullable: true })
+  activeLayout?: LayoutType;
 }
 
 @Resolver()
 export class PresentationResolver {
-  constructor(private readonly presentationService: PresentationService) {}
+  constructor(
+    private readonly presentationService: PresentationService,
+    @Inject('PUB_SUB') private readonly pubSub: PubSub,
+  ) {}
 
-  @Query(() => [TemplateType])
-  async templates(@Args('orgId') orgId: string) {
-    return this.presentationService.getTemplates(orgId);
+  @Query(() => [LayoutType])
+  async layouts(@Args('organizationId') orgId: string) {
+    return this.presentationService.getLayouts(orgId);
   }
 
-  @Query(() => [DisplayType])
-  async displays(@Args('orgId') orgId: string) {
-    return this.presentationService.getDisplays(orgId);
+  @Query(() => LayoutType, { nullable: true })
+  async layout(@Args('id') id: string, @Args('organizationId') orgId: string) {
+    return this.presentationService.getLayoutById(id, orgId);
   }
 
-  @Mutation(() => TemplateType)
-  async createTemplate(
-    @Args('orgId') orgId: string,
-    @Args('input') input: CreateTemplateInput,
-  ) {
-    return this.presentationService.createLayout({
-      ...input,
-      type: 'TEMPLATE',
-      organizationId: orgId,
-      isSystem: false,
-    });
+  @Query(() => LayoutType, { nullable: true })
+  async activeLayout(@Args('hardwareId') hardwareId: string) {
+    console.log(`[PresentationResolver] activeLayout query received for hardwareId: ${hardwareId}`);
+    return this.presentationService.getActiveLayoutByHardwareId(hardwareId);
   }
 
-  @Mutation(() => DisplayType)
-  async createDisplay(
-    @Args('orgId') orgId: string,
-    @Args('input') input: CreateDisplayInput,
-  ) {
-    return this.presentationService.createDisplay({
-      ...input,
-      organizationId: orgId,
-    });
+  @Subscription(() => LayoutType, {
+    filter: (payload, variables) => {
+      return payload.presentationUpdated.hardwareId === variables.hardwareId;
+    },
+    resolve: (payload) => payload.presentationUpdated.layout,
+  })
+  presentationUpdated(@Args('hardwareId') hardwareId: string) {
+    return this.pubSub.asyncIterableIterator('presentationUpdated');
   }
 }

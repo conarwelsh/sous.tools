@@ -36,17 +36,34 @@ export const useHardware = (
   const refreshPairingCode = useCallback(async () => {
     if (!hardwareId) return;
     setIsLoading(true);
+    let apiUrl = localConfig.api.url || "http://localhost:4000";
     try {
-      const http = await getHttpClient();
+      // Detect if running in Capacitor and use host IP if available
+      if (typeof window !== "undefined" && ((window as any).Capacitor || (window as any).sous_host_ip)) {
+        const hostIp = (window as any).sous_host_ip;
+        if (hostIp && hostIp !== "10.0.2.2") {
+          apiUrl = apiUrl.replace("localhost", hostIp).replace("127.0.0.1", hostIp);
+          console.log(`[useHardware] refreshPairingCode using Native Host API: ${apiUrl}`);
+        }
+      }
+
+      console.log(`[useHardware] Requesting pairing code from ${apiUrl}/hardware/pairing-code`);
+      const http = await getHttpClient(apiUrl);
       // Extract base type (e.g. 'signage' from 'signage:primary')
       const baseType = type.split(":")[0];
       const resp = (await http.post("/hardware/pairing-code", {
         hardwareId,
         type: baseType,
       })) as any;
+      console.log("[useHardware] Pairing code received:", resp.code);
       setPairingCode(resp.code);
-    } catch (e) {
-      console.error("Failed to get pairing code", e);
+    } catch (e: any) {
+      console.error("[useHardware] Failed to get pairing code:", {
+        message: e.message,
+        status: e.status,
+        apiUrl: apiUrl,
+        stack: e.stack
+      });
     } finally {
       setIsLoading(false);
     }
@@ -56,7 +73,17 @@ export const useHardware = (
     if (!hardwareId) return;
 
     // 2. Connect Socket
-    const apiUrl = localConfig.api.url;
+    let apiUrl = localConfig.api.url || "http://localhost:4000";
+
+    // Detect if running in Capacitor and use host IP if available
+    if (typeof window !== "undefined" && ((window as any).Capacitor || (window as any).sous_host_ip)) {
+      const hostIp = (window as any).sous_host_ip;
+      if (hostIp && hostIp !== "10.0.2.2") {
+        apiUrl = apiUrl.replace("localhost", hostIp).replace("127.0.0.1", hostIp);
+        console.log(`[useHardware] socket connection using Native Host API: ${apiUrl}`);
+      }
+    }
+
     console.log("Connecting to API Realtime at:", apiUrl);
     const s = io(apiUrl, {
       auth: { hardwareId },
@@ -78,7 +105,7 @@ export const useHardware = (
     // 3. Heartbeat logic
     const sendHeartbeat = async () => {
       try {
-        const http = await getHttpClient();
+        const http = await getHttpClient(apiUrl);
         const metadata = {
           userAgent: navigator.userAgent,
           platform: (navigator as any).platform,

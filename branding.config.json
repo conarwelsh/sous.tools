@@ -4,11 +4,24 @@
   "apple-touch-icon": { "variant": "neon", "size": 180, "props": {} },
   "android-chrome-192": { "variant": "neon", "size": 192, "props": {} },
   "android-chrome-512": { "variant": "neon", "size": 512, "props": {} },
-  "android-adaptive-foreground": { "variant": "neon", "size": 512, "props": { "animate": false } },
-  "ios-app-icon": { "variant": "neon", "size": 1024, "props": { "animate": false } },
-  "wearos-app-icon": { "variant": "neon", "size": 512, "props": { "animate": false } },
+  "android-adaptive-foreground": {
+    "variant": "neon",
+    "size": 512,
+    "props": { "animate": false }
+  },
+  "ios-app-icon": {
+    "variant": "neon",
+    "size": 1024,
+    "props": { "animate": false }
+  },
+  "wearos-app-icon": {
+    "variant": "neon",
+    "size": 512,
+    "props": { "animate": false }
+  },
   "pos-logo": { "variant": "pos", "size": 512, "props": {} },
   "kds-logo": { "variant": "kds", "size": 512, "props": {} },
   "signage-logo": { "variant": "signage", "size": 512, "props": {} },
-  "api-logo": { "variant": "api", "size": 512, "props": {} }
+  "api-logo": { "variant": "api", "size": 512, "props": {} },
+  "kiosk-logo": { "variant": "pos", "size": 512, "props": {} }
 }

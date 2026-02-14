@@ -135,9 +135,12 @@ export class ProcessManager
         else if (pm2Status === 'errored') status = 'error';
 
         if (!this.processes.has(id)) {
+          const name = id.startsWith('sous-') ? id.replace('sous-', '').toUpperCase() : id.toUpperCase();
+          logger.info(`[ProcessManager] Registering new process: ${id} as ${name} (${(p.pm2_env as any)?.namespace || 'default'})`);
+          
           this.processes.set(id, {
             id,
-            name: id.replace('sous-', '').toUpperCase(),
+            name,
             type:
               id.startsWith('sous-db') || id.startsWith('sous-redis')
                 ? 'docker'

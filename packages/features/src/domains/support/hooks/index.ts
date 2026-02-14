@@ -1,1 +1,1 @@
-export * from "./useSupport.js";
+export * from "./useSupport";

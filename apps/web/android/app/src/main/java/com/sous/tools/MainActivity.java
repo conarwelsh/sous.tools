@@ -27,24 +27,32 @@ public class MainActivity extends BridgeActivity {
         
         // Map flavors to their dev ports
         String port = "3000";
-        if ("signage".equals(flavor)) port = "1425";
-        else if ("pos".equals(flavor)) port = "1424";
-        else if ("kds".equals(flavor)) port = "1423";
-        else if ("tools".equals(flavor)) port = "3000";
-        
+        // All flavors use port 3000 now via Next.js
         final String targetPort = port;
 
         if (hostIp != null && !hostIp.isEmpty() && !hostIp.equals("10.0.2.2")) {
             this.getBridge().getWebView().setWebViewClient(new BridgeWebViewClient(this.getBridge()) {
                 @Override
+                public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+                    super.onPageStarted(view, url, favicon);
+                    view.evaluateJavascript("window.sous_host_ip = '" + hostIp + "';", null);
+                }
+
+                @Override
+                public void onPageFinished(WebView view, String url) {
+                    super.onPageFinished(view, url);
+                    view.evaluateJavascript("window.sous_host_ip = '" + hostIp + "';", null);
+                }
+
+                @Override
                 public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                     String url = request.getUrl().toString();
                     // Catch ANY localhost attempt and force to WSL
                     if (url.contains("localhost")) {
-                        String newUrl = url.replace("localhost:3000", hostIp + ":" + targetPort)
-                                           .replace("localhost:1423", hostIp + ":1423")
-                                           .replace("localhost:1424", hostIp + ":1424")
-                                           .replace("localhost:1425", hostIp + ":1425")
+                        String newUrl = url.replace("localhost:3000", hostIp + ":3000")
+                                           .replace("localhost:1423", hostIp + ":3000")
+                                           .replace("localhost:1424", hostIp + ":3000")
+                                           .replace("localhost:1425", hostIp + ":3000")
                                            .replace("localhost:4000", hostIp + ":4000");
                         
                         // Fallback if port wasn't explicitly in the localhost string
@@ -53,6 +61,7 @@ public class MainActivity extends BridgeActivity {
                         }
 
                         android.util.Log.e("MainActivity", "NATIVE_REDIRECT: " + url + " -> " + newUrl);
+                        view.evaluateJavascript("window.sous_host_ip = '" + hostIp + "';", null);
                         view.loadUrl(newUrl);
                         return true;
                     }
@@ -63,10 +72,10 @@ public class MainActivity extends BridgeActivity {
             // Proactively check current URL and redirect if it's already localhost
             String currentUrl = this.getBridge().getWebView().getUrl();
             if (currentUrl != null && currentUrl.contains("localhost")) {
-                String newUrl = currentUrl.replace("localhost:3000", hostIp + ":" + targetPort)
-                                           .replace("localhost:1423", hostIp + ":1423")
-                                           .replace("localhost:1424", hostIp + ":1424")
-                                           .replace("localhost:1425", hostIp + ":1425")
+                String newUrl = currentUrl.replace("localhost:3000", hostIp + ":3000")
+                                           .replace("localhost:1423", hostIp + ":3000")
+                                           .replace("localhost:1424", hostIp + ":3000")
+                                           .replace("localhost:1425", hostIp + ":3000")
                                            .replace("localhost:4000", hostIp + ":4000");
                 this.getBridge().getWebView().loadUrl(newUrl);
             }
@@ -96,9 +105,7 @@ public class MainActivity extends BridgeActivity {
 
         // Map flavors to their dev ports
         String port = "3000";
-        if ("signage".equals(flavor)) port = "1425";
-        else if ("pos".equals(flavor)) port = "1424";
-        else if ("kds".equals(flavor)) port = "1423";
+        // All flavors use port 3000 now
 
         for (Display display : displays) {
             // Construct route based on flavor

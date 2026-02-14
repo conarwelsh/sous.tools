@@ -169,14 +169,19 @@ export class HttpClient {
 
 let clientInstance: HttpClient | null = null;
 
-export const getHttpClient = async (): Promise<HttpClient> => {
+export const getHttpClient = async (baseUrl?: string): Promise<HttpClient> => {
   if (typeof window !== "undefined") {
-    if ((window as any).__SOUS_HTTP_CLIENT__) {
+    if ((window as any).__SOUS_HTTP_CLIENT__ && !baseUrl) {
       return (window as any).__SOUS_HTTP_CLIENT__;
     }
   }
 
-  if (clientInstance) return clientInstance;
+  if (clientInstance && !baseUrl) return clientInstance;
+  
+  if (baseUrl) {
+    return new HttpClient(baseUrl);
+  }
+
   const { config } = await import("@sous/config");
   clientInstance = new HttpClient(config.api.url || "http://localhost:4000");
 

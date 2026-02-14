@@ -10,7 +10,7 @@ export function AddHardwareView() {
   const router = useRouter();
 
   const handleSuccess = () => {
-    router.push("/hardware");
+    router.push("/settings/hardware");
   };
 
   return (

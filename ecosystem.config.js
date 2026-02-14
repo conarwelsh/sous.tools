@@ -53,8 +53,36 @@ module.exports = {
 
     // --- Native Applications ---
     {
-      name: "sous-pos-android",
-      script: "bash ./scripts/run-android.sh Pixel_9 pos",
+      name: "sous-pos",
+      script: "bash ./scripts/run-android.sh Pixel_Tablet pos",
+      cwd: ".",
+      autorestart: false,
+      namespace: "native"
+    },
+    {
+      name: "sous-kds",
+      script: "bash ./scripts/run-android.sh Medium_Desktop kds",
+      cwd: ".",
+      autorestart: false,
+      namespace: "native"
+    },
+    {
+      name: "sous-signage",
+      script: "bash ./scripts/run-android.sh Television_1080p signage",
+      cwd: ".",
+      autorestart: false,
+      namespace: "native"
+    },
+    {
+      name: "sous-kiosk",
+      script: "bash ./scripts/run-android.sh Pixel_Tablet kiosk",
+      cwd: ".",
+      autorestart: false,
+      namespace: "native"
+    },
+    {
+      name: "sous-tools",
+      script: "bash ./scripts/run-android.sh Pixel_9 tools",
       cwd: ".",
       autorestart: false,
       namespace: "native"

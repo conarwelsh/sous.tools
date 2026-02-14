@@ -89,6 +89,18 @@ export class PosResolver {
   }
 
   /**
+   * Retrieves orders for an organization with optional status filtering.
+   */
+  @Query(() => [PosOrder])
+  async orders(
+    @CurrentUser() user: any,
+    @Args('status', { nullable: true }) status?: string,
+    @Args('limit', { type: () => Int, defaultValue: 50 }) limit?: number,
+  ) {
+    return this.posService.getOrders(user.organizationId, status, limit);
+  }
+
+  /**
    * Updates the status of an order (e.g., OPEN -> COMPLETED).
    * Publishes an event to the orderUpdated subscription.
    */

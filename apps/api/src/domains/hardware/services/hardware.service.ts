@@ -5,7 +5,7 @@ import {
   Inject,
 } from '@nestjs/common';
 import { DatabaseService } from '../../core/database/database.service.js';
-import { devices, pairingCodes } from '../../core/database/schema.js';
+import { devices, pairingCodes, displays } from '../../core/database/schema.js';
 import { eq, and, gt } from 'drizzle-orm';
 import { logger } from '@sous/logger';
 import { RealtimeGateway } from '../../realtime/realtime.gateway.js';
@@ -95,6 +95,23 @@ export class HardwareService {
             })
             .returning()
         )[0];
+
+    // 2.5 Special Case: Signage needs a Display entry to be visible in Signage Manager
+    if (record.deviceType === 'signage') {
+      const existingDisplay = await this.dbService.db.query.displays.findFirst({
+        where: eq(displays.hardwareId, record.hardwareId),
+      });
+
+      if (!existingDisplay) {
+        await this.dbService.db.insert(displays).values({
+          organizationId,
+          locationId,
+          hardwareId: record.hardwareId,
+          name: `${device.name} (Auto-created)`,
+          isActive: true,
+        });
+      }
+    }
 
     // 3. Notify Hardware
     this.realtimeGateway.emitToHardware(record.hardwareId, 'pairing:success', {

@@ -1,8 +1,11 @@
-import { Resolver, Query, Args, Subscription } from '@nestjs/graphql';
+import { Resolver, Query, Args, Subscription, ResolveField, Parent } from '@nestjs/graphql';
 import { HardwareService } from '../services/hardware.service.js';
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { Inject } from '@nestjs/common';
 import { PubSub } from 'graphql-subscriptions';
+import { DatabaseService } from '../../core/database/database.service.js';
+import { eq } from 'drizzle-orm';
+import { displays, displayAssignments, layouts } from '../../core/database/schema.js';
 
 @ObjectType()
 class DeviceType {
@@ -29,19 +32,40 @@ class DeviceType {
 
   @Field({ nullable: true })
   organizationId?: string;
+
+  @Field({ nullable: true })
+  currentAssignment?: string;
 }
 
 @Resolver(() => DeviceType)
 export class HardwareResolver {
   constructor(
     private readonly hardwareService: HardwareService,
+    private readonly dbService: DatabaseService,
     @Inject('PUB_SUB') private readonly pubSub: PubSub,
   ) {}
 
   @Query(() => [DeviceType])
   async devices(@Args('orgId') orgId: string) {
-    // For MVP, we'll map the Drizzle results to the GraphQL type.
     return this.hardwareService.getDevicesByOrg(orgId);
+  }
+
+  @ResolveField(() => String, { nullable: true })
+  async currentAssignment(@Parent() device: any) {
+    const display = await this.dbService.readDb.query.displays.findFirst({
+      where: eq(displays.hardwareId, device.hardwareId),
+    });
+
+    if (!display) return null;
+
+    const assignment = await this.dbService.readDb.query.displayAssignments.findFirst({
+      where: eq(displayAssignments.displayId, display.id),
+      with: {
+        layout: true,
+      },
+    });
+
+    return assignment?.layout?.name || null;
   }
 
   @Subscription(() => DeviceType, {

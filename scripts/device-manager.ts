@@ -11,13 +11,26 @@ const IS_WSL = fs
   .readFileSync("/proc/version", "utf8")
   .toLowerCase()
   .includes("microsoft");
-const ADB = IS_WSL ? "adb.exe" : "adb";
-const EMULATOR = IS_WSL ? "emulator.exe" : "emulator";
+
+const CMD_EXE = "/mnt/c/Windows/System32/cmd.exe";
+const ADB_PATH = "C:\\Users\\conar\\AppData\\Local\\Android\\Sdk\\platform-tools\\adb.exe";
+const EMULATOR_PATH = "C:\\Users\\conar\\AppData\\Local\\Android\\Sdk\\emulator\\emulator.exe";
+
+function winExecSync(cmd: string, options: any = {}) {
+  if (IS_WSL) {
+    // Ensure 60s timeout for all Windows interop calls
+    return execSync(`${CMD_EXE} /c "${cmd}"`, {
+      ...options,
+      timeout: options.timeout || 60000,
+    });
+  }
+  return execSync(cmd, options);
+}
 
 // Helper to get WSL IP
 function getWslIp() {
   try {
-    return execSync("ip route show default | awk '{print $3}'")
+    return execSync("ip route show default | awk '{print $3}'", { timeout: 10000 })
       .toString()
       .trim();
   } catch (e) {
@@ -33,6 +46,20 @@ async function main() {
 
   const WIN_IP = getWslIp();
 
+  // 0. Validate AVD exists
+  console.error(`🔍 Validating AVD: ${AVD_NAME}...`);
+  try {
+    const avdList = winExecSync(`"${EMULATOR_PATH}" -list-avds`, { timeout: 15000 }).toString();
+    if (!avdList.includes(AVD_NAME)) {
+      console.error(`❌ AVD "${AVD_NAME}" not found in available devices:`);
+      console.error(avdList);
+      process.exit(1);
+    }
+    console.error(`✅ AVD validated.`);
+  } catch (e: any) {
+    console.error(`⚠️ Could not validate AVD list (skipping): ${e.message}`);
+  }
+
   // 1. Check if already running
   let serial = await findSerialByAvd(AVD_NAME);
   if (serial) {
@@ -40,9 +67,7 @@ async function main() {
     // Ensure ADB is connected to the right IP if WSL
     if (IS_WSL) {
       try {
-        execSync(`${ADB} connect ${WIN_IP}:${serial.split("-")[1]}`, {
-          stdio: "ignore",
-        });
+        winExecSync(`${ADB_PATH} connect ${WIN_IP}:${serial.split("-")[1]}`, { timeout: 10000 });
       } catch (e) {}
     }
     console.log(serial);
@@ -53,44 +78,17 @@ async function main() {
   console.error(`🚀 Launching emulator: ${AVD_NAME}...`);
 
   if (IS_WSL) {
-    // Attempt to find emulator.exe robustly
-    let emulatorCmd = "emulator.exe";
-
-    // Check if emulator is in PATH
-    try {
-      execSync("cmd.exe /c where emulator.exe", { timeout: 60000, stdio: "ignore" });
-    } catch {
-      // Not in path, search standard locations
-      const userProfile = execSync("cmd.exe /c echo %USERPROFILE%", { timeout: 60000 })
-        .toString()
-        .trim();
-      const candidates = [
-        `${userProfile}\\AppData\\Local\\Android\\Sdk\\emulator\\emulator.exe`,
-        `C:\\Users\\conar\\AppData\\Local\\Android\\Sdk\\emulator\\emulator.exe`,
-        `C:\\Android\\emulator\\emulator.exe`,
-      ];
-
-      for (const candidate of candidates) {
-        try {
-          // Check if file exists via cmd
-          execSync(`cmd.exe /c if exist "${candidate}" echo found`, { timeout: 60000 });
-          emulatorCmd = `"${candidate}"`;
-          console.error(`Found emulator at: ${emulatorCmd}`);
-          break;
-        } catch {}
-      }
-    }
-
     // Launch via cmd.exe to ensure it's a Windows process that survives WSL session
+    // Use full path and explicit environment to prevent hangs
     spawn(
-      "cmd.exe",
+      CMD_EXE,
       [
         "/c",
         "start",
         "/b",
         "cmd",
         "/c",
-        `${emulatorCmd} -avd ${AVD_NAME} -no-snapshot-load`,
+        `"${EMULATOR_PATH}" -avd ${AVD_NAME} -no-snapshot-load -no-audio -no-boot-anim`,
       ],
       {
         detached: true,
@@ -98,7 +96,7 @@ async function main() {
       },
     ).unref();
   } else {
-    spawn(EMULATOR, ["-avd", AVD_NAME], {
+    spawn(EMULATOR_PATH, ["-avd", AVD_NAME, "-no-snapshot-load"], {
       detached: true,
       stdio: "ignore",
     }).unref();
@@ -129,11 +127,11 @@ async function main() {
 
 async function findSerialByAvd(targetAvd: string): Promise<string | null> {
   try {
-    // Add timeout to adb commands to prevent hangs
-    const devicesOutput = execSync(`${ADB} devices`, {
-      timeout: 60000,
+    const devicesOutput = winExecSync(`${ADB_PATH} devices`, {
       stdio: ["pipe", "pipe", "ignore"],
+      timeout: 30000,
     }).toString();
+
     const lines = devicesOutput
       .split("\n")
       .filter((l) => l.includes("\tdevice"));
@@ -141,21 +139,23 @@ async function findSerialByAvd(targetAvd: string): Promise<string | null> {
     for (const line of lines) {
       const serial = line.split("\t")[0].trim();
       try {
-        const avdName = execSync(
-          `${ADB} -s ${serial} shell getprop ro.boot.qemu.avd_name`,
-          { timeout: 60000, stdio: ["pipe", "pipe", "ignore"] },
+        // Strict 10s timeout for each device query to prevent overall hang
+        const avdName = winExecSync(
+          `${ADB_PATH} -s ${serial} shell getprop ro.boot.qemu.avd_name`,
+          { stdio: ["pipe", "pipe", "ignore"], timeout: 10000 }
         )
           .toString()
           .trim();
+        const model = winExecSync(
+          `${ADB_PATH} -s ${serial} shell getprop ro.product.model`,
+          { stdio: ["pipe", "pipe", "ignore"], timeout: 10000 }
+        )
+          .toString()
+          .trim();
+
         if (avdName === targetAvd) return serial;
 
         // Fallback to model check
-        const model = execSync(
-          `${ADB} -s ${serial} shell getprop ro.product.model`,
-          { timeout: 60000, stdio: ["pipe", "pipe", "ignore"] },
-        )
-          .toString()
-          .trim();
         if (
           model
             .toLowerCase()

@@ -1,19 +1,19 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { View, Text, ScrollView, Button } from "@sous/ui";
+import React, { useEffect, useState } from "react";
+import { View, Text, ScrollView, Button, cn } from "@sous/ui";
 import { OrderTicket } from "./components/OrderTicket";
 import { HACCPBar } from "./components/HACCPBar";
 import { DevicePairingFlow } from "../hardware/components/DevicePairingFlow";
 import { gql } from "@apollo/client";
 import { useQuery, useMutation, useSubscription } from "@apollo/client/react";
 import { useAuth } from "../iam/auth/hooks/useAuth";
-import { RefreshCcw, Utensils, Loader2 } from "lucide-react";
+import { RefreshCcw, Utensils, Loader2, CheckCircle2, List } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const GET_ACTIVE_ORDERS = gql`
-  query GetActiveOrders {
-    activeOrders {
+const GET_ORDERS = gql`
+  query GetOrders($status: String) {
+    orders(status: $status) {
       id
       externalOrderId
       status
@@ -53,31 +53,16 @@ const UPDATE_ORDER_STATUS = gql`
 `;
 
 interface KDSData {
-  activeOrders: any[];
+  orders: any[];
 }
 
-/**
- * Kitchen Display System (KDS) Feature.
- * Provides real-time visualization of active kitchen orders,
- * utilizing GraphQL Subscriptions for instant updates and
- * Framer Motion for smooth UI transitions.
- *
- * @returns {JSX.Element} The KDS interface.
- */
-/**
- * KDSFeature Component
- * 
- * Provides a real-time Kitchen Display System interface.
- * Uses GraphQL Subscriptions to listen for order status changes.
- * Implements Framer Motion layout animations for smooth ticket entry and exit.
- * 
- * @returns React Node
- */
 export const KDSFeature = () => {
   const { user } = useAuth();
   const orgId = user?.organizationId || "";
+  const [showCompleted, setShowCompleted] = useState(false);
 
-  const { data, loading, refetch } = useQuery<KDSData>(GET_ACTIVE_ORDERS, {
+  const { data, loading, refetch } = useQuery<KDSData>(GET_ORDERS, {
+    variables: { status: showCompleted ? "COMPLETED" : "OPEN" },
     skip: !orgId,
   });
 
@@ -97,14 +82,10 @@ export const KDSFeature = () => {
     onCompleted: () => refetch()
   });
 
-  /**
-   * Bumps an order from the kitchen display.
-   * @param {string} id - The ID of the order to bump.
-   */
   const handleBump = async (id: string) => {
     try {
       await updateStatus({
-        variables: { id, status: "COMPLETED" }
+        variables: { id, status: showCompleted ? "OPEN" : "COMPLETED" }
       });
     } catch (err) {
       console.error(err);
@@ -122,7 +103,7 @@ export const KDSFeature = () => {
     );
   }
 
-  const orders = data?.activeOrders || [];
+  const orders = data?.orders || [];
 
   return (
     <DevicePairingFlow type="kds">
@@ -140,8 +121,38 @@ export const KDSFeature = () => {
              </View>
 
              <View className="flex flex-row items-center gap-6">
-                <View className="flex flex-col items-end">
-                   <Text className="text-[8px] font-black uppercase text-zinc-500 tracking-widest">Active Tickets</Text>
+                {/* Toggle Group */}
+                <div className="flex flex-row bg-zinc-950 p-1 rounded-xl border border-zinc-800">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setShowCompleted(false)}
+                    className={cn(
+                      "h-8 px-4 rounded-lg gap-2",
+                      !showCompleted ? "bg-zinc-800 text-white shadow-lg" : "text-zinc-500"
+                    )}
+                  >
+                    <List size={14} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Active</span>
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setShowCompleted(true)}
+                    className={cn(
+                      "h-8 px-4 rounded-lg gap-2",
+                      showCompleted ? "bg-zinc-800 text-white shadow-lg" : "text-zinc-500"
+                    )}
+                  >
+                    <CheckCircle2 size={14} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">History</span>
+                  </Button>
+                </div>
+
+                <View className="flex flex-col items-end min-w-[80px]">
+                   <Text className="text-[8px] font-black uppercase text-zinc-500 tracking-widest">
+                     {showCompleted ? "Completed" : "Active"}
+                   </Text>
                    <Text className="text-xl font-mono font-black text-white">{orders.length}</Text>
                 </View>
                 <Button variant="ghost" size="icon" onClick={() => refetch()} className="text-zinc-500 hover:text-white">
@@ -156,14 +167,22 @@ export const KDSFeature = () => {
               layout
               className="flex flex-row flex-wrap gap-6"
             >
-              {orders.length === 0 ? (
-                <View className="flex-1 items-center justify-center py-32 opacity-20">
-                   <Utensils size={64} className="text-white mb-4" />
-                   <Text className="text-xl font-black uppercase tracking-widest text-white">Clear Board</Text>
-                </View>
-              ) : (
-                <AnimatePresence mode="popLayout">
-                  {orders.map((order: any) => (
+              <AnimatePresence mode="popLayout" initial={false}>
+                {orders.length === 0 ? (
+                  <motion.div 
+                    key="empty"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex-1 items-center justify-center py-32 opacity-20 w-full"
+                  >
+                     <Utensils size={64} className="text-white mb-4" />
+                     <Text className="text-xl font-black uppercase tracking-widest text-white">
+                       {showCompleted ? "No History" : "Clear Board"}
+                     </Text>
+                  </motion.div>
+                ) : (
+                  orders.map((order: any) => (
                     <motion.div
                       key={order.id}
                       layout
@@ -180,9 +199,9 @@ export const KDSFeature = () => {
                         onBump={handleBump} 
                       />
                     </motion.div>
-                  ))}
-                </AnimatePresence>
-              )}
+                  ))
+                )}
+              </AnimatePresence>
             </motion.div>
           </ScrollView>
 

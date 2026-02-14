@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { View, Text, Logo, Button, cn } from "@sous/ui";
+import { localConfig } from "@sous/config";
 import { useHardware } from "../hooks/useHardware";
 import {
   Wifi,
@@ -14,7 +15,7 @@ import {
 } from "lucide-react";
 
 interface DevicePairingFlowProps {
-  type: "kds" | "pos" | "signage" | "kiosk";
+  type: "kds" | "pos" | "signage" | "kiosk" | "gateway" | "watch";
   children: (props: { hardwareId: string; socket: any }) => React.ReactNode;
 }
 
@@ -73,6 +74,20 @@ export const DevicePairingFlow: React.FC<DevicePairingFlowProps> = ({
           color: "text-orange-500",
           bg: "bg-orange-500/10",
         };
+      case "gateway":
+        return {
+          label: "Sous Gateway",
+          icon: ShieldCheck,
+          color: "text-amber-500",
+          bg: "bg-amber-500/10",
+        };
+      case "watch":
+        return {
+          label: "Sous Watch",
+          icon: Utensils,
+          color: "text-rose-500",
+          bg: "bg-rose-500/10",
+        };
       default:
         return {
           label: "Sous Node",
@@ -82,6 +97,13 @@ export const DevicePairingFlow: React.FC<DevicePairingFlowProps> = ({
         };
     }
   };
+
+  useEffect(() => {
+    if (!isPaired && !pairingCode && !isLoading) {
+      console.log("[DevicePairingFlow] No code found on mount, refreshing...");
+      refreshPairingCode();
+    }
+  }, [isPaired, pairingCode, isLoading, refreshPairingCode]);
 
   const flavor = getFlavorConfig();
 
@@ -163,11 +185,18 @@ export const DevicePairingFlow: React.FC<DevicePairingFlowProps> = ({
           </Text>
         </View>
 
-        <div className="mt-20 flex flex-row items-center gap-3 text-zinc-700">
-          <ShieldCheck size={16} />
-          <Text className="font-bold uppercase text-[10px] tracking-widest">
-            Hardware ID: {hardwareId?.substring(0, 12)}...
-          </Text>
+        <div className="mt-20 flex flex-col items-center gap-2 text-zinc-700">
+          <div className="flex flex-row items-center gap-3">
+            <ShieldCheck size={16} />
+            <Text className="font-bold uppercase text-[10px] tracking-widest">
+              Hardware ID: {hardwareId?.substring(0, 12)}...
+            </Text>
+          </div>
+          {typeof window !== "undefined" && (
+            <Text className="text-[8px] font-mono opacity-50">
+              API: {localConfig.api.url || "default"} | Host: {(window as any).sous_host_ip || "none"}
+            </Text>
+          )}
         </div>
 
         <Button

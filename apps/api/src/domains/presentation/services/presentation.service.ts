@@ -11,9 +11,10 @@ import {
   displayAssignments,
   organizations,
 } from '../../core/database/schema.js';
-import { eq, and, or } from 'drizzle-orm';
+import { eq, and, or, desc } from 'drizzle-orm';
 import { logger } from '@sous/logger';
 import { RealtimeGateway } from '../../realtime/realtime.gateway.js';
+import { PubSub } from 'graphql-subscriptions';
 
 import { users } from '../../core/database/schema.js';
 
@@ -24,6 +25,9 @@ export class PresentationService {
     @Optional()
     @Inject(RealtimeGateway)
     private readonly realtimeGateway?: RealtimeGateway,
+    @Optional()
+    @Inject('PUB_SUB')
+    private readonly pubSub?: PubSub,
   ) {}
 
   async getUserOrganizationId(userId: string) {
@@ -37,9 +41,26 @@ export class PresentationService {
   // --- Layout Management (Unified) ---
 
   async createLayout(data: typeof layouts.$inferInsert) {
+    // Ensure JSON fields are stringified if they came in as objects
+    const safeData: any = { ...data };
+    if (safeData.structure && typeof safeData.structure === 'object') {
+      safeData.structure = JSON.stringify(safeData.structure);
+    }
+    if (safeData.content && typeof safeData.content === 'object') {
+      safeData.content = JSON.stringify(safeData.content);
+    }
+    if (safeData.config && typeof safeData.config === 'object') {
+      safeData.config = JSON.stringify(safeData.config);
+    }
+
+    // Strip redundant fields
+    delete safeData.id;
+    delete safeData.createdAt;
+    delete safeData.updatedAt;
+
     const result = await this.dbService.db
       .insert(layouts)
-      .values(data)
+      .values(safeData)
       .returning();
     return result[0];
   }
@@ -52,44 +73,60 @@ export class PresentationService {
     const { assignments, ...layoutData } = data;
 
     // Ensure JSON fields are stringified if they came in as objects
-    const safeData = { ...layoutData };
-    if (typeof safeData.structure === 'object') {
+    const safeData: any = { ...layoutData };
+    if (safeData.structure && typeof safeData.structure === 'object') {
       safeData.structure = JSON.stringify(safeData.structure);
     }
-    if (typeof safeData.content === 'object') {
+    if (safeData.content && typeof safeData.content === 'object') {
       safeData.content = JSON.stringify(safeData.content);
     }
-    if (typeof safeData.config === 'object') {
+    if (safeData.config && typeof safeData.config === 'object') {
       safeData.config = JSON.stringify(safeData.config);
     }
 
-    const result = await this.dbService.db
-      .update(layouts)
-      .set({ ...safeData, updatedAt: new Date() })
-      .where(
-        and(eq(layouts.id, id), eq(layouts.organizationId, organizationId)),
-      )
-      .returning();
+    // Strip redundant fields that might cause constraint issues or are immutable
+    delete safeData.id;
+    delete safeData.organizationId;
+    delete safeData.createdAt;
+    delete safeData.updatedAt;
 
-    if (!result[0]) throw new NotFoundException('Layout not found');
+    try {
+      logger.info(`[PresentationService] Updating layout ${id}`, { safeDataKeys: Object.keys(safeData) });
 
-    const updatedLayout = result[0];
+      const result = await this.dbService.db
+        .update(layouts)
+        .set({ ...safeData, updatedAt: new Date() })
+        .where(
+          and(eq(layouts.id, id), eq(layouts.organizationId, organizationId)),
+        )
+        .returning();
 
-    // Handle Display Assignments if provided (specifically for type 'SCREEN')
-    if (
-      updatedLayout.type === 'SCREEN' &&
-      assignments?.hardware &&
-      Array.isArray(assignments.hardware)
-    ) {
-      for (const displayId of assignments.hardware) {
-        await this.assignLayoutToDisplay({
-          displayId,
-          layoutId: id,
-        });
+      if (!result[0]) throw new NotFoundException('Layout not found');
+
+      const updatedLayout = result[0];
+
+      // Handle Display Assignments if provided (specifically for type 'SCREEN')
+      if (
+        updatedLayout.type === 'SCREEN' &&
+        assignments?.hardware &&
+        Array.isArray(assignments.hardware)
+      ) {
+        for (const displayId of assignments.hardware) {
+          await this.assignLayoutToDisplay({
+            displayId,
+            layoutId: id,
+          });
+        }
       }
-    }
 
-    return updatedLayout;
+      return updatedLayout;
+    } catch (e: any) {
+      logger.error(`[PresentationService] Failed to update layout ${id}: ${e.message}`, {
+        stack: e.stack,
+        safeData,
+      });
+      throw e;
+    }
   }
 
   async deleteLayout(id: string, organizationId: string) {
@@ -264,39 +301,73 @@ export class PresentationService {
 
   // --- Assignments ---
   async assignLayoutToDisplay(data: typeof displayAssignments.$inferInsert) {
-    const result = await this.dbService.db
-      .insert(displayAssignments)
-      .values(data)
-      .onConflictDoUpdate({
-        target: [displayAssignments.displayId],
-        set: { layoutId: data.layoutId, updatedAt: new Date() },
-      })
-      .returning();
+    try {
+      const result = await this.dbService.db
+        .insert(displayAssignments)
+        .values(data)
+        .onConflictDoUpdate({
+          target: [displayAssignments.displayId],
+          set: { layoutId: data.layoutId, updatedAt: new Date() },
+        })
+        .returning();
 
-    const display = await this.dbService.readDb.query.displays.findFirst({
-      where: eq(displays.id, data.displayId),
-    });
-
-    if (display?.hardwareId) {
-      const layout = await this.dbService.readDb.query.layouts.findFirst({
-        where: eq(layouts.id, data.layoutId),
+      const display = await this.dbService.readDb.query.displays.findFirst({
+        where: eq(displays.id, data.displayId),
       });
 
-      if (layout && this.realtimeGateway) {
-        this.realtimeGateway.emitToHardware(
-          display.hardwareId,
-          'presentation:update',
-          {
-            layoutId: layout.id,
-            structure: JSON.parse(layout.structure),
-            content: JSON.parse(layout.content),
-            config: JSON.parse(layout.config),
-          },
-        );
-      }
-    }
+      if (display?.hardwareId) {
+        const layout = await this.dbService.readDb.query.layouts.findFirst({
+          where: eq(layouts.id, data.layoutId),
+        });
 
-    return result[0];
+        if (layout && this.realtimeGateway) {
+          // Defensive parsing to prevent crash if DB content is corrupt
+          const safeParse = (str: string | null) => {
+            try {
+              return str ? JSON.parse(str) : {};
+            } catch (e) {
+              logger.warn(`[PresentationService] Failed to parse JSON field: ${str}`);
+              return {};
+            }
+          };
+
+          this.realtimeGateway.emitToHardware(
+            display.hardwareId,
+            'presentation:update',
+            {
+              layoutId: layout.id,
+              structure: safeParse(layout.structure),
+              content: safeParse(layout.content),
+              config: safeParse(layout.config),
+            },
+          );
+        }
+
+        if (layout && display.hardwareId && this.pubSub) {
+          this.pubSub.publish('presentationUpdated', {
+            presentationUpdated: {
+              hardwareId: display.hardwareId,
+              layout: {
+                id: layout.id,
+                name: layout.name,
+                structure: layout.structure,
+                content: layout.content,
+                config: layout.config,
+              },
+            },
+          });
+        }
+      }
+
+      return result[0];
+    } catch (e: any) {
+      logger.error(`[PresentationService] Failed to assign layout to display: ${e.message}`, {
+        stack: e.stack,
+        displayId: data.displayId,
+        layoutId: data.layoutId,
+      });
+      throw e;
+    }
   }
 
   async getAssignmentsForDisplay(displayId: string) {
@@ -304,5 +375,32 @@ export class PresentationService {
       .select()
       .from(displayAssignments)
       .where(eq(displayAssignments.displayId, displayId));
+  }
+
+  async getActiveLayoutByHardwareId(hardwareId: string) {
+    logger.info(`[PresentationService] Fetching active layout for hardwareId: ${hardwareId}`);
+    const display = await this.dbService.readDb.query.displays.findFirst({
+      where: eq(displays.hardwareId, hardwareId),
+      with: {
+        assignments: {
+          with: {
+            layout: true,
+          },
+        },
+      },
+    });
+
+    if (!display) {
+      logger.warn(`[PresentationService] No display found for hardwareId: ${hardwareId}`);
+      return null;
+    }
+
+    if (!display.assignments?.[0]) {
+      logger.warn(`[PresentationService] No assignments found for display: ${display.id} (${display.name})`);
+      return null;
+    }
+
+    logger.info(`[PresentationService] Found layout ${display.assignments[0].layout.id} for display ${display.name}`);
+    return display.assignments[0].layout;
   }
 }

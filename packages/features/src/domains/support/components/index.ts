@@ -1,3 +1,3 @@
-export * from "./SupportForm.js";
-export * from "./FeedbackModal.js";
-export * from "./SupportCategoryCard.js";
+export * from "./SupportForm";
+export * from "./FeedbackModal";
+export * from "./SupportCategoryCard";

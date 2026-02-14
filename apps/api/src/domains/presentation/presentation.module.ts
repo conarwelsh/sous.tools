@@ -9,7 +9,7 @@ import { CoreModule } from '../core/core.module.js';
 
 @Module({
   imports: [AuthModule],
-  providers: [PresentationService],
+  providers: [PresentationService, PresentationResolver],
   controllers: [PresentationController, PublicPresentationController],
   exports: [PresentationService],
 })

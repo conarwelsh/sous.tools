@@ -36,6 +36,42 @@ export class IngredientType {
 }
 
 @ObjectType()
+export class CategoryType {
+  @Field(() => ID)
+  id: string;
+
+  @Field()
+  name: string;
+
+  @Field({ nullable: true })
+  description?: string;
+
+  @Field(() => Int)
+  sortOrder: number;
+}
+
+@ObjectType()
+export class ProductType {
+  @Field(() => ID)
+  id: string;
+
+  @Field()
+  name: string;
+
+  @Field(() => Int)
+  price: number;
+
+  @Field({ nullable: true })
+  categoryId?: string;
+
+  @Field(() => Int)
+  sortOrder: number;
+
+  @Field()
+  isSoldOut: boolean;
+}
+
+@ObjectType()
 export class RecipeIngredientType {
   @Field(() => ID)
   id: string;
@@ -206,6 +242,19 @@ export class CulinaryResolver {
   @Query(() => [IngredientType])
   async ingredients(@Args('orgId') orgId: string) {
     return this.culinaryService.getIngredients(orgId);
+  }
+
+  @Query(() => [CategoryType])
+  async categories(@Args('orgId') orgId: string) {
+    return this.culinaryService.getCategories(orgId);
+  }
+
+  @Query(() => [ProductType])
+  async products(
+    @Args('orgId') orgId: string,
+    @Args('categoryId', { nullable: true }) categoryId?: string,
+  ) {
+    return this.culinaryService.getProducts(orgId, categoryId);
   }
 
   @Query(() => [RecipeType])
