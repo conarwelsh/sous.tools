@@ -36,16 +36,21 @@ export const useUpdateManager = () => {
 
   const currentVersion = config.features.appVersion;
   const channel = config.features.appEnv;
-  const supabaseUrl = config.storage.supabase.url;
-  const bucket = config.storage.supabase.bucket;
+  const supabaseUrl = config.storage.supabase?.url;
+  const bucket = config.storage.supabase?.bucket;
 
-  const manifestUrl = `${supabaseUrl}/storage/v1/object/public/${bucket}/releases/${channel}/latest/manifest.json`;
+  const manifestUrl =
+    supabaseUrl && bucket
+      ? `${supabaseUrl}/storage/v1/object/public/${bucket}/releases/${channel}/latest/manifest.json`
+      : "";
 
   /**
    * Checks for a new version of the application by fetching the manifest
    * from the configured Supabase release channel.
    */
   const checkForUpdates = useCallback(async () => {
+    if (!manifestUrl) return;
+
     try {
       const response = await fetch(manifestUrl, { cache: "no-cache" });
       if (!response.ok) {
