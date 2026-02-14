@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 interface DevicePairingFlowProps {
-  type: "kds" | "pos" | "signage";
+  type: "kds" | "pos" | "signage" | "kiosk";
   children: (props: { hardwareId: string; socket: any }) => React.ReactNode;
 }
 
@@ -65,6 +65,13 @@ export const DevicePairingFlow: React.FC<DevicePairingFlowProps> = ({
           icon: Monitor,
           color: "text-sky-500",
           bg: "bg-sky-500/10",
+        };
+      case "kiosk":
+        return {
+          label: "Sous Kiosk",
+          icon: Monitor,
+          color: "text-orange-500",
+          bg: "bg-orange-500/10",
         };
       default:
         return {

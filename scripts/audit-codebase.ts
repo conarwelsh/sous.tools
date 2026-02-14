@@ -30,6 +30,12 @@ function checkPlaceholders(): boolean {
     ".gemini",
     ".turbo",
     ".next",
+    ".next-signage",
+    ".next-pos",
+    ".next-kds",
+    ".next-mobile",
+    "playwright-report",
+    "test-results",
   ];
   const excludeFiles = ["audit-codebase.ts", "pnpm-lock.yaml"];
 
@@ -101,6 +107,7 @@ async function main() {
     dependencies: runCommand("pnpm audit --prod", "Dependency Security Audit"),
     lint: runCommand("pnpm turbo run lint", "Linting"),
     typecheck: runCommand("pnpm turbo run typecheck", "Type Checking"),
+    test: runCommand("pnpm turbo run test", "Unit Testing"),
     placeholders: checkPlaceholders(),
     // deadCode: runCommand('npx ts-prune', 'Dead Code Analysis (ts-prune)'), // Optional, requires ts-prune
   };

@@ -125,6 +125,13 @@ function buildConfig(): Config {
     support: {
       email: envVars.SUPPORT_EMAIL || 'support@sous.tools',
     },
+    emails: {
+      support: envVars.EMAIL_SUPPORT || "support@sous.tools",
+      sales: envVars.EMAIL_SALES || "sales@sous.tools",
+      notifications: envVars.EMAIL_NOTIFICATIONS || "notifications@sous.tools",
+      auth: envVars.EMAIL_AUTH || "auth@sous.tools",
+      billing: envVars.EMAIL_BILLING || "billing@sous.tools",
+    },
     facebook: {
       clientId: envVars.FACEBOOK_CLIENT_ID,
       clientSecret: envVars.FACEBOOK_CLIENT_SECRET,

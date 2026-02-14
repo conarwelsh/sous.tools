@@ -1,96 +1,60 @@
-# Features
+# Product Features
 
-## Initial Setup
+This document provides a comprehensive list of implemented and planned features for the Sous platform.
 
-- **Monorepo Structure**: TurboRepo with pnpm workspaces.
-- **Web-First Architecture**: Standard Next.js + Shadcn UI + Tailwind.
-- **Apps**:
-  - `@sous/web`: Next.js Universal Web App / PWA / Mobile (via Capacitor).
-  - `@sous/api`: NestJS application using **Drizzle ORM**.
-  - `@sous/cli`: NestJS CLI tool.
-  - `@sous/docs`: Centralized documentation hub and design lab.
-  - `@sous/wearos`: Native Wear OS app for hands-free operations.
-- **Wear OS Enhancements (Spec 023):**
-  - **Custom Watch Faces**: "Executive" and "Operator" designs with customizable complication slots.
-  - **Platform Complications**: At-a-glance metrics for Daily Sales, Avg Ticket Time, Open Orders, Longest Open Order.
-  - **Advanced Voice Commands**: Hands-free control for wastage tracking, timer management, order item addition, and marking items as sold out.
-- **Packages**:
-  - `@sous/client-sdk`: Generated client-server SDK.
-  - `@sous/config`: Centralized configuration (Infisical + Zod).
-  - `@sous/logger`: Centralized logging (Pino).
-  - `@sous/ui`: Standard React UI component library (Shadcn pattern).
-  - `@sous/features`: Shared business logic and "Organisms".
-- **Shared Ingestion Engine (Spec 013)**:
-  - **Gemini AI Integration**: Uses Google Gemini 1.5 Flash for high-accuracy extraction of recipe data from unstructured documents.
-  - **Interactive Drive Picker**: Browse and select specific files/folders from Google Drive for ingestion.
-  - **Multi-Format Support**: Automated processing of PDFs, Images (JPG/PNG/HEIC), and native Google Docs.
-  - **AI Recipe Extraction**: Automatically extract recipe names, yields, and ingredient lists into structured database records.
-  - **Smart Mapping**: Fuzzy-matching and automated creation of catalog items for extracted ingredients.
-- **Mobile Background Update System (Spec 023)**:
-  - **Autonomous Discovery**: Periodically checks Supabase-hosted `manifest.json` for new builds.
-  - **Scheduled Updates**: Allows users to schedule installations outside of business hours.
-  - **Background Download**: Downloads APK artifacts in the background via Capacitor plugins.
-- **Presentation Engine (Spec 006/007)**:
-  - **Unified Layout Architecture**: Single polymorphic engine for Digital Signage, Web Pages, and Thermal Labels.
-  - **Polymorphic Designer**: Recursive, visual editor for both structural blueprints (Templates) and live data-bound instances.
-  - **Contextual Binding**: Data-binding interface for mapping POS Catalog and Media assets to specific slots within a layout.
-  - **Type-Specific Config**: Support for web slugs, custom dimensions (mm/in), and refresh intervals per layout type.
-  - **Real-time Synchronization**: Zero-refresh updates pushed to hardware displays via Socket.io.
-  - **Multi-Output Support**: Assign layouts to physical HDMI ports or unique web slugs.
-- **Support & Feedback System (Spec 022)**:
-  - **Multi-Channel Delivery**: Automated report routing to GitHub Issues and configured Support Email.
-  - **Contextual Enrichment**: Automatic capture of app version, user ID, organization, and device metadata.
-  - **SuperAdmin Configuration**: Dynamic management of support destinations via global platform settings.
-- **Smart Seeding System (Spec 032)**:
-  - **Domain-Specific Logic**: Decentralized seeding where each domain manages its own system and sample data.
-  - **External Sandbox Sync**: Automatic synchronization of local culinary catalogs to Square Sandbox for seamless development.
-  - **Modular Architecture**: Easy expansion for new domains via standardized seeder interfaces.
-- **Unified Authorization & OAuth2 (ADR 048 / Spec 037)**:
-  - **Provider-Level Scoping**: Granular scope enforcement merging User Roles, Plans, and Token grants.
-  - **OAuth2 Provider**: Full support for the Authorization Code flow for 3rd-party developers.
-  - **Consent Management**: Native UI for users to approve and revoke application permissions.
-  - **Developer Portal**: Dashboard for managing client IDs, secrets, and redirect URIs.
-- **Salesman System (Spec 030)**:
-  - **Performance Attribution**: Track organization signups and invitations back to specific sales agents.
-  - **Commission Ledger**: Automated tracking of earnings based on successful customer payments (BPS).
-  - **Agent Portal**: Specialized dashboard for salesmen to manage their "Book of Business".
-  - **Support Access**: Seamless impersonation feature for agents to assist their clients in real-time.
-- **Pricing & Plans (ADR 048 / Spec 024)**:
-  - **Tiered Access**: Standard plans (Commis, Chef de Partie, Executive Chef) with hierarchical feature sets.
-  - **Granular Scopes**: Fine-grained control over specific module access using shared constants.
-  - **Usage Limits**: Numerical caps on resources (e.g., max recipes, monthly invoice processing).
-  - **Grace Periods**: Configurable window for payment recovery before service suspension.
-  - **Custom Overrides**: Capability to define bespoke plans for specific organizations.
-  - **Performance**: Redis-backed caching of effective scopes and limits.
+## 1. Core Platform
 
-## CLI Capabilities (@sous/cli)
+### Unified Authentication (IAM)
+- **Status**: ✅ Implemented
+- **Details**: JWT-based login, registration, and password recovery. Supports multi-tenant organization switching.
+- **Tech**: NestJS Passport + `@sous/features`.
 
-- **Identity (IAM)**: `sous iam login`, `logout`, `whoami`, `switch-org`.
-- **Infrastructure (INFRA)**: `sous infra dashboard`, `config`, `logs`, `env-exec`, `feedback`.
-- **Operations (OPS)**: `sous ops db` (push, seed, reset), `housekeep`, `kill`.
-- **Systems (SYS)**: `sous sys hardware`, `integrations` (sync).
-- **Financials (FIN)**: `sous fin intel`.
-- **Development (DEV)**: `sous dev` (TUI), `install`, `workspace`, `generate`, `quality` (test, check, audit).
+### Device Pairing
+- **Status**: ✅ Implemented
+- **Details**: 6-digit code pairing for native nodes (KDS, POS, Signage). Automatic discovery via mDNS.
+- **Tech**: `@sous/client-sdk` + Socket.io.
 
-## Deployment Targets
+## 2. Operations (KDS & POS)
 
-| Platform            | Strategy                          | Status          |
-| :------------------ | :-------------------------------- | :-------------- |
-| **Web / Admin**     | Vercel (Next.js)                  | ✅ Stable       |
-| **Android / iOS**   | Capacitor Shell (Flavor: tools)   | ✅ Stable       |
-| **KDS / POS**       | Capacitor Shell (Flavor: kds/pos) | ✅ Stable       |
-| **Signage Node**    | Android OS (Flavor: signage)      | ✅ Stable       |
-| **Signage Simulator** | Redroid (Docker)                | ✅ Stable       |
-| **Wear OS**         | Native Android (Kotlin/Compose)   | ✅ Functional  |
-| **Dev Bridge**      | WSL-Windows Health Recovery       | ✅ Stable       |
-| **Backend**         | Cloud Run / Render (NestJS)       | ✅ Stable       |
+### Kitchen Display System (KDS)
+- **Status**: ✅ Hardened (Feb 2026)
+- **Details**: Real-time ticket visualization with GraphQL Subscriptions. Automated ticket aging and bump logic.
+- **UX**: Framer Motion animations for ticket entry/exit.
 
-## Infrastructure & Domains
+### Point of Sale (POS) Terminal
+- **Status**: ✅ Hardened (Feb 2026)
+- **Details**: Touch-optimized interface for order entry. Dual-driver support (Square + Proprietary Sous Driver).
+- **UX**: Category filtering and animated cart management.
 
-- **Database**: Postgres 16 with Row-Level Security (RLS) and **Reader/Writer separation**.
-- **Observability**: **OpenTelemetry** + **HyperDX** for distributed tracing and centralized logging.
-- **Real-time**: Socket.io for instant updates.
-- **Hardware Simulation**: Dockerized Android OS (Redroid) for signage verification.
-- **Unified Tag Engine (Spec 017)**: Polymorphic tagging system with organization-level isolation and color-coding for any UUID-based entity.
-- **Domains**: IAM, Procurement, Culinary, Intelligence, Accounting, Presentation, Hardware, Integrations.
-  - **Integrations**: Robust OAuth handling for Square and Google Drive with automatic token refresh and detailed error reporting.
+### Catalog Management
+- **Status**: ✅ Implemented
+- **Details**: Centralized product and category management with organization-level scoping.
+
+## 3. Presentation & Signage
+
+### Digital Menu Boards
+- **Status**: ✅ Implemented
+- **Details**: Dynamic layout engine. Real-time content updates from the API.
+- **Tech**: Next.js Server Components.
+
+### Branding Lab
+- **Status**: ✅ Implemented
+- **Details**: Interactive playground for testing theme variables and design tokens.
+- **Path**: `@sous/docs` -> `/branding`.
+
+## 4. Hardware & IoT
+
+### Remote Node Management
+- **Status**: ✅ Implemented
+- **Details**: Centralized logging ("God View") and remote terminal access via the Windows Agent bridge.
+- **Hardware**: Raspberry Pi 4/5, Android Tablets, Wear OS.
+
+## 5. Intelligence & Growth
+
+### Real-time Metrics
+- **Status**: 🚧 In Progress
+- **Details**: Live dashboard for sales and operational efficiency.
+
+### Procurement & Inventory
+- **Status**: 🚧 Refactoring
+- **Details**: Automated stock auditing and invoice ingestion.

@@ -1,5 +1,6 @@
 import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
-import { SupportService, SupportReport } from '../services/support.service.js';
+import { SupportService } from '../services/support.service.js';
+import type { SupportReport } from '../services/support.service.js';
 import { JwtAuthGuard } from '../../iam/auth/guards/jwt-auth.guard.js';
 
 @Controller('support')

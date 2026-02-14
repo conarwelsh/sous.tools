@@ -1,47 +1,60 @@
 # @sous/api
 
-The core intelligence and data gateway for the `sous.tools` platform.
+The centralized backend for the Sous platform. Built with **NestJS**, **GraphQL**, and **Drizzle ORM**.
 
 ## Responsibilities
 
-- **Data Persistence**: Manages the PostgreSQL database using Drizzle ORM.
-- **API Protocols**: Provides REST (standard), GraphQL (complex), and WebSockets (real-time).
-- **Domain Logic**: Implements business rules for Recipes, Invoices, Inventory, etc.
-- **Tenancy**: Enforces strict organization-level isolation.
-
-## Functionality List
-
-- [x] Multi-tenant data isolation (RLS).
-- [x] Hybrid API (REST + GraphQL + WebSockets).
-- [x] Robust Authentication & IAM (JWT, RBAC, OAuth2: Google, GitHub, Facebook).
-- [x] User Invitation System with token-based joining.
-- [x] Account Recovery (Password Reset) with secure tokens.
-- [x] AI-powered recipe and invoice extraction (Schema & Logic).
-- [x] Real-time Menuboard/Signage synchronization.
-- [x] Asynchronous background job processing (BullMQ).
-- [x] Financial Ledger & P&L generation.
-- [x] Stock Ledger & Depletion logic.
-
-## Installation & Setup
-
-1. Ensure the root `@sous/config` is configured with a valid `DATABASE_URL`.
-2. Run `pnpm install` from the root.
-3. Build the package: `pnpm --filter @sous/api build`.
-
-## Development
-
-- **Start**: `pnpm run dev` (Port 4000)
-- **Database**: Migrations are managed via `drizzle-kit`.
+- **Unified API**: Single entry point for Web, Native, and Hardware nodes.
+- **Real-time Engine**: GraphQL Subscriptions via Redis/PubSub.
+- **Background Processing**: BullMQ for email processing and data ingestion.
+- **Polymorphic Drivers**: Universal interfaces for POS (Square, Sous) and Payments (Stripe, CardConnect).
+- **Identity Management**: JWT-based authentication with organization-level isolation.
 
 ## Tech Stack
 
-- NestJS
-- Drizzle ORM
-- PostgreSQL
-- TypeScript
-- Socket.io
+- **Framework**: NestJS 11
+- **API Style**: GraphQL (Code-first) + REST (for specific webhooks)
+- **Database**: PostgreSQL 16 + Drizzle ORM
+- **Cache/PubSub**: Redis
+- **Task Queue**: BullMQ
+- **Language**: TypeScript (ESM)
 
-## Related ADRs
+## Installation & Setup
 
-- [ADR 010: Backend API Architecture](../../.gemini/docs/ADRs/010-backend-api-strategy.md)
-- [ADR 005: Platform Domains & Tenancy](../../.gemini/docs/ADRs/005-platform-domains-and-tenancy.md)
+1.  **Infra**: Ensure Docker is running.
+    ```bash
+    pnpm db:up
+    ```
+
+2.  **Migration**:
+    ```bash
+    pnpm db:push
+    ```
+
+3.  **Development**:
+    ```bash
+    pnpm dev
+    ```
+
+## Functionality List
+
+- [x] **Multi-Tenant Architecture**: Strict organization-level data isolation via Drizzle middleware.
+- [x] **GraphQL Subscriptions**: Real-time order and hardware event propagation.
+- [x] **Driver Factory**: Polymorphic support for multiple POS and Payment providers.
+- [x] **Centralized Logging**: Integration with `@sous/logger` for unified observability.
+- [x] **Automated Documentation**: Scalar API reference available at `/docs`.
+
+## Domain Organization
+
+Following Mandate #14, the API uses a Strategic Umbrella structure:
+- `src/domains/iam`: Identity & Access Management.
+- `src/domains/pos`: Point of Sale and KDS logic.
+- `src/domains/culinary`: Catalog, Products, and Recipes.
+- `src/domains/procurement`: Invoices, Suppliers, and Orders.
+- `src/domains/billing`: Subscriptions and Payments.
+
+## Documentation
+
+- [Database Schema](./src/domains/core/database/schema.ts)
+- [API Reference](http://localhost:4000/docs)
+- [ADRs](../../.gemini/docs/ADRs/)

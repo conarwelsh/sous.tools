@@ -85,6 +85,14 @@ export const configSchema = z.object({
     redirectUri: z.string().optional(),
   }).default({}),
 
+  emails: z.object({
+    support: z.string().email().default("support@sous.tools"),
+    sales: z.string().email().default("sales@sous.tools"),
+    notifications: z.string().email().default("notifications@sous.tools"),
+    auth: z.string().email().default("auth@sous.tools"),
+    billing: z.string().email().default("billing@sous.tools"),
+  }).default({}),
+
   support: z.object({
     email: z.string().email().default("support@sous.tools"),
   }).default({}),

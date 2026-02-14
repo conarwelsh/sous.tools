@@ -1,7 +1,8 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { logger } from '@sous/logger';
+import { config } from '@sous/config';
 
 export class SupportReport {
   type: 'BUG' | 'FEATURE' | 'QUESTION';
@@ -25,6 +26,7 @@ export class SupportService {
 
   async report(data: SupportReport) {
     logger.info(`[Support] Queueing ${data.type} report: ${data.subject}`);
+    
     await this.supportQueue.add('process-report', data, {
       attempts: 3,
       backoff: { type: 'exponential', delay: 5000 },

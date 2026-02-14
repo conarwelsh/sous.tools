@@ -8,8 +8,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import path from 'path';
 import { createRequire } from 'module';
-
-const require = createRequire(import.meta.url);
+const require = createRequire(path.resolve(process.cwd(), 'package.json'));
 const execAsync = promisify(exec);
 
 export type ProcessStatus =

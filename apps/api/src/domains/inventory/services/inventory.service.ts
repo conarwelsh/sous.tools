@@ -61,9 +61,11 @@ export class InventoryService {
   private async checkLowStock(organizationId: string, ingredientId: string) {
     try {
       // 1. Get Ingredient Info
-      const ingredient = await this.dbService.readDb.query.ingredients.findFirst({
-        where: and(eq(ingredients.id, ingredientId), eq(ingredients.organizationId, organizationId)),
-      });
+      const [ingredient] = await this.dbService.readDb
+        .select()
+        .from(ingredients)
+        .where(and(eq(ingredients.id, ingredientId), eq(ingredients.organizationId, organizationId)))
+        .limit(1);
 
       if (!ingredient || !ingredient.parLevel) return;
 
@@ -89,9 +91,10 @@ export class InventoryService {
           .where(eq(ingredients.id, ingredientId));
 
         // 5. Notify Admins
-        const admins = await this.dbService.readDb.query.users.findMany({
-          where: and(eq(users.organizationId, organizationId), eq(users.role, 'admin')),
-        });
+        const admins = await this.dbService.readDb
+          .select()
+          .from(users)
+          .where(and(eq(users.organizationId, organizationId), eq(users.role, 'admin')));
 
         for (const admin of admins) {
           await this.mailService.sendEmail({

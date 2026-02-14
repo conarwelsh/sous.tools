@@ -4,11 +4,21 @@ import { useState, useEffect, useCallback } from "react";
 import { AuthService, User } from "../services/auth.service";
 import { getHttpClient } from "@sous/client-sdk";
 
+/**
+ * Hook for managing application-wide authentication state.
+ * Handles token persistence in localStorage and provides
+ * methods for login, logout, and registration.
+ *
+ * @returns {object} Auth state and methods.
+ */
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  /**
+   * Fetches the currently authenticated user's profile.
+   */
   const fetchMe = useCallback(async () => {
     const token =
       typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -41,6 +51,11 @@ export const useAuth = () => {
     fetchMe();
   }, [fetchMe]);
 
+  /**
+   * Authenticates a user and stores the access token.
+   * @param {string} email - User's email.
+   * @param {string} password - User's password.
+   */
   const login = async (email: string, password: string) => {
     const res = await AuthService.login(email, password);
     if (typeof window !== "undefined")
@@ -50,6 +65,9 @@ export const useAuth = () => {
     await fetchMe();
   };
 
+  /**
+   * Terminates the user session and clears local storage.
+   */
   const logout = async () => {
     try {
       await AuthService.logout();
@@ -62,6 +80,10 @@ export const useAuth = () => {
     setUser(null);
   };
 
+  /**
+   * Registers a new user.
+   * @param {any} data - Registration payload.
+   */
   const register = async (data: any) => {
     const user = await AuthService.register(data);
     return user;

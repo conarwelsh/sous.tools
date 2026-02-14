@@ -61,6 +61,7 @@ import { UiGenerateCommand } from './commands/dev/generate/ui.command.js';
 // DEV - QUALITY
 import { QualityCommand } from './commands/dev/quality/quality.command.js';
 import { TestCommand } from './commands/dev/quality/test/test.command.js';
+import { E2ECommand } from './commands/dev/quality/test/e2e.command.js';
 import { CheckCommand } from './commands/dev/quality/check/check.command.js';
 import { AuditCommand } from './commands/dev/quality/audit.command.js';
 import { ForgeCommand } from './commands/dev/quality/forge.command.js';
@@ -137,6 +138,7 @@ import { CliConfigService } from './services/cli-config.service.js';
     // DEV - QUALITY
     QualityCommand,
     TestCommand,
+    E2ECommand,
     CheckCommand,
     AuditCommand,
     ForgeCommand,

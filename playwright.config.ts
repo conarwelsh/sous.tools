@@ -10,6 +10,7 @@ export default defineConfig({
   use: {
     baseURL: "http://localhost:3000",
     trace: "on-first-retry",
+    video: process.env.PLAYWRIGHT_VIDEO ? "on" : "off",
   },
   projects: [
     {
@@ -19,23 +20,27 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: "pnpm --filter @sous/api run start:dev",
-      url: "http://localhost:4000/reference",
+      command: "pnpm sous infra exec pnpm --filter @sous/api run start:dev",
+      url: "http://localhost:4000/docs",
+      timeout: 120000,
       reuseExistingServer: !process.env.CI,
     },
     {
-      command: "pnpm --filter @sous/web run dev",
+      command: "pnpm sous infra exec pnpm --filter @sous/web run dev",
       url: "http://localhost:3000",
+      timeout: 120000,
       reuseExistingServer: !process.env.CI,
     },
     {
-      command: "pnpm --filter @sous/kds run dev",
+      command: "pnpm sous infra exec pnpm --filter @sous/web run dev -- --port 1423",
       url: "http://localhost:1423",
+      timeout: 120000,
       reuseExistingServer: !process.env.CI,
     },
     {
-      command: "pnpm --filter @sous/pos run dev",
+      command: "pnpm sous infra exec pnpm --filter @sous/web run dev -- --port 1424",
       url: "http://localhost:1424",
+      timeout: 120000,
       reuseExistingServer: !process.env.CI,
     },
   ],

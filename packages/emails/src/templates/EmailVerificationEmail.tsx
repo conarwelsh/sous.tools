@@ -16,9 +16,10 @@ export const EmailVerificationEmail = ({
       Verify your Identity
     </Heading>
     <Text className="text-zinc-600 text-sm mb-6">
-      Hello {userName}, please click the button below to verify your email address and activate your kitchen profile.
+      Hello {userName}, please click the button below to verify your email
+      address and activate your kitchen profile.
     </Text>
-    
+
     <Section className="mb-8 text-center">
       <Button
         className="bg-black rounded-xl text-white text-xs font-black uppercase tracking-widest py-4 px-8"

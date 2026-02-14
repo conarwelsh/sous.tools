@@ -96,21 +96,21 @@ services:
       - "traefik.http.services.redisinsight.loadbalancer.server.port=5540"
 
   # Universal runner for CI/CD and testing installation workflow
-  # installer:
-  #   image: my-github-runner:latest
-  #   container_name: sous-installer
-  #   restart: unless-stopped
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile.runner
-  #   environment:
-  #     - REPO_URL=${GITHUB_REPO_URL:-}
-  #     - RUNNER_TOKEN=${GITHUB_RUNNER_TOKEN:-}
-  #     - DEBIAN_FRONTEND=noninteractive
-  #   volumes:
-  #     - .:/home/conar/sous.tools
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #   working_dir: /home/conar/sous.tools
+  installer:
+    image: my-github-runner:latest
+    container_name: sous-installer
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile.runner
+    environment:
+      - REPO_URL=${GITHUB_REPO_URL:-}
+      - RUNNER_TOKEN=${GITHUB_RUNNER_TOKEN:-}
+      - DEBIAN_FRONTEND=noninteractive
+    volumes:
+      - .:/home/conar/sous.tools
+      - /var/run/docker.sock:/var/run/docker.sock
+    working_dir: /home/conar/sous.tools
 
 volumes:
   postgres_data:

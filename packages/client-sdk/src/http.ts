@@ -28,7 +28,6 @@ export class HttpClient {
       try {
         await this.request(req.path, req.options);
       } catch (e) {
-        // eslint-disable-next-line no-console
         console.error(
           `[HttpClient] Failed to process queued request ${req.id}, re-queueing...`,
           e,
@@ -94,7 +93,6 @@ export class HttpClient {
     } catch (e: any) {
       // 1. Try Edge Node Fallback if cloud fails
       if (!url.includes("sous.local") && !url.includes("localhost")) {
-        // eslint-disable-next-line no-console
         console.warn(
           `[HttpClient] Cloud API unreachable. Attempting Edge Node fallback...`,
         );
@@ -105,7 +103,6 @@ export class HttpClient {
             options,
           );
         } catch (_edgeError) {
-          // eslint-disable-next-line no-console
           console.error(`[HttpClient] Edge Node also unreachable.`);
         }
       }
@@ -116,7 +113,6 @@ export class HttpClient {
         !window.navigator.onLine &&
         ["POST", "PUT", "PATCH", "DELETE"].includes(options.method || "")
       ) {
-        // eslint-disable-next-line no-console
         console.warn(
           `[HttpClient] Offline. Queuing ${options.method} request to ${path}`,
         );

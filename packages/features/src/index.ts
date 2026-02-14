@@ -25,6 +25,7 @@ export * from "./domains/pos/index";
 // Billing Domain
 export * from "./domains/billing/components/PlanSelector";
 export * from "./domains/billing/components/CheckoutView";
+export * from "./domains/billing/actions/index";
 
 // KDS Domain
 export * from "./domains/kds/index";
@@ -90,3 +91,4 @@ export * from "./domains/core/platform/hooks/usePlatformMetrics";
 export * from "./domains/iam/oauth/components/DeveloperPortal";
 export * from "./domains/iam/oauth/components/ConsentView";
 export * from "./domains/iam/oauth/hooks/useOAuthClients";
+export * from "./domains/kiosk";

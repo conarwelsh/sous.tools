@@ -1,3 +1,11 @@
+## 2026-02-14 (Marketing Restoration & Design Fidelity)
+
+- **Marketing Page Restoration:**
+    - Reverted the main landing page (`apps/web/src/app/(public)/page.tsx`) to its previous industrial design version.
+    - Restored the use of the `@sous/ui` design system components (`Logo`, `View`, `Text` with uppercase tracking) for better alignment with the project's brand identity.
+    - Re-introduced the interactive "Culinary Intelligence" features grid and tiered pricing section with "Most Popular" badges.
+    - Restored the dynamic theme-aware radial background gradients for enhanced visual depth.
+
 ## 2026-02-13 (Smart Seeding Refactor & Support UI 100% Completion)
 
 - **Smart Seeding (Spec 032):**

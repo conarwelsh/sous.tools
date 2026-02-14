@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Real-time GraphQL Subscriptions for KDS and POS status updates.
+- Framer Motion animations for KDS ticket layout and POS category transitions.
+- ADR 003: Real-time GraphQL Subscriptions.
+- Descriptive JSDoc blocks for core POS and KDS logic.
+
+### Changed
+- Restored the main marketing page to the industrial design version, reverting recent layout changes.
+- Standardized CLI build to pure ESM/CJS based on environment stability.
+- Refactored `ecosystem.config.js` to support direct dev server execution.
+- Updated project documentation and README files.
+
+### Fixed
+- Fixed `SupportService` configuration access.
+- Restored `MetricsModule` to API module graph.
+- Resolved PM2 crash loop caused by CLI artifact mismatches.
+
 ## [0.1.0] - 2026-02-13
 
 ### Added

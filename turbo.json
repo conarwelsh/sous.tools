@@ -4,13 +4,16 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+      "outputs": ["dist/**", "out/**", ".next/**", "!.next/cache/**"]
     },
     "lint": {},
     "typecheck": {
       "dependsOn": ["^build"]
     },
     "test": {
+      "dependsOn": ["^build"]
+    },
+    "test:e2e": {
       "dependsOn": ["^build"]
     },
     "dev": {

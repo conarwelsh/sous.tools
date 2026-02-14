@@ -43,11 +43,8 @@ const nextConfig = {
     },
   },
   transpilePackages: ["@sous/ui", "@sous/features", "@sous/config"],
-  // Explicitly set the output file tracing root to the monorepo root
-  outputFileTracingRoot: path.join(__dirname, "../../"),
   turbopack: {
-    // Resolve the monorepo root for Turbopack
-    root: path.join(__dirname, "../../"),
+    root: "/home/conar/sous.tools",
   },
   webpack: (config: any, { isServer }: any) => {
     if (!isServer) {

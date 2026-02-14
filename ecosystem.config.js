@@ -3,8 +3,6 @@
  * 100% Process Management via PM2
  */
 
-const path = require('path');
-
 module.exports = {
   apps: [
     // --- Infrastructure ---
@@ -21,11 +19,11 @@ module.exports = {
       namespace: "infra"
     },
 
-    // --- Core Services ---
+    // --- Core Services (Injected) ---
     {
       name: "sous-api",
-      script: "node ../../apps/cli/dist/main.js env exec -- pnpm nest start --watch",
-      cwd: "apps/api",
+      script: "pnpm sous infra exec pnpm --filter @sous/api run dev",
+      cwd: ".",
       env: {
         NODE_ENV: "development",
         PORT: 4000
@@ -34,8 +32,8 @@ module.exports = {
     },
     {
       name: "sous-web",
-      script: "node ../../apps/cli/dist/main.js env exec -- pnpm next dev --turbo",
-      cwd: "apps/web",
+      script: "pnpm sous infra exec pnpm --filter @sous/web run dev",
+      cwd: ".",
       env: {
         NODE_ENV: "development",
         PORT: 3000
@@ -44,55 +42,13 @@ module.exports = {
     },
     {
       name: "sous-docs",
-      script: "node ../../apps/cli/dist/main.js env exec -- pnpm next dev --turbo",
-      cwd: "apps/docs",
+      script: "pnpm sous infra exec pnpm --filter @sous/docs run dev",
+      cwd: ".",
       env: {
         NODE_ENV: "development",
         PORT: 3001
       },
       namespace: "core"
-    },
-
-    // --- Native Deployments (One-Shot) ---
-    {
-      name: "sous-pos",
-      script: "node ./apps/cli/dist/main.js env exec -- bash -c \"SERIAL=$(pnpm tsx scripts/device-manager.ts 'Pixel_Tablet') && bash scripts/run-android.sh $SERIAL pos\"",
-      cwd: ".",
-      autorestart: false,
-      env: {
-        FLAVOR: "pos",
-        PORT: 3000
-      },
-      namespace: "native"
-    },
-    {
-      name: "sous-kds",
-      script: "node ./apps/cli/dist/main.js env exec -- bash -c \"SERIAL=$(pnpm tsx scripts/device-manager.ts 'Medium_Desktop') && bash scripts/run-android.sh $SERIAL kds\"",
-      cwd: ".",
-      autorestart: false,
-      env: {
-        FLAVOR: "kds",
-        PORT: 3000
-      },
-      namespace: "native"
-    },
-    {
-      name: "sous-signage",
-      script: "node ./apps/cli/dist/main.js env exec -- bash -c \"SERIAL=$(pnpm tsx scripts/device-manager.ts 'Television_1080p') && bash scripts/run-android.sh $SERIAL signage\"",
-      cwd: ".",
-      autorestart: false,
-      env: {
-        FLAVOR: "signage",
-        PORT: 3000
-      },
-      namespace: "native"
-    },
-    {
-      name: "sous-wearos",
-      script: "node ./apps/cli/dist/main.js env exec -- bash -c \"SERIAL=$(pnpm tsx scripts/device-manager.ts 'Wear_OS_Large_Round') && bash scripts/run-wearos.sh $SERIAL\"",
-      cwd: ".",
-      autorestart: false,
-      namespace: "native"
     }
   ]
 };

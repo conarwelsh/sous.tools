@@ -1,16 +1,25 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { SquareDriver } from './square.driver.js';
+import { SousDriver } from './sous.driver.js';
 import { GoogleDriveDriver } from './google-drive.driver.js';
+import { DatabaseService } from '../../core/database/database.service.js';
+import { PosService } from '../../pos/services/pos.service.js';
 import { logger } from '@sous/logger';
 
 @Injectable()
 export class DriverFactory {
-  getPOSDriver(provider: string, credentials: any) {
+  constructor(
+    @Inject(DatabaseService) private readonly dbService: DatabaseService,
+    @Inject(forwardRef(() => PosService)) private readonly posService: PosService,
+  ) {}
 
-
+  getPOSDriver(provider: string, credentials: any, organizationId?: string) {
     switch (provider) {
       case 'square':
         return new SquareDriver(credentials);
+      case 'sous':
+        if (!organizationId) throw new Error('[DriverFactory] organizationId required for Sous driver');
+        return new SousDriver(this.dbService, this.posService, organizationId);
       default:
         throw new Error(
           `[DriverFactory] Unsupported POS provider: ${provider}`,

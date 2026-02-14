@@ -6,12 +6,16 @@
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
+  "main": "./dist/main.js",
+  "bin": {
+    "sous": "./dist/main.js"
+  },
   "scripts": {
-    "build": "nest build",
+    "build": "tsup src/main.ts --format cjs --clean --minify --no-dts --external @nestjs/common,@nestjs/core,@nestjs/platform-express,reflect-metadata,rxjs,nest-commander,fs,path,os,child_process,http,https,module,url,stream",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "tsx src/main.ts",
-    "start:dev": "tsx watch src/main.ts",
+    "start": "tsx --tsconfig tsconfig.json src/main.ts",
+    "start:dev": "tsx watch --tsconfig tsconfig.json src/main.ts",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -54,6 +58,8 @@
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
+    "@swc/core": "^1.15.11",
+    "@swc/helpers": "^0.5.18",
     "@tailwindcss/postcss": "4.1.18",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
@@ -75,6 +81,7 @@
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
+    "tsup": "^8.5.1",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
   },

@@ -109,37 +109,37 @@ export default function RecipeDetailPage({
     },
   );
 
-  const [formData, setFormData] = useState<any>(null);
+  const [formDataOverride, setFormDataOverride] = useState<any>(null);
   const [isDirty, setIsDirty] = useState(false);
 
-  useEffect(() => {
-    if (data?.recipe && !isDirty) {
-      setFormData(JSON.parse(JSON.stringify(data.recipe)));
-    }
-  }, [data, isDirty]);
+  const formData = useMemo(() => {
+    if (formDataOverride) return formDataOverride;
+    if (data?.recipe) return JSON.parse(JSON.stringify(data.recipe));
+    return null;
+  }, [data?.recipe, formDataOverride]);
 
   const handleFieldChange = (updates: any) => {
-    setFormData((prev: any) => ({ ...prev, ...updates }));
+    setFormDataOverride((prev: any) => ({ ...(prev || formData), ...updates }));
     setIsDirty(true);
   };
 
   const handleIngredientChange = (idx: number, updates: any) => {
     const newIngredients = [...formData.ingredients];
     newIngredients[idx] = { ...newIngredients[idx], ...updates };
-    setFormData((prev: any) => ({ ...prev, ingredients: newIngredients }));
+    setFormDataOverride((prev: any) => ({ ...(prev || formData), ingredients: newIngredients }));
     setIsDirty(true);
   };
 
   const handleStepChange = (idx: number, updates: any) => {
     const newSteps = [...formData.steps];
     newSteps[idx] = { ...newSteps[idx], ...updates };
-    setFormData((prev: any) => ({ ...prev, steps: newSteps }));
+    setFormDataOverride((prev: any) => ({ ...(prev || formData), steps: newSteps }));
     setIsDirty(true);
   };
 
   const addIngredient = () => {
     const newIngredients = [
-      ...(formData.ingredients || []),
+      ...(formData?.ingredients || []),
       {
         id: `new-${Date.now()}`,
         amount: 0,
@@ -147,21 +147,21 @@ export default function RecipeDetailPage({
         ingredient: { id: "", name: "New Ingredient" },
       },
     ];
-    setFormData((prev: any) => ({ ...prev, ingredients: newIngredients }));
+    setFormDataOverride((prev: any) => ({ ...(prev || formData), ingredients: newIngredients }));
     setIsDirty(true);
   };
 
   const addStep = () => {
     const newSteps = [
-      ...(formData.steps || []),
+      ...(formData?.steps || []),
       {
         id: `new-${Date.now()}`,
-        order: (formData.steps?.length || 0) + 1,
+        order: (formData?.steps?.length || 0) + 1,
         instruction: "New instruction step...",
         timerDuration: null,
       },
     ];
-    setFormData((prev: any) => ({ ...prev, steps: newSteps }));
+    setFormDataOverride((prev: any) => ({ ...(prev || formData), steps: newSteps }));
     setIsDirty(true);
   };
 
@@ -189,6 +189,8 @@ export default function RecipeDetailPage({
           },
         },
       });
+      setIsDirty(false);
+      setFormDataOverride(null);
       refetch();
     } catch (e) {
       console.error(e);

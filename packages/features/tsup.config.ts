@@ -5,11 +5,10 @@ export default defineConfig([
     entry: {
       client: "src/client.ts",
       index: "src/index.ts",
-      "constants/plans": "src/constants/plans.ts",
     },
     format: ["cjs", "esm"],
     dts: true,
-    clean: true,
+    clean: false,
     bundle: true,
     splitting: false,
     banner: {
@@ -28,6 +27,16 @@ export default defineConfig([
       "react-markdown",
       "remark-gfm",
     ],
+  },
+  {
+    entry: {
+      "constants/plans": "src/constants/plans.ts",
+    },
+    format: ["cjs", "esm"],
+    dts: true,
+    clean: false,
+    bundle: true,
+    splitting: false,
   },
   {
     entry: {

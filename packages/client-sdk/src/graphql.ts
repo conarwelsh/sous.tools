@@ -3,10 +3,24 @@ import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { createClient } from "graphql-ws";
 import { getMainDefinition } from "@apollo/client/utilities";
 
+/**
+ * Configuration options for the Apollo Client.
+ */
 export interface ApolloClientConfig {
-  apiUrl: string; // e.g. http://localhost:4000
+  /**
+   * The base URL of the GraphQL API (e.g. http://localhost:4000).
+   */
+  apiUrl: string;
 }
 
+/**
+ * Creates and configures a new Apollo Client instance.
+ * Automatically sets up a WebSocket link for subscriptions
+ * and an HTTP link for queries and mutations.
+ *
+ * @param {ApolloClientConfig} config - The client configuration.
+ * @returns {ApolloClient} A configured Apollo Client instance.
+ */
 export const createApolloClient = (config: ApolloClientConfig) => {
   const httpLink = new HttpLink({
     uri: `${config.apiUrl}/graphql`,
@@ -21,6 +35,10 @@ export const createApolloClient = (config: ApolloClientConfig) => {
         )
       : null;
 
+  /**
+   * Splits traffic between HTTP and WebSocket links
+   * based on the type of GraphQL operation.
+   */
   const splitLink =
     wsLink != null
       ? split(

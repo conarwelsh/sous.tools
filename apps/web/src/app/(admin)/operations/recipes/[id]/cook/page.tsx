@@ -81,9 +81,13 @@ function StepTimer({ duration, label }: { duration: number; label: string }) {
   useEffect(() => {
     let interval: any;
     if (isRunning && timeLeft > 0) {
-      interval = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
-    } else if (timeLeft === 0 && isRunning) {
-      setIsRunning(false);
+      interval = setInterval(() => setTimeLeft(prev => {
+        if (prev <= 1) {
+          setIsRunning(false);
+          return 0;
+        }
+        return prev - 1;
+      }), 1000);
     }
     return () => clearInterval(interval);
   }, [isRunning, timeLeft]);

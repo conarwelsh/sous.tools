@@ -25,7 +25,7 @@ export * from '../../procurement/procurement.schema';
 export * from '../../pos/pos.schema';
 export * from '../../hardware/hardware.schema';
 export * from '../../presentation/presentation.schema';
-export * from '../../billing/billing.schema';
+export * from '../../billing/billing.schema.js';
 
 // 4. Heavy Dependencies
 export * from '../../inventory/inventory.schema';
@@ -69,7 +69,7 @@ import {
 import {
   billingPlans,
   billingSubscriptions,
-} from '../../billing/billing.schema';
+} from '../../billing/billing.schema.js';
 
 import { invitations } from '../../iam/invitations/invitations.schema';
 import { passwordResetTokens } from '../../iam/auth/password-reset.schema';

@@ -95,14 +95,29 @@ The project includes a `.vscode` folder with recommended extensions and debug co
 
 ---
 
-## 🛠️ Testing the Installation Workflow
+## 🛠️ Infrastructure & CI/CD
 
+### 1. Local Infrastructure
+We use Docker Compose to manage local development dependencies (Postgres, Redis, MinIO, etc.).
+
+```bash
+pnpm db:up
+```
+
+### 2. GitHub Runner
+A self-hosted GitHub Actions runner is provided as a Docker service. It is configured to autostart and restart automatically.
+
+To enable the runner:
+1. Set `GITHUB_REPO_URL` and `GITHUB_RUNNER_TOKEN` in your `.env`.
+2. Start the service:
+```bash
+docker compose up -d installer
+```
+
+### 3. Testing the Installation Workflow
 We use a Docker-based ephemeral Ubuntu container to verify the installation process remains robust.
 
 ```bash
-# Start the tester container
-docker compose up -d installer
-
 # Run the automated install test
 docker exec -it sous-installer pnpm sous dev install
 ```

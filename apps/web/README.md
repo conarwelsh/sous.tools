@@ -1,59 +1,63 @@
 # @sous/web
 
-The primary administrative web interface for the `sous.tools` platform.
+The unified frontend shell for the Sous platform. Built with **Next.js 16**, **Tailwind CSS 4**, and **Capacitor**.
 
 ## Responsibilities
 
-- **Management Console**: Full CRUD for Organizations, Locations, and Staff.
-- **Data Visualisation**: Dashboards for COGS, Inventory, and Market Intelligence.
-- **Platform Thin Shell**: Routes and orchestrates shared features from `@sous/features`.
+This application serves as a thin "Shell" (Mandate #15). It handles:
+- **Routing**: Client and Server-side routing for all platform flavors.
+- **Platform Glue**: Capacitor integration for native hardware access.
+- **Initialization**: Apollo Client, Auth Providers, and Design System setup.
+- **Layouts**: High-level structural containers for different view modes.
 
-## Functionality List
+**Note**: All core business logic, components ("Organisms"), and domain-specific hooks reside in `@sous/features`.
 
-- [x] Server-Side Data Fetching (MANDATE 7).
-- [x] Subdomain-based tenant routing.
-- [ ] Culinary Management (Recipes, Invoices).
-- [ ] Signage Template Editor.
+## Product Flavors
 
-## Installation & Setup
+The web app is optimized for multiple deployment targets using Capacitor:
 
-1. Ensure `@sous/config` is initialized.
-2. Run `pnpm install` from the root.
-3. Build the package: `pnpm --filter @sous/web build`.
-
-## Development
-
-- **Start**: `pnpm run dev` (Port 3000)
-- **Pattern**: Follows the Controller-View pattern (ADR 004).
-
-## Android Flavors (Capacitor)
-
-We use Android Product Flavors to build specialized APKs from this single codebase:
-
-- `tools`: Primary admin app (`com.sous.tools`)
-- `kds`: Kitchen Display System (`com.sous.kds`)
-- `pos`: Point of Sale terminal (`com.sous.pos`)
-- `signage`: Digital Signage node (`com.sous.signage`)
-
-To build a specific flavor:
-
-```bash
-cd android
-./gradlew assembleKdsRelease
-```
-
-Each flavor automatically redirects to its respective route on boot via the `FlavorGate` component.
+| Flavor | Target | Description |
+| :--- | :--- | :--- |
+| **Admin** | Desktop Web | Central management console for organizations. |
+| **POS** | Tablet | Touch-optimized terminal for order entry. |
+| **KDS** | Large Tablet / Monitor | Kitchen Display System with real-time ticket aging. |
+| **Signage** | TV / 1080p | Digital menu board and promotional display. |
+| **Mobile** | Phone | Consumer and staff mobile companion. |
 
 ## Tech Stack
 
-- Next.js 16 (App Router)
-- React
-- Tailwind CSS
-- Socket.io Client (Realtime Integration)
-- `@sous/ui`
-- `@sous/features`
+- **Framework**: Next.js 16 (App Router)
+- **Styling**: Tailwind CSS 4 + `@sous/ui`
+- **Data Fetching**: Apollo Client (GraphQL + WebSockets for Subscriptions)
+- **Animations**: Framer Motion (Real-time updates)
+- **Native Bridge**: Capacitor 7
 
-## Related ADRs
+## Installation & Setup
 
-- [ADR 015: Universal Platform Application](../../.gemini/docs/ADRs/015-universal-platform-application-strategy.md)
-- [ADR 004: Design Strategies](../../.gemini/docs/ADRs/004-design-strategies.md)
+1.  **Dependencies**:
+    ```bash
+    pnpm install
+    ```
+
+2.  **Environment**:
+    All configuration is managed via `@sous/config` and injected via `sous env exec`.
+
+3.  **Development**:
+    ```bash
+    # Start the dev server
+    pnpm dev
+    ```
+
+## Functionality List
+
+- [x] **Unified Authentication**: SSR-compatible auth flow with RBAC.
+- [x] **Real-time KDS**: Subscriptions-based ticket management with animated transitions.
+- [x] **Touch POS**: Interactive catalog and cart management.
+- [x] **Digital Signage**: Dynamic layout engine driven by API content.
+- [x] **Device Pairing**: 6-digit code pairing for native hardware nodes.
+
+## Documentation
+
+- [Design System Tokens](../../packages/ui/README.md)
+- [Feature Architecture](../../packages/features/README.md)
+- [Capacitor Workflow](../../.gemini/docs/dev-device-installation.md)

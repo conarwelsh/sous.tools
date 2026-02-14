@@ -1,5 +1,6 @@
 import React from "react";
 import { Button, Card, View, Text, ScrollView } from "@sous/ui";
+import { Loader2 } from "lucide-react";
 
 interface CartItem {
   id: string;
@@ -12,9 +13,10 @@ interface Props {
   items: CartItem[];
   onPay: () => void;
   onClear: () => void;
+  isSubmitting?: boolean;
 }
 
-export const Cart = ({ items, onPay, onClear }: Props) => {
+export const Cart = ({ items, onPay, onClear, isSubmitting }: Props) => {
   const total = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0,
@@ -58,16 +60,20 @@ export const Cart = ({ items, onPay, onClear }: Props) => {
             variant="destructive"
             className="flex-1 h-12"
             onClick={onClear}
+            disabled={isSubmitting}
           >
             <span className="font-bold uppercase tracking-widest">Clear</span>
           </Button>
           <Button
             className="flex-[2] bg-emerald-600 hover:bg-emerald-700 h-12"
             onClick={onPay}
+            disabled={isSubmitting}
           >
-            <span className="text-xl font-black uppercase tracking-widest">
-              Pay
-            </span>
+            {isSubmitting ? <Loader2 className="animate-spin" /> : (
+              <span className="text-xl font-black uppercase tracking-widest">
+                Pay
+              </span>
+            )}
           </Button>
         </div>
       </div>

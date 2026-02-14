@@ -3,7 +3,7 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   experimental: {},
-  outputFileTracingRoot: path.join(__dirname, "../../"),
+  outputFileTracingRoot: "/home/conar/sous.tools",
   transpilePackages: ["@sous/ui", "@sous/features", "@sous/config"],
   webpack: (config, { isServer }) => {
     if (!isServer) {

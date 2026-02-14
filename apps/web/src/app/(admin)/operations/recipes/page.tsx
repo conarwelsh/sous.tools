@@ -118,7 +118,9 @@ export default function RecipesPage() {
             (i) => i.provider === "google-drive" && (i.isActive || i.is_active),
           ),
         );
-      } catch (e) {}
+      } catch (e) {
+        // Silently fail if integrations check fails
+      }
     };
     if (orgId) checkIntegrations();
   }, [orgId]);
