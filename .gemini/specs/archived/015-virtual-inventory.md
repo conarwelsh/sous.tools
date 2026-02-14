@@ -13,31 +13,38 @@ Create a "Virtual Inventory" system that provides a real-time, theoretical calcu
 The heart of this domain is the `StockLedger`, an event-driven calculator.
 
 ### 1. The Equation
+
 `Current Stock = (Last Physical Count) + (Invoices Since Count) - (Theoretical Depletion via Sales) - (Reported Waste)`
 
 ### 2. Unit Normalization
+
 All calculations MUST occur in the **Base Unit** defined in the Catalog for that ingredient.
-- *Example:*
+
+- _Example:_
   - Invoice: "1 Case of Tomatoes (25 lbs)" -> Converter -> `11,340 grams` (Inflow).
-  - Recipe: "Tomato Slice (30g)" * 10 Sold -> `300 grams` (Outflow).
+  - Recipe: "Tomato Slice (30g)" \* 10 Sold -> `300 grams` (Outflow).
   - Ledger Impact: `+11,040 grams`.
 
 ### 3. Wastage Logic
+
 - **Recipe Wastage:** Defined in Recipe Manager (Spec 011). If a recipe uses 100g of Onion but has a 10% wastage factor, the ledger deducts 110g per sale.
 - **Incident Wastage:** Spills, drops, or spoilage reported via apps.
 
 ### 4. Event Triggers
+
 - **`InvoiceFinalized`:** Increases stock. Sourced from Invoices Domain.
 - **`POSOrderFinalized`:** Decreases stock. Sourced from POS/Integrations. Requires "Exploding" menu items into ingredients via Recipe logic.
 - **`WasteReported`:** Decreases stock. Sourced from KDS/POS manual entry.
-- **`StockAudit` (Physical Count):** Resets stock to a hard number. The difference between *Virtual* and *Physical* is recorded as **Variance** (Cost of Goods Lost).
+- **`StockAudit` (Physical Count):** Resets stock to a hard number. The difference between _Virtual_ and _Physical_ is recorded as **Variance** (Cost of Goods Lost).
 
 ## User Interfaces
 
 ### 1. Inventory Manager Page
+
 The central dashboard for managing stock.
 
 #### Features
+
 - **Global Inventory Table:**
   - Columns: Ingredient Name, Category, Last Purchased Price, Vendor, **Virtual Stock Level**, Par Level, Status.
   - **Visuals:** Stock levels represented as progress bars relative to "Par Level".
@@ -51,19 +58,23 @@ The central dashboard for managing stock.
   - "View History": Opens the Ledger Log for that item.
 
 ### 2. Wastage Reporting (Incident Hub)
+
 A specialized modal/view available on **POS**, **KDS**, and **Manager Tools**.
+
 - **Quick Entry:** Select Ingredient -> Enter Qty -> Select Reason (Spilled, Spoiled, Burned, Returned).
 - **Voice Command (Wear OS / Mobile):**
-  - *"Tell Sous I spilled a gallon of mayo."*
+  - _"Tell Sous I spilled a gallon of mayo."_
   - System parses "Mayo" -> `Mayonnaise`, "Gallon" -> `3.78L`.
   - Creates a `WasteReported` event automatically.
 
 ### 3. Physical Count Mode (Audit)
+
 A specialized mobile-first view for performing actual inventory counts.
+
 - **Barcode Scanning:**
   - Users can scan UPC/EAN codes on boxes/cans.
   - System looks up the `Ingredient` associated with that barcode (established during Invoice Ingestion).
-  - *Feedback:* Beeps on success, prompts to map new barcodes if unknown.
+  - _Feedback:_ Beeps on success, prompts to map new barcodes if unknown.
 - **Workflow:**
   1. User selects "Start Count" (Full Inventory or Specific Category/Location).
   2. UI shows list of items expected in that location.
@@ -72,8 +83,10 @@ A specialized mobile-first view for performing actual inventory counts.
   5. User submits Audit -> Ledger is "Trued Up".
 
 ### 4. Ubiquitous Data Hooks
+
 Inventory data must be injected into other domains:
-- **Recipe Manager:** When viewing a recipe, if an ingredient is Critical/Red, show a warning: *"Low Stock: Butter (Only 200g remaining)"*.
+
+- **Recipe Manager:** When viewing a recipe, if an ingredient is Critical/Red, show a warning: _"Low Stock: Butter (Only 200g remaining)"_.
 - **Order Manager:** Automatically populate the "Suggestions" tab with items below Par.
 - **Ingredient Detail:** Show the "Burn Rate" (Average depletion per day) to help set accurate Par levels.
 

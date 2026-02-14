@@ -12,7 +12,9 @@ export const WelcomeEmail = ({ firstName }: WelcomeEmailProps) => (
       Welcome, Chef {firstName}.
     </Heading>
     <Text className="text-zinc-600 text-sm leading-relaxed mb-6">
-      Your account is now active. You're joining a community of culinary professionals using Sous to automate the "boring stuff" so you can focus on the food.
+      Your account is now active. You're joining a community of culinary
+      professionals using Sous to automate the "boring stuff" so you can focus
+      on the food.
     </Text>
     <Section className="mb-8">
       <Button

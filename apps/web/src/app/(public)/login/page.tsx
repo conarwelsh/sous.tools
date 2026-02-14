@@ -27,11 +27,13 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <View className="flex-1 items-center justify-center min-h-screen bg-background">
-        <Loader2 className="animate-spin text-primary" />
-      </View>
-    }>
+    <Suspense
+      fallback={
+        <View className="flex-1 items-center justify-center min-h-screen bg-background">
+          <Loader2 className="animate-spin text-primary" />
+        </View>
+      }
+    >
       <LoginContent />
     </Suspense>
   );

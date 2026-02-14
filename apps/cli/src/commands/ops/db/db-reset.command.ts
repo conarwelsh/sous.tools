@@ -42,7 +42,9 @@ export class DbResetCommand extends CommandRunner {
       logger.info('  └─ Seeding database (system + sample)...');
       runCommand('SKIP_MAIL=true SKIP_INGESTION=true SKIP_GATEWAYS=true pnpm --filter @sous/api run db:seed sample');
 
-      logger.info('✅ Database reset and seeded with sample data successfully.');
+      logger.info(
+        '✅ Database reset and seeded with sample data successfully.',
+      );
     } catch (error: any) {
       logger.error(`❌ Database reset failed: ${error.message}`);
       process.exit(1);

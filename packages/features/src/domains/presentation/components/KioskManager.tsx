@@ -1,7 +1,20 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { View, Text, Card, Button, Input, ScrollView, Logo, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@sous/ui";
+import {
+  View,
+  Text,
+  Card,
+  Button,
+  Input,
+  ScrollView,
+  Logo,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@sous/ui";
 import { getHttpClient } from "@sous/client-sdk";
 import { PresentationEditor } from "./PresentationEditor";
 import { Globe, Monitor, Share2, Trash2, Plus } from "lucide-react";
@@ -40,7 +53,7 @@ export const KioskManager = () => {
         name: newDisplayName,
         resolution: "1920x1080",
         isActive: true,
-        isWebOnly: true
+        isWebOnly: true,
       });
       setShowAddModal(false);
       setNewDisplayName("");
@@ -71,8 +84,8 @@ export const KioskManager = () => {
 
   if (selectedDisplay) {
     return (
-      <PresentationEditor 
-        display={selectedDisplay} 
+      <PresentationEditor
+        display={selectedDisplay}
         onCancel={() => setSelectedDisplay(null)}
         onSave={() => {
           setSelectedDisplay(null);
@@ -90,11 +103,15 @@ export const KioskManager = () => {
             Screen Assignments
           </h1>
           <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">
-            Map templates to your physical digital screens or publish as web signage.
+            Map templates to your physical digital screens or publish as web
+            signage.
           </p>
         </View>
 
-        <Button onClick={() => setShowAddModal(true)} className="bg-primary h-12 px-8">
+        <Button
+          onClick={() => setShowAddModal(true)}
+          className="bg-primary h-12 px-8"
+        >
           <View className="flex-row items-center gap-2">
             <Plus size={16} />
             <span className="text-primary-foreground font-black uppercase tracking-widest text-xs">
@@ -117,10 +134,20 @@ export const KioskManager = () => {
             >
               <div className="flex flex-row justify-between items-start mb-6">
                 <div className="h-10 w-10 rounded-xl bg-muted border border-border flex items-center justify-center">
-                    {display.isWebOnly ? <Globe size={20} className="text-muted-foreground" /> : <Monitor size={20} className="text-muted-foreground" />}
+                  {display.isWebOnly ? (
+                    <Globe size={20} className="text-muted-foreground" />
+                  ) : (
+                    <Monitor size={20} className="text-muted-foreground" />
+                  )}
                 </div>
-                <div className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${display.isActive ? "bg-emerald-500/10 text-emerald-500" : "bg-muted text-muted-foreground"}`}>
-                    {display.isWebOnly ? "Public URL" : display.isActive ? "Hardware Paired" : "Awaiting Pairing"}
+                <div
+                  className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${display.isActive ? "bg-emerald-500/10 text-emerald-500" : "bg-muted text-muted-foreground"}`}
+                >
+                  {display.isWebOnly
+                    ? "Public URL"
+                    : display.isActive
+                      ? "Hardware Paired"
+                      : "Awaiting Pairing"}
                 </div>
               </div>
 
@@ -132,28 +159,39 @@ export const KioskManager = () => {
               </Text>
 
               <div className="bg-muted/50 rounded-xl p-4 border border-border mb-6">
-                 <p className="text-[10px] font-black text-zinc-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Current Layout</p>
-                 <p className="text-foreground font-bold uppercase tracking-tight">
-                    {display.assignments?.[0]?.template?.name || "No Template Assigned"}
-                 </p>
+                <p className="text-[10px] font-black text-zinc-600 dark:text-zinc-400 uppercase tracking-widest mb-2">
+                  Current Layout
+                </p>
+                <p className="text-foreground font-bold uppercase tracking-tight">
+                  {display.assignments?.[0]?.template?.name ||
+                    "No Template Assigned"}
+                </p>
               </div>
 
               <div className="flex flex-col gap-2">
                 <div className="flex flex-row gap-2">
-                  <Button onClick={() => setSelectedDisplay(display)} className="flex-1 h-10 bg-secondary hover:bg-secondary/80">
+                  <Button
+                    onClick={() => setSelectedDisplay(display)}
+                    className="flex-1 h-10 bg-secondary hover:bg-secondary/80"
+                  >
                     <span className="text-secondary-foreground text-[10px] font-black uppercase tracking-widest">
                       Manage Content
                     </span>
                   </Button>
-                  <Button onClick={() => copyPublicUrl(display.id)} className="h-10 w-10 bg-secondary hover:bg-secondary/80 flex items-center justify-center border border-border">
+                  <Button
+                    onClick={() => copyPublicUrl(display.id)}
+                    className="h-10 w-10 bg-secondary hover:bg-secondary/80 flex items-center justify-center border border-border"
+                  >
                     <Share2 size={14} className="text-secondary-foreground" />
                   </Button>
                 </div>
-                <Button 
+                <Button
                   onClick={() => handleDeleteDisplay(display.id)}
                   className="h-10 bg-destructive/5 hover:bg-destructive/10 flex items-center justify-center border border-destructive/10 transition-colors"
                 >
-                  <span className="text-destructive text-[10px] font-black uppercase tracking-widest">Delete Display</span>
+                  <span className="text-destructive text-[10px] font-black uppercase tracking-widest">
+                    Delete Display
+                  </span>
                 </Button>
               </div>
             </Card>
@@ -164,7 +202,10 @@ export const KioskManager = () => {
               <p className="text-muted-foreground font-black uppercase tracking-widest mb-4">
                 No active screens assigned.
               </p>
-              <Button onClick={() => setShowAddModal(true)} className="bg-secondary px-6 h-10">
+              <Button
+                onClick={() => setShowAddModal(true)}
+                className="bg-secondary px-6 h-10"
+              >
                 <span className="text-secondary-foreground font-black uppercase tracking-widest text-[10px]">
                   Map your first screen
                 </span>
@@ -177,11 +218,15 @@ export const KioskManager = () => {
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
         <DialogContent className="sm:max-w-[425px] bg-background border-border">
           <DialogHeader>
-            <DialogTitle className="text-foreground font-black uppercase tracking-tight">New Screen Assignment</DialogTitle>
+            <DialogTitle className="text-foreground font-black uppercase tracking-tight">
+              New Screen Assignment
+            </DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest">Display Name</Text>
+              <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest">
+                Display Name
+              </Text>
               <Input
                 value={newDisplayName}
                 onChange={(e) => setNewDisplayName(e.target.value)}
@@ -191,7 +236,11 @@ export const KioskManager = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={handleCreateDisplay} disabled={isCreating} className="bg-primary w-full">
+            <Button
+              onClick={handleCreateDisplay}
+              disabled={isCreating}
+              className="bg-primary w-full"
+            >
               <Text className="text-primary-foreground font-bold uppercase text-xs tracking-widest">
                 {isCreating ? "Creating..." : "Create Display"}
               </Text>

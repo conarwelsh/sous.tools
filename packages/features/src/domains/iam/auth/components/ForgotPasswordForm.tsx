@@ -1,14 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Button,
-  Card,
-  Input,
-  Logo,
-  CardHeader,
-  CardContent,
-} from "@sous/ui";
+import { Button, Card, Input, Logo, CardHeader, CardContent } from "@sous/ui";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { getHttpClient } from "@sous/client-sdk";
@@ -38,28 +31,35 @@ export function ForgotPasswordForm() {
   return (
     <Card className="w-full max-w-md mx-auto shadow-2xl shadow-primary/5 bg-card border-border/50 rounded-[2.5rem] overflow-hidden">
       <CardHeader className="flex flex-col items-center pt-12 pb-8 bg-muted/30 border-b border-border/50 relative">
-        <button 
+        <button
           onClick={() => router.push("/login")}
           className="absolute left-8 top-12 p-2 hover:bg-background/50 rounded-full transition-colors"
         >
           <ArrowLeft size={20} className="text-muted-foreground" />
         </button>
         <Logo size={60} showWordmark variant="neon" />
-        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground mt-4">Account Recovery</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground mt-4">
+          Account Recovery
+        </p>
       </CardHeader>
 
       <CardContent className="p-10 space-y-6">
         {!submitted ? (
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="text-center space-y-2 mb-8">
-              <h2 className="text-xl font-black text-foreground uppercase tracking-tight">Forgot Password?</h2>
+              <h2 className="text-xl font-black text-foreground uppercase tracking-tight">
+                Forgot Password?
+              </h2>
               <p className="text-xs text-muted-foreground leading-relaxed max-w-xs mx-auto">
-                Enter your email address below and we'll send you a secure link to reset your password.
+                Enter your email address below and we'll send you a secure link
+                to reset your password.
               </p>
             </div>
 
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-foreground uppercase ml-1 block tracking-[0.2em]">Email Address</label>
+              <label className="text-[10px] font-black text-foreground uppercase ml-1 block tracking-[0.2em]">
+                Email Address
+              </label>
               <Input
                 placeholder="chef@dtown.cafe"
                 value={email}
@@ -72,7 +72,9 @@ export function ForgotPasswordForm() {
 
             {error && (
               <div className="bg-destructive/10 border border-destructive/20 p-4 rounded-2xl">
-                <p className="text-destructive text-[10px] font-black text-center uppercase tracking-widest">{error}</p>
+                <p className="text-destructive text-[10px] font-black text-center uppercase tracking-widest">
+                  {error}
+                </p>
               </div>
             )}
 
@@ -90,9 +92,12 @@ export function ForgotPasswordForm() {
               <div className="w-8 h-8 bg-primary rounded-full animate-ping opacity-75 absolute" />
               <div className="w-8 h-8 bg-primary rounded-full relative" />
             </div>
-            <h2 className="text-xl font-black text-foreground uppercase tracking-tight">Check your inbox</h2>
+            <h2 className="text-xl font-black text-foreground uppercase tracking-tight">
+              Check your inbox
+            </h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              We've sent a password reset link to <span className="font-bold text-foreground">{email}</span>.
+              We've sent a password reset link to{" "}
+              <span className="font-bold text-foreground">{email}</span>.
             </p>
             <Button
               onClick={() => router.push("/login")}

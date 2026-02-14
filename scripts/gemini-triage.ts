@@ -45,41 +45,51 @@ async function main() {
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
-    
+
     // Clean up JSON markdown block if present
-    const jsonStr = text.replace(/```json/g, "").replace(/```/g, "").trim();
+    const jsonStr = text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
     const data = JSON.parse(jsonStr);
 
     console.log("Analysis complete:", data);
 
     // Apply Labels
     if (data.labels && data.labels.length > 0) {
-      await fetch(`https://api.github.com/repos/${repo}/issues/${issueNumber}/labels`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${githubToken}`,
-          "Content-Type": "application/json",
-          "User-Agent": "Gemini-Agent"
+      await fetch(
+        `https://api.github.com/repos/${repo}/issues/${issueNumber}/labels`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${githubToken}`,
+            "Content-Type": "application/json",
+            "User-Agent": "Gemini-Agent",
+          },
+          body: JSON.stringify({ labels: data.labels }),
         },
-        body: JSON.stringify({ labels: data.labels })
-      });
+      );
     }
 
     // Post Comment
     if (data.comment) {
-      await fetch(`https://api.github.com/repos/${repo}/issues/${issueNumber}/comments`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${githubToken}`,
-          "Content-Type": "application/json",
-          "User-Agent": "Gemini-Agent"
+      await fetch(
+        `https://api.github.com/repos/${repo}/issues/${issueNumber}/comments`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${githubToken}`,
+            "Content-Type": "application/json",
+            "User-Agent": "Gemini-Agent",
+          },
+          body: JSON.stringify({
+            body: `🤖 **Gemini Triage:**
+
+${data.comment}`,
+          }),
         },
-        body: JSON.stringify({ body: `🤖 **Gemini Triage:**
-
-${data.comment}` })
-      });
+      );
     }
-
   } catch (error) {
     console.error("Error processing issue:", error);
     process.exit(1);

@@ -26,19 +26,19 @@ const nextConfig = {
   experimental: {
     serverActions: {
       allowedOrigins: [
-        "localhost:3000", 
-        "localhost:4000", 
-        "localhost:1423", 
-        "localhost:1424", 
-        "localhost:1425", 
+        "localhost:3000",
+        "localhost:4000",
+        "localhost:1423",
+        "localhost:1424",
+        "localhost:1425",
         `${hostIp}:3000`,
         `${hostIp}:4000`,
         `${hostIp}:1423`,
         `${hostIp}:1424`,
         `${hostIp}:1425`,
-        "web.sous.localhost", 
-        "api.sous.localhost", 
-        "docs.sous.localhost"
+        "web.sous.localhost",
+        "api.sous.localhost",
+        "docs.sous.localhost",
       ],
     },
   },
@@ -49,20 +49,21 @@ const nextConfig = {
     // Resolve the monorepo root for Turbopack
     root: path.join(__dirname, "../../"),
   },
-      webpack: (config: any, { isServer }: any) => {
-      if (!isServer) {
-        config.resolve.alias = {
-          ...config.resolve.alias,
-          "@infisical/sdk": false,
-          "@hyperdx/node-opentelemetry": false,
-          dotenv: false,
-          fs: false,
-          path: false,
-          os: false,
-          child_process: false,
-        };
-      }
-      return config;
-    },};
+  webpack: (config: any, { isServer }: any) => {
+    if (!isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        "@infisical/sdk": false,
+        "@hyperdx/node-opentelemetry": false,
+        dotenv: false,
+        fs: false,
+        path: false,
+        os: false,
+        child_process: false,
+      };
+    }
+    return config;
+  },
+};
 
 export default nextConfig;

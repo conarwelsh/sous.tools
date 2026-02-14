@@ -2,7 +2,13 @@
 
 import React from "react";
 import { View, Text, Card } from "@sous/ui";
-import { Gauge, TrendingUp, Book, FileBarChart, ArrowRight } from "lucide-react";
+import {
+  Gauge,
+  TrendingUp,
+  Book,
+  FileBarChart,
+  ArrowRight,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function FinancesPage() {
@@ -15,7 +21,7 @@ export default function FinancesPage() {
       icon: Gauge,
       href: "/operations/intelligence/costing",
       stats: "UP TO DATE",
-      group: "Intelligence"
+      group: "Intelligence",
     },
     {
       title: "Price Trends",
@@ -23,7 +29,7 @@ export default function FinancesPage() {
       icon: TrendingUp,
       href: "/operations/intelligence/trends",
       stats: "STABLE",
-      group: "Intelligence"
+      group: "Intelligence",
     },
     {
       title: "General Ledger",
@@ -31,7 +37,7 @@ export default function FinancesPage() {
       icon: Book,
       href: "/operations/intelligence/ledger",
       stats: "IMMUTABLE",
-      group: "Finance"
+      group: "Finance",
     },
     {
       title: "P&L Reports",
@@ -39,7 +45,7 @@ export default function FinancesPage() {
       icon: FileBarChart,
       href: "/operations/intelligence/reports",
       stats: "0 ARCHIVED",
-      group: "Finance"
+      group: "Finance",
     },
   ];
 

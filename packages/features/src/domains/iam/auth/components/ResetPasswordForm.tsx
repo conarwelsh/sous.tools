@@ -1,14 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  Button,
-  Card,
-  Input,
-  Logo,
-  CardHeader,
-  CardContent,
-} from "@sous/ui";
+import { Button, Card, Input, Logo, CardHeader, CardContent } from "@sous/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getHttpClient } from "@sous/client-sdk";
 
@@ -51,8 +44,16 @@ export function ResetPasswordForm() {
   if (!token) {
     return (
       <Card className="w-full max-w-md mx-auto bg-destructive/10 border-destructive/20 p-8 text-center rounded-[2.5rem]">
-        <p className="text-destructive font-black uppercase tracking-widest">Invalid Link</p>
-        <Button onClick={() => router.push("/login")} variant="link" className="mt-4">Back to Login</Button>
+        <p className="text-destructive font-black uppercase tracking-widest">
+          Invalid Link
+        </p>
+        <Button
+          onClick={() => router.push("/login")}
+          variant="link"
+          className="mt-4"
+        >
+          Back to Login
+        </Button>
       </Card>
     );
   }
@@ -61,14 +62,18 @@ export function ResetPasswordForm() {
     <Card className="w-full max-w-md mx-auto shadow-2xl shadow-primary/5 bg-card border-border/50 rounded-[2.5rem] overflow-hidden">
       <CardHeader className="flex flex-col items-center pt-12 pb-8 bg-muted/30 border-b border-border/50">
         <Logo size={60} showWordmark variant="neon" />
-        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground mt-4">Secure Reset</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground mt-4">
+          Secure Reset
+        </p>
       </CardHeader>
 
       <CardContent className="p-10 space-y-6">
         {!success ? (
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-foreground uppercase ml-1 block tracking-[0.2em]">New Password</label>
+              <label className="text-[10px] font-black text-foreground uppercase ml-1 block tracking-[0.2em]">
+                New Password
+              </label>
               <Input
                 placeholder="••••••••"
                 value={password}
@@ -80,7 +85,9 @@ export function ResetPasswordForm() {
             </div>
 
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-foreground uppercase ml-1 block tracking-[0.2em]">Confirm Password</label>
+              <label className="text-[10px] font-black text-foreground uppercase ml-1 block tracking-[0.2em]">
+                Confirm Password
+              </label>
               <Input
                 placeholder="••••••••"
                 value={confirmPassword}
@@ -93,7 +100,9 @@ export function ResetPasswordForm() {
 
             {error && (
               <div className="bg-destructive/10 border border-destructive/20 p-4 rounded-2xl">
-                <p className="text-destructive text-[10px] font-black text-center uppercase tracking-widest">{error}</p>
+                <p className="text-destructive text-[10px] font-black text-center uppercase tracking-widest">
+                  {error}
+                </p>
               </div>
             )}
 
@@ -107,11 +116,15 @@ export function ResetPasswordForm() {
           </form>
         ) : (
           <div className="text-center space-y-6 py-8 animate-in fade-in duration-500">
-             <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <div className="w-8 h-8 bg-emerald-500 rounded-full animate-pulse" />
             </div>
-            <h2 className="text-xl font-black text-foreground uppercase tracking-tight">Password Updated</h2>
-            <p className="text-sm text-muted-foreground">Redirecting to login...</p>
+            <h2 className="text-xl font-black text-foreground uppercase tracking-tight">
+              Password Updated
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Redirecting to login...
+            </p>
           </div>
         )}
       </CardContent>

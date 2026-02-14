@@ -12,7 +12,8 @@ export const PasswordResetEmail = ({ resetLink }: PasswordResetEmailProps) => (
       Lost Access?
     </Heading>
     <Text className="text-zinc-600 text-sm leading-relaxed mb-6">
-      We received a request to reset your Sous password. If this was you, click the button below to set a new one. This link will expire in 1 hour.
+      We received a request to reset your Sous password. If this was you, click
+      the button below to set a new one. This link will expire in 1 hour.
     </Text>
     <Section className="mb-8">
       <Button

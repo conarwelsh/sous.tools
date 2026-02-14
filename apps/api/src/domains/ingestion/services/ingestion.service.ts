@@ -127,7 +127,7 @@ export class IngestionService {
             statusText: aiError.statusText,
             details: aiError.errorDetails,
             model: 'gemini-1.5-flash',
-            stack: aiError.stack
+            stack: aiError.stack,
           },
         );
 

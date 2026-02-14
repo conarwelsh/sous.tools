@@ -11,7 +11,8 @@ export function PresentationDashboardView() {
   const sections = [
     {
       title: "Signage",
-      description: "Map layouts to physical HDMI ports or publish unique web IDs.",
+      description:
+        "Map layouts to physical HDMI ports or publish unique web IDs.",
       icon: Monitor,
       href: "/presentation/signage",
       stats: "0 ACTIVE",

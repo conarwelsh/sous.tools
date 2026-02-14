@@ -109,7 +109,7 @@ export default function SuppliersPage() {
             Suppliers
           </Text>
         </View>
-        <Button 
+        <Button
           className="bg-sky-500 hover:bg-sky-600 px-6 h-12"
           onClick={() => setShowAddModal(true)}
         >
@@ -131,23 +131,29 @@ export default function SuppliersPage() {
             No Suppliers Found
           </Text>
           <Text className="text-muted-foreground/60 text-sm max-w-xs text-center">
-            Start by adding your vendors to track invoices and ingredient pricing
-            trends.
+            Start by adding your vendors to track invoices and ingredient
+            pricing trends.
           </Text>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {suppliers.map((supplier: any) => (
-            <Card key={supplier.id} className="p-6 bg-card border-border hover:border-primary/50 transition-all group">
+            <Card
+              key={supplier.id}
+              className="p-6 bg-card border-border hover:border-primary/50 transition-all group"
+            >
               <View className="flex-row justify-between items-start mb-6">
                 <View className="p-3 bg-muted border border-border rounded-xl">
-                  <Truck size={20} className="text-muted-foreground group-hover:text-sky-500 transition-colors" />
+                  <Truck
+                    size={20}
+                    className="text-muted-foreground group-hover:text-sky-500 transition-colors"
+                  />
                 </View>
                 <div className="px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded text-[10px] font-black text-emerald-500 uppercase tracking-widest">
                   Active
                 </div>
               </View>
-              
+
               <Text className="text-xl font-black text-foreground uppercase tracking-tight mb-4">
                 {supplier.name}
               </Text>
@@ -199,7 +205,9 @@ export default function SuppliersPage() {
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
         <DialogContent className="sm:max-w-[500px] bg-background border-border">
           <DialogHeader>
-            <DialogTitle className="text-foreground font-black uppercase tracking-tight">Add New Supplier</DialogTitle>
+            <DialogTitle className="text-foreground font-black uppercase tracking-tight">
+              Add New Supplier
+            </DialogTitle>
           </DialogHeader>
           <div className="grid gap-6 py-4">
             <div className="grid grid-cols-2 gap-4">
@@ -243,6 +251,7 @@ export default function SuppliersPage() {
                   placeholder="+1 (555) 000-0000"
                 />
               </div>
+            </div>
             </div>
 
             <div className="grid gap-2">

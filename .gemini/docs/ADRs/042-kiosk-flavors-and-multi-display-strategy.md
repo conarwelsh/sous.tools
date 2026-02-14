@@ -20,19 +20,19 @@ We will implement standard Android Product Flavors in `apps/web/android/app/buil
 
 - **Dimensions**: `app`
 - **Flavors**:
-    - `tools`: Primary administrative app (`com.sous.tools`).
-    - `kds`: Kitchen Display System (`com.sous.kds`).
-    - `pos`: Point of Sale terminal (`com.sous.pos`).
-    - `signage`: Digital Signage node (`com.sous.signage`).
+  - `tools`: Primary administrative app (`com.sous.tools`).
+  - `kds`: Kitchen Display System (`com.sous.kds`).
+  - `pos`: Point of Sale terminal (`com.sous.pos`).
+  - `signage`: Digital Signage node (`com.sous.signage`).
 
 ### 2. Flavor-Specific Logic
 
 Each flavor will define a `SOUS_FLAVOR` string resource. The web application will read this via a simple bridge or Capacitor plugin on boot.
 
 - If `SOUS_FLAVOR` is detected and the user is at the root path (`/`), the app will automatically redirect to the corresponding route:
-    - `kds` -> `/kds`
-    - `pos` -> `/pos`
-    - `signage` -> `/hardware` (to initiate pairing) or saved signage route (e.g., `/signage/[id]`).
+  - `kds` -> `/kds`
+  - `pos` -> `/pos`
+  - `signage` -> `/hardware` (to initiate pairing) or saved signage route (e.g., `/signage/[id]`).
 
 ### 3. Multi-Display (HDMI) Projection
 
@@ -40,18 +40,18 @@ For Digital Signage nodes with multiple HDMI ports, we will implement a custom C
 
 - **Mechanism**: Use Android's `DisplayManager` and `Presentation` class.
 - **Implementation**:
-    - Detect secondary displays via `DisplayManager`.
-    - Instantiate a `Presentation` object targeting the secondary `Display`.
-    - The `Presentation` will contain its own `WebView` instance.
-    - This `WebView` will load the specific signage route (e.g., `/signage/[id]`).
+  - Detect secondary displays via `DisplayManager`.
+  - Instantiate a `Presentation` object targeting the secondary `Display`.
+  - The `Presentation` will contain its own `WebView` instance.
+  - This `WebView` will load the specific signage route (e.g., `/signage/[id]`).
 - **Hardware Target**: Raspberry Pi running an Android-based OS (e.g., LineageOS, Emteria, or custom AOSP build).
 
 ## Consequences
 
 - **Positive**:
-    - **Single Codebase**: All kiosk logic and administrative UI live in one Next.js project.
-    - **Native Performance**: Using Android's `Presentation` API ensures high-performance secondary display rendering.
-    - **Streamlined Deployment**: Build specific APKs for different hardware roles.
+  - **Single Codebase**: All kiosk logic and administrative UI live in one Next.js project.
+  - **Native Performance**: Using Android's `Presentation` API ensures high-performance secondary display rendering.
+  - **Streamlined Deployment**: Build specific APKs for different hardware roles.
 - **Negative**:
-    - **Native Complexity**: Requires maintaining a small amount of Java/Kotlin code for the HDMI projection bridge.
-    - **Webview Overhead**: Running multiple WebViews (Primary + Secondary) on low-end hardware (RPi) may require memory optimization.
+  - **Native Complexity**: Requires maintaining a small amount of Java/Kotlin code for the HDMI projection bridge.
+  - **Webview Overhead**: Running multiple WebViews (Primary + Secondary) on low-end hardware (RPi) may require memory optimization.

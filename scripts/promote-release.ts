@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import { config } from '../packages/config/src/index.js';
 
@@ -8,16 +7,16 @@ async function main() {
   const BUCKET = config.storage.supabase.bucket;
 
   if (!supabaseUrl || !supabaseKey) {
-    console.error('❌ Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+    console.error("❌ Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
     process.exit(1);
   }
 
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  console.log('🚀 Promoting Staging Release to Production...');
+  console.log("🚀 Promoting Staging Release to Production...");
 
-  const STAGING_FOLDER = 'releases/staging/latest';
-  const PROD_FOLDER = 'releases/production/latest';
+  const STAGING_FOLDER = "releases/staging/latest";
+  const PROD_FOLDER = "releases/production/latest";
 
   // 1. List files in Staging
   const { data: files, error: listError } = await supabase.storage
@@ -25,12 +24,12 @@ async function main() {
     .list(STAGING_FOLDER);
 
   if (listError) {
-    console.error('❌ Failed to list staging files:', listError);
+    console.error("❌ Failed to list staging files:", listError);
     process.exit(1);
   }
 
   if (!files || files.length === 0) {
-    console.error('❌ No files found in staging to promote.');
+    console.error("❌ No files found in staging to promote.");
     process.exit(1);
   }
 
@@ -38,7 +37,7 @@ async function main() {
 
   // 2. Copy each file to Production
   for (const file of files) {
-    if (file.name === '.emptyFolderPlaceholder') continue; // Skip placeholders
+    if (file.name === ".emptyFolderPlaceholder") continue; // Skip placeholders
 
     const sourcePath = `${STAGING_FOLDER}/${file.name}`;
     const destPath = `${PROD_FOLDER}/${file.name}`;
@@ -58,7 +57,7 @@ async function main() {
       const { error: retryError } = await supabase.storage
         .from(BUCKET)
         .copy(sourcePath, destPath);
-      
+
       if (retryError) {
         console.error(`❌ Failed to copy ${file.name}:`, retryError);
         // Continue or exit? Let's continue to try others.
@@ -66,10 +65,10 @@ async function main() {
     }
   }
 
-  console.log('✅ Promotion complete!');
+  console.log("✅ Promotion complete!");
 }
 
-main().catch(e => {
+main().catch((e) => {
   console.error(e);
   process.exit(1);
 });

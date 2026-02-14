@@ -96,6 +96,36 @@ function buildConfig(): Config {
       appVersion: envVars.NEXT_PUBLIC_APP_VERSION || envVars.APP_VERSION || "0.1.0",
       appEnv: envVars.APP_ENV || env,
     },
+    infisical: {
+      projectId: envVars.INFISICAL_PROJECT_ID,
+      clientId: envVars.INFISICAL_CLIENT_ID,
+      clientSecret: envVars.INFISICAL_CLIENT_SECRET,
+    },
+        serviceRoleKey: envVars.SUPABASE_SERVICE_ROLE_KEY,
+        bucket: envVars.SUPABASE_BUCKET || "media",
+      },
+      cloudinary: {
+        cloudName: envVars.CLOUDINARY_CLOUD_NAME,
+        apiKey: envVars.CLOUDINARY_API_KEY,
+        apiSecret: envVars.CLOUDINARY_API_SECRET,
+      },
+    },
+    logger: {
+      level: envVars.LOG_LEVEL || (env === "development" ? "debug" : "info"),
+      json: envVars.SOUS_JSON_LOGS === "true",
+      logtailToken: envVars.LOGTAIL_SOURCE_TOKEN,
+      hyperdxApiKey: envVars.HYPERDX_API_KEY,
+    },
+    features: {
+      enableRegistration: envVars.ENABLE_REGISTRATION !== "false",
+      appVersion: envVars.NEXT_PUBLIC_APP_VERSION || envVars.APP_VERSION || "0.1.0",
+      appEnv: envVars.APP_ENV || env,
+    },
+    infisical: {
+      projectId: envVars.INFISICAL_PROJECT_ID,
+      clientId: envVars.INFISICAL_CLIENT_ID,
+      clientSecret: envVars.INFISICAL_CLIENT_SECRET,
+    },
     square: {
       accessToken: envVars.SQUARE_ACCESS_TOKEN,
       applicationId: envVars.SQUARE_APPLICATION_ID,

@@ -50,6 +50,7 @@ export const configSchema = z.object({
   logger: z.object({
     level: z.enum(["debug", "info", "warn", "error"]).default("info"),
     json: z.boolean().default(false),
+    logtailToken: z.string().optional(),
     hyperdxApiKey: z.string().optional(),
   }),
 
@@ -75,17 +76,17 @@ export const configSchema = z.object({
     clientSecret: z.string().optional(),
     redirectUri: z.string().optional(),
     token: z.string().optional(),
-    repo: z.string().default("sous-tools/sous-tools"),
-  }).default({}),
-
-  support: z.object({
-    email: z.string().email().default("support@sous.tools"),
+    repo: z.string().default("sous-tools/sous.tools"),
   }).default({}),
 
   facebook: z.object({
     clientId: z.string().optional(),
     clientSecret: z.string().optional(),
     redirectUri: z.string().optional(),
+  }).default({}),
+
+  support: z.object({
+    email: z.string().email().default("support@sous.tools"),
   }).default({}),
 
   ai: z.object({
@@ -121,13 +122,10 @@ export const configSchema = z.object({
 export type Config = z.infer<typeof configSchema>;
 
 // Branding remains separate as it's often a dynamic record
-export const brandingConfigSchema = z.record(
-  z.string(),
-  z.object({
-    variant: z.string(),
-    size: z.number(),
-    props: z.record(z.string(), z.any()).default({}),
-  }),
-);
+export const brandingConfigSchema = z.record(z.string(), z.object({
+  variant: z.string(),
+  size: z.number(),
+  props: z.record(z.string(), z.any()).default({}),
+}));
 
 export type BrandingConfig = z.infer<typeof brandingConfigSchema>;

@@ -42,13 +42,16 @@ export class ProcurementService {
     });
   }
 
-  async createInvoice(data: typeof invoices.$inferInsert, items: (typeof invoiceItems.$inferInsert)[]) {
+  async createInvoice(
+    data: typeof invoices.$inferInsert,
+    items: (typeof invoiceItems.$inferInsert)[],
+  ) {
     return await this.dbService.db.transaction(async (tx) => {
       const [invoice] = await tx.insert(invoices).values(data).returning();
       if (items.length > 0) {
-        await tx.insert(invoiceItems).values(
-          items.map(item => ({ ...item, invoiceId: invoice.id }))
-        );
+        await tx
+          .insert(invoiceItems)
+          .values(items.map((item) => ({ ...item, invoiceId: invoice.id })));
       }
       return invoice;
     });
@@ -101,16 +104,29 @@ export class ProcurementService {
   async updateShoppingListItem(
     id: string,
     organizationId: string,
-    updates: { quantity?: number; preferredSupplierId?: string | null; status?: string },
+    updates: {
+      quantity?: number;
+      preferredSupplierId?: string | null;
+      status?: string;
+    },
   ) {
     return this.dbService.db
       .update(shoppingList)
       .set({ ...updates, updatedAt: new Date() })
-      .where(and(eq(shoppingList.id, id), eq(shoppingList.organizationId, organizationId)))
+      .where(
+        and(
+          eq(shoppingList.id, id),
+          eq(shoppingList.organizationId, organizationId),
+        ),
+      )
       .returning();
   }
 
-  async placeOrder(organizationId: string, supplierId: string, itemIds: string[]) {
+  async placeOrder(
+    organizationId: string,
+    supplierId: string,
+    itemIds: string[],
+  ) {
     return await this.dbService.db.transaction(async (tx) => {
       const [po] = await tx
         .insert(purchaseOrders)
@@ -118,14 +134,14 @@ export class ProcurementService {
           organizationId,
           supplierId,
           status: 'open',
-          totalAmount: 0, 
+          totalAmount: 0,
         })
         .returning();
 
       const items = await tx.query.shoppingList.findMany({
         where: and(
           eq(shoppingList.organizationId, organizationId),
-          sql`${shoppingList.id} IN ${itemIds}`
+          sql`${shoppingList.id} IN ${itemIds}`,
         ),
       });
 
@@ -142,10 +158,12 @@ export class ProcurementService {
         await tx
           .update(shoppingList)
           .set({ status: 'ordered', updatedAt: new Date() })
-          .where(and(
-            eq(shoppingList.organizationId, organizationId),
-            sql`${shoppingList.id} IN ${itemIds}`
-          ));
+          .where(
+            and(
+              eq(shoppingList.organizationId, organizationId),
+              sql`${shoppingList.id} IN ${itemIds}`,
+            ),
+          );
       }
 
       return po;

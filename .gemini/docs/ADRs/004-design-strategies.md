@@ -66,12 +66,16 @@ For `@sous/web` (and other UI apps), we strictly separate **Logic** from **Rende
 To ensure the platform can scale to multi-server architectures and automated environments, we enforce:
 
 #### A. The Partition Key Mandate (ADR 058)
+
 Every domain entity (Database Table) MUST include an `organization_id` column.
+
 - **Why**: Allows for future database sharding (splitting data across servers by tenant).
 - **Exceptions**: Global system configuration tables (e.g., `feature_flags`).
 
 #### B. The Decentralized Seeding Mandate (ADR 055)
+
 Every tactical domain folder in `@sous/api` MUST contain a `[domain].seed.ts` file.
+
 - **Role**: Exports a class implementing `IDomainSeeder` to handle:
   - `seedSystem`: Global defaults.
   - `seedSample`: Development dummy data.

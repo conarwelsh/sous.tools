@@ -65,11 +65,12 @@
 
 ## CLI Capabilities (@sous/cli)
 
-- **Development**: `sous dev` (Interactive Ink TUI), `sous install`.
-- **Environment Orchestration**: `sous env exec` for secure secret injection and `sous env context` for managing environments.
-- **Configuration**: `sous env config` (view, list, add), `sous env branding`.
-- **Logging**: `sous env logs` (Centralized log tailing with OpenTelemetry support).
-- **Maintenance**: `sous maintenance housekeep`, `sous maintenance db` (push, seed, reset).
+- **Identity (IAM)**: `sous iam login`, `logout`, `whoami`, `switch-org`.
+- **Infrastructure (INFRA)**: `sous infra dashboard`, `config`, `logs`, `env-exec`, `feedback`.
+- **Operations (OPS)**: `sous ops db` (push, seed, reset), `housekeep`, `kill`.
+- **Systems (SYS)**: `sous sys hardware`, `integrations` (sync).
+- **Financials (FIN)**: `sous fin intel`.
+- **Development (DEV)**: `sous dev` (TUI), `install`, `workspace`, `generate`, `quality` (test, check, audit).
 
 ## Deployment Targets
 

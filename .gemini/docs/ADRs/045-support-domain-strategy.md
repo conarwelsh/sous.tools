@@ -17,21 +17,25 @@ Users require a streamlined way to report bugs, request features, and ask for he
 We will implement a dedicated **Support Domain** within `@sous/features` and `@sous/api` to centralize feedback orchestration.
 
 ### 1. Domain Placement
+
 - **Package:** `@sous/features/src/domains/support/`
 - **API:** `apps/api/src/domains/support/`
 - **Logic:** Follows the Nested DDD pattern.
 
 ### 2. Integration Strategy
+
 - **GitHub:** The `@sous/api` will use the GitHub REST API (via Octokit) to create issues in the project repository. Authentication will be handled via a GitHub Personal Access Token stored in the platform configuration.
 - **Email:** Reports will be dispatched via the centralized `@sous/api` mailing service to a "Support Email" address.
 - **Dynamic Configuration:** The destination support email will be configurable via the **SuperAdmin Settings** page, stored in the global platform settings.
 
 ### 3. UI/UX Principles
+
 - **Ubiquity:** The support flow should be easily accessible from any "Shell" application.
 - **Frictionless:** Minimize fields. Use context (User ID, Organization, App Version, Browser/Device Info) to automatically enrich reports.
 - **Categorization:** Users will select from "Bug Report", "Feature Request", or "General Help".
 
 ### 4. Headless Support
+
 - The CLI (`@sous/cli`) will also expose a `sous feedback` command that utilizes the same API endpoints, ensuring parity between UI and terminal users.
 
 ## Consequences

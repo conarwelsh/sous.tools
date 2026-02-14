@@ -43,29 +43,35 @@ As a complex monorepo with multiple apps (Web, API, CLI, Native) and shared pack
 ### 4. Command List (Status Map)
 
 #### **Development (`sous dev`) [ACTIVE]**
+
 - `sous dev`: Starts the interactive development dashboard (Ink TUI).
 - `sous dev install`: Platform installation wizard (Ubuntu/WSL2).
 - `sous dev sync`: Hardware/Schema synchronization.
 
 #### **Environment (`sous env`) [ACTIVE]**
+
 - `sous env dashboard`: Infrastructure health dashboard (Spec 004).
 - `sous env config`: Secret management (Infisical integration).
 - `sous env export`: Inject secrets into shell commands (Spec 019).
 - `sous env context`: Identity and target switching (whoami).
 
 #### **Hardware (`sous hardware`) [PLANNED]**
+
 - `sous hardware list`: Paired device overview.
 - `sous hardware reboot`: Remote node control.
 - `sous hardware logs`: Tail remote RPi logs.
 
 #### **Integrations (`sous integrations`) [PLANNED]**
+
 - `sous integrations sync`: Trigger provider data pulls (Square/Google).
 
 #### **Quality (`sous quality`) [ACTIVE]**
+
 - `sous quality check`: Full platform health check (lint, typecheck, test, build).
 - `sous quality test`: Test runner wrapper.
 
 #### **Maintenance (`sous maintenance`) [ACTIVE]**
+
 - `sous maintenance housekeep`: monorepo artifact cleanup.
 - `sous maintenance db reset`: database factory reset and seeding.
 

@@ -14,11 +14,16 @@ export const SignageView = ({ id }: { id: string }) => {
     const fetchPublicScreen = async () => {
       // 1. Detect subdomain
       const hostname = window.location.hostname;
-      const parts = hostname.split('.');
+      const parts = hostname.split(".");
       let orgSlug: string | undefined;
-      
+
       // Handle local and production subdomains
-      if (parts.length >= 3 && parts[0] !== 'web' && parts[0] !== 'api' && parts[0] !== 'docs') {
+      if (
+        parts.length >= 3 &&
+        parts[0] !== "web" &&
+        parts[0] !== "api" &&
+        parts[0] !== "docs"
+      ) {
         orgSlug = parts[0];
       }
 
@@ -31,14 +36,19 @@ export const SignageView = ({ id }: { id: string }) => {
         const http = await getHttpClient();
         // Pass org slug in header for verification
         const config: any = {
-          headers: orgSlug ? { 'x-org-slug': orgSlug } : {}
+          headers: orgSlug ? { "x-org-slug": orgSlug } : {},
         };
-        
-        const data = await http.get<any>(`/public/presentation/signage/${id}`, config);
+
+        const data = await http.get<any>(
+          `/public/presentation/signage/${id}`,
+          config,
+        );
         setPublicPresentation(data);
       } catch (e) {
         // Fallback to pairing if public fetch fails
-        console.log("Public screen fetch failed, falling back to pairing mode.");
+        console.log(
+          "Public screen fetch failed, falling back to pairing mode.",
+        );
       } finally {
         setIsPublicLoading(false);
       }
@@ -64,11 +74,7 @@ export const SignageView = ({ id }: { id: string }) => {
 
   return (
     <DevicePairingFlow type="signage">
-      {({ socket }) => (
-        <SignageContent 
-          socket={socket} 
-        />
-      )}
+      {({ socket }) => <SignageContent socket={socket} />}
     </DevicePairingFlow>
   );
 };

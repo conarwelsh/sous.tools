@@ -1,6 +1,6 @@
-import sharp from 'sharp';
-import fs from 'fs';
-import path from 'path';
+import sharp from "sharp";
+import fs from "fs";
+import path from "path";
 
 /**
  * SOUS Brand Asset Generator
@@ -12,10 +12,10 @@ import path from 'path';
  */
 
 const THEME = {
-  bg: '#0a0a0a',
-  primary: '#0091FF',
-  sec: '#FFFFFF',
-  muted: '#52525b',
+  bg: "#0a0a0a",
+  primary: "#0091FF",
+  sec: "#FFFFFF",
+  muted: "#52525b",
 };
 
 // Simple SVG path-based versions of our logos for Sharp rendering
@@ -47,34 +47,43 @@ const LOGOS = {
         />
         <line x1="25" y1="20" x2="75" y2="20" stroke="${THEME.primary}" stroke-width="6" stroke-linecap="round"/>
     </g>
-  `
+  `,
 };
 
-function getSVG(content: string, width: number, height: number, includeText = false) {
+function getSVG(
+  content: string,
+  width: number,
+  height: number,
+  includeText = false,
+) {
   return `
     <svg width="${width}" height="${height}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
       <rect width="100" height="100" fill="${THEME.bg}"/>
       ${content}
-      ${includeText ? `
+      ${
+        includeText
+          ? `
         <text x="50" y="85" fill="white" font-family="sans-serif" font-size="12" font-weight="900" text-anchor="middle" letter-spacing="-0.05em">
           SOUS<tspan fill="${THEME.primary}">.</tspan><tspan font-weight="400" fill="${THEME.muted}">tools</tspan>
         </text>
-      ` : ''}
+      `
+          : ""
+      }
     </svg>
   `;
 }
 
 async function generate() {
-  const assetsDir = path.join(process.cwd(), 'packages/ui/assets');
-  const logosDir = path.join(assetsDir, 'logos');
-  const winAgentDir = '/mnt/c/tools/sous-agent';
-  const repoWinDir = path.join(process.cwd(), 'scripts/windows');
+  const assetsDir = path.join(process.cwd(), "packages/ui/assets");
+  const logosDir = path.join(assetsDir, "logos");
+  const winAgentDir = "/mnt/c/tools/sous-agent";
+  const repoWinDir = path.join(process.cwd(), "scripts/windows");
 
-  [assetsDir, logosDir, repoWinDir].forEach(d => {
+  [assetsDir, logosDir, repoWinDir].forEach((d) => {
     if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
   });
 
-  console.log('🎨 Generating Brand Assets...');
+  console.log("🎨 Generating Brand Assets...");
 
   // Use THE CLOUD as the primary logo for now
   const PRIMARY_LOGO = LOGOS.cloud;
@@ -94,21 +103,25 @@ async function generate() {
       </text>
     </svg>
   `;
-  await sharp(Buffer.from(splashSVG)).png().toFile(path.join(assetsDir, 'boot-splash.png'));
-  console.log('✅ Generated: boot-splash.png');
+  await sharp(Buffer.from(splashSVG))
+    .png()
+    .toFile(path.join(assetsDir, "boot-splash.png"));
+  console.log("✅ Generated: boot-splash.png");
 
   // 2. Windows Agent Icon (256x256)
   const agentSVG = getSVG(PRIMARY_LOGO, 256, 256);
-  const agentPngPath = path.join(repoWinDir, 'agent.png');
+  const agentPngPath = path.join(repoWinDir, "agent.png");
   await sharp(Buffer.from(agentSVG)).png().toFile(agentPngPath);
-  
+
   // Try to copy to Windows if path exists
   if (fs.existsSync(winAgentDir)) {
     try {
-      fs.copyFileSync(agentPngPath, path.join(winAgentDir, 'agent.png'));
-      console.log('✅ Updated Windows Agent: agent.png');
+      fs.copyFileSync(agentPngPath, path.join(winAgentDir, "agent.png"));
+      console.log("✅ Updated Windows Agent: agent.png");
     } catch (e) {
-      console.warn('⚠️ Could not write directly to C:\\tools\\sous-agent. Ensure directory is writable.');
+      console.warn(
+        "⚠️ Could not write directly to C:\\tools\\sous-agent. Ensure directory is writable.",
+      );
     }
   }
 
@@ -119,22 +132,25 @@ async function generate() {
       .png()
       .toFile(path.join(logosDir, `logo-${size}.png`));
   }
-  console.log(`✅ Generated ${sizes.length} logo sizes in packages/ui/assets/logos/`);
+  console.log(
+    `✅ Generated ${sizes.length} logo sizes in packages/ui/assets/logos/`,
+  );
 
   // 4. Capacitor Web App Assets (apps/web/assets/)
-  const capAssetsDir = path.join(process.cwd(), 'apps/web/assets');
-  if (!fs.existsSync(capAssetsDir)) fs.mkdirSync(capAssetsDir, { recursive: true });
+  const capAssetsDir = path.join(process.cwd(), "apps/web/assets");
+  if (!fs.existsSync(capAssetsDir))
+    fs.mkdirSync(capAssetsDir, { recursive: true });
 
   // Icon (512x512)
   await sharp(Buffer.from(getSVG(PRIMARY_LOGO, 1024, 1024)))
     .png()
-    .toFile(path.join(capAssetsDir, 'icon.png'));
-  
+    .toFile(path.join(capAssetsDir, "icon.png"));
+
   // Also split versions for better adaptive icon generation
   await sharp(Buffer.from(getSVG(PRIMARY_LOGO, 1024, 1024)))
     .png()
-    .toFile(path.join(capAssetsDir, 'icon-only.png'));
-  
+    .toFile(path.join(capAssetsDir, "icon-only.png"));
+
   // Foreground (no background)
   const foregroundSVG = `
     <svg width="1024" height="1024" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -143,8 +159,8 @@ async function generate() {
   `;
   await sharp(Buffer.from(foregroundSVG))
     .png()
-    .toFile(path.join(capAssetsDir, 'icon-foreground.png'));
-  
+    .toFile(path.join(capAssetsDir, "icon-foreground.png"));
+
   // Background (just the color)
   const backgroundSVG = `
     <svg width="1024" height="1024" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -153,7 +169,7 @@ async function generate() {
   `;
   await sharp(Buffer.from(backgroundSVG))
     .png()
-    .toFile(path.join(capAssetsDir, 'icon-background.png'));
+    .toFile(path.join(capAssetsDir, "icon-background.png"));
 
   // Splash (2732x2732)
   const appSplashSVG = `
@@ -166,14 +182,14 @@ async function generate() {
   `;
   await sharp(Buffer.from(appSplashSVG))
     .png()
-    .toFile(path.join(capAssetsDir, 'splash.png'));
+    .toFile(path.join(capAssetsDir, "splash.png"));
   await sharp(Buffer.from(appSplashSVG))
     .png()
-    .toFile(path.join(capAssetsDir, 'splash-dark.png'));
+    .toFile(path.join(capAssetsDir, "splash-dark.png"));
 
-  console.log('✅ Generated Capacitor assets in apps/web/assets/');
+  console.log("✅ Generated Capacitor assets in apps/web/assets/");
 
-  console.log('\n✨ All assets synchronized.');
+  console.log("\n✨ All assets synchronized.");
 }
 
 generate().catch(console.error);

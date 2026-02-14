@@ -12,10 +12,11 @@ import {
   Laptop,
   Terminal,
   Info,
-  ShieldAlert
+  ShieldAlert,
 } from "lucide-react";
 
-const RELEASES_URL = "https://your-supabase-project.supabase.co/storage/v1/object/public/media/releases/latest/manifest.json"; // Placeholder, needs actual URL
+const RELEASES_URL =
+  "https://your-supabase-project.supabase.co/storage/v1/object/public/media/releases/latest/manifest.json"; // Placeholder, needs actual URL
 
 export default function DownloadPage() {
   const [userOS, setUserOS] = useState<
@@ -48,16 +49,23 @@ export default function DownloadPage() {
       icon: Laptop,
       ext: ".exe",
       version: "Latest",
-      url: manifest.tools || "#" // Use manifest
+      url: manifest.tools || "#", // Use manifest
     },
-    { id: "macos", name: "macOS", icon: Apple, ext: ".dmg", version: "Latest", url: "#" },
+    {
+      id: "macos",
+      name: "macOS",
+      icon: Apple,
+      ext: ".dmg",
+      version: "Latest",
+      url: "#",
+    },
     {
       id: "linux",
       name: "Linux",
       icon: Terminal,
       ext: ".AppImage",
       version: "Latest",
-      url: "#"
+      url: "#",
     },
     {
       id: "android",
@@ -65,7 +73,7 @@ export default function DownloadPage() {
       icon: Smartphone,
       ext: ".apk",
       version: "Latest",
-      url: manifest.signage || "#" // Default to signage or specific flavor
+      url: manifest.signage || "#", // Default to signage or specific flavor
     },
   ];
 
@@ -75,25 +83,25 @@ export default function DownloadPage() {
     <ScrollView className="flex-1 bg-[#0a0a0a]">
       <View className="px-8 py-24 items-center">
         <View className="bg-sky-500/10 border border-sky-500/20 px-4 py-1 rounded-full mb-8">
-            <Text className="text-sky-500 font-black text-[9px] uppercase tracking-[0.2em]">
-                {env.toUpperCase()} CHANNEL
-            </Text>
+          <Text className="text-sky-500 font-black text-[9px] uppercase tracking-[0.2em]">
+            {env.toUpperCase()} CHANNEL
+          </Text>
         </View>
         <Logo variant="circuit" size={48} showWordmark={false} />
         <Text className="text-5xl font-black text-white tracking-tighter uppercase mt-8 mb-4">
           Install Terminal
         </Text>
         <Text className="text-zinc-500 text-lg max-w-xl text-center mb-16 font-medium">
-          Deploy the specialized Sous Tools interface to your local hardware. 
+          Deploy the specialized Sous Tools interface to your local hardware.
           Real-time synchronization and safety-mode persistence built-in.
         </Text>
 
         {/* Suggested Download */}
         <Card className="p-12 w-full max-w-2xl bg-sky-500 border-none shadow-[0_0_50px_rgba(14,165,233,0.2)] mb-12 relative overflow-hidden group">
           <div className="absolute -right-10 -bottom-10 opacity-20 group-hover:scale-110 transition-transform duration-500">
-              <suggested.icon size={240} color="white" />
+            <suggested.icon size={240} color="white" />
           </div>
-          
+
           <View className="flex-row items-center justify-between relative z-10">
             <View>
               <Text className="text-sky-900 font-black uppercase text-[10px] tracking-[0.2em] mb-4">
@@ -107,9 +115,9 @@ export default function DownloadPage() {
               </Text>
             </View>
           </View>
-          <Button 
+          <Button
             className="mt-12 bg-white h-20 shadow-2xl relative z-10 hover:bg-zinc-100 transition-colors"
-            onClick={() => window.open(suggested.url, '_blank')}
+            onClick={() => window.open(suggested.url, "_blank")}
           >
             <Text className="text-sky-600 font-black text-xl uppercase tracking-widest italic">
               Download Installer
@@ -118,36 +126,52 @@ export default function DownloadPage() {
         </Card>
 
         {env === "staging" && (
-            <View className="w-full max-w-2xl bg-amber-500/10 border border-amber-500/20 rounded-[2rem] p-8 mb-16">
-                <View className="flex-row items-center gap-4 mb-4">
-                    <ShieldAlert className="text-amber-500" size={24} />
-                    <Text className="text-amber-500 font-black uppercase text-sm tracking-tighter italic">Staging Instructions</Text>
-                </View>
-                <Text className="text-zinc-400 text-sm leading-relaxed mb-6 font-medium">
-                    You are accessing the Staging channel. These builds contain the latest features but may be unstable. 
-                    To install on Android, you must enable "Install from Unknown Sources" in your device settings.
-                </Text>
-                <View className="flex flex-col gap-3">
-                    <View className="flex-row items-center gap-3">
-                        <div className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center">
-                            <Text className="text-amber-500 font-black text-[10px]">1</Text>
-                        </div>
-                        <Text className="text-zinc-500 text-xs font-bold">Download the .apk file above</Text>
-                    </View>
-                    <View className="flex-row items-center gap-3">
-                        <div className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center">
-                            <Text className="text-amber-500 font-black text-[10px]">2</Text>
-                        </div>
-                        <Text className="text-zinc-500 text-xs font-bold">Open the file on your device</Text>
-                    </View>
-                    <View className="flex-row items-center gap-3">
-                        <div className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center">
-                            <Text className="text-amber-500 font-black text-[10px]">3</Text>
-                        </div>
-                        <Text className="text-zinc-500 text-xs font-bold">Follow prompts to "Install Anyway"</Text>
-                    </View>
-                </View>
+          <View className="w-full max-w-2xl bg-amber-500/10 border border-amber-500/20 rounded-[2rem] p-8 mb-16">
+            <View className="flex-row items-center gap-4 mb-4">
+              <ShieldAlert className="text-amber-500" size={24} />
+              <Text className="text-amber-500 font-black uppercase text-sm tracking-tighter italic">
+                Staging Instructions
+              </Text>
             </View>
+            <Text className="text-zinc-400 text-sm leading-relaxed mb-6 font-medium">
+              You are accessing the Staging channel. These builds contain the
+              latest features but may be unstable. To install on Android, you
+              must enable "Install from Unknown Sources" in your device
+              settings.
+            </Text>
+            <View className="flex flex-col gap-3">
+              <View className="flex-row items-center gap-3">
+                <div className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center">
+                  <Text className="text-amber-500 font-black text-[10px]">
+                    1
+                  </Text>
+                </div>
+                <Text className="text-zinc-500 text-xs font-bold">
+                  Download the .apk file above
+                </Text>
+              </View>
+              <View className="flex-row items-center gap-3">
+                <div className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center">
+                  <Text className="text-amber-500 font-black text-[10px]">
+                    2
+                  </Text>
+                </div>
+                <Text className="text-zinc-500 text-xs font-bold">
+                  Open the file on your device
+                </Text>
+              </View>
+              <View className="flex-row items-center gap-3">
+                <div className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center">
+                  <Text className="text-amber-500 font-black text-[10px]">
+                    3
+                  </Text>
+                </div>
+                <Text className="text-zinc-500 text-xs font-bold">
+                  Follow prompts to "Install Anyway"
+                </Text>
+              </View>
+            </View>
+          </View>
         )}
 
         {/* All Platforms */}
@@ -159,16 +183,19 @@ export default function DownloadPage() {
                 key={p.id}
                 className="p-8 flex-1 min-w-[240px] bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-all flex flex-col group"
               >
-                <p.icon size={32} className="text-zinc-600 group-hover:text-sky-500 transition-colors mb-6" />
+                <p.icon
+                  size={32}
+                  className="text-zinc-600 group-hover:text-sky-500 transition-colors mb-6"
+                />
                 <Text className="text-xl font-black text-white uppercase tracking-tight italic">
                   {p.name}
                 </Text>
                 <Text className="text-zinc-600 font-mono text-[10px] mt-2 mb-8 font-bold">
                   {p.version} • {p.ext}
                 </Text>
-                <Button 
-                    className="h-12 bg-zinc-800 hover:bg-zinc-700 transition-colors"
-                    onClick={() => window.open(p.url, '_blank')}
+                <Button
+                  className="h-12 bg-zinc-800 hover:bg-zinc-700 transition-colors"
+                  onClick={() => window.open(p.url, "_blank")}
                 >
                   <Text className="text-zinc-300 font-black uppercase text-[10px] tracking-widest">
                     Download
@@ -184,7 +211,9 @@ export default function DownloadPage() {
             Specialized Wear OS App
           </Text>
           <Text className="text-zinc-500 text-sm text-center leading-relaxed font-medium">
-            Keep your hands free while managing timers and alerts. Search for <Text className="text-sky-500 italic font-black">"Sous Tools"</Text> directly on the Google Play Store from your watch.
+            Keep your hands free while managing timers and alerts. Search for{" "}
+            <Text className="text-sky-500 italic font-black">"Sous Tools"</Text>{" "}
+            directly on the Google Play Store from your watch.
           </Text>
         </View>
       </View>

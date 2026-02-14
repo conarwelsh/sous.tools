@@ -73,10 +73,10 @@ export async function initObservability(config: LoggerConfig) {
 
 export function createLogger(options: { name: string; config?: LoggerConfig }) {
   const transports: any[] = [];
-  
+
   // Use provided config or safe fallbacks for bootstrap/browser
   const logConfig = options.config || {
-    env: isServer ? (process.env.NODE_ENV || "development") : "development",
+    env: isServer ? process.env.NODE_ENV || "development" : "development",
     logger: {
       level: isServer ? (process.env.LOG_LEVEL || "info") : "info",
       json: isServer ? (process.env.SOUS_JSON_LOGS === "true") : false,
@@ -93,7 +93,10 @@ export function createLogger(options: { name: string; config?: LoggerConfig }) {
     if (home && !isDev) { 
       transports.push({
         target: "pino/file",
-        options: { destination: `${home}/.sous/logs/combined.log`, mkdir: true },
+        options: {
+          destination: `${home}/.sous/logs/combined.log`,
+          mkdir: true,
+        },
       });
     }
   }

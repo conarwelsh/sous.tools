@@ -35,7 +35,8 @@ export class MetricsService {
       );
 
     const rawTotal = result[0]?.total;
-    const totalCents = typeof rawTotal === 'string' ? parseInt(rawTotal, 10) : (rawTotal || 0);
+    const totalCents =
+      typeof rawTotal === 'string' ? parseInt(rawTotal, 10) : rawTotal || 0;
 
     return { value: totalCents / 100, unit: 'USD' };
   }

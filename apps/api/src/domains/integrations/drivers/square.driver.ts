@@ -27,7 +27,7 @@ export class SquareDriver implements PosInterface {
     );
     try {
       const response = (await this.client.orders.search({
-        locationIds: [], 
+        locationIds: [],
         query: {
           filter: {
             dateTimeFilter: {
@@ -64,8 +64,12 @@ export class SquareDriver implements PosInterface {
         objects = body;
       }
 
-      const sqCategories = objects.filter((obj: any) => obj.type === 'CATEGORY');
-      const catNameToId = new Map(sqCategories.map((c: any) => [c.categoryData?.name, c.id]));
+      const sqCategories = objects.filter(
+        (obj: any) => obj.type === 'CATEGORY',
+      );
+      const catNameToId = new Map(
+        sqCategories.map((c: any) => [c.categoryData?.name, c.id]),
+      );
 
       // Fallback map for Sandbox consistency if linking fails
       const itemToCatName: Record<string, string> = {
@@ -88,9 +92,13 @@ export class SquareDriver implements PosInterface {
           };
         } else if (obj.type === 'ITEM') {
           let categoryId = obj.itemData?.categoryId;
-          
+
           // Robust Fallback: link by name if ID missing
-          if (!categoryId && obj.itemData?.name && itemToCatName[obj.itemData.name]) {
+          if (
+            !categoryId &&
+            obj.itemData?.name &&
+            itemToCatName[obj.itemData.name]
+          ) {
             categoryId = catNameToId.get(itemToCatName[obj.itemData.name]);
           }
 
@@ -128,8 +136,7 @@ export class SquareDriver implements PosInterface {
 
   async fetchInventory() {
     try {
-      const response = (await this.client.inventory.batchGetCounts({
-      })) as any;
+      const response = (await this.client.inventory.batchGetCounts({})) as any;
       const body = response.result || response.data || response;
       return body.counts || [];
     } catch (error) {
@@ -250,7 +257,7 @@ export class SquareDriver implements PosInterface {
       const body = response.result || response.data || response;
       let objects = body.objects || [];
       if (objects.length === 0 && Array.isArray(body)) objects = body;
-      
+
       const idsToDelete = objects.map((obj: any) => obj.id);
 
       if (idsToDelete.length > 0) {
@@ -286,13 +293,15 @@ export class SquareDriver implements PosInterface {
         name: 'Truffle Parmesan Fries',
         price: 1200,
         categoryName: 'Appetizers',
-        description: 'Hand-cut fries tossed in white truffle oil and fresh parmesan.',
+        description:
+          'Hand-cut fries tossed in white truffle oil and fresh parmesan.',
       },
       {
         name: 'Sous Signature Burger',
         price: 1800,
         categoryName: 'Main Courses',
-        description: 'Double wagyu beef, aged cheddar, caramelised onions, brioche.',
+        description:
+          'Double wagyu beef, aged cheddar, caramelised onions, brioche.',
       },
       {
         name: 'Honey Glazed Sprouts',
@@ -316,7 +325,8 @@ export class SquareDriver implements PosInterface {
         name: 'NY Style Cheesecake',
         price: 1000,
         categoryName: 'Desserts',
-        description: 'Velvety smooth with a graham cracker crust and berry coulis.',
+        description:
+          'Velvety smooth with a graham cracker crust and berry coulis.',
       },
       {
         name: 'Nitro Cold Brew',
@@ -328,7 +338,8 @@ export class SquareDriver implements PosInterface {
         name: 'Margherita Pizza',
         price: 2200,
         categoryName: 'Main Courses',
-        description: 'San Marzano tomatoes, fresh mozzarella, basil, extra virgin olive oil.',
+        description:
+          'San Marzano tomatoes, fresh mozzarella, basil, extra virgin olive oil.',
       },
     ];
 
@@ -336,20 +347,25 @@ export class SquareDriver implements PosInterface {
     const catIdMap = new Map<string, string>();
     for (const cat of categoryConfigs) {
       try {
-        const response = await this.client.catalog.object.upsert({
+        const response = (await this.client.catalog.object.upsert({
           idempotencyKey: `seed_cat_${Date.now()}_${cat.name.replace(/\s+/g, '')}`,
           object: {
             type: 'CATEGORY',
             id: cat.id,
             categoryData: { name: cat.name },
           },
-        }) as any;
+        })) as any;
         const body = response.result || response.data || response;
         const realId = body.catalogObject.id;
         catIdMap.set(cat.name, realId);
-        logger.info(`[Square] Seeded category: ${cat.name} (Real ID: ${realId})`);
+        logger.info(
+          `[Square] Seeded category: ${cat.name} (Real ID: ${realId})`,
+        );
       } catch (error: any) {
-        logger.error(`[Square] Failed to seed category ${cat.name}:`, error.message);
+        logger.error(
+          `[Square] Failed to seed category ${cat.name}:`,
+          error.message,
+        );
       }
     }
 
@@ -363,9 +379,14 @@ export class SquareDriver implements PosInterface {
           categoryId,
           description: item.description,
         });
-        logger.info(`[Square] Seeded item: ${item.name} (Linked to Category ID: ${categoryId})`);
+        logger.info(
+          `[Square] Seeded item: ${item.name} (Linked to Category ID: ${categoryId})`,
+        );
       } catch (error: any) {
-        logger.error(`[Square] Failed to seed item ${item.name}:`, error.message);
+        logger.error(
+          `[Square] Failed to seed item ${item.name}:`,
+          error.message,
+        );
       }
     }
 

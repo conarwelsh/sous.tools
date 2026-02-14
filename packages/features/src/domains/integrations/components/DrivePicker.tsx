@@ -1,30 +1,30 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { 
-  View, 
-  Text, 
-  Button, 
-  Card, 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
+import {
+  View,
+  Text,
+  Button,
+  Card,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogFooter,
   cn,
   ScrollView,
-  Logo
+  Logo,
 } from "@sous/ui";
-import { 
-  Folder, 
-  FileText, 
-  Image as ImageIcon, 
-  ChevronRight, 
-  Search, 
-  X, 
+import {
+  Folder,
+  FileText,
+  Image as ImageIcon,
+  ChevronRight,
+  Search,
+  X,
   Check,
   ChevronLeft,
-  HardDrive
+  HardDrive,
 } from "lucide-react";
 import { getHttpClient } from "@sous/client-sdk";
 
@@ -54,13 +54,16 @@ export const DrivePicker: React.FC<DrivePickerProps> = ({
   const [loading, setLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  const currentFolderId = path.length > 0 ? path[path.length - 1].id : undefined;
+  const currentFolderId =
+    path.length > 0 ? path[path.length - 1].id : undefined;
 
   const fetchFiles = async (folderId?: string) => {
     setLoading(true);
     try {
       const http = await getHttpClient();
-      const data = await http.get<GoogleDriveFile[]>(`/integrations/google-drive/files${folderId ? `?folderId=${folderId}` : ''}`);
+      const data = await http.get<GoogleDriveFile[]>(
+        `/integrations/google-drive/files${folderId ? `?folderId=${folderId}` : ""}`,
+      );
       setFiles(data);
     } catch (e) {
       console.error("Failed to fetch Google Drive files", e);
@@ -98,7 +101,7 @@ export const DrivePicker: React.FC<DrivePickerProps> = ({
   };
 
   const handleConfirm = () => {
-    const selectedFiles = files.filter(f => selectedIds.has(f.id));
+    const selectedFiles = files.filter((f) => selectedIds.has(f.id));
     onSelect(selectedFiles);
   };
 
@@ -112,23 +115,30 @@ export const DrivePicker: React.FC<DrivePickerProps> = ({
                 Browse Google Drive
               </DialogTitle>
               <View className="flex-row items-center gap-2 mt-1">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className="h-auto p-0 hover:bg-transparent"
                   onClick={() => setPath([])}
                 >
                   <HardDrive size={12} className="text-muted-foreground" />
-                  <Text className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">My Drive</Text>
+                  <Text className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">
+                    My Drive
+                  </Text>
                 </Button>
                 {path.map((p, i) => (
                   <React.Fragment key={p.id}>
-                    <ChevronRight size={10} className="text-muted-foreground/40" />
-                    <Button 
-                      variant="ghost" 
+                    <ChevronRight
+                      size={10}
+                      className="text-muted-foreground/40"
+                    />
+                    <Button
+                      variant="ghost"
                       className="h-auto p-0 hover:bg-transparent"
                       onClick={() => setPath(path.slice(0, i + 1))}
                     >
-                      <Text className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{p.name}</Text>
+                      <Text className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                        {p.name}
+                      </Text>
                     </Button>
                   </React.Fragment>
                 ))}
@@ -147,26 +157,35 @@ export const DrivePicker: React.FC<DrivePickerProps> = ({
           <ScrollView className="flex-1 p-4">
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {path.length > 0 && (
-                <Card 
+                <Card
                   onClick={handleBack}
                   className="p-4 bg-muted/20 border-border hover:bg-muted/40 cursor-pointer items-center justify-center border-dashed"
                 >
-                  <ChevronLeft size={24} className="text-muted-foreground mb-2" />
-                  <Text className="text-[10px] font-black text-muted-foreground uppercase">Back</Text>
+                  <ChevronLeft
+                    size={24}
+                    className="text-muted-foreground mb-2"
+                  />
+                  <Text className="text-[10px] font-black text-muted-foreground uppercase">
+                    Back
+                  </Text>
                 </Card>
               )}
 
               {files.map((file) => {
-                const isFolder = file.mimeType === 'application/vnd.google-apps.folder';
+                const isFolder =
+                  file.mimeType === "application/vnd.google-apps.folder";
                 const isSelected = selectedIds.has(file.id);
 
                 return (
-                  <Card 
+                  <Card
                     key={file.id}
-                    onClick={() => isFolder ? handleFolderClick(file) : toggleSelect(file)}
+                    onClick={() =>
+                      isFolder ? handleFolderClick(file) : toggleSelect(file)
+                    }
                     className={cn(
                       "p-4 bg-card border-border hover:border-primary/50 cursor-pointer transition-all group relative",
-                      isSelected && "border-primary bg-primary/5 ring-1 ring-primary"
+                      isSelected &&
+                        "border-primary bg-primary/5 ring-1 ring-primary",
                     )}
                   >
                     {isSelected && (
@@ -174,19 +193,23 @@ export const DrivePicker: React.FC<DrivePickerProps> = ({
                         <Check size={10} className="text-primary-foreground" />
                       </div>
                     )}
-                    
+
                     <View className="items-center justify-center mb-3 aspect-square bg-muted/30 rounded-xl">
                       {isFolder ? (
-                        <Folder size={32} className="text-sky-500 fill-sky-500/20" />
-                      ) : file.mimeType === 'application/vnd.google-apps.document' ? (
+                        <Folder
+                          size={32}
+                          className="text-sky-500 fill-sky-500/20"
+                        />
+                      ) : file.mimeType ===
+                        "application/vnd.google-apps.document" ? (
                         <FileText size={32} className="text-blue-500" />
-                      ) : file.mimeType.includes('image/') ? (
+                      ) : file.mimeType.includes("image/") ? (
                         <ImageIcon size={32} className="text-emerald-500" />
                       ) : (
                         <FileText size={32} className="text-amber-500" />
                       )}
                     </View>
-                    
+
                     <Text className="text-[10px] font-bold text-foreground text-center line-clamp-2 uppercase tracking-tighter">
                       {file.name}
                     </Text>
@@ -198,7 +221,9 @@ export const DrivePicker: React.FC<DrivePickerProps> = ({
             {!loading && files.length === 0 && (
               <View className="items-center justify-center py-20 opacity-30">
                 <Search size={48} className="text-muted-foreground mb-4" />
-                <Text className="text-muted-foreground font-black uppercase text-xs">No matching files found</Text>
+                <Text className="text-muted-foreground font-black uppercase text-xs">
+                  No matching files found
+                </Text>
               </View>
             )}
           </ScrollView>
@@ -206,15 +231,19 @@ export const DrivePicker: React.FC<DrivePickerProps> = ({
 
         <DialogFooter className="p-6 border-t border-border bg-muted/30">
           <Button variant="ghost" onClick={onCancel}>
-            <Text className="text-muted-foreground font-bold uppercase text-xs tracking-widest">Cancel</Text>
+            <Text className="text-muted-foreground font-bold uppercase text-xs tracking-widest">
+              Cancel
+            </Text>
           </Button>
-          <Button 
+          <Button
             disabled={selectedIds.size === 0}
             onClick={handleConfirm}
             className="bg-primary px-8 h-12"
           >
             <Text className="text-primary-foreground font-black uppercase text-xs tracking-widest">
-              {selectedIds.size > 0 ? `Import ${selectedIds.size} File${selectedIds.size > 1 ? 's' : ''}` : 'Select Files'}
+              {selectedIds.size > 0
+                ? `Import ${selectedIds.size} File${selectedIds.size > 1 ? "s" : ""}`
+                : "Select Files"}
             </Text>
           </Button>
         </DialogFooter>

@@ -36,12 +36,12 @@ We will strictly enforce a **Centralized Configuration** strategy using the `@so
 
 2.  **Infisical Abstraction:**
     - Infisical is an implementation detail of the config package.
-    - No other part of the system should know *how* secrets are fetched. This allows us to swap secret providers in the future with zero impact on the rest of the codebase.
+    - No other part of the system should know _how_ secrets are fetched. This allows us to swap secret providers in the future with zero impact on the rest of the codebase.
 
 3.  **Client-Safe Split:**
     - The package provides two primary typed exports:
-        - `server`: The full configuration object, including sensitive secrets. **MUST NEVER** be imported into client-side code.
-        - `client`: A filtered, public-safe subset of configuration. This includes variables prefixed with `NEXT_PUBLIC_` or `VITE_`.
+      - `server`: The full configuration object, including sensitive secrets. **MUST NEVER** be imported into client-side code.
+      - `client`: A filtered, public-safe subset of configuration. This includes variables prefixed with `NEXT_PUBLIC_` or `VITE_`.
     - Next.js Webpack configuration will explicitly mock server-only dependencies (like the Infisical SDK) to prevent them from leaking into the browser bundle.
 
 4.  **Validation & Schema (Zod):**

@@ -19,7 +19,7 @@ export default function AddHardwareModal() {
       <DialogContent className="max-w-2xl border-border bg-background p-0 overflow-hidden">
         <DialogTitle className="sr-only">Add Hardware Device</DialogTitle>
         <div className="p-8">
-            <PairingWorkflow onSuccess={handleSuccess} />
+          <PairingWorkflow onSuccess={handleSuccess} />
         </div>
       </DialogContent>
     </Dialog>

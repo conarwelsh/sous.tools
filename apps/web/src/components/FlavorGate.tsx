@@ -16,20 +16,29 @@ export function FlavorGate() {
       console.log("FlavorGate: Checking flavor...");
 
       // EMERGENCY REDIRECT: If we are on localhost in native, we are lost. Force to WSL IP.
-      if (typeof window !== "undefined" && window.location.hostname === "localhost" && (window as any).Capacitor) {
-         const targetUrl = config.web.url;
-         
-         if (!targetUrl || targetUrl.includes("localhost")) {
-            // If we don't have the env var, we might have it injected into the window by the bridge
-            // or we can try to guess from the strings.xml if we had a plugin for it.
-            // For now, let's assume the build process worked and we have the env var.
-            console.warn("FlavorGate: NEXT_PUBLIC_WEB_URL is missing during emergency redirect!");
-            return;
-         }
+      if (
+        typeof window !== "undefined" &&
+        window.location.hostname === "localhost" &&
+        (window as any).Capacitor
+      ) {
+        const targetUrl = config.web.url;
 
-         console.log(`FlavorGate: Detected localhost in native. Redirecting to ${targetUrl}...`);
-         window.location.href = targetUrl + window.location.pathname + window.location.search;
-         return;
+        if (!targetUrl || targetUrl.includes("localhost")) {
+          // If we don't have the env var, we might have it injected into the window by the bridge
+          // or we can try to guess from the strings.xml if we had a plugin for it.
+          // For now, let's assume the build process worked and we have the env var.
+          console.warn(
+            "FlavorGate: NEXT_PUBLIC_WEB_URL is missing during emergency redirect!",
+          );
+          return;
+        }
+
+        console.log(
+          `FlavorGate: Detected localhost in native. Redirecting to ${targetUrl}...`,
+        );
+        window.location.href =
+          targetUrl + window.location.pathname + window.location.search;
+        return;
       }
 
       if (typeof window !== "undefined" && (window as any).Capacitor) {
@@ -53,7 +62,9 @@ export function FlavorGate() {
               console.log("FlavorGate: Redirecting to /dashboard");
               router.replace("/dashboard");
             } else {
-              console.log("FlavorGate: No specific flavor found, staying at root");
+              console.log(
+                "FlavorGate: No specific flavor found, staying at root",
+              );
             }
           } else {
             console.log("FlavorGate: SousHardware plugin not found");

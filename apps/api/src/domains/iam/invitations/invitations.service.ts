@@ -1,7 +1,15 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { DatabaseService } from '../../../domains/core/database/database.service.js';
 import { MailService } from '../../../domains/core/mail/mail.service.js';
-import { invitations, organizations, users } from '../../../domains/core/database/schema.js';
+import {
+  invitations,
+  organizations,
+  users,
+} from '../../../domains/core/database/schema.js';
 import { eq, and, gt } from 'drizzle-orm';
 import { config } from '@sous/config';
 import { logger } from '@sous/logger';
@@ -48,13 +56,13 @@ export class InvitationsService {
         .returning();
 
       const inviteLink = `${config.web.url}/register?token=${token}&email=${encodeURIComponent(data.email)}`;
-      
+
       await this.mailService.sendInvitationEmail(
-        data.email, 
-        org.name, 
-        inviteLink, 
+        data.email,
+        org.name,
+        inviteLink,
         inviter?.firstName || 'A team member',
-        data.role
+        data.role,
       );
 
       return invite;
@@ -65,11 +73,11 @@ export class InvitationsService {
     const invite = await this.dbService.db.query.invitations.findFirst({
       where: and(
         eq(invitations.token, token),
-        gt(invitations.expiresAt, new Date())
+        gt(invitations.expiresAt, new Date()),
       ),
       with: {
         organization: true,
-      }
+      },
     });
 
     if (!invite) {
@@ -96,18 +104,20 @@ export class InvitationsService {
       orderBy: (inv, { desc }) => [desc(inv.createdAt)],
       with: {
         invitedBy: true,
-      }
+      },
     });
   }
 
   async revokeInvitation(id: string, organizationId: string) {
     await this.dbService.db
       .delete(invitations)
-      .where(and(
-        eq(invitations.id, id),
-        eq(invitations.organizationId, organizationId)
-      ));
-    
+      .where(
+        and(
+          eq(invitations.id, id),
+          eq(invitations.organizationId, organizationId),
+        ),
+      );
+
     return { success: true };
   }
 }

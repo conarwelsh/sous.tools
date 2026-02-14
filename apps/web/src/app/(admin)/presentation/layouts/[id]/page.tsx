@@ -6,7 +6,11 @@ import { useRouter } from "next/navigation";
 import { getHttpClient } from "@sous/client-sdk";
 import { Logo } from "@sous/ui";
 
-export default function EditLayoutPage({ params }: { params: Promise<{ id: string }> }) {
+export default function EditLayoutPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const router = useRouter();
   const { id } = use(params);
   const [template, setTemplate] = useState<any>(null);
@@ -21,9 +25,10 @@ export default function EditLayoutPage({ params }: { params: Promise<{ id: strin
         if (found) {
           setTemplate({
             ...found,
-            structure: typeof found.structure === 'string' 
-              ? JSON.parse(found.structure) 
-              : found.structure
+            structure:
+              typeof found.structure === "string"
+                ? JSON.parse(found.structure)
+                : found.structure,
           });
         }
       } catch (e) {
@@ -70,10 +75,10 @@ export default function EditLayoutPage({ params }: { params: Promise<{ id: strin
   }
 
   return (
-    <LayoutDesigner 
-      layout={template} 
-      onSave={handleSave} 
-      onCancel={() => router.push("/presentation/layouts")} 
+    <LayoutDesigner
+      layout={template}
+      onSave={handleSave}
+      onCancel={() => router.push("/presentation/layouts")}
     />
   );
 }

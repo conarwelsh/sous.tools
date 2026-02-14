@@ -12,7 +12,7 @@ export const useAuth = () => {
   const fetchMe = useCallback(async () => {
     const token =
       typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    
+
     if (!token) {
       setUser(null);
       setLoading(false);

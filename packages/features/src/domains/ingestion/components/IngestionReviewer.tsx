@@ -34,8 +34,8 @@ export function IngestionReviewer({
               </Text>
             </View>
             <View className="flex-row items-center gap-2">
-              <button 
-                onClick={() => setZoom(prev => Math.max(0.5, prev - 0.2))}
+              <button
+                onClick={() => setZoom((prev) => Math.max(0.5, prev - 0.2))}
                 className="w-6 h-6 items-center justify-center rounded bg-muted text-muted-foreground hover:text-foreground transition-colors"
               >
                 -
@@ -43,8 +43,8 @@ export function IngestionReviewer({
               <Text className="text-muted-foreground font-mono text-[10px] w-8 text-center">
                 {(zoom * 100).toFixed(0)}%
               </Text>
-              <button 
-                onClick={() => setZoom(prev => Math.min(3, prev + 0.2))}
+              <button
+                onClick={() => setZoom((prev) => Math.min(3, prev + 0.2))}
                 className="w-6 h-6 items-center justify-center rounded bg-muted text-muted-foreground hover:text-foreground transition-colors"
               >
                 +
@@ -53,23 +53,21 @@ export function IngestionReviewer({
           </View>
         </View>
 
-        <ScrollView 
-          className="flex-1"
-        >
+        <ScrollView className="flex-1">
           <div className="min-h-full flex items-center justify-center">
-            <div 
-              style={{ 
-                transform: `scale(${zoom})`, 
-                transition: 'transform 0.2s ease-out',
-                transformOrigin: 'center center'
+            <div
+              style={{
+                transform: `scale(${zoom})`,
+                transition: "transform 0.2s ease-out",
+                transformOrigin: "center center",
               }}
               className="shadow-2xl shadow-foreground/5"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
-                src={sourceImage} 
-                alt="Source document" 
-                className="max-w-[90%] h-auto rounded-sm border border-border" 
+              <img
+                src={sourceImage}
+                alt="Source document"
+                className="max-w-[90%] h-auto rounded-sm border border-border"
               />
             </div>
           </div>
@@ -87,35 +85,33 @@ export function IngestionReviewer({
               {title}
             </Text>
           </View>
-          <Button 
+          <Button
             onClick={onCancel}
-            variant="ghost" 
+            variant="ghost"
             className="w-10 h-10 rounded-full items-center justify-center p-0"
           >
-            <Trash2 size={18} className="text-muted-foreground hover:text-destructive transition-colors" />
+            <Trash2
+              size={18}
+              className="text-muted-foreground hover:text-destructive transition-colors"
+            />
           </Button>
         </View>
 
         <ScrollView className="flex-1 p-6">
-          <View className="gap-8 pb-32">
-            {children}
-          </View>
+          <View className="gap-8 pb-32">{children}</View>
         </ScrollView>
 
         <View className="p-6 border-t border-border bg-background/40 backdrop-blur-xl flex-row gap-4">
-          <Button 
+          <Button
             onClick={onCancel}
-            variant="outline" 
+            variant="outline"
             className="flex-1 h-12 border-border"
           >
             <Text className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">
               Discard
             </Text>
           </Button>
-          <Button 
-            onClick={onSave}
-            className="flex-[2] h-12"
-          >
+          <Button onClick={onSave} className="flex-[2] h-12">
             <View className="flex-row items-center gap-2">
               <Save size={16} className="text-primary-foreground" />
               <Text className="text-primary-foreground font-black uppercase tracking-widest text-[10px]">

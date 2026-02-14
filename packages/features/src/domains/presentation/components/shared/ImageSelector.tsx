@@ -1,9 +1,29 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, Card, Button, Input, Logo, cn, ScrollView, Dialog, DialogContent, DialogHeader, DialogTitle } from "@sous/ui";
+import {
+  View,
+  Text,
+  Card,
+  Button,
+  Input,
+  Logo,
+  cn,
+  ScrollView,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@sous/ui";
 import { getHttpClient } from "@sous/client-sdk";
-import { Search, Image as ImageIcon, Upload, Link as LinkIcon, X, Check } from "lucide-react";
+import {
+  Search,
+  Image as ImageIcon,
+  Upload,
+  Link as LinkIcon,
+  X,
+  Check,
+} from "lucide-react";
 
 interface ImageSelectorProps {
   onSelect: (mediaId: string, url: string) => void;
@@ -22,7 +42,9 @@ export const ImageSelector: React.FC<ImageSelectorProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [search, setSearch] = useState("");
-  const [activeTab, setActiveTab] = useState<"gallery" | "upload" | "url">("gallery");
+  const [activeTab, setActiveTab] = useState<"gallery" | "upload" | "url">(
+    "gallery",
+  );
   const [externalUrl, setExternalUrl] = useState("");
 
   const fetchMedia = useCallback(async () => {
@@ -53,7 +75,7 @@ export const ImageSelector: React.FC<ImageSelectorProps> = ({
       const http = await getHttpClient();
       const formData = new FormData();
       formData.append("file", file);
-      
+
       const response = await http.post<any>("/media/upload", formData);
       await fetchMedia();
       onSelect(response.id, response.url);
@@ -64,8 +86,8 @@ export const ImageSelector: React.FC<ImageSelectorProps> = ({
     }
   };
 
-  const filteredMedia = media.filter(item => 
-    item.name.toLowerCase().includes(search.toLowerCase())
+  const filteredMedia = media.filter((item) =>
+    item.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -97,11 +119,15 @@ export const ImageSelector: React.FC<ImageSelectorProps> = ({
               onClick={() => setActiveTab(tab.id as any)}
               className={cn(
                 "h-14 rounded-none px-6 gap-2 border-b-2 transition-all",
-                activeTab === tab.id ? "bg-muted border-primary text-foreground" : "border-transparent text-muted-foreground"
+                activeTab === tab.id
+                  ? "bg-muted border-primary text-foreground"
+                  : "border-transparent text-muted-foreground",
               )}
             >
               <tab.icon size={14} />
-              <span className="text-[10px] font-black uppercase tracking-widest">{tab.label}</span>
+              <span className="text-[10px] font-black uppercase tracking-widest">
+                {tab.label}
+              </span>
             </Button>
           ))}
         </View>
@@ -111,8 +137,11 @@ export const ImageSelector: React.FC<ImageSelectorProps> = ({
             <View className="flex-1 flex flex-col">
               <div className="p-6 border-b border-border bg-muted/20">
                 <div className="relative">
-                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <Input 
+                  <Search
+                    size={14}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  />
+                  <Input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Filter by filename..."
@@ -127,29 +156,45 @@ export const ImageSelector: React.FC<ImageSelectorProps> = ({
                   </div>
                 ) : filteredMedia.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-64 opacity-20">
-                    <ImageIcon size={48} className="text-muted-foreground mb-4" />
-                    <Text className="text-muted-foreground font-black uppercase text-xs">No media found</Text>
+                    <ImageIcon
+                      size={48}
+                      className="text-muted-foreground mb-4"
+                    />
+                    <Text className="text-muted-foreground font-black uppercase text-xs">
+                      No media found
+                    </Text>
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     {filteredMedia.map((item) => (
-                      <Card 
+                      <Card
                         key={item.id}
                         onClick={() => onSelect(item.id, item.url)}
                         className={cn(
                           "aspect-square bg-card border-2 transition-all cursor-pointer group relative overflow-hidden",
-                          selectedId === item.id ? "border-primary" : "border-border hover:border-muted-foreground/50"
+                          selectedId === item.id
+                            ? "border-primary"
+                            : "border-border hover:border-muted-foreground/50",
                         )}
                       >
-                        <img src={item.url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt={item.name} />
+                        <img
+                          src={item.url}
+                          className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                          alt={item.name}
+                        />
                         <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                         {selectedId === item.id && (
                           <div className="absolute top-2 right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center shadow-lg">
-                            <Check size={14} className="text-primary-foreground" />
+                            <Check
+                              size={14}
+                              className="text-primary-foreground"
+                            />
                           </div>
                         )}
                         <div className="absolute bottom-0 left-0 right-0 p-2 bg-background/80 translate-y-full group-hover:translate-y-0 transition-transform">
-                           <Text className="text-[8px] font-bold text-foreground uppercase truncate">{item.name}</Text>
+                          <Text className="text-[8px] font-bold text-foreground uppercase truncate">
+                            {item.name}
+                          </Text>
                         </div>
                       </Card>
                     ))}
@@ -165,20 +210,32 @@ export const ImageSelector: React.FC<ImageSelectorProps> = ({
                 {isUploading ? (
                   <>
                     <Logo size={48} animate className="mb-6" />
-                    <Text className="text-primary font-black uppercase tracking-widest text-xs animate-pulse">Processing Asset...</Text>
+                    <Text className="text-primary font-black uppercase tracking-widest text-xs animate-pulse">
+                      Processing Asset...
+                    </Text>
                   </>
                 ) : (
                   <>
                     <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-6">
                       <Upload size={24} className="text-muted-foreground" />
                     </div>
-                    <Text className="text-foreground font-black uppercase text-lg mb-2">Upload Image</Text>
+                    <Text className="text-foreground font-black uppercase text-lg mb-2">
+                      Upload Image
+                    </Text>
                     <Text className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest mb-8 leading-relaxed">
-                      Files will be automatically optimized for signage hardware.
+                      Files will be automatically optimized for signage
+                      hardware.
                     </Text>
                     <label className="bg-primary h-12 px-8 rounded-xl cursor-pointer hover:bg-primary/90 transition-colors flex items-center justify-center">
-                      <span className="text-primary-foreground font-black uppercase tracking-widest text-[10px]">Choose File</span>
-                      <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
+                      <span className="text-primary-foreground font-black uppercase tracking-widest text-[10px]">
+                        Choose File
+                      </span>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                      />
                     </label>
                   </>
                 )}
@@ -190,20 +247,24 @@ export const ImageSelector: React.FC<ImageSelectorProps> = ({
             <View className="flex-1 items-center justify-center p-12">
               <div className="w-full max-w-md gap-6 flex flex-col">
                 <View className="gap-2">
-                  <Text className="text-muted-foreground font-black uppercase text-[10px] tracking-widest">Image URL</Text>
-                  <Input 
+                  <Text className="text-muted-foreground font-black uppercase text-[10px] tracking-widest">
+                    Image URL
+                  </Text>
+                  <Input
                     value={externalUrl}
                     onChange={(e) => setExternalUrl(e.target.value)}
                     placeholder="https://example.com/image.jpg"
                     className="h-12 bg-background border-border text-sm font-mono text-primary"
                   />
                 </View>
-                <Button 
-                  onClick={() => onSelect('external', externalUrl)}
+                <Button
+                  onClick={() => onSelect("external", externalUrl)}
                   disabled={!externalUrl}
                   className="bg-primary hover:bg-primary/90 h-12"
                 >
-                  <span className="text-primary-foreground font-black uppercase tracking-widest text-[10px]">Use External Asset</span>
+                  <span className="text-primary-foreground font-black uppercase tracking-widest text-[10px]">
+                    Use External Asset
+                  </span>
                 </Button>
               </div>
             </View>

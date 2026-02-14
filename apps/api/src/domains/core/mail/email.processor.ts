@@ -32,7 +32,7 @@ export class EmailProcessor extends WorkerHost {
 
   async process(job: Job<EmailJobData>): Promise<any> {
     const { to, subject, template, context } = job.data;
-    
+
     logger.info(`⚙️ Processing Email Job: ${job.id} (${template})`);
 
     let component: React.ReactElement;

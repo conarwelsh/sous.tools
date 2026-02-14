@@ -119,12 +119,9 @@ export function DocumentIngestor({
                 </Text>
               </View>
             </Button>
-            
+
             {/* Camera action would be Capacitor specific, but we can mock it here */}
-            <Button
-              onClick={onButtonClick}
-              className="bg-primary px-6 h-12"
-            >
+            <Button onClick={onButtonClick} className="bg-primary px-6 h-12">
               <View className="flex-row items-center gap-2">
                 <Camera size={18} className="text-primary-foreground" />
                 <Text className="text-primary-foreground font-bold uppercase text-[10px] tracking-widest">
@@ -175,7 +172,10 @@ export function DocumentIngestor({
             className="w-full mt-8 h-14"
           >
             {isLoading ? (
-              <Loader2 className="animate-spin text-primary-foreground" size={20} />
+              <Loader2
+                className="animate-spin text-primary-foreground"
+                size={20}
+              />
             ) : (
               <Text className="text-primary-foreground font-black uppercase tracking-widest text-xs">
                 Start AI Ingestion

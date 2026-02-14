@@ -35,7 +35,7 @@ export function RegisterForm() {
   useEffect(() => {
     const emailParam = searchParams.get("email");
     const tokenParam = searchParams.get("token");
-    
+
     if (emailParam) setEmail(emailParam);
     if (tokenParam) {
       setInviteToken(tokenParam);
@@ -43,7 +43,9 @@ export function RegisterForm() {
       void (async () => {
         try {
           const client = await getHttpClient();
-          const invite = await client.get(`/invitations/validate?token=${tokenParam}`) as any;
+          const invite = (await client.get(
+            `/invitations/validate?token=${tokenParam}`,
+          )) as any;
           setInvitedOrg(invite.organization.name);
         } catch (e) {
           setError("Invitation link is invalid or has expired.");
@@ -57,13 +59,13 @@ export function RegisterForm() {
     setError(null);
     setLoading(true);
     try {
-      await register({ 
-        firstName, 
-        lastName, 
-        email, 
+      await register({
+        firstName,
+        lastName,
+        email,
         password,
         organizationName: inviteToken ? undefined : organizationName,
-        inviteToken: inviteToken || undefined
+        inviteToken: inviteToken || undefined,
       });
       router.push("/dashboard");
     } catch (e: any) {
@@ -87,21 +89,25 @@ export function RegisterForm() {
 
       <Card className="w-full max-w-md mx-auto shadow-2xl shadow-primary/5 bg-card border-border/50 rounded-[2.5rem] overflow-hidden">
         <CardHeader className="flex flex-col items-center pt-12 pb-8 bg-muted/30 border-b border-border/50 relative">
-          <button 
+          <button
             onClick={() => router.push("/login")}
             className="absolute left-8 top-12 p-2 hover:bg-background/50 rounded-full transition-colors"
           >
             <ArrowLeft size={20} className="text-muted-foreground" />
           </button>
           <Logo size={60} showWordmark variant="neon" />
-          <Text className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground mt-4">Join the kitchen</Text>
+          <Text className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground mt-4">
+            Join the kitchen
+          </Text>
         </CardHeader>
 
         <CardContent className="p-10 space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-foreground uppercase ml-1 block tracking-[0.2em]">First Name</label>
+                <label className="text-[10px] font-black text-foreground uppercase ml-1 block tracking-[0.2em]">
+                  First Name
+                </label>
                 <Input
                   placeholder="Marco"
                   value={firstName}
@@ -111,7 +117,9 @@ export function RegisterForm() {
                 />
               </div>
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-foreground uppercase ml-1 block tracking-[0.2em]">Last Name</label>
+                <label className="text-[10px] font-black text-foreground uppercase ml-1 block tracking-[0.2em]">
+                  Last Name
+                </label>
                 <Input
                   placeholder="Pierre"
                   value={lastName}
@@ -123,7 +131,9 @@ export function RegisterForm() {
             </div>
 
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-foreground uppercase ml-1 block tracking-[0.2em]">Email Address</label>
+              <label className="text-[10px] font-black text-foreground uppercase ml-1 block tracking-[0.2em]">
+                Email Address
+              </label>
               <Input
                 placeholder="chef@dtown.cafe"
                 value={email}
@@ -136,7 +146,9 @@ export function RegisterForm() {
 
             {!inviteToken ? (
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-foreground uppercase ml-1 block tracking-[0.2em]">Kitchen Name</label>
+                <label className="text-[10px] font-black text-foreground uppercase ml-1 block tracking-[0.2em]">
+                  Kitchen Name
+                </label>
                 <Input
                   placeholder="e.g. My Awesome Restaurant"
                   value={organizationName}
@@ -148,8 +160,12 @@ export function RegisterForm() {
             ) : invitedOrg ? (
               <div className="bg-primary/5 border border-primary/10 p-4 rounded-2xl flex flex-row items-center justify-between">
                 <div className="space-y-1">
-                  <p className="text-[8px] font-black text-primary uppercase tracking-[0.2em]">You're Joining</p>
-                  <p className="text-sm font-black text-foreground uppercase tracking-tight">{invitedOrg}</p>
+                  <p className="text-[8px] font-black text-primary uppercase tracking-[0.2em]">
+                    You're Joining
+                  </p>
+                  <p className="text-sm font-black text-foreground uppercase tracking-tight">
+                    {invitedOrg}
+                  </p>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <ChefHat size={14} className="text-primary" />
@@ -158,7 +174,9 @@ export function RegisterForm() {
             ) : null}
 
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-foreground uppercase ml-1 block tracking-[0.2em]">Password</label>
+              <label className="text-[10px] font-black text-foreground uppercase ml-1 block tracking-[0.2em]">
+                Password
+              </label>
               <Input
                 placeholder="••••••••"
                 value={password}
@@ -171,7 +189,9 @@ export function RegisterForm() {
 
             {error && (
               <div className="bg-destructive/10 border border-destructive/20 p-4 rounded-2xl">
-                <p className="text-destructive text-[10px] font-black text-center uppercase tracking-widest">{error}</p>
+                <p className="text-destructive text-[10px] font-black text-center uppercase tracking-widest">
+                  {error}
+                </p>
               </div>
             )}
 
@@ -188,7 +208,9 @@ export function RegisterForm() {
                 <span className="w-full border-t border-border/50" />
               </div>
               <div className="relative flex justify-center text-[8px] uppercase font-black">
-                <span className="bg-card px-4 text-muted-foreground tracking-[0.3em]">Or Sign Up With</span>
+                <span className="bg-card px-4 text-muted-foreground tracking-[0.3em]">
+                  Or Sign Up With
+                </span>
               </div>
             </div>
 

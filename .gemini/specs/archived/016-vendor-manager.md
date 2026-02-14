@@ -11,12 +11,14 @@ Centralize the management of third-party suppliers, their operational constraint
 ## Core Features
 
 ### 1. Vendor Profiles
+
 - **Contact Information:** Primary representative, phone, email, emergency contact.
 - **Account Details:** Customer ID, payment terms, preferred ordering method (Email, Portal, SMS).
 - **Service Scoping:** Assign vendors to specific **Locations** or the entire **Organization**.
 
 ### 2. Operational Logic
-- **Delivery Schedules:** 
+
+- **Delivery Schedules:**
   - Day-of-week selector (e.g., "Delivers Monday, Wednesday, Friday").
   - **Impact:** The Order Manager uses this to flag "Next Order Due" dates and warn if an item is needed before the next possible delivery.
 - **Order Minimums:**
@@ -24,7 +26,9 @@ Centralize the management of third-party suppliers, their operational constraint
   - **Impact:** Order Manager shows a "Minimum Progress Bar" when building an order for this vendor.
 
 ### 3. Product & Barcode Mapping
+
 The "Rosetta Stone" for vendor items.
+
 - **Item Registry:** A list of items provided by this vendor.
 - **Mapping:** Links Vendor SKU/Name (from Invoices) to platform Ingredients.
 - **Barcode Management:**
@@ -33,6 +37,7 @@ The "Rosetta Stone" for vendor items.
   - **Usage in Ingestion:** Scanning a barcode on a delivered case can automatically "Check In" the item against a PO.
 
 ### 4. Performance Analytics
+
 - **Reconciliation Grade:** Percentage of orders that arrived without discrepancies (Shortages/Overcharges).
 - **Price Volatility:** Tracking how often this vendor changes prices compared to the market average.
 - **Fulfillment Speed:** Average time from PO creation to Invoice finalization.
@@ -40,14 +45,17 @@ The "Rosetta Stone" for vendor items.
 ## User Interfaces
 
 ### 1. Vendor Directory
+
 - Card-based view of all suppliers with "Quick Status" (Online/Offline, Next Delivery).
 - "Order Now" shortcut that deep-links to the Order Manager filtered for that vendor.
 
 ### 2. Item Mapping Tool
+
 - A table view for managing the relationship between Vendor SKUs and internal Ingredients.
 - Searchable by Barcode, SKU, or Name.
 
 ### 3. Wastage & Quality Reports
+
 - View incidents specifically tied to a vendor (e.g., "Arrived spoiled", "Damaged in transit").
 - Integrated with the **Wastage Log** (Spec 015).
 
@@ -61,7 +69,7 @@ type Vendor = {
   deliveryDays: number[]; // 0-6 (Sun-Sat)
   orderMinimum: {
     amount: number;
-    type: 'CURRENCY' | 'WEIGHT';
+    type: "CURRENCY" | "WEIGHT";
   };
   performanceScore: number;
 };

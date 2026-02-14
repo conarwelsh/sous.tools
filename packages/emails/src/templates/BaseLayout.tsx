@@ -4,7 +4,6 @@ import {
   Head,
   Hr,
   Html,
-  Img,
   Preview,
   Section,
   Text,
@@ -37,7 +36,9 @@ export const BaseLayout = ({ preview, children }: BaseLayoutProps) => (
       <Body className="bg-white font-sans">
         <Container className="mx-auto py-12 px-4 max-w-[580px]">
           <Section className="mb-8">
-             <Text className="text-2xl font-black uppercase tracking-tighter italic">Sous</Text>
+            <Text className="text-2xl font-black uppercase tracking-tighter italic">
+              Sous
+            </Text>
           </Section>
           {children}
           <Hr className="border-zinc-200 my-8" />
@@ -46,7 +47,8 @@ export const BaseLayout = ({ preview, children }: BaseLayoutProps) => (
               © {new Date().getFullYear()} Sous Tools. All rights reserved.
             </Text>
             <Text className="text-muted text-[10px] mt-2">
-              You received this email because it is critical to your Sous account operations.
+              You received this email because it is critical to your Sous
+              account operations.
             </Text>
           </Section>
         </Container>

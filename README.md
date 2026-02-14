@@ -45,18 +45,21 @@ cp .env.example .env
 To set up your development environment on Ubuntu (Native or WSL2):
 
 1.  **Clone the repository:**
+
     ```bash
     git clone https://github.com/conarwelsh/sous.tools.git
     cd sous.tools
     ```
 
 2.  **Install base dependencies:**
+
     ```bash
     pnpm install
     ```
 
 3.  **Run the Sous Installer:**
     This command is idempotent and will install all system dependencies (Docker, Node, Native, Android SDK, etc.).
+
     ```bash
     pnpm sous dev install
     ```
@@ -66,6 +69,7 @@ To set up your development environment on Ubuntu (Native or WSL2):
 
 5.  **Optional: Install Shell Customization:**
     Adds productivity aliases and a brand-aligned ZSH prompt.
+
     ```bash
     pnpm sous dev install shell
     source ~/.zshrc

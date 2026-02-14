@@ -125,13 +125,15 @@ export const AtelierLogo: React.FC<LogoProps> = ({
         {/* Clip path for liquid and bubbles to stay within the flask */}
         {/* Path for a more flask-like shape with curves, matching the reference image */}
         <clipPath id={`flaskClip-${size}`}>
-          <path d={`M35,${pad} L35,${pad+40} Q25,${45+pad} 25,${55+pad} Q20,${75+pad} 35,${90} L65,${90} Q80,${75+pad} 75,${55+pad} Q75,${45+pad} 65,${40+pad} L65,${pad} Z`} />
+          <path
+            d={`M35,${pad} L35,${pad + 40} Q25,${45 + pad} 25,${55 + pad} Q20,${75 + pad} 35,${90} L65,${90} Q80,${75 + pad} 75,${55 + pad} Q75,${45 + pad} 65,${40 + pad} L65,${pad} Z`}
+          />
         </clipPath>
       </defs>
 
       {/* Back Glass */}
       <path
-        d={`M35,${pad} L35,${pad+40} Q25,${45+pad} 25,${55+pad} Q20,${75+pad} 35,${90} L65,${90} Q80,${75+pad} 75,${55+pad} Q75,${45+pad} 65,${40+pad} L65,${pad} Z`}
+        d={`M35,${pad} L35,${pad + 40} Q25,${45 + pad} 25,${55 + pad} Q20,${75 + pad} 35,${90} L65,${90} Q80,${75 + pad} 75,${55 + pad} Q75,${45 + pad} 65,${40 + pad} L65,${pad} Z`}
         stroke={t.main}
         strokeWidth={lod === "micro" ? 10 : 6}
       />
@@ -168,7 +170,7 @@ export const AtelierLogo: React.FC<LogoProps> = ({
 
       {/* Front Glass Overlay */}
       <path
-        d={`M35,${pad} L35,${pad+40} Q25,${45+pad} 25,${55+pad} Q20,${75+pad} 35,${90} L65,${90} Q80,${75+pad} 75,${55+pad} Q75,${45+pad} 65,${40+pad} L65,${pad} Z`}
+        d={`M35,${pad} L35,${pad + 40} Q25,${45 + pad} 25,${55 + pad} Q20,${75 + pad} 35,${90} L65,${90} Q80,${75 + pad} 75,${55 + pad} Q75,${45 + pad} 65,${40 + pad} L65,${pad} Z`}
         stroke={t.main}
         strokeWidth={lod === "micro" ? 10 : 6}
       />

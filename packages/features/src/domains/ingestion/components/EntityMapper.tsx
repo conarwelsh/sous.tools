@@ -20,7 +20,9 @@ export function EntityMapper({
   isLoading = false,
 }: EntityMapperProps) {
   const [searchTerm, setSearchText] = useState(suggestedMatch?.name || "");
-  const [isEditing, setIsEditing] = useState(!suggestedMatch || suggestedMatch.confidence < 0.9);
+  const [isEditing, setIsEditing] = useState(
+    !suggestedMatch || suggestedMatch.confidence < 0.9,
+  );
 
   const confidenceColor = () => {
     if (!suggestedMatch) return "text-zinc-500";
@@ -40,16 +42,18 @@ export function EntityMapper({
             {originalText}
           </Text>
         </View>
-        
+
         {suggestedMatch && !isEditing && (
           <View className="items-end">
-            <View className={`flex-row items-center gap-1 mb-1 ${confidenceColor()}`}>
+            <View
+              className={`flex-row items-center gap-1 mb-1 ${confidenceColor()}`}
+            >
               <Check size={10} />
               <Text className="font-black uppercase text-[8px] tracking-widest">
                 {(suggestedMatch.confidence * 100).toFixed(0)}% Match
               </Text>
             </View>
-            <button 
+            <button
               onClick={() => setIsEditing(true)}
               className="text-muted-foreground hover:text-primary text-[8px] font-bold uppercase tracking-widest underline transition-colors"
             >
@@ -62,7 +66,10 @@ export function EntityMapper({
       {isEditing ? (
         <View className="gap-3">
           <View className="relative">
-            <Search size={14} className="absolute left-3 top-3 text-muted-foreground" />
+            <Search
+              size={14}
+              className="absolute left-3 top-3 text-muted-foreground"
+            />
             <Input
               value={searchTerm}
               onChange={(e) => setSearchText(e.target.value)}
@@ -70,7 +77,7 @@ export function EntityMapper({
               className="pl-10 h-10 bg-muted/40 border-border text-xs"
             />
           </View>
-          
+
           <View className="flex-row gap-2">
             <Button
               onClick={() => setIsEditing(false)}
@@ -81,7 +88,7 @@ export function EntityMapper({
                 Cancel
               </Text>
             </Button>
-            
+
             {onCreateNew && (
               <Button
                 onClick={() => onCreateNew(searchTerm)}
@@ -108,7 +115,9 @@ export function EntityMapper({
             </Text>
           </View>
           <View className="px-2 py-1 rounded bg-primary/10 border border-primary/20">
-             <Text className="text-primary font-mono text-[8px] uppercase tracking-widest">Linked</Text>
+            <Text className="text-primary font-mono text-[8px] uppercase tracking-widest">
+              Linked
+            </Text>
           </View>
         </View>
       )}

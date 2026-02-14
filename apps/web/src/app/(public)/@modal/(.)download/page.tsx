@@ -14,7 +14,7 @@ export default function DownloadModal() {
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0 border-zinc-800 bg-[#0a0a0a]">
         <DialogTitle className="sr-only">Download Terminal</DialogTitle>
         <div className="flex-1 overflow-auto">
-            <DownloadPage />
+          <DownloadPage />
         </div>
       </DialogContent>
     </Dialog>

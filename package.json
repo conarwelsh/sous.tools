@@ -19,6 +19,7 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:e2e": "playwright test",
+    "audit:codebase": "tsx scripts/audit-codebase.ts",
     "check": "turbo run lint build test",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "prepare": "husky",
