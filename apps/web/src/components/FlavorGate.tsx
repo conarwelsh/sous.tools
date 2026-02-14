@@ -3,10 +3,14 @@
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { config } from "@sous/config";
+import { useUpdateManager } from "@sous/features";
 
 export function FlavorGate() {
   const router = useRouter();
   const pathname = usePathname();
+  
+  // Initialize background update manager
+  useUpdateManager();
 
   useEffect(() => {
     // Only redirect if at root

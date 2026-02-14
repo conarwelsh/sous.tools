@@ -34,6 +34,15 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
+  @Post('login-pin')
+  async loginByPin(@Body('pin') pin: string) {
+    const user = await this.authService.validatePinUser(pin);
+    if (!user) {
+      throw new UnauthorizedException('Invalid PIN');
+    }
+    return this.authService.login(user);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   async logout(@Req() req: any) {

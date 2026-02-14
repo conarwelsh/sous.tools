@@ -31,11 +31,17 @@ const LoginFormContent = ({
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { login, refresh } = useAuth();
+  const { user, login, refresh } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    // If already logged in, redirect away from login page
+    if (user && !loading) {
+      router.push(callbackUrl === "/login" ? "/dashboard" : callbackUrl);
+      return;
+    }
+
     const token = searchParams.get("token");
     const errorParam = searchParams.get("error");
 
@@ -46,18 +52,14 @@ const LoginFormContent = ({
         const http = await getHttpClient();
         http.setToken(token);
         await refresh();
-        if (onSuccess) {
-          onSuccess();
-        } else {
-          router.push(callbackUrl);
-        }
+        // Redirect will be handled by the user check above once refresh completes
       })();
     }
 
     if (errorParam) {
       setError(errorParam);
     }
-  }, [searchParams, refresh, onSuccess, router, callbackUrl]);
+  }, [searchParams, refresh, onSuccess, router, callbackUrl, user, loading]);
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();

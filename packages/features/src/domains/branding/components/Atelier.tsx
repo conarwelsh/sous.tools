@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Logo, Wordmark, LogoVariant, Environment } from "@sous/ui";
+import { Logo, Wordmark, LogoVariant, Environment, KioskLoading } from "@sous/ui";
 import { type BrandingConfig } from "@sous/config";
 import {
   Save,
@@ -17,6 +17,10 @@ import {
   Zap,
   Shield,
   FlaskConical,
+  Grid,
+  Layout,
+  Play,
+  RefreshCcw,
 } from "lucide-react";
 
 export const Atelier: React.FC = () => {
@@ -32,24 +36,66 @@ export const Atelier: React.FC = () => {
 
   useEffect(() => {
     // Attempt to load standard configuration
-    setConfig({
-      favicon: { variant: "plate", size: 32, props: { suffix: "tools" } },
-      "app-icon": {
-        variant: "neon",
-        size: 512,
-        props: { suffix: "tools", animate: false },
-      },
-      "pos-logo": { variant: "pos", size: 48, props: { suffix: "pos" } },
-      "kds-logo": { variant: "kds", size: 48, props: { suffix: "kds" } },
-      "signage-logo": {
-        variant: "signage",
-        size: 48,
-        props: { suffix: "signage" },
-      },
-      "api-logo": { variant: "api", size: 48, props: { suffix: "api" } },
-    });
-    setLoading(false);
+    const fetchConfig = async () => {
+      try {
+        const res = await fetch("/api/branding");
+        if (res.ok) {
+          const data = await res.json();
+          setConfig(data);
+        } else {
+          // Fallback if API not yet implemented
+          setConfig({
+            "favicon-16": { variant: "plate", size: 16, props: {} },
+            "favicon-32": { variant: "plate", size: 32, props: {} },
+            "apple-touch-icon": { variant: "neon", size: 180, props: {} },
+            "android-chrome-192": { variant: "neon", size: 192, props: {} },
+            "android-chrome-512": { variant: "neon", size: 512, props: {} },
+            "android-adaptive-foreground": {
+              variant: "neon",
+              size: 512,
+              props: { animate: false }
+            },
+            "ios-app-icon": {
+              variant: "neon",
+              size: 1024,
+              props: { animate: false }
+            },
+            "wearos-app-icon": {
+              variant: "neon",
+              size: 512,
+              props: { animate: false }
+            },
+            "pos-logo": { variant: "pos", size: 512, props: {} },
+            "kds-logo": { variant: "kds", size: 512, props: {} },
+            "signage-logo": { variant: "signage", size: 512, props: {} },
+            "api-logo": { variant: "api", size: 512, props: {} },
+            "kiosk-logo": { variant: "kiosk", size: 512, props: {} }
+          });
+        }
+      } catch (e) {
+        console.error("Failed to fetch branding config:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchConfig();
   }, []);
+
+  const handleForge = async () => {
+    setSaving(true);
+    try {
+      const response = await fetch("/api/branding/forge", { method: "POST" });
+      if (response.ok) {
+        alert("Assets forged successfully!");
+      } else {
+        alert("Failed to forge assets.");
+      }
+    } catch (e) {
+      alert("Forge failed.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -80,11 +126,8 @@ export const Atelier: React.FC = () => {
   const handlePasteConfig = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     try {
       const pasted = JSON.parse(e.target.value);
-      // Basic validation or just set it
       setConfig(pasted);
-    } catch (e) {
-      // Invalid JSON, ignore
-    }
+    } catch (e) {}
   };
 
   if (loading)
@@ -107,6 +150,7 @@ export const Atelier: React.FC = () => {
     "pos",
     "kds",
     "signage",
+    "kiosk",
     "tools",
     "neon",
     "circuit",
@@ -187,6 +231,12 @@ export const Atelier: React.FC = () => {
           </div>
 
           <button
+            onClick={handleForge}
+            className="border border-sky-500/50 text-sky-500 px-6 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider hover:bg-sky-500 hover:text-white transition-all active:scale-95"
+          >
+            Forge Assets
+          </button>
+          <button
             onClick={handleSave}
             className="bg-foreground text-background px-6 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider hover:bg-sky-500 hover:text-white transition-all shadow-xl active:scale-95"
           >
@@ -226,71 +276,124 @@ export const Atelier: React.FC = () => {
 
         {/* Main Workspace */}
         <main className="flex-1 overflow-y-auto bg-[radial-gradient(var(--color-border)_1px,transparent_1px)] [background-size:32px_32px] p-12">
-          <div className="max-w-6xl mx-auto space-y-24">
-            {/* Stage: Identity Core */}
+          <div className="max-w-6xl mx-auto space-y-24 pb-32">
+            
+            {/* Stage: Vector & Mask Validation */}
             <section className="space-y-8">
               <div className="flex flex-row items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className="p-2 bg-sky-500/10 rounded-lg"><Sparkles size={16} className="text-sky-500" /></div>
-                  <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">Identity Core</h2>
-                </div>
-                <div className="flex flex-row items-center gap-4">
-                  <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">Import State</span>
-                  <textarea 
-                    placeholder="Paste JSON config..."
-                    onChange={handlePasteConfig}
-                    className="h-8 w-48 bg-muted/50 border border-border/50 rounded-lg px-3 py-1 text-[8px] font-mono focus:w-96 transition-all focus:h-24 resize-none"
-                  />
+                  <div className="p-2 bg-sky-500/10 rounded-lg"><Grid size={16} className="text-sky-500" /></div>
+                  <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">Active Manifest Validation</h2>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Hero Logo */}
-                <div className="bg-card/50 border border-border rounded-[2rem] p-12 flex flex-col items-center justify-center space-y-12 relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-sky-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div
-                    style={{ transform: `scale(${globalScale})` }}
-                    className="transition-transform duration-300"
-                  >
-                    <Logo
-                      variant={selectedVariant || "cloud"}
-                      size={120}
-                      suffix="tools"
-                      environment={globalEnvironment}
-                      animate
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {Object.entries(config).map(([key, cfg]: [string, any]) => {
+                  let mask: "squircle" | "rounded" | "circle" | "none" = "none";
+                  if (key.includes("android-adaptive")) mask = "squircle";
+                  else if (key.includes("ios-app-icon")) mask = "rounded";
+                  else if (key.includes("wearos-app-icon")) mask = "circle";
+                  else if (key.includes("apple-touch")) mask = "rounded";
+
+                  return (
+                    <IconPreviewCard 
+                      key={key}
+                      label={key} 
+                      type={cfg.variant.toUpperCase()} 
+                      color="text-sky-500" 
+                      mask={mask} 
+                      variant={cfg.variant} 
+                      env={globalEnvironment}
+                      size={cfg.size}
                     />
-                  </div>
-                  <div className="flex space-x-4 opacity-40 group-hover:opacity-100 transition-opacity">
-                    <span className="text-[10px] font-mono px-3 py-1 bg-muted rounded-full border border-border">
-                      PRIMARY
-                    </span>
-                    <span className="text-[10px] font-mono px-3 py-1 bg-muted rounded-full border border-border">
-                      VECTOR_READY
-                    </span>
+                  );
+                })}
+              </div>
+
+              {/* Density Grid */}
+              <div className="bg-card/30 border border-border/50 rounded-[2rem] p-8 flex flex-row items-center justify-between">
+                 {[16, 24, 32, 48, 64, 128].map(size => (
+                   <div key={size} className="flex flex-col items-center gap-3">
+                      <Logo 
+                        variant={selectedVariant || "cloud"} 
+                        size={size} 
+                        showWordmark={false} 
+                        environment={globalEnvironment}
+                      />
+                      <span className="text-[8px] font-mono font-bold text-muted-foreground uppercase">{size}px</span>
+                   </div>
+                 ))}
+              </div>
+            </section>
+
+            {/* Stage: UI Contexts */}
+            <section className="space-y-8">
+              <div className="flex items-center space-x-4">
+                <div className="p-2 bg-purple-500/10 rounded-lg"><Layout size={16} className="text-purple-500" /></div>
+                <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">UI Contextual Scale</h2>
+              </div>
+
+              <div className="grid grid-cols-3 gap-8">
+                {/* Sidebar Context */}
+                <div className="bg-card/50 border border-border rounded-3xl p-8 flex flex-col gap-6">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Sidebar (Collapsed)</span>
+                  <div className="w-16 h-64 bg-zinc-950 rounded-2xl border border-zinc-800 flex flex-col items-center py-6">
+                    <Logo variant={selectedVariant || "cloud"} size={28} showWordmark={false} environment={globalEnvironment} />
+                    <div className="mt-8 flex flex-col gap-4 opacity-20">
+                      {Array.from({ length: 4 }).map((_, i) => <div key={i} className="w-8 h-8 rounded-lg bg-zinc-800" />)}
+                    </div>
                   </div>
                 </div>
 
-                {/* Secondary/API Logo */}
-                <div className="bg-card/50 border border-border rounded-[2rem] p-12 flex flex-col items-center justify-center space-y-12 relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div
-                    style={{ transform: `scale(${globalScale})` }}
-                    className="transition-transform duration-300"
-                  >
-                    <Logo
-                      variant={selectedVariant || "api"}
-                      size={80}
-                      suffix="api"
-                      environment={globalEnvironment}
-                    />
+                {/* Footer Context */}
+                <div className="bg-card/50 border border-border rounded-3xl p-8 flex flex-col gap-6">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Footer / Status Bar</span>
+                  <div className="w-full h-12 bg-zinc-950 rounded-xl border border-zinc-800 mt-auto flex items-center px-4 justify-between">
+                    <Logo variant={selectedVariant || "cloud"} size={16} showWordmark={false} environment={globalEnvironment} />
+                    <div className="flex gap-2">
+                      <div className="w-12 h-2 rounded bg-zinc-800 opacity-20" />
+                      <div className="w-12 h-2 rounded bg-zinc-800 opacity-20" />
+                    </div>
                   </div>
-                  <div className="flex space-x-4 opacity-40 group-hover:opacity-100 transition-opacity">
-                    <span className="text-[10px] font-mono px-3 py-1 bg-muted rounded-full border border-border">
-                      SECONDARY
-                    </span>
-                    <span className="text-[10px] font-mono px-3 py-1 bg-muted rounded-full border border-border">
-                      TECHNICAL
-                    </span>
+                </div>
+
+                {/* Navbar Context */}
+                <div className="bg-card/50 border border-border rounded-3xl p-8 flex flex-col gap-6">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Navigation Header</span>
+                  <div className="w-full h-16 bg-zinc-900 rounded-xl border border-zinc-800 flex items-center px-6 gap-4">
+                    <Logo variant={selectedVariant || "cloud"} size={32} showWordmark environment={globalEnvironment} />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Stage: Loading & Splash */}
+            <section className="space-y-8">
+              <div className="flex items-center space-x-4">
+                <div className="p-2 bg-emerald-500/10 rounded-lg"><Play size={16} className="text-emerald-500" /></div>
+                <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">Launch Experience</h2>
+              </div>
+
+              <div className="grid grid-cols-2 gap-8">
+                {/* Initializing Hardware */}
+                <div className="bg-card border border-border rounded-[2.5rem] p-8 flex flex-col items-center">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-8">Hardware Initialization</span>
+                  <div className="w-full aspect-video bg-black rounded-3xl border border-zinc-800 flex items-center justify-center relative overflow-hidden">
+                    <div className="flex flex-col items-center gap-6">
+                      <Logo variant={selectedVariant || "cloud"} size={64} animate environment={globalEnvironment} />
+                      <div className="flex flex-col items-center gap-2">
+                        <RefreshCcw size={24} className="text-zinc-800 animate-spin" />
+                        <span className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-600">Initializing Core...</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Kiosk Loading */}
+                <div className="bg-card border border-border rounded-[2.5rem] p-8 flex flex-col items-center">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-8">Service Splash</span>
+                  <div className="w-full aspect-video bg-zinc-950 rounded-3xl border border-zinc-800 overflow-hidden relative">
+                    <KioskLoading suffix={selectedVariant === 'pos' ? 'pos' : 'kiosk'} />
                   </div>
                 </div>
               </div>
@@ -299,56 +402,23 @@ export const Atelier: React.FC = () => {
             {/* Stage: Product Flavors */}
             <section className="space-y-8">
               <div className="flex items-center space-x-4">
-                <div className="p-2 bg-muted rounded-lg">
-                  <Layers size={16} className="text-muted-foreground" />
-                </div>
-                <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">
-                  System Flavors
-                </h2>
+                <div className="p-2 bg-muted rounded-lg"><Layers size={16} className="text-muted-foreground" /></div>
+                <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">System Flavors</h2>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
                 {[
-                  {
-                    id: "pos",
-                    label: "Point of Sale",
-                    variant: "pos" as LogoVariant,
-                  },
-                  {
-                    id: "kds",
-                    label: "Kitchen Display",
-                    variant: "kds" as LogoVariant,
-                  },
-                  {
-                    id: "signage",
-                    label: "Digital Signage",
-                    variant: "signage" as LogoVariant,
-                  },
-                  {
-                    id: "docs",
-                    label: "Intelligence Hub",
-                    variant: "whisk" as LogoVariant,
-                  },
-                ].map((flavor) => (
-                  <div
-                    key={flavor.id}
-                    className="bg-card/30 border border-border/50 rounded-3xl p-8 flex flex-col items-center space-y-6 hover:border-border transition-all group"
-                  >
-                    <Logo
-                      variant={flavor.variant}
-                      size={48}
-                      showWordmark={false}
-                      environment={globalEnvironment}
-                    />
+                  { id: "pos", label: "Point of Sale", variant: "pos" as LogoVariant },
+                  { id: "kds", label: "Kitchen Display", variant: "kds" as LogoVariant },
+                  { id: "signage", label: "Digital Signage", variant: "signage" as LogoVariant },
+                  { id: "kiosk", label: "Self-Order Kiosk", variant: "kiosk" as LogoVariant },
+                  { id: "docs", label: "Intelligence Hub", variant: "whisk" as LogoVariant },
+                ].map(flavor => (
+                  <div key={flavor.id} className="bg-card/30 border border-border/50 rounded-3xl p-8 flex flex-col items-center space-y-6 hover:border-border transition-all group">
+                    <Logo variant={flavor.variant} size={48} showWordmark={false} environment={globalEnvironment} />
                     <div className="text-center">
-                      <div className="text-[8px] font-black uppercase tracking-widest text-muted-foreground mb-1">
-                        {flavor.id}
-                      </div>
-                      <Wordmark
-                        size={16}
-                        suffix={flavor.id}
-                        environment={globalEnvironment}
-                      />
+                      <div className="text-[8px] font-black uppercase tracking-widest text-muted-foreground mb-1">{flavor.id}</div>
+                      <Wordmark size={16} suffix={flavor.id} environment={globalEnvironment} />
                     </div>
                   </div>
                 ))}
@@ -358,12 +428,8 @@ export const Atelier: React.FC = () => {
             {/* Stage: Deployment Preview */}
             <section className="space-y-8 pb-24">
               <div className="flex items-center space-x-4">
-                <div className="p-2 bg-amber-500/10 rounded-lg">
-                  <Box size={16} className="text-amber-500" />
-                </div>
-                <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">
-                  Deployment Preview
-                </h2>
+                <div className="p-2 bg-amber-500/10 rounded-lg"><Box size={16} className="text-amber-500" /></div>
+                <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">Deployment Preview</h2>
               </div>
 
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
@@ -376,18 +442,8 @@ export const Atelier: React.FC = () => {
                     <div className="w-12 h-1 bg-muted-foreground/20 rounded-full mx-auto mb-8" />
                     <div className="grid grid-cols-4 gap-4">
                       {Array.from({ length: 12 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className={`aspect-square rounded-xl flex items-center justify-center ${i === 0 ? "bg-card shadow-xl border border-border" : "bg-card/20"}`}
-                        >
-                          {i === 0 && (
-                            <Logo
-                              variant="cloud"
-                              size={24}
-                              showWordmark={false}
-                              environment={globalEnvironment}
-                            />
-                          )}
+                        <div key={i} className={`aspect-square rounded-xl flex items-center justify-center ${i === 0 ? "bg-card shadow-xl border border-border" : "bg-card/20"}`}>
+                          {i === 0 && <Logo variant="cloud" size={24} showWordmark={false} environment={globalEnvironment} />}
                         </div>
                       ))}
                     </div>
@@ -405,15 +461,8 @@ export const Atelier: React.FC = () => {
                       <div className="w-1.5 h-1.5 rounded-full bg-amber-500/50" />
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/50" />
                       <div className="ml-4 h-4 w-32 bg-card rounded flex items-center px-2 border border-border/50">
-                        <Logo
-                          variant="cloud"
-                          size={10}
-                          showWordmark={false}
-                          environment={globalEnvironment}
-                        />
-                        <span className="text-[6px] text-muted-foreground ml-1">
-                          sous.tools
-                        </span>
+                        <Logo variant="cloud" size={10} showWordmark={false} environment={globalEnvironment} />
+                        <span className="text-[6px] text-muted-foreground ml-1">sous.tools</span>
                       </div>
                     </div>
                     <div className="flex-1 p-4 bg-card/50">
@@ -432,16 +481,8 @@ export const Atelier: React.FC = () => {
                   </div>
                   <div className="w-40 h-40 bg-muted rounded-full border-4 border-muted-foreground/20 flex items-center justify-center relative shadow-inner">
                     <div className="text-center">
-                      <Logo
-                        variant="cloud"
-                        size={32}
-                        showWordmark={false}
-                        environment={globalEnvironment}
-                        animate
-                      />
-                      <div className="text-[8px] font-mono text-sky-500 mt-2">
-                        12:45
-                      </div>
+                      <Logo variant="cloud" size={32} showWordmark={false} environment={globalEnvironment} animate />
+                      <div className="text-[8px] font-mono text-sky-500 mt-2">12:45</div>
                     </div>
                   </div>
                 </div>
@@ -453,3 +494,30 @@ export const Atelier: React.FC = () => {
     </div>
   );
 };
+
+const IconPreviewCard = ({ label, type, color, mask, variant, env }: any) => (
+  <div className="bg-card/50 border border-border rounded-[2rem] p-6 flex flex-col gap-4">
+    <div className="text-[8px] font-black uppercase tracking-widest text-muted-foreground flex justify-between px-2">
+      <span>{label}</span>
+      <span className={color}>{type}</span>
+    </div>
+    <div className="aspect-square bg-muted/20 rounded-2xl flex items-center justify-center border border-border/50 relative overflow-hidden">
+      {mask === 'squircle' && <div className="absolute inset-0 border-[1px] border-emerald-500/20 rounded-[35%] pointer-events-none" />}
+      <div className={cn(
+        "w-[120px] h-[120px] bg-background flex items-center justify-center overflow-hidden border border-border shadow-xl",
+        mask === 'squircle' ? "rounded-[35%]" : mask === 'rounded' ? "rounded-[22%]" : mask === 'circle' ? "rounded-full" : "rounded-none"
+      )}>
+        <Logo
+          variant={variant || "cloud"}
+          size={mask === 'circle' ? 64 : 80}
+          showWordmark={false}
+          environment={env}
+        />
+      </div>
+    </div>
+  </div>
+);
+
+function cn(...classes: any[]) {
+  return classes.filter(Boolean).join(" ");
+}

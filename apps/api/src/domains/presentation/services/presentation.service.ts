@@ -11,7 +11,7 @@ import {
   displayAssignments,
   organizations,
 } from '../../core/database/schema.js';
-import { eq, and, or, desc } from 'drizzle-orm';
+import { eq, and, or, desc, inArray } from 'drizzle-orm';
 import { logger } from '@sous/logger';
 import { RealtimeGateway } from '../../realtime/realtime.gateway.js';
 import { PubSub } from 'graphql-subscriptions';
@@ -180,7 +180,7 @@ export class PresentationService {
       .from(layouts)
       .where(
         and(
-          eq(layouts.type, 'PAGE'),
+          inArray(layouts.type, ['PAGE', 'SCREEN']),
           organizationId
             ? eq(layouts.organizationId, organizationId)
             : undefined,

@@ -54,21 +54,21 @@ module.exports = {
     // --- Native Applications ---
     {
       name: "sous-pos",
-      script: "bash ./scripts/run-android.sh Pixel_Tablet pos",
+      script: "bash ./scripts/run-android.sh Wear_OS_Large_Round pos",
       cwd: ".",
       autorestart: false,
       namespace: "native"
     },
     {
       name: "sous-kds",
-      script: "bash ./scripts/run-android.sh Medium_Desktop kds",
+      script: "bash ./scripts/run-android.sh sdk_gpc_x86_64 kds",
       cwd: ".",
       autorestart: false,
       namespace: "native"
     },
     {
       name: "sous-signage",
-      script: "bash ./scripts/run-android.sh Television_1080p signage",
+      script: "bash ./scripts/run-android.sh sdk_google_atv_x86 signage",
       cwd: ".",
       autorestart: false,
       namespace: "native"
@@ -81,8 +81,8 @@ module.exports = {
       namespace: "native"
     },
     {
-      name: "sous-tools",
-      script: "bash ./scripts/run-android.sh Pixel_9 tools",
+      name: "sous-wearos",
+      script: "bash ./scripts/run-android.sh Wear_OS_Large_Round wearos",
       cwd: ".",
       autorestart: false,
       namespace: "native"

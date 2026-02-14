@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
+import { logger } from '@sous/logger';
 import { DatabaseService } from '../../core/database/database.service.js';
 import { eq, and } from 'drizzle-orm';
 import { devices } from '../../core/database/schema.js';
@@ -28,27 +29,22 @@ export class HardwareAuthGuard implements CanActivate {
     const hardwareId = request.headers['x-hardware-id'];
     const orgId = request.headers['x-organization-id'];
 
-    if (!hardwareId || !orgId) {
+    if (!hardwareId || !orgId || orgId === 'undefined' || orgId === 'null' || !hardwareId.length || !orgId.length) {
       return false; 
     }
-
-    console.log(`[HardwareAuthGuard] Checking hardwareId: ${hardwareId}, orgId: ${orgId}`);
 
     // Verify hardware belongs to org and is active
     const device = await this.dbService.readDb.query.devices.findFirst({
       where: and(
-        eq(devices.hardwareId, hardwareId),
-        eq(devices.organizationId, orgId),
+        eq(devices.hardwareId, hardwareId as string),
+        eq(devices.organizationId, orgId as string),
         eq(devices.status, 'online')
       ),
     });
 
     if (!device) {
-      console.warn(`[HardwareAuthGuard] Device not found or inactive: hw=${hardwareId}, org=${orgId}`);
-      throw new UnauthorizedException('Hardware not recognized or inactive');
+      return false; 
     }
-
-    console.log(`[HardwareAuthGuard] Success for device: ${device.name}`);
 
     // Populate user context for resolvers
     request['user'] = {

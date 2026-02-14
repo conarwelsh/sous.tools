@@ -34,9 +34,13 @@ async function main() {
     process.exit(1);
   }
 
+  const rootPkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), "package.json"), "utf8"));
+  const version = rootPkg.version;
+
   const manifest: Record<string, string> = {
     updatedAt: new Date().toISOString(),
     channel,
+    version,
   };
 
   async function uploadFile(filePath: string, destPath: string) {

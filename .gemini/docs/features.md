@@ -24,7 +24,8 @@ This document provides a comprehensive list of implemented and planned features 
 ### Point of Sale (POS) Terminal
 - **Status**: ✅ Hardened (Feb 2026)
 - **Details**: Touch-optimized interface for order entry. Dual-driver support (Square + Proprietary Sous Driver).
-- **UX**: Category filtering and animated cart management.
+- **Features**: Employee PIN Login, Floorplan view with SVG tables, Shift Dashboard, Modifiers Modal.
+- **UX**: Category filtering and animated cart management with 'Neon' design system.
 
 ### Catalog Management
 - **Status**: ✅ Implemented
@@ -37,9 +38,15 @@ This document provides a comprehensive list of implemented and planned features 
 - **Details**: Dynamic layout engine. Real-time content updates from the API.
 - **Tech**: Next.js Server Components.
 
-### Branding Lab
-- **Status**: ✅ Implemented
-- **Details**: Interactive playground for testing theme variables and design tokens.
+### Sous Asset Forge
+- **Status**: ✅ Implemented (Feb 2026)
+- **Details**: Centralized brand asset generation engine ensures 100% uniformity across Web, Android, iOS, and WearOS.
+- **Tech**: `resvg-js` + `sharp` + `@sous/ui` React Components.
+- **Command**: `sous dev quality forge`.
+
+### Branding Lab (Atelier)
+- **Status**: ✅ Hardened (Feb 2026)
+- **Details**: Interactive playground for testing theme variables and design tokens. Includes high-fidelity icon masking previews for all platforms.
 - **Path**: `@sous/docs` -> `/branding`.
 
 ## 4. Hardware & IoT

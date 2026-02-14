@@ -249,6 +249,29 @@ async function seed() {
           ]).onConflictDoNothing();
         }
 
+        // ... existing hardware ...
+        logger.info('🧪 Seeding Hardware...');
+        await db.insert(schema.devices).values([
+          {
+            organizationId: sampleOrgId,
+            hardwareId: 'hw_ble_therm_01',
+            name: 'Walk-in Fridge',
+            type: 'gateway',
+            status: 'online',
+            lastHeartbeat: new Date(),
+            metadata: JSON.stringify({ type: 'thermometer', battery: 85, temp: 3.5, unit: 'C' }),
+          },
+          {
+            organizationId: sampleOrgId,
+            hardwareId: 'hw_ble_therm_02',
+            name: 'Line Freezer',
+            type: 'gateway',
+            status: 'online',
+            lastHeartbeat: new Date(),
+            metadata: JSON.stringify({ type: 'thermometer', battery: 92, temp: -18.2, unit: 'C' }),
+          },
+        ]).onConflictDoNothing();
+
         logger.info('🧪 Seeding Presentation Sample Data...');
         await db.insert(schema.displays).values({
           name: 'Main Entrance TV',

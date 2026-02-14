@@ -48,7 +48,23 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${inter.variable} ${outfit.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var storedTheme = localStorage.getItem('sous-theme');
+                  var theme = storedTheme || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+                  document.documentElement.classList.add(theme);
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className="antialiased overflow-x-hidden">
         <ThemeProvider>
           <LoadingProvider>

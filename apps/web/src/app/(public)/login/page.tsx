@@ -10,7 +10,11 @@ function LoginContent() {
   const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  let callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  
+  if (callbackUrl.includes("/login")) {
+    callbackUrl = "/dashboard";
+  }
 
   useEffect(() => {
     if (user) {

@@ -1,48 +1,48 @@
 import { relations } from 'drizzle-orm';
 
 // 1. Base / Independent
-export * from '../../iam/iam.schema';
-export * from '../../iam/organizations/organizations.schema';
-export * from '../../iam/oauth/oauth.schema';
-export * from '../../iam/invitations/invitations.schema';
-export * from '../../iam/auth/password-reset.schema';
-export * from './platform.schema';
+export * from '../../iam/iam.schema.js';
+export * from '../../iam/organizations/organizations.schema.js';
+export * from '../../iam/oauth/oauth.schema.js';
+export * from '../../iam/invitations/invitations.schema.js';
+export * from '../../iam/auth/password-reset.schema.js';
+export * from './platform.schema.js';
 
 // 2. Depends on Organizations
-export * from '../../iam/locations/locations.schema';
-export * from '../../iam/users/users.schema';
-export * from '../../media/media.schema';
-export * from '../../culinary/culinary.schema';
-export * from '../../culinary/catalog/catalog.schema';
-export * from '../../sales/sales.schema';
-export * from '../../accounting/accounting.schema';
-export * from '../../integrations/integrations.schema';
-export * from '../tags/tags.schema';
-export * from '../ingestion/ingestion.schema';
+export * from '../../iam/locations/locations.schema.js';
+export * from '../../iam/users/users.schema.js';
+export * from '../../media/media.schema.js';
+export * from '../../culinary/culinary.schema.js';
+export * from '../../culinary/catalog/catalog.schema.js';
+export * from '../../sales/sales.schema.js';
+export * from '../../accounting/accounting.schema.js';
+export * from '../../integrations/integrations.schema.js';
+export * from '../tags/tags.schema.js';
+export * from '../ingestion/ingestion.schema.js';
 
 // 3. Mixed Dependencies
-export * from '../../procurement/procurement.schema';
-export * from '../../pos/pos.schema';
-export * from '../../hardware/hardware.schema';
-export * from '../../presentation/presentation.schema';
+export * from '../../procurement/procurement.schema.js';
+export * from '../../pos/pos.schema.js';
+export * from '../../hardware/hardware.schema.js';
+export * from '../../presentation/presentation.schema.js';
 export * from '../../billing/billing.schema.js';
 
 // 4. Heavy Dependencies
-export * from '../../inventory/inventory.schema';
-export * from '../../intelligence/intelligence.schema';
+export * from '../../inventory/inventory.schema.js';
+export * from '../../intelligence/intelligence.schema.js';
 
 // Import for relations
-import { organizations } from '../../iam/organizations/organizations.schema';
-import { users } from '../../iam/users/users.schema';
-import { displays } from '../../presentation/presentation.schema';
-import { layouts } from '../../presentation/presentation.schema';
-import { displayAssignments } from '../../presentation/presentation.schema';
-import { recipes } from '../../culinary/culinary.schema';
-import { recipeIngredients } from '../../culinary/culinary.schema';
-import { ingredients } from '../../culinary/culinary.schema';
-import { categories, products } from '../../culinary/catalog/catalog.schema';
-import { tags, tagAssignments } from '../tags/tags.schema';
-import { ingestionSessions } from '../ingestion/ingestion.schema';
+import { organizations } from '../../iam/organizations/organizations.schema.js';
+import { users } from '../../iam/users/users.schema.js';
+import { displays } from '../../presentation/presentation.schema.js';
+import { layouts } from '../../presentation/presentation.schema.js';
+import { displayAssignments } from '../../presentation/presentation.schema.js';
+import { recipes } from '../../culinary/culinary.schema.js';
+import { recipeIngredients } from '../../culinary/culinary.schema.js';
+import { ingredients } from '../../culinary/culinary.schema.js';
+import { categories, products } from '../../culinary/catalog/catalog.schema.js';
+import { tags, tagAssignments } from '../tags/tags.schema.js';
+import { ingestionSessions } from '../ingestion/ingestion.schema.js';
 import {
   suppliers,
   invoices,
@@ -51,30 +51,50 @@ import {
   poItems,
   vendorMappings,
   shoppingList,
-} from '../../procurement/procurement.schema';
+} from '../../procurement/procurement.schema.js';
 import {
   posOrders,
   posOrderProducts,
-} from '../../pos/pos.schema';
+} from '../../pos/pos.schema.js';
 import {
   stockAudits,
   stockAuditItems,
   wastageEvents,
-} from '../../inventory/inventory.schema';
-import { recipeSteps, cookNotes } from '../../culinary/culinary.schema';
+} from '../../inventory/inventory.schema.js';
+import { recipeSteps, cookNotes } from '../../culinary/culinary.schema.js';
 import {
   plans,
   usageMetrics,
-} from '../../iam/organizations/organizations.schema';
+} from '../../iam/organizations/organizations.schema.js';
 import {
   billingPlans,
   billingSubscriptions,
 } from '../../billing/billing.schema.js';
 
-import { invitations } from '../../iam/invitations/invitations.schema';
-import { passwordResetTokens } from '../../iam/auth/password-reset.schema';
+import { invitations } from '../../iam/invitations/invitations.schema.js';
+import { passwordResetTokens } from '../../iam/auth/password-reset.schema.js';
+import { devices } from '../../hardware/hardware.schema.js';
 
 // --- Relations ---
+
+export const locationsRelations = relations(locations, ({ one, many }) => ({
+  organization: one(organizations, {
+    fields: [locations.organizationId],
+    references: [organizations.id],
+  }),
+  devices: many(devices),
+}));
+
+export const devicesRelations = relations(devices, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [devices.organizationId],
+    references: [organizations.id],
+  }),
+  location: one(locations, {
+    fields: [devices.locationId],
+    references: [locations.id],
+  }),
+}));
 
 export const invitationsRelations = relations(invitations, ({ one }) => ({
   organization: one(organizations, {
@@ -109,7 +129,7 @@ export const organizationsRelations = relations(organizations, ({ one, many }) =
   }),
 }));
 
-import { locations } from '../../iam/locations/locations.schema';
+import { locations } from '../../iam/locations/locations.schema.js';
 
 export const usersRelations = relations(users, ({ one }) => ({
   organization: one(organizations, {

@@ -61,6 +61,7 @@ export * from "./domains/hardware/components/HardwareManager";
 export * from "./domains/hardware/components/AddHardwareView";
 export * from "./domains/hardware/components/DevicePairingFlow";
 export * from "./domains/hardware/hooks/useHardware";
+export * from "./domains/hardware/hooks/useUpdateManager";
 
 // Branding Domain
 export * from "./domains/branding/components/Atelier";

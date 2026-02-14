@@ -7,6 +7,7 @@ import { IamSeeder } from '../seeders/iam.seeder.js';
 import { PresentationSeeder } from '../seeders/presentation.seeder.js';
 import { ProcurementSeeder } from '../seeders/procurement.seeder.js';
 import { CulinarySeeder } from '../seeders/culinary.seeder.js';
+import { HardwareSeeder } from '../seeders/hardware.seeder.js';
 
 @Injectable()
 export class SeederService implements OnModuleInit {
@@ -16,6 +17,7 @@ export class SeederService implements OnModuleInit {
     private readonly presentationSeeder: PresentationSeeder,
     private readonly procurementSeeder: ProcurementSeeder,
     private readonly culinarySeeder: CulinarySeeder,
+    private readonly hardwareSeeder: HardwareSeeder,
   ) {
     logger.info('🏗️ SeederService: Initialized with domain-specific seeders');
   }
@@ -73,6 +75,7 @@ export class SeederService implements OnModuleInit {
     await this.presentationSeeder.seedSample(orgId);
     await this.procurementSeeder.seedSample(orgId);
     await this.culinarySeeder.seedSample(orgId);
+    await this.hardwareSeeder.seedSample(orgId);
 
     logger.info('✅ SeederService: Sample seeding complete.');
   }

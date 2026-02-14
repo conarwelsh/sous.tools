@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+import { jsonb, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 import { organizations } from '../organizations/organizations.schema';
 
 export const locations = pgTable('locations', {
@@ -9,6 +9,7 @@ export const locations = pgTable('locations', {
   name: varchar('name', { length: 255 }).notNull(),
   address: text('address'),
   timezone: varchar('timezone', { length: 100 }).default('UTC').notNull(),
+  businessHours: jsonb('business_hours').default({}).notNull(), // Record<Day, { open: string, close: string }>
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

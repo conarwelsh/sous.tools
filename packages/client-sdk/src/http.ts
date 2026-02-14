@@ -1,3 +1,5 @@
+import { resolveApiUrl } from "./utils.js";
+
 export class HttpClient {
   private baseUrl: string;
   public token: string | null = null;
@@ -57,12 +59,14 @@ export class HttpClient {
     // Dynamic Hardware Context
     if (typeof window !== "undefined") {
       const hardwareId = localStorage.getItem("sous_hardware_id");
-      if (hardwareId) {
+      const organizationId = hardwareId ? localStorage.getItem(`sous_org_id_${hardwareId}`) : null;
+      
+      if (hardwareId && hardwareId !== "undefined" && hardwareId !== "null") {
         headers.set("x-hardware-id", hardwareId);
-        const organizationId = localStorage.getItem(`sous_org_id_${hardwareId}`);
-        if (organizationId) {
-          headers.set("x-organization-id", organizationId);
-        }
+      }
+      
+      if (organizationId && organizationId !== "undefined" && organizationId !== "null") {
+        headers.set("x-organization-id", organizationId);
       }
     }
 
@@ -89,11 +93,16 @@ export class HttpClient {
       const response = await fetch(url, { ...options, headers });
 
       if (!response.ok) {
-        console.error(`[HttpClient] Request failed with status ${response.status}: ${url}`);
         const error = await response
           .json()
           .catch(() => ({ message: `HTTP Error ${response.status}` }));
-        throw new Error(error.message || "API Request failed");
+        
+        // Don't log 404s as errors to the console, they are often expected (e.g. public signage fallback)
+        if (response.status !== 404) {
+          console.error(`[HttpClient] Request failed with status ${response.status}: ${url}`);
+        }
+        
+        throw new Error(error.message || `API Request failed (${response.status})`);
       }
 
       if (response.status === 204) return {} as T;
@@ -196,11 +205,11 @@ export const getHttpClient = async (baseUrl?: string): Promise<HttpClient> => {
   if (clientInstance && !baseUrl) return clientInstance;
   
   if (baseUrl) {
-    return new HttpClient(baseUrl);
+    return new HttpClient(resolveApiUrl(baseUrl));
   }
 
   const { config } = await import("@sous/config");
-  clientInstance = new HttpClient(config.api.url || "http://localhost:4000");
+  clientInstance = new HttpClient(resolveApiUrl(config.api.url || "http://localhost:4000"));
 
   if (typeof window !== "undefined") {
     (window as any).__SOUS_HTTP_CLIENT__ = clientInstance;

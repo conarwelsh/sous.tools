@@ -65,6 +65,15 @@ export const useAuth = () => {
     await fetchMe();
   };
 
+  const loginByPin = async (pin: string) => {
+    const res = await AuthService.loginByPin(pin);
+    if (typeof window !== "undefined")
+      localStorage.setItem("token", res.access_token);
+    const http = await getHttpClient();
+    http.setToken(res.access_token);
+    await fetchMe();
+  };
+
   /**
    * Terminates the user session and clears local storage.
    */
@@ -93,6 +102,7 @@ export const useAuth = () => {
     user,
     loading: loading || !isInitialized,
     login,
+    loginByPin,
     logout,
     register,
     isAuthenticated: !!user,

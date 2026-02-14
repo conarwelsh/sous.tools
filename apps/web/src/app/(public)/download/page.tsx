@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { View, Text, Button, Card, ScrollView, Logo } from "@sous/ui";
-import { client as config } from "@sous/config";
+import { useUpdateManager } from "@sous/features";
+import { config } from "@sous/config";
 
 import {
   Monitor,
@@ -13,33 +14,26 @@ import {
   Terminal,
   Info,
   ShieldAlert,
+  Download,
 } from "lucide-react";
-
-const RELEASES_URL =
-  "https://your-supabase-project.supabase.co/storage/v1/object/public/media/releases/latest/manifest.json"; // Placeholder, needs actual URL
 
 export default function DownloadPage() {
   const [userOS, setUserOS] = useState<
     "windows" | "macos" | "linux" | "android" | "ios" | "unknown"
-  >("linux");
-  const [manifest, setManifest] = useState<Record<string, string>>({});
+  >("unknown");
+  
+  const { manifest, updateAvailable } = useUpdateManager();
 
   // Determine environment
   const env = config.features.appEnv || "development";
 
   useEffect(() => {
     const ua = window.navigator.userAgent.toLowerCase();
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (ua.includes("win")) setUserOS("windows");
     else if (ua.includes("mac")) setUserOS("macos");
     else if (ua.includes("linux")) setUserOS("linux");
     else if (ua.includes("android")) setUserOS("android");
     else if (ua.includes("iphone") || ua.includes("ipad")) setUserOS("ios");
-
-    // Fetch manifest
-    // In a real scenario, you'd put the actual Supabase URL here.
-    // For now, I'll use a placeholder logic or try to fetch if URL was known.
-    // fetch(RELEASES_URL).then(r => r.json()).then(setManifest).catch(console.error);
   }, []);
 
   const platforms = [
@@ -48,36 +42,44 @@ export default function DownloadPage() {
       name: "Windows",
       icon: Laptop,
       ext: ".exe",
-      version: "Latest",
-      url: manifest.tools || "#", // Use manifest
-    },
-    {
-      id: "macos",
-      name: "macOS",
-      icon: Apple,
-      ext: ".dmg",
-      version: "Latest",
-      url: "#",
-    },
-    {
-      id: "linux",
-      name: "Linux",
-      icon: Terminal,
-      ext: ".AppImage",
-      version: "Latest",
-      url: "#",
+      version: manifest?.version || "Latest",
+      url: manifest?.tools || "#",
     },
     {
       id: "android",
-      name: "Android",
+      name: "Android (Signage)",
+      icon: Monitor,
+      ext: ".apk",
+      version: manifest?.version || "Latest",
+      url: manifest?.signage || "#",
+    },
+    {
+      id: "kds",
+      name: "Android (KDS)",
       icon: Smartphone,
       ext: ".apk",
-      version: "Latest",
-      url: manifest.signage || "#", // Default to signage or specific flavor
+      version: manifest?.version || "Latest",
+      url: manifest?.kds || "#",
+    },
+    {
+      id: "pos",
+      name: "Android (POS)",
+      icon: Smartphone,
+      ext: ".apk",
+      version: manifest?.version || "Latest",
+      url: manifest?.pos || "#",
+    },
+    {
+      id: "rpi",
+      name: "Raspberry Pi",
+      icon: Terminal,
+      ext: ".img",
+      version: manifest?.version || "Latest",
+      url: manifest?.rpi || "#",
     },
   ];
 
-  const suggested = platforms.find((p) => p.id === userOS) || platforms[2];
+  const suggested = platforms.find((p) => p.id === userOS) || platforms[0];
 
   return (
     <ScrollView className="flex-1 bg-[#0a0a0a]">
@@ -210,11 +212,22 @@ export default function DownloadPage() {
           <Text className="text-white font-black uppercase text-sm tracking-widest mb-4">
             Specialized Wear OS App
           </Text>
-          <Text className="text-zinc-500 text-sm text-center leading-relaxed font-medium">
+          <Text className="text-zinc-500 text-sm text-center leading-relaxed font-medium mb-8">
             Keep your hands free while managing timers and alerts. Search for{" "}
             <Text className="text-sky-500 italic font-black">"Sous Tools"</Text>{" "}
-            directly on the Google Play Store from your watch.
+            directly on the Google Play Store from your watch, or download the APK below.
           </Text>
+          {manifest?.wearos && (
+            <Button
+              className="w-full bg-zinc-800 hover:bg-zinc-700"
+              onClick={() => window.open(manifest.wearos, "_blank")}
+            >
+              <Download size={16} className="mr-2" />
+              <Text className="text-zinc-300 font-black uppercase text-[10px] tracking-widest">
+                Download Wear OS APK
+              </Text>
+            </Button>
+          )}
         </View>
       </View>
     </ScrollView>

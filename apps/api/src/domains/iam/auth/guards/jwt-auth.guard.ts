@@ -5,11 +5,11 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { SessionService } from '../services/session.service.js';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator.js';
-import { HardwareAuthGuard } from '../../hardware/guards/hardware-auth.guard.js';
+import { HardwareAuthGuard } from '../../../hardware/guards/hardware-auth.guard.js';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -30,44 +30,47 @@ export class JwtAuthGuard implements CanActivate {
       return true;
     }
 
-    // Try hardware auth first
+    const request = this.getRequest(context);
+    const token = this.extractTokenFromHeader(request);
+
+    // 1. Try JWT auth first if a token is provided
+    if (token) {
+      try {
+        const payload = await this.jwtService.verifyAsync(token);
+
+        // Check if token is revoked
+        if (
+          payload.jti &&
+          (await this.sessionService.isTokenRevoked(payload.jti))
+        ) {
+          throw new UnauthorizedException('Token revoked');
+        }
+
+        // Assigning the mapped payload to the request object
+        request['user'] = {
+          ...payload,
+          id: payload.sub,
+          organizationId: payload.orgId,
+        };
+        return true;
+      } catch (e) {
+        // If token was invalid, fall through to hardware auth (or fail)
+      }
+    }
+
+    // 2. Try hardware auth as fallback
     try {
       const isHardware = await this.hardwareGuard.canActivate(context);
       if (isHardware) return true;
     } catch (e) {
-      // Hardware auth failed, continue to JWT
+      // Hardware auth failed
     }
 
-    const request = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromHeader(request);
+    throw new UnauthorizedException();
+  }
 
-    if (!token) {
-      throw new UnauthorizedException();
-    }
-
-    try {
-      const payload = await this.jwtService.verifyAsync(token);
-
-      // Check if token is revoked
-      if (
-        payload.jti &&
-        (await this.sessionService.isTokenRevoked(payload.jti))
-      ) {
-        throw new UnauthorizedException('Token revoked');
-      }
-
-      // Assigning the mapped payload to the request object here
-      // so that we can access it in our route handlers with consistent naming
-      request['user'] = {
-        ...payload,
-        id: payload.sub,
-        organizationId: payload.orgId,
-      };
-    } catch {
-      throw new UnauthorizedException();
-    }
-
-    return true;
+  protected getRequest(context: ExecutionContext) {
+    return context.switchToHttp().getRequest();
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {

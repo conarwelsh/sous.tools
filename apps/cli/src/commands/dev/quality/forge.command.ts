@@ -114,28 +114,44 @@ export class ForgeCommand extends CommandRunner {
   }
 
   private getPathsForTarget(target: string, rootDir: string): string[] {
+    const webPublic = path.join(rootDir, 'apps/web/public');
+    const webAssets = path.join(rootDir, 'apps/web/assets'); // Capacitor/PWA assets
+    
     switch (target) {
-      case 'favicon':
+      case 'favicon-16':
+        return [path.join(webPublic, 'favicon-16x16.png')];
+      case 'favicon-32':
+        return [path.join(webPublic, 'favicon-32x32.png')];
+      case 'apple-touch-icon':
+        return [path.join(webPublic, 'apple-touch-icon.png')];
+      case 'android-chrome-192':
+        return [path.join(webPublic, 'android-chrome-192x192.png')];
+      case 'android-chrome-512':
+        return [path.join(webPublic, 'android-chrome-512x512.png')];
+      case 'android-adaptive-foreground':
         return [
-          path.join(rootDir, 'apps/web/public/favicon.png'),
-          path.join(rootDir, 'apps/docs/public/favicon.png'),
+          path.join(webAssets, 'android/icon-foreground.png'),
+          path.join(rootDir, 'apps/web/android/app/src/main/res/drawable-v24/ic_launcher_foreground.png')
         ];
-      case 'app-icon':
+      case 'ios-app-icon':
         return [
-          path.join(rootDir, 'apps/web/public/icon.png'),
-          // Android res paths vary, but let's target the web public for now as a base
-          path.join(rootDir, 'apps/web/public/app-icon.png'),
+          path.join(webAssets, 'ios/icon.png'),
+          path.join(rootDir, 'apps/web/ios/App/App/Assets.xcassets/AppIcon.appiconset/icon-1024.png')
         ];
+      case 'wearos-app-icon':
+        return [path.join(rootDir, 'apps/wearos/src/main/res/mipmap-xxxhdpi/ic_launcher.png')];
       case 'pos-logo':
-        return [path.join(rootDir, 'apps/web/public/logos/pos.png')];
+        return [path.join(webPublic, 'logos/pos.png')];
       case 'kds-logo':
-        return [path.join(rootDir, 'apps/web/public/logos/kds.png')];
+        return [path.join(webPublic, 'logos/kds.png')];
       case 'signage-logo':
-        return [path.join(rootDir, 'apps/web/public/logos/signage.png')];
+        return [path.join(webPublic, 'logos/signage.png')];
+      case 'kiosk-logo':
+        return [path.join(webPublic, 'logos/kiosk.png')];
       case 'api-logo':
-        return [path.join(rootDir, 'apps/web/public/logos/api.png')];
+        return [path.join(webPublic, 'logos/api.png')];
       default:
-        return [path.join(rootDir, `apps/web/public/generated/${target}.png`)];
+        return [path.join(webPublic, `generated/${target}.png`)];
     }
   }
 }

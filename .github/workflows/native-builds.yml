@@ -118,7 +118,7 @@ jobs:
 
   build-os-image:
     needs: build-android-flavors
-    if: false # TODO: Re-enable when KonstaKANG download link is fixed
+    if: github.ref == 'refs/heads/staging'
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
@@ -127,7 +127,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: signage-apk
-          path: apps/web/android/app/build/outputs/apk/signage/debug/
+          path: dist/artifacts/signage-apk
 
       - name: Build RPi OS Image
         run: ./scripts/build-rpi-os.sh
@@ -137,7 +137,7 @@ jobs:
       - name: Upload OS Image
         uses: actions/upload-artifact@v4
         with:
-          name: sous-os-rpi4
+          name: rpi4-image
           path: dist/sous-os-rpi4.img
 
   publish-staging:

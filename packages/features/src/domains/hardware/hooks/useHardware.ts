@@ -45,11 +45,15 @@ export const useHardware = (
 
     // Load orgId if already paired
     const storedOrgId = localStorage.getItem(`sous_org_id_${id}`);
-    if (storedOrgId) setOrganizationId(storedOrgId);
-    
-    const isPairedStored = localStorage.getItem(`sous_paired_${id}`);
-    if (isPairedStored === "true") {
-      setIsPaired(true);
+    if (storedOrgId && storedOrgId !== "undefined" && storedOrgId !== "null") {
+      setOrganizationId(storedOrgId);
+      const isPairedStored = localStorage.getItem(`sous_paired_${id}`);
+      if (isPairedStored === "true") {
+        setIsPaired(true);
+        setIsLoading(false);
+      }
+    } else {
+      setIsPaired(false);
       setIsLoading(false);
     }
   }, []);
@@ -81,7 +85,7 @@ export const useHardware = (
   }, [hardwareId, type]);
 
   // 2. Real-time Subscription for Pairing
-  const { data: subData } = useSubscription(DEVICE_PAIRED_SUBSCRIPTION, {
+  const { data: subData } = useSubscription<any>(DEVICE_PAIRED_SUBSCRIPTION, {
     variables: { hardwareId: hardwareId || "" },
     skip: !hardwareId || isPaired,
   });

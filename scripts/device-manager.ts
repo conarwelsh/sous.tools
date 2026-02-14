@@ -13,8 +13,8 @@ const IS_WSL = fs
   .includes("microsoft");
 
 const CMD_EXE = "/mnt/c/Windows/System32/cmd.exe";
-const ADB_PATH = "C:\\Users\\conar\\AppData\\Local\\Android\\Sdk\\platform-tools\\adb.exe";
-const EMULATOR_PATH = "C:\\Users\\conar\\AppData\\Local\\Android\\Sdk\\emulator\\emulator.exe";
+const ADB_PATH = "C:/Users/conar/AppData/Local/Android/Sdk/platform-tools/adb.exe";
+const EMULATOR_PATH = "C:/Users/conar/AppData/Local/Android/Sdk/emulator/emulator.exe";
 
 function winExecSync(cmd: string, options: any = {}) {
   if (IS_WSL) {

@@ -5,6 +5,7 @@ import {
   uuid,
   varchar,
   boolean,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import { organizations } from '../organizations/organizations.schema';
 import { roleEnum } from '../iam.schema';
@@ -19,8 +20,11 @@ export const users = pgTable('users', {
   githubId: varchar('github_id', { length: 255 }).unique(),
   facebookId: varchar('facebook_id', { length: 255 }).unique(),
   role: roleEnum('role').default('user').notNull(),
+  pin: varchar('pin', { length: 4 }),
   organizationId: uuid('organization_id').references(() => organizations.id),
   isActive: boolean('is_active').default(true).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+}, (t) => ({
+  orgPinIndex: uniqueIndex('org_pin_idx').on(t.organizationId, t.pin),
+}));

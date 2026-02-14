@@ -7,6 +7,7 @@ import {
   PosLogo,
   KdsLogo,
   SignageLogo,
+  KioskLogo,
   BrandMorph,
   BrandCloud,
   BrandWhisk,
@@ -26,6 +27,7 @@ export type LogoVariant =
   | "pos"
   | "kds"
   | "signage"
+  | "kiosk"
   | "tools"
   | "neon"
   | "circuit"
@@ -181,6 +183,10 @@ export const Logo: React.FC<LogoProps> = ({
             environment={logoEnv}
             animState={animState}
           />
+        );
+      case "kiosk":
+        return (
+          <KioskLogo size={size} environment={logoEnv} animState={animState} />
         );
       case "tools":
       case "line":

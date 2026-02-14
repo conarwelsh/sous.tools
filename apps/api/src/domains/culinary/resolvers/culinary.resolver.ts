@@ -11,10 +11,13 @@ import {
   Subscription,
 } from '@nestjs/graphql';
 import { Inject, forwardRef, Optional } from '@nestjs/common';
+import { logger } from '@sous/logger';
 import { CulinaryService } from '../services/culinary.service.js';
 import { IngestionService } from '../../ingestion/services/ingestion.service.js';
 import { IntegrationsService } from '../../integrations/services/integrations.service.js';
 import { PubSub } from 'graphql-subscriptions';
+import { UseGuards } from '@nestjs/common';
+import { GqlAuthGuard } from '../../iam/auth/guards/gql-auth.guard.js';
 
 @ObjectType()
 export class IngredientType {
@@ -233,6 +236,7 @@ export class UpdateRecipeInput {
 }
 
 @Resolver(() => RecipeType)
+@UseGuards(GqlAuthGuard)
 export class CulinaryResolver {
   constructor(
     private readonly culinaryService: CulinaryService,
@@ -241,11 +245,6 @@ export class CulinaryResolver {
     private readonly integrationsService: IntegrationsService,
     @Inject('PUB_SUB') private readonly pubSub: PubSub,
   ) {}
-
-  @Query(() => [IngredientType])
-  async ingredients(@Args('orgId') orgId: string) {
-    return this.culinaryService.getIngredients(orgId);
-  }
 
   @Query(() => [CategoryType])
   async categories(@Args('orgId') orgId: string) {
@@ -258,6 +257,11 @@ export class CulinaryResolver {
     @Args('categoryId', { nullable: true }) categoryId?: string,
   ) {
     return this.culinaryService.getProducts(orgId, categoryId);
+  }
+
+  @Query(() => [IngredientType])
+  async ingredients(@Args('orgId') orgId: string) {
+    return this.culinaryService.getIngredients(orgId);
   }
 
   @Subscription(() => Boolean, {

@@ -54,7 +54,7 @@ export const KioskManager = () => {
   const [newDisplayName, setNewDisplayName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
-  const { data, loading, refetch } = useQuery(GET_DISPLAYS, {
+  const { data, loading, refetch } = useQuery<any>(GET_DISPLAYS, {
     variables: { orgId },
     skip: !orgId,
   });

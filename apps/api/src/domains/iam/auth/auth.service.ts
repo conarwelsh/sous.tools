@@ -261,11 +261,23 @@ export class AuthService {
         passwordHash,
         organizationId: orgId,
         role: 'admin',
+        pin: '1234',
       })
-      .onConflictDoNothing();
+      .onConflictDoUpdate({
+        target: users.email,
+        set: {
+          pin: '1234',
+        }
+      });
   }
 
   async getProfile(userId: string) {
+    // Basic UUID validation to prevent DB crashes
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(userId)) {
+      return null;
+    }
+
     return await this.dbService.db.query.users.findFirst({
       where: eq(users.id, userId),
       with: {
@@ -284,6 +296,18 @@ export class AuthService {
     });
 
     if (user && (await bcrypt.compare(pass, user.passwordHash))) {
+      const { passwordHash, ...result } = user;
+      return result;
+    }
+    return null;
+  }
+
+  async validatePinUser(pin: string): Promise<any> {
+    const user = await this.dbService.db.query.users.findFirst({
+      where: eq(users.pin, pin),
+    });
+
+    if (user) {
       const { passwordHash, ...result } = user;
       return result;
     }

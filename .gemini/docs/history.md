@@ -1,3 +1,11 @@
+## 2026-02-14 (API Hardening & Auth Guard Fixes)
+
+- **API Hardening & Auth Guard Fixes:**
+    - Fixed a critical crash in `JwtAuthGuard` caused by an incorrect relative import path for `HardwareAuthGuard` (`../../` instead of `../../../`).
+    - Resolved a `TypeError: context.getHandler is not a function` in `GqlAuthGuard` by implementing a more complete `ExecutionContext` mock that delegates all core methods (`getHandler`, `getClass`, `getType`, etc.) to the original context. This ensures compatibility with decorators like `@Public()` and hardware-specific auth logic when used within a GraphQL execution context.
+    - Verified the API stability after restart, ensuring successful startup and database connection.
+    - Added comprehensive fix notes to `CHANGELOG.md`.
+
 ## 2026-02-14 (Marketing Restoration, Design Fidelity & Bug Fixes)
 
 - **Marketing Page Restoration:**

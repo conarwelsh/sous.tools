@@ -23,7 +23,7 @@ import { IngestionModule } from './domains/ingestion/ingestion.module.js';
 import { MaintenanceModule } from './domains/maintenance/maintenance.module.js';
 import { SupportModule } from './domains/support/support.module.js';
 import { TagsModule } from './domains/core/tags/tags.module.js';
-import { MetricsModule } from './domains/metrics/metrics.module';
+import { MetricsModule } from './domains/metrics/metrics.module.js';
 import { join } from 'path';
 
 @Module({
@@ -35,7 +35,7 @@ import { join } from 'path';
     ScheduleModule.forRoot(),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: join(__dirname, 'schema.gql'),
+      autoSchemaFile: 'src/schema.gql',
       sortSchema: true,
       playground: false, // Disabled deprecated GraphQL Playground
       installSubscriptionHandlers: true,

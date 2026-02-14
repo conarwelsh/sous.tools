@@ -25,6 +25,11 @@ export class AuthService {
     return http.post("/auth/login", { email, password });
   }
 
+  static async loginByPin(pin: string): Promise<AuthResponse> {
+    const http = await getHttpClient();
+    return http.post("/auth/login-pin", { pin });
+  }
+
   static async register(data: any): Promise<User> {
     const http = await getHttpClient();
     return http.post("/auth/register", data);

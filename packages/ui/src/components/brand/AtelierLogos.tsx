@@ -877,3 +877,48 @@ export const BrandKitchenLine: React.FC<AtelierLogoProps> = ({
     </svg>
   );
 };
+
+/**
+ * Asset: KioskLogo
+ */
+export const KioskLogo: React.FC<AtelierLogoProps> = ({
+  size = 64,
+  environment,
+  animState = "static",
+  lod: forcedLod,
+  ...props
+}) => {
+  const t = getTheme(environment);
+  const lod = (forcedLod || getLOD(size)) as "micro" | "medium" | "macro";
+  const s = size;
+
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      width={s}
+      height={s}
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <rect
+        x="20"
+        y="20"
+        width="60"
+        height="45"
+        rx="8"
+        stroke={t.main}
+        strokeWidth="6"
+      />
+      <path d="M35 80 L65 80 M50 65 L50 80" stroke={t.main} strokeWidth="6" />
+      <path
+        d="M40 42 L45 42 L48 35 L60 35 L57 42 L65 42"
+        stroke={t.sec}
+        strokeWidth="4"
+      />
+      <circle cx="48" cy="50" r="3" fill={t.sec} />
+      <circle cx="57" cy="50" r="3" fill={t.sec} />
+    </svg>
+  );
+};

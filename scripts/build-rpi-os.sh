@@ -6,7 +6,11 @@ set -e
 # Dev Path: Raspbian Lite + Browser
 BASE_IMAGE_URL="https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2024-11-20/2024-11-19-raspios-jazzy-arm64-lite.img.xz"
 WORK_DIR=".tmp/rpi-build"
-SIGNAGE_APK="apps/web/android/app/build/outputs/apk/signage/debug/app-signage-debug.apk"
+SIGNAGE_APK="dist/artifacts/signage-apk/app-signage-debug.apk"
+# Fallback for local build
+if [ ! -f "$SIGNAGE_APK" ]; then
+    SIGNAGE_APK="apps/web/android/app/build/outputs/apk/signage/debug/app-signage-debug.apk"
+fi
 OUTPUT_IMAGE="dist/sous-os-rpi4.img"
 
 echo "🥧 Starting Sous OS build for Raspberry Pi..."

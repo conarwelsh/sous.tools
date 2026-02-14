@@ -15,6 +15,9 @@ RUN apt-get update && apt-get install -y \
     librsvg2-dev \
     openjdk-21-jdk \
     wget \
+    libguestfs-tools \
+    linux-image-generic \
+    xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js & pnpm
@@ -42,13 +45,19 @@ RUN curl -o actions-runner-linux-x64-2.311.0.tar.gz -L https://github.com/action
 # Pre-accept Android licenses
 RUN yes | sdkmanager --licenses || true
 
-# Create non-root user for the runner
-RUN useradd -m runner \
-    && chown -R runner:runner /home/runner \
-    && mkdir -p /opt/android-sdk \
-    && chown -R runner:runner /opt/android-sdk
+# Create non-root user for the runner with host-matching UID/GID for volume access
+# We also add it to a docker group that matches the host's docker GID (1001)
+RUN groupadd -g 1001 docker || true && \
+    useradd -m -u 1000 runner && \
+    usermod -aG docker runner || true && \
+    chown -R runner:runner /home/runner && \
+    mkdir -p /opt/android-sdk && \
+    chown -R runner:runner /opt/android-sdk
 
 USER runner
 WORKDIR /home/runner
 
-CMD ["./run.sh"]
+COPY --chown=runner:runner scripts/runner-entrypoint.sh /home/runner/entrypoint.sh
+RUN chmod +x /home/runner/entrypoint.sh
+
+ENTRYPOINT ["/home/runner/entrypoint.sh"]

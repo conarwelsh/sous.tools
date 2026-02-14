@@ -44,10 +44,13 @@ export const SignageView = ({ id }: { id: string }) => {
           config,
         );
         setPublicPresentation(data);
-      } catch (e) {
-        console.log(
-          "Public screen fetch failed, falling back to pairing mode.",
-        );
+      } catch (e: any) {
+        // If it's a 404, we don't log it as an error because we expect to fall back to pairing mode
+        if (e.message?.includes("404") || e.message?.includes("Page not found")) {
+          console.log("No public signage layout found for slug:", id);
+        } else {
+          console.error("Public screen fetch failed:", e.message);
+        }
       } finally {
         setIsPublicLoading(false);
       }
@@ -92,13 +95,13 @@ const SignageContent = ({ hardwareId }: { hardwareId: string }) => {
   };
 
   // 1. Initial Fetch
-  const { data, loading: queryLoading, error: queryError } = useQuery(GET_ACTIVE_LAYOUT, {
+  const { data, loading: queryLoading, error: queryError } = useQuery<any>(GET_ACTIVE_LAYOUT, {
     variables: { hardwareId },
     fetchPolicy: 'network-only'
   });
 
   // 2. Real-time Subscription
-  const { data: subData } = useSubscription(PRESENTATION_UPDATED_SUBSCRIPTION, {
+  const { data: subData } = useSubscription<any>(PRESENTATION_UPDATED_SUBSCRIPTION, {
     variables: { hardwareId },
   });
 

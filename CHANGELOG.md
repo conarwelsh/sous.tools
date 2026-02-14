@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ADR 003: Real-time GraphQL Subscriptions.
 - Descriptive JSDoc blocks for core POS and KDS logic.
 
+### Fixed
+- **API/IAM**: Fixed a critical crash in `JwtAuthGuard` caused by a broken relative import path for `HardwareAuthGuard`.
+- **API/IAM**: Resolved `TypeError: context.getHandler is not a function` in `GqlAuthGuard` by providing a complete `ExecutionContext` mock to the base class, ensuring compatibility with GraphQL requests and decorator-based logic.
+
 ### Changed
 - **CLI/Dev Tools:** Updated `ecosystem.config.js` to include all native app targets (POS, KDS, Signage, Kiosk, Tools) with correct emulator mappings.
 - **Native Experience:** Renamed `POS_Android` to just `POS` for a cleaner UI.
