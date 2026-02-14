@@ -32,8 +32,6 @@ export const PresentationRenderer: React.FC<Props> = ({
       setIsLoading(true);
       try {
         const http = await getHttpClient();
-        // In a real public view, we might need a public endpoint for products
-        // for now we assume the client has access or we use the authenticated one
         const data = await http.get<any[]>("/culinary/products");
         setProducts(data);
       } catch (e) {

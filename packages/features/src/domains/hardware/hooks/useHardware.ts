@@ -2,24 +2,35 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { getHttpClient } from "@sous/client-sdk";
-import { io, Socket } from "socket.io-client";
 import { localConfig } from "@sous/config";
+import { gql } from "@apollo/client";
+import { useSubscription } from "@apollo/client/react";
+
+const DEVICE_PAIRED_SUBSCRIPTION = gql`
+  subscription OnDevicePaired($hardwareId: String!) {
+    devicePaired(hardwareId: $hardwareId) {
+      id
+      organizationId
+      hardwareId
+    }
+  }
+`;
 
 export const useHardware = (
   type: "kds" | "pos" | "signage" | string,
 ): {
   hardwareId: string | null;
   pairingCode: string | null;
+  organizationId: string | null;
   isPaired: boolean;
   isLoading: boolean;
-  socket: Socket | null;
   refreshPairingCode: () => Promise<void>;
 } => {
   const [hardwareId, setHardwareId] = useState<string | null>(null);
   const [pairingCode, setPairingCode] = useState<string | null>(null);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [isPaired, setIsPaired] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
     // 1. Ensure Hardware ID
@@ -31,6 +42,16 @@ export const useHardware = (
       localStorage.setItem("sous_hardware_id", id);
     }
     setHardwareId(id);
+
+    // Load orgId if already paired
+    const storedOrgId = localStorage.getItem(`sous_org_id_${id}`);
+    if (storedOrgId) setOrganizationId(storedOrgId);
+    
+    const isPairedStored = localStorage.getItem(`sous_paired_${id}`);
+    if (isPairedStored === "true") {
+      setIsPaired(true);
+      setIsLoading(false);
+    }
   }, []);
 
   const refreshPairingCode = useCallback(async () => {
@@ -38,71 +59,59 @@ export const useHardware = (
     setIsLoading(true);
     let apiUrl = localConfig.api.url || "http://localhost:4000";
     try {
-      // Detect if running in Capacitor and use host IP if available
       if (typeof window !== "undefined" && ((window as any).Capacitor || (window as any).sous_host_ip)) {
         const hostIp = (window as any).sous_host_ip;
         if (hostIp && hostIp !== "10.0.2.2") {
           apiUrl = apiUrl.replace("localhost", hostIp).replace("127.0.0.1", hostIp);
-          console.log(`[useHardware] refreshPairingCode using Native Host API: ${apiUrl}`);
         }
       }
 
-      console.log(`[useHardware] Requesting pairing code from ${apiUrl}/hardware/pairing-code`);
       const http = await getHttpClient(apiUrl);
-      // Extract base type (e.g. 'signage' from 'signage:primary')
       const baseType = type.split(":")[0];
       const resp = (await http.post("/hardware/pairing-code", {
         hardwareId,
         type: baseType,
       })) as any;
-      console.log("[useHardware] Pairing code received:", resp.code);
       setPairingCode(resp.code);
     } catch (e: any) {
-      console.error("[useHardware] Failed to get pairing code:", {
-        message: e.message,
-        status: e.status,
-        apiUrl: apiUrl,
-        stack: e.stack
-      });
+      console.error("[useHardware] Failed to get pairing code:", e.message);
     } finally {
       setIsLoading(false);
     }
   }, [hardwareId, type]);
 
+  // 2. Real-time Subscription for Pairing
+  const { data: subData } = useSubscription(DEVICE_PAIRED_SUBSCRIPTION, {
+    variables: { hardwareId: hardwareId || "" },
+    skip: !hardwareId || isPaired,
+  });
+
   useEffect(() => {
-    if (!hardwareId) return;
+    if (subData?.devicePaired) {
+      const device = subData.devicePaired;
+      setIsPaired(true);
+      setPairingCode(null);
+      if (device.organizationId) {
+        setOrganizationId(device.organizationId);
+        localStorage.setItem(`sous_org_id_${hardwareId}`, device.organizationId);
+      }
+      localStorage.setItem(`sous_paired_${hardwareId}`, "true");
+      setIsLoading(false);
+    }
+  }, [subData, hardwareId]);
 
-    // 2. Connect Socket
+  // 3. Heartbeat logic
+  useEffect(() => {
+    if (!hardwareId || !isPaired) return;
+
     let apiUrl = localConfig.api.url || "http://localhost:4000";
-
-    // Detect if running in Capacitor and use host IP if available
     if (typeof window !== "undefined" && ((window as any).Capacitor || (window as any).sous_host_ip)) {
       const hostIp = (window as any).sous_host_ip;
       if (hostIp && hostIp !== "10.0.2.2") {
         apiUrl = apiUrl.replace("localhost", hostIp).replace("127.0.0.1", hostIp);
-        console.log(`[useHardware] socket connection using Native Host API: ${apiUrl}`);
       }
     }
 
-    console.log("Connecting to API Realtime at:", apiUrl);
-    const s = io(apiUrl, {
-      auth: { hardwareId },
-    });
-
-    s.on("connect", () => {
-      console.log("Hardware node connected to realtime");
-    });
-
-    s.on("pairing:success", () => {
-      setIsPaired(true);
-      setPairingCode(null);
-      localStorage.setItem(`sous_paired_${hardwareId}`, "true");
-      setIsLoading(false);
-    });
-
-    setSocket(s);
-
-    // 3. Heartbeat logic
     const sendHeartbeat = async () => {
       try {
         const http = await getHttpClient(apiUrl);
@@ -112,97 +121,43 @@ export const useHardware = (
           version: localConfig.features.appVersion || "0.1.0",
           timestamp: new Date().toISOString(),
         };
-        console.log(`[Hardware] Sending heartbeat for ${hardwareId}...`);
         const resp = (await http.post("/hardware/heartbeat", {
           hardwareId,
           metadata,
         })) as any;
 
-        // 4. Remote Update Check
-        if (
-          resp &&
-          resp.requiredVersion &&
-          resp.requiredVersion !== metadata.version
-        ) {
-          console.log(
-            `🚀 New version required: ${resp.requiredVersion}. Performing whole app update...`,
-          );
-
-          // Clear service worker caches if they exist
-          if ("caches" in window) {
-            const cacheNames = await caches.keys();
-            await Promise.all(cacheNames.map((name) => caches.delete(name)));
-          }
-
-          // Clear local storage (except pairing)
-          const pairingId = localStorage.getItem("sous_hardware_id");
-          const pairingState = localStorage.getItem(
-            `sous_paired_${hardwareId}`,
-          );
-          localStorage.clear();
-          if (pairingId) localStorage.setItem("sous_hardware_id", pairingId);
-          if (pairingState)
-            localStorage.setItem(`sous_paired_${hardwareId}`, pairingState);
-
-          // Force a hard reload from the server (bypassing browser cache)
-          window.location.href =
-            window.location.href +
-            (window.location.href.includes("?") ? "&" : "?") +
-            "update=" +
-            Date.now();
+        if (resp?.requiredVersion && resp.requiredVersion !== metadata.version) {
+          window.location.reload();
         }
       } catch (e: any) {
-        console.error("Heartbeat failed", e);
-        // If the server doesn't know about this device (404), clear pairing
-        if (
-          e.response?.status === 404 ||
-          e.status === 404 ||
-          e.message?.includes("404")
-        ) {
-          console.warn(
-            "⚠️ Device pairing lost (not found on server). Returning to pairing mode.",
-          );
+        if (e.status === 404) {
           localStorage.removeItem(`sous_paired_${hardwareId}`);
           setIsPaired(false);
-          setIsLoading(false);
-          refreshPairingCode();
+          void refreshPairingCode();
         }
       }
     };
 
-    let heartbeatInterval: NodeJS.Timeout;
-    const isPairedStored = localStorage.getItem(`sous_paired_${hardwareId}`);
-    if (isPairedStored) {
-      sendHeartbeat();
-      heartbeatInterval = setInterval(sendHeartbeat, 30000); // Every 30s
-    }
+    const heartbeatInterval = setInterval(sendHeartbeat, 30000);
+    void sendHeartbeat();
 
-    // 4. Check initial pairing state
-    if (isPairedStored) {
-      setIsPaired(true);
-      setIsLoading(false);
-    } else {
-      refreshPairingCode();
-    }
+    return () => clearInterval(heartbeatInterval);
+  }, [hardwareId, isPaired, refreshPairingCode]);
 
-    // 5. Loading Timeout (failsafe)
+  // 4. Loading Timeout (failsafe)
+  useEffect(() => {
     const timeout = setTimeout(() => {
-      setIsLoading(false);
+      if (isLoading) setIsLoading(false);
     }, 10000);
-
-    return () => {
-      s.disconnect();
-      if (heartbeatInterval) clearInterval(heartbeatInterval);
-      clearTimeout(timeout);
-    };
-  }, [hardwareId, refreshPairingCode]);
+    return () => clearTimeout(timeout);
+  }, [isLoading]);
 
   return {
     hardwareId,
     pairingCode,
+    organizationId,
     isPaired,
     isLoading,
-    socket,
     refreshPairingCode,
   };
 };

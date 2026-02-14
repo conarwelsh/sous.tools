@@ -279,6 +279,11 @@ export class PresentationService {
       .insert(displays)
       .values(data)
       .returning();
+    
+    if (result[0] && this.pubSub) {
+      this.pubSub.publish('displayUpdated', { displayUpdated: result[0] });
+    }
+    
     return result[0];
   }
 
@@ -355,6 +360,12 @@ export class PresentationService {
                 config: layout.config,
               },
             },
+          });
+        }
+
+        if (display && this.pubSub) {
+          this.pubSub.publish('displayUpdated', {
+            displayUpdated: display
           });
         }
       }

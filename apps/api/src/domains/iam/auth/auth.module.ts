@@ -8,6 +8,7 @@ import { JwtStrategy } from './guards/jwt.strategy.js';
 import { LocalStrategy } from './guards/local.strategy.js';
 import { SessionService } from './services/session.service.js';
 import { CoreModule } from '../../core/core.module.js';
+import { HardwareAuthGuard } from '../../hardware/guards/hardware-auth.guard.js';
 
 @Global()
 @Module({
@@ -18,8 +19,8 @@ import { CoreModule } from '../../core/core.module.js';
       signOptions: { expiresIn: '1d' },
     }),
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy, SessionService],
+  providers: [AuthService, LocalStrategy, JwtStrategy, SessionService, HardwareAuthGuard],
   controllers: [AuthController],
-  exports: [AuthService, JwtModule, SessionService],
+  exports: [AuthService, JwtModule, SessionService, HardwareAuthGuard],
 })
 export class AuthModule {}

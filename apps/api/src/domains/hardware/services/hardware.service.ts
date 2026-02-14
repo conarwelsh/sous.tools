@@ -121,6 +121,7 @@ export class HardwareService {
 
     // 4. Notify UI via GraphQL Subscription
     this.pubSub.publish('deviceUpdated', { deviceUpdated: device });
+    this.pubSub.publish('devicePaired', { devicePaired: device });
 
     return device;
   }

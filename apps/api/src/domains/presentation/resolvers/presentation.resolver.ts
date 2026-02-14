@@ -82,7 +82,6 @@ export class PresentationResolver {
 
   @Query(() => LayoutType, { nullable: true })
   async activeLayout(@Args('hardwareId') hardwareId: string) {
-    console.log(`[PresentationResolver] activeLayout query received for hardwareId: ${hardwareId}`);
     return this.presentationService.getActiveLayoutByHardwareId(hardwareId);
   }
 
@@ -94,5 +93,15 @@ export class PresentationResolver {
   })
   presentationUpdated(@Args('hardwareId') hardwareId: string) {
     return this.pubSub.asyncIterableIterator('presentationUpdated');
+  }
+
+  @Subscription(() => PresentationDisplayType, {
+    filter: (payload, variables) => {
+      return payload.displayUpdated.organizationId === variables.organizationId;
+    },
+    resolve: (payload) => payload.displayUpdated,
+  })
+  displayUpdated(@Args('organizationId') organizationId: string) {
+    return this.pubSub.asyncIterableIterator('displayUpdated');
   }
 }

@@ -6,9 +6,10 @@ import { PresentationResolver, PresentationDisplayResolver } from './resolvers/p
 import { AuthModule } from '../iam/auth/auth.module.js';
 import { RealtimeModule } from '../realtime/realtime.module.js';
 import { CoreModule } from '../core/core.module.js';
+import { CulinaryModule } from '../culinary/culinary.module.js';
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, CulinaryModule],
   providers: [PresentationService, PresentationResolver, PresentationDisplayResolver],
   controllers: [PresentationController, PublicPresentationController],
   exports: [PresentationService],

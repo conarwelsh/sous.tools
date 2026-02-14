@@ -7,15 +7,37 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { SessionService } from '../services/session.service.js';
+import { Reflector } from '@nestjs/core';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator.js';
+import { HardwareAuthGuard } from '../../hardware/guards/hardware-auth.guard.js';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
     private sessionService: SessionService,
+    private reflector: Reflector,
+    private hardwareGuard: HardwareAuthGuard,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isPublic) {
+      return true;
+    }
+
+    // Try hardware auth first
+    try {
+      const isHardware = await this.hardwareGuard.canActivate(context);
+      if (isHardware) return true;
+    } catch (e) {
+      // Hardware auth failed, continue to JWT
+    }
+
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
 

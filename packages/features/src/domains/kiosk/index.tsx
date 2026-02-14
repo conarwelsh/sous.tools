@@ -51,15 +51,15 @@ interface KioskCatalogData {
   categories: any[];
 }
 
-/**
- * Self-Service Kiosk Feature.
- * provides a customer-facing interface for browsing the menu, managing a cart,
- * and completing orders with integrated payment simulation.
- */
 export const KioskFeature = () => {
-  const { user } = useAuth();
-  const orgId = user?.organizationId || "";
-  
+  return (
+    <DevicePairingFlow type="kiosk">
+      {({ organizationId }) => <KioskContent orgId={organizationId || ""} />}
+    </DevicePairingFlow>
+  );
+};
+
+const KioskContent = ({ orgId }: { orgId: string }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [isCheckout, setIsCheckout] = useState(false);
@@ -218,111 +218,107 @@ export const KioskFeature = () => {
   }
 
   return (
-    <DevicePairingFlow type="kiosk">
-      {() => (
-        <View className="flex flex-col h-screen bg-[#050505] text-white overflow-hidden">
-          {/* Header */}
-          <View className="h-24 border-b border-zinc-800 flex flex-row items-center justify-between px-12 bg-black/40 backdrop-blur-md sticky top-0 z-10">
-            <View className="flex flex-row items-center gap-4">
-               <Logo size={40} animate />
-               <View className="h-8 w-px bg-zinc-800" />
-               <h1 className="text-2xl font-black uppercase tracking-tighter">Self-Service <span className="text-primary">Kiosk</span></h1>
-            </View>
-            
-            {cart.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-              >
-                <Button onClick={() => setIsCheckout(true)} className="h-16 px-8 rounded-2xl bg-primary text-primary-foreground shadow-2xl shadow-primary/30 active:scale-95 transition-transform">
-                  <ShoppingCart className="mr-3 h-6 w-6" />
-                  <span className="text-xl font-black uppercase tracking-tighter">View My Tray</span>
-                  <Badge className="ml-4 bg-white text-primary rounded-lg px-2 font-black text-lg">
-                    {cart.reduce((a, b) => a + b.quantity, 0)}
-                  </Badge>
+    <View className="flex flex-col h-screen bg-[#050505] text-white overflow-hidden">
+      {/* Header */}
+      <View className="h-24 border-b border-zinc-800 flex flex-row items-center justify-between px-12 bg-black/40 backdrop-blur-md sticky top-0 z-10">
+        <View className="flex flex-row items-center gap-4">
+           <Logo size={40} animate />
+           <View className="h-8 w-px bg-zinc-800" />
+           <h1 className="text-2xl font-black uppercase tracking-tighter">Self-Service <span className="text-primary">Kiosk</span></h1>
+        </View>
+        
+        {cart.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+          >
+            <Button onClick={() => setIsCheckout(true)} className="h-16 px-8 rounded-2xl bg-primary text-primary-foreground shadow-2xl shadow-primary/30 active:scale-95 transition-transform">
+              <ShoppingCart className="mr-3 h-6 w-6" />
+              <span className="text-xl font-black uppercase tracking-tighter">View My Tray</span>
+              <Badge className="ml-4 bg-white text-primary rounded-lg px-2 font-black text-lg">
+                {cart.reduce((a, b) => a + b.quantity, 0)}
+              </Badge>
+            </Button>
+          </motion.div>
+        )}
+      </View>
+
+      <View className="flex flex-1 flex-row overflow-hidden">
+        {/* Sidebar Categories */}
+        <View className="w-80 bg-zinc-900/30 border-r border-zinc-800 flex flex-col">
+          <View className="p-10 flex-1 flex flex-col">
+            <h3 className="text-[10px] font-black uppercase text-zinc-600 mb-8 tracking-[0.3em]">Menu Categories</h3>
+            <ScrollView className="flex-1">
+              <View className="gap-4">
+                <Button
+                  variant={selectedCategoryId === null ? "default" : "ghost"}
+                  className={`w-full h-20 justify-start rounded-3xl px-8 text-lg font-black uppercase tracking-tight transition-all ${selectedCategoryId === null ? "bg-primary text-primary-foreground shadow-xl shadow-primary/20" : "text-zinc-500 hover:text-white hover:bg-zinc-800/50"}`}
+                  onClick={() => setSelectedCategoryId(null)}
+                >
+                  All Items
                 </Button>
-              </motion.div>
-            )}
-          </View>
-
-          <View className="flex flex-1 flex-row overflow-hidden">
-            {/* Sidebar Categories */}
-            <View className="w-80 bg-zinc-900/30 border-r border-zinc-800 flex flex-col">
-              <View className="p-10">
-                <h3 className="text-[10px] font-black uppercase text-zinc-600 mb-8 tracking-[0.3em]">Menu Categories</h3>
-                <ScrollView className="flex-1">
-                  <View className="gap-4">
-                    <Button
-                      variant={selectedCategoryId === null ? "default" : "ghost"}
-                      className={`w-full h-20 justify-start rounded-3xl px-8 text-lg font-black uppercase tracking-tight transition-all ${selectedCategoryId === null ? "bg-primary text-primary-foreground shadow-xl shadow-primary/20" : "text-zinc-500 hover:text-white hover:bg-zinc-800/50"}`}
-                      onClick={() => setSelectedCategoryId(null)}
-                    >
-                      All Items
-                    </Button>
-                    {categories.map((cat: any) => (
-                      <Button
-                        key={cat.id}
-                        variant={selectedCategoryId === cat.id ? "default" : "ghost"}
-                        className={`w-full h-20 justify-start rounded-3xl px-8 text-lg font-black uppercase tracking-tight transition-all ${selectedCategoryId === cat.id ? "bg-primary text-primary-foreground shadow-xl shadow-primary/20" : "text-zinc-500 hover:text-white hover:bg-zinc-800/50"}`}
-                        onClick={() => setSelectedCategoryId(cat.id)}
-                      >
-                        {cat.name}
-                      </Button>
-                    ))}
-                  </View>
-                </ScrollView>
+                {categories.map((cat: any) => (
+                  <Button
+                    key={cat.id}
+                    variant={selectedCategoryId === cat.id ? "default" : "ghost"}
+                    className={`w-full h-20 justify-start rounded-3xl px-8 text-lg font-black uppercase tracking-tight transition-all ${selectedCategoryId === cat.id ? "bg-primary text-primary-foreground shadow-xl shadow-primary/20" : "text-zinc-500 hover:text-white hover:bg-zinc-800/50"}`}
+                    onClick={() => setSelectedCategoryId(cat.id)}
+                  >
+                    {cat.name}
+                  </Button>
+                ))}
               </View>
-            </View>
-
-            {/* Main Content */}
-            <View className="flex-1 flex flex-col overflow-hidden bg-black/20">
-               <ScrollView className="flex-1 p-12">
-                 <AnimatePresence mode="wait">
-                   <motion.div
-                    key={selectedCategoryId || 'all'}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10"
-                   >
-                     {filteredItems.map((product: any) => (
-                       <motion.div
-                        key={product.id}
-                        layout
-                        whileHover={{ y: -10 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                       >
-                         <Card 
-                          className="bg-zinc-900/40 border-zinc-800/50 rounded-[3rem] overflow-hidden flex flex-col h-[500px] group hover:border-primary/50 transition-all cursor-pointer shadow-2xl"
-                          onClick={() => addToCart(product)}
-                         >
-                           <View className="h-64 bg-zinc-800/30 flex items-center justify-center relative overflow-hidden">
-                              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                              <Text className="text-8xl group-hover:scale-110 transition-transform duration-700">🍔</Text>
-                           </View>
-                           <View className="p-10 flex flex-col flex-1">
-                             <View className="flex flex-row justify-between items-start mb-4">
-                               <h3 className="text-3xl font-black uppercase tracking-tighter text-white">{product.name}</h3>
-                             </View>
-                             <Text className="text-zinc-500 text-lg line-clamp-2 mb-8 flex-1 font-medium leading-relaxed">Delicious freshly prepared {product.name.toLowerCase()} made with the finest local ingredients.</Text>
-                             <View className="flex flex-row items-center justify-between mt-auto">
-                                <Text className="text-3xl font-mono font-black text-primary">${(product.price / 100).toFixed(2)}</Text>
-                                <Button className="rounded-2xl h-14 px-10 font-black uppercase tracking-widest shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
-                                  Add to Tray
-                                </Button>
-                             </View>
-                           </View>
-                         </Card>
-                       </motion.div>
-                     ))}
-                   </motion.div>
-                 </AnimatePresence>
-               </ScrollView>
-            </View>
+            </ScrollView>
           </View>
         </View>
-      )}
-    </DevicePairingFlow>
+
+        {/* Main Content */}
+        <View className="flex-1 flex flex-col overflow-hidden bg-black/20">
+           <ScrollView className="flex-1 p-12">
+             <AnimatePresence mode="wait">
+               <motion.div
+                key={selectedCategoryId || 'all'}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10"
+               >
+                 {filteredItems.map((product: any) => (
+                   <motion.div
+                    key={product.id}
+                    layout
+                    whileHover={{ y: -10 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                   >
+                     <Card 
+                      className="bg-zinc-900/40 border-zinc-800/50 rounded-[3rem] overflow-hidden flex flex-col h-[500px] group hover:border-primary/50 transition-all cursor-pointer shadow-2xl"
+                      onClick={() => addToCart(product)}
+                     >
+                       <View className="h-64 bg-zinc-800/30 flex items-center justify-center relative overflow-hidden">
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <Text className="text-8xl group-hover:scale-110 transition-transform duration-700">🍔</Text>
+                       </View>
+                       <View className="p-10 flex flex-col flex-1">
+                         <View className="flex flex-row justify-between items-start mb-4">
+                           <h3 className="text-3xl font-black uppercase tracking-tighter text-white">{product.name}</h3>
+                         </View>
+                         <Text className="text-zinc-500 text-lg line-clamp-2 mb-8 flex-1 font-medium leading-relaxed">Delicious freshly prepared {product.name.toLowerCase()} made with the finest local ingredients.</Text>
+                         <View className="flex flex-row items-center justify-between mt-auto">
+                            <Text className="text-3xl font-mono font-black text-primary">${(product.price / 100).toFixed(2)}</Text>
+                            <Button className="rounded-2xl h-14 px-10 font-black uppercase tracking-widest shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
+                              Add to Tray
+                            </Button>
+                         </View>
+                       </View>
+                     </Card>
+                   </motion.div>
+                 ))}
+               </motion.div>
+             </AnimatePresence>
+           </ScrollView>
+        </View>
+      </View>
+    </View>
   );
 };

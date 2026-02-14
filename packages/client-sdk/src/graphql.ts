@@ -11,6 +11,11 @@ export interface ApolloClientConfig {
    * The base URL of the GraphQL API (e.g. http://localhost:4000).
    */
   apiUrl: string;
+  /**
+   * Optional hardware context.
+   */
+  hardwareId?: string | null;
+  organizationId?: string | null;
 }
 
 /**
@@ -22,8 +27,13 @@ export interface ApolloClientConfig {
  * @returns {ApolloClient} A configured Apollo Client instance.
  */
 export const createApolloClient = (config: ApolloClientConfig) => {
+  const headers: Record<string, string> = {};
+  if (config.hardwareId) headers["x-hardware-id"] = config.hardwareId;
+  if (config.organizationId) headers["x-organization-id"] = config.organizationId;
+
   const httpLink = new HttpLink({
     uri: `${config.apiUrl}/graphql`,
+    headers,
   });
 
   const wsLink =
@@ -31,6 +41,7 @@ export const createApolloClient = (config: ApolloClientConfig) => {
       ? new GraphQLWsLink(
           createClient({
             url: `${config.apiUrl.replace("http", "ws")}/graphql`,
+            connectionParams: headers,
           }),
         )
       : null;

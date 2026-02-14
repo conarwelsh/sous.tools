@@ -34,6 +34,9 @@ export class CreateOrderInput {
 
   @Field()
   source: string;
+
+  @Field({ nullable: true })
+  ledgerId?: string;
 }
 
 @ObjectType()
@@ -114,8 +117,13 @@ export class PosResolver {
    * Retrieves all active (OPEN) orders for an organization.
    */
   @Query(() => [PosOrder])
-  async activeOrders(@CurrentUser() user: any) {
-    return this.posService.getActiveOrders(user.organizationId);
+  async activeOrders(
+    @CurrentUser() user: any,
+    @Args('orgId', { nullable: true }) orgId?: string,
+  ) {
+    const finalOrgId = orgId || user?.organizationId;
+    if (!finalOrgId) return [];
+    return this.posService.getActiveOrders(finalOrgId);
   }
 
   /**
@@ -126,8 +134,11 @@ export class PosResolver {
     @CurrentUser() user: any,
     @Args('status', { nullable: true }) status?: string,
     @Args('limit', { type: () => Int, defaultValue: 50 }) limit?: number,
+    @Args('orgId', { nullable: true }) orgId?: string,
   ) {
-    return this.posService.getOrders(user.organizationId, status, limit);
+    const finalOrgId = orgId || user?.organizationId;
+    if (!finalOrgId) return [];
+    return this.posService.getOrders(finalOrgId, status, limit);
   }
 
   /**
@@ -138,7 +149,7 @@ export class PosResolver {
     @CurrentUser() user: any,
     @Args('input') input: CreateOrderInput,
   ) {
-    const order = await this.posService.recordSale(user.organizationId, input, '');
+    const order = await this.posService.recordSale(user.organizationId, input, input.ledgerId || '');
     
     // Notify KDS
     await this.pubSub.publish('orderUpdated', { orderUpdated: order });

@@ -77,4 +77,14 @@ export class HardwareResolver {
   deviceUpdated(@Args('orgId') orgId: string) {
     return this.pubSub.asyncIterableIterator('deviceUpdated');
   }
+
+  @Subscription(() => DeviceType, {
+    filter: (payload, variables) => {
+      return payload.devicePaired.hardwareId === variables.hardwareId;
+    },
+    resolve: (payload) => payload.devicePaired,
+  })
+  devicePaired(@Args('hardwareId') hardwareId: string) {
+    return this.pubSub.asyncIterableIterator('devicePaired');
+  }
 }

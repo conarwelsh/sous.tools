@@ -16,7 +16,7 @@ import {
 
 interface DevicePairingFlowProps {
   type: "kds" | "pos" | "signage" | "kiosk" | "gateway" | "watch";
-  children: (props: { hardwareId: string; socket: any }) => React.ReactNode;
+  children: (props: { hardwareId: string; organizationId: string | null }) => React.ReactNode;
 }
 
 export const DevicePairingFlow: React.FC<DevicePairingFlowProps> = ({
@@ -26,9 +26,9 @@ export const DevicePairingFlow: React.FC<DevicePairingFlowProps> = ({
   const {
     hardwareId,
     pairingCode,
+    organizationId,
     isPaired,
     isLoading,
-    socket,
     refreshPairingCode,
   } = useHardware(type);
   const [isOnline, setIsOnline] = useState(true);
@@ -212,5 +212,5 @@ export const DevicePairingFlow: React.FC<DevicePairingFlowProps> = ({
   }
 
   // If paired, we render the actual app content
-  return <>{children({ hardwareId: hardwareId!, socket })}</>;
+  return <>{children({ hardwareId: hardwareId!, organizationId })}</>;
 };

@@ -47,16 +47,15 @@ interface PosCatalogData {
   categories: any[];
 }
 
-/**
- * Point of Sale (POS) Feature.
- * Provides a touch-optimized terminal for order creation,
- * catalog browsing, and payment processing.
- *
- * @returns {JSX.Element} The POS interface.
- */
 export const POSFeature = () => {
-  const { user } = useAuth();
-  const orgId = user?.organizationId || "";
+  return (
+    <DevicePairingFlow type="pos">
+      {({ organizationId }) => <POSContent orgId={organizationId || ""} />}
+    </DevicePairingFlow>
+  );
+};
+
+const POSContent = ({ orgId }: { orgId: string }) => {
   const [cart, setCart] = useState<any[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
@@ -79,10 +78,6 @@ export const POSFeature = () => {
 
   const [createOrder, { loading: isSubmitting }] = useMutation(CREATE_ORDER);
 
-  /**
-   * Adds an item to the active cart.
-   * @param {any} item - The product item to add.
-   */
   const handleAddItem = (item: any) => {
     setCart((prev) => {
       const existing = prev.find((i) => i.id === item.id);
@@ -95,9 +90,6 @@ export const POSFeature = () => {
     });
   };
 
-  /**
-   * Processes the current cart and creates a new order.
-   */
   const handlePay = async () => {
     if (cart.length === 0) return;
 
@@ -129,7 +121,7 @@ export const POSFeature = () => {
     }
   };
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <View className="flex-1 bg-black items-center justify-center">
         <Loader2 className="animate-spin text-primary mb-4" size={48} />
@@ -147,64 +139,60 @@ export const POSFeature = () => {
     : products;
 
   return (
-    <DevicePairingFlow type="pos">
-      {() => (
-        <POSLayout>
-          {/* Sidebar */}
-          <View className="w-20 bg-zinc-950 border-r border-zinc-800 flex flex-col items-center py-6 gap-8">
-             <Button variant="ghost" size="icon" className="text-zinc-600">
-                <Settings size={24} />
-             </Button>
-             <Button variant="ghost" size="icon" className="text-zinc-600">
-                <User size={24} />
-             </Button>
-          </View>
+    <POSLayout>
+      {/* Sidebar */}
+      <View className="w-20 bg-zinc-950 border-r border-zinc-800 flex flex-col items-center py-6 gap-8">
+         <Button variant="ghost" size="icon" className="text-zinc-600">
+            <Settings size={24} />
+         </Button>
+         <Button variant="ghost" size="icon" className="text-zinc-600">
+            <User size={24} />
+         </Button>
+      </View>
 
-          {/* Catalog & Categories */}
-          <View className="flex-1 flex flex-col bg-[#050505]">
-             {/* Category Bar */}
-             <View className="h-20 border-b border-zinc-800 flex flex-row items-center px-6 gap-4 overflow-x-auto whitespace-nowrap bg-zinc-900/20">
-                <Button 
-                  variant={selectedCategoryId === null ? "default" : "ghost"}
-                  onClick={() => setSelectedCategoryId(null)}
-                  className="rounded-full px-6 h-10 font-bold uppercase text-[10px] tracking-widest"
-                >
-                  All Items
-                </Button>
-                {categories.map((cat: any) => (
-                  <Button 
-                    key={cat.id}
-                    variant={selectedCategoryId === cat.id ? "default" : "ghost"}
-                    onClick={() => setSelectedCategoryId(cat.id)}
-                    className="rounded-full px-6 h-10 font-bold uppercase text-[10px] tracking-widest"
-                  >
-                    {cat.name}
-                  </Button>
-                ))}
-             </View>
+      {/* Catalog & Categories */}
+      <View className="flex-1 flex flex-col bg-[#050505]">
+         {/* Category Bar */}
+         <View className="h-20 border-b border-zinc-800 flex flex-row items-center px-6 gap-4 overflow-x-auto whitespace-nowrap bg-zinc-900/20">
+            <Button 
+              variant={selectedCategoryId === null ? "default" : "ghost"}
+              onClick={() => setSelectedCategoryId(null)}
+              className="rounded-full px-6 h-10 font-bold uppercase text-[10px] tracking-widest"
+            >
+              All Items
+            </Button>
+            {categories.map((cat: any) => (
+              <Button 
+                key={cat.id}
+                variant={selectedCategoryId === cat.id ? "default" : "ghost"}
+                onClick={() => setSelectedCategoryId(cat.id)}
+                className="rounded-full px-6 h-10 font-bold uppercase text-[10px] tracking-widest"
+              >
+                {cat.name}
+              </Button>
+            ))}
+         </View>
 
-             <AnimatePresence mode="wait">
-               <motion.div
-                 key={selectedCategoryId || 'all'}
-                 initial={{ opacity: 0, x: 20 }}
-                 animate={{ opacity: 1, x: 0 }}
-                 exit={{ opacity: 0, x: -20 }}
-                 transition={{ duration: 0.2 }}
-                 className="flex-1 overflow-hidden"
-               >
-                 <OrderGrid items={filteredProducts} onItemPress={handleAddItem} />
-               </motion.div>
-             </AnimatePresence>
-          </View>
+         <AnimatePresence mode="wait">
+           <motion.div
+             key={selectedCategoryId || 'all'}
+             initial={{ opacity: 0, x: 20 }}
+             animate={{ opacity: 1, x: 0 }}
+             exit={{ opacity: 0, x: -20 }}
+             transition={{ duration: 0.2 }}
+             className="flex-1 overflow-hidden"
+           >
+             <OrderGrid items={filteredProducts} onItemPress={handleAddItem} />
+           </motion.div>
+         </AnimatePresence>
+      </View>
 
-          <Cart 
-            items={cart} 
-            onPay={handlePay} 
-            onClear={() => setCart([])} 
-            isSubmitting={isSubmitting}
-          />
-        </POSLayout>
-      )}
-    </DevicePairingFlow>
+      <Cart 
+        items={cart} 
+        onPay={handlePay} 
+        onClear={() => setCart([])} 
+        isSubmitting={isSubmitting}
+      />
+    </POSLayout>
   );
 };
