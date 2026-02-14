@@ -19,7 +19,50 @@ interface LoggerConfig {
     level: string;
     json: boolean;
     logtailToken?: string;
+    hyperdxApiKey?: string;
   };
+}
+
+/**
+ * Initializes OpenTelemetry and distributed tracing via HyperDX
+ */
+export async function initObservability(config: LoggerConfig) {
+  if (!isServer) return;
+  
+  const apiKey = config.logger.hyperdxApiKey;
+  if (!apiKey) {
+    console.log("ℹ️ HyperDX API Key not found. Skipping OpenTelemetry initialization.");
+    return;
+  }
+
+  try {
+    const hyperdxPkg = "@hyperdx/node-opentelemetry";
+    const HyperDX = await import(/* webpackIgnore: true */ hyperdxPkg);
+    
+    // Temporarily silence console to suppress HyperDX bootstrap logs
+    const originalLog = console.log;
+    const originalInfo = console.info;
+    if (config.logger.level !== 'debug') {
+      console.log = () => {};
+      console.info = () => {};
+    }
+
+    HyperDX.init({
+      apiKey,
+      serviceName: process.env.SERVICE_NAME || "@sous/core",
+      consoleCapture: true, // Automatically capture console logs
+    } as any);
+
+    // Restore console
+    console.log = originalLog;
+    console.info = originalInfo;
+
+    if (config.logger.level === 'debug') {
+      console.log("✅ Observability initialized with HyperDX");
+    }
+  } catch (e: any) {
+    console.error(`❌ Failed to initialize HyperDX: ${e.message}`);
+  }
 }
 
 export function createLogger(options: { name: string; config?: LoggerConfig }) {
@@ -32,18 +75,17 @@ export function createLogger(options: { name: string; config?: LoggerConfig }) {
       level: isServer ? (process.env.LOG_LEVEL || "info") : "info",
       json: isServer ? (process.env.SOUS_JSON_LOGS === "true") : false,
       logtailToken: isServer ? process.env.LOGTAIL_SOURCE_TOKEN : undefined,
+      hyperdxApiKey: isServer ? process.env.HYPERDX_API_KEY : undefined,
     }
   };
 
   const isDev = logConfig.env === "development";
-  const useJson = logConfig.logger.json;
 
   // Transports are only supported on server in Pino
   if (isServer) {
     // 1. Centralized Local Log File
-    // Note: We avoid dynamic path detection here to keep it stable
     const home = process.env.HOME || process.env.USERPROFILE;
-    if (home && !isDev) { // Only file log in prod/staging to save I/O in dev
+    if (home && !isDev) { 
       transports.push({
         target: "pino/file",
         options: { destination: `${home}/.sous/logs/combined.log`, mkdir: true },
@@ -57,6 +99,11 @@ export function createLogger(options: { name: string; config?: LoggerConfig }) {
         options: { sourceToken: logConfig.logger.logtailToken },
       });
     }
+
+    // 3. HyperDX / OpenTelemetry
+    // Note: If initObservability was called, consoleCapture: true will already pipe logs.
+    // However, for more structured pino logs, we could add a specific transport here.
+    // For now, consoleCapture is sufficient for a basic replacement.
   }
 
   const baseLogger = pino(
@@ -70,7 +117,7 @@ export function createLogger(options: { name: string; config?: LoggerConfig }) {
       browser: isServer ? undefined : { asObject: true },
       transport: isServer && transports.length > 0
         ? { targets: transports }
-        : undefined,
+        : (isDev ? { target: "pino-pretty" } : undefined),
     }
   );
 
@@ -78,7 +125,6 @@ export function createLogger(options: { name: string; config?: LoggerConfig }) {
 }
 
 // Global default instance
-// In a fully refactored state, we would pass the resolved config here
 logger = createLogger({ name: "@sous/core" });
 
 export { logger };

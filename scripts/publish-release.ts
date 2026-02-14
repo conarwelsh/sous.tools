@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import mime from 'mime-types';
 
-import { resolveConfig } from '../packages/config/src/index.js';
+import { config } from '../packages/config/src/index.js';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -12,7 +12,6 @@ async function main() {
 
   console.log(`🚀 Publishing to ${channel.toUpperCase()} channel...`);
 
-  const config = await resolveConfig();
   const supabaseUrl = config.storage.supabase.url;
   const supabaseKey = config.storage.supabase.serviceRoleKey;
 

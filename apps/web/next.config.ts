@@ -54,6 +54,7 @@ const nextConfig = {
         config.resolve.alias = {
           ...config.resolve.alias,
           "@infisical/sdk": false,
+          "@hyperdx/node-opentelemetry": false,
           dotenv: false,
           fs: false,
           path: false,

@@ -170,6 +170,7 @@
 **Rule:** ALL `pm2 logs` commands MUST include the `--nostream` flag.
 
 - **Action:** When inspecting logs, never use the default streaming mode. Always use `pm2 logs --nostream` or `pm2 logs <app> --nostream` along with `--lines <number>` if necessary.
+- **Action (Log Discovery):** When the user asks to "check the logs" or similar, use the centralized logging infrastructure (e.g., `pm2 logs --nostream`, tailing `~/.sous/logs/combined.log`, or `sous env logs`). DO NOT start or restart dev servers unless specifically asked, as they are managed by PM2.
 - **Goal:** Prevent the agent from getting stuck in a long-running tail process and ensure predictable tool termination.
 
 ### 25. Next.js Conventions Mandate (MANDATE)
@@ -190,6 +191,16 @@
 - **Action (Fonts):** Font variable names MUST NOT be hardcoded as strings. Use the centralized constants exported from `@sous/ui` (e.g., `FONT_SANS_VAR`, `FONT_BRAND_VAR`).
 - **Action (Icons):** Icons MUST use semantic color classes and consistent sizing tokens (`size-4`, `size-5`) to maintain visual harmony.
 - **Goal:** Ensure the UI remains modern, visually consistent, and 100% themeable via centralized variables in `@sous/ui`.
+
+### 27. Bulletproof Configuration Mandate (MANDATE)
+
+**Rule:** ALL processes, scripts, and applications MUST utilize the `@sous/cli` orchestrator (`sous env exec`) for configuration injection.
+
+- **Action (Secrets):** The `.env` file at the project root MUST ONLY contain Infisical bootstrap credentials (`INFISICAL_PROJECT_ID`, `INFISICAL_CLIENT_ID`, `INFISICAL_CLIENT_SECRET`). All other configuration MUST live in the Infisical vault.
+- **Action (Execution):** Never use `dotenv` or direct `process.env` hacks in scripts. Use `sous env exec -- <command>` to run any process that requires configuration.
+- **Action (Validation):** `@sous/config` MUST strictly validate the presence of required variables at runtime.
+- **Action (Overloading):** Use the `--env` flag in the CLI to overload the target environment (e.g., `sous env exec --env=production -- db:migrate`).
+- **Goal:** Eliminate race conditions, ensure secret security, and provide a unified entry point for all environment-aware operations.
 
 ## Documentation Index
 

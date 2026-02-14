@@ -27,7 +27,7 @@ export class PresentationService {
   ) {}
 
   async getUserOrganizationId(userId: string) {
-    const user = await this.dbService.db.query.users.findFirst({
+    const user = await this.dbService.readDb.query.users.findFirst({
       where: eq(users.id, userId),
       columns: { organizationId: true },
     });
@@ -105,14 +105,14 @@ export class PresentationService {
     const conditions = [eq(layouts.organizationId, organizationId)];
     if (type) conditions.push(eq(layouts.type, type));
 
-    return this.dbService.db
+    return this.dbService.readDb
       .select()
       .from(layouts)
       .where(and(...conditions));
   }
 
   async getLayoutById(id: string, organizationId: string) {
-    const result = await this.dbService.db
+    const result = await this.dbService.readDb
       .select()
       .from(layouts)
       .where(
@@ -122,7 +122,7 @@ export class PresentationService {
   }
 
   async getTemplates(organizationId: string) {
-    return this.dbService.db
+    return this.dbService.readDb
       .select()
       .from(layouts)
       .where(
@@ -138,7 +138,7 @@ export class PresentationService {
 
   async getLayoutBySlug(slug: string, organizationId?: string) {
     // webSlug is stored in the 'config' JSON field
-    const organizationLayouts = await this.dbService.db
+    const organizationLayouts = await this.dbService.readDb
       .select()
       .from(layouts)
       .where(
@@ -169,7 +169,7 @@ export class PresentationService {
   async seedSystem(orgId: string) {
     logger.info('🌱 Seeding Presentation System Templates...');
 
-    const systemOrg = await this.dbService.db.query.organizations.findFirst({
+    const systemOrg = await this.dbService.readDb.query.organizations.findFirst({
       where: eq(organizations.slug, 'system'),
     });
 
@@ -246,14 +246,14 @@ export class PresentationService {
   }
 
   async getDisplays(organizationId: string) {
-    return this.dbService.db
+    return this.dbService.readDb
       .select()
       .from(displays)
       .where(eq(displays.organizationId, organizationId));
   }
 
   async getDisplayById(id: string, organizationId: string) {
-    const result = await this.dbService.db
+    const result = await this.dbService.readDb
       .select()
       .from(displays)
       .where(
@@ -273,12 +273,12 @@ export class PresentationService {
       })
       .returning();
 
-    const display = await this.dbService.db.query.displays.findFirst({
+    const display = await this.dbService.readDb.query.displays.findFirst({
       where: eq(displays.id, data.displayId),
     });
 
     if (display?.hardwareId) {
-      const layout = await this.dbService.db.query.layouts.findFirst({
+      const layout = await this.dbService.readDb.query.layouts.findFirst({
         where: eq(layouts.id, data.layoutId),
       });
 
@@ -300,7 +300,7 @@ export class PresentationService {
   }
 
   async getAssignmentsForDisplay(displayId: string) {
-    return this.dbService.db
+    return this.dbService.readDb
       .select()
       .from(displayAssignments)
       .where(eq(displayAssignments.displayId, displayId));

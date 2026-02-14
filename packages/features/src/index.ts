@@ -22,8 +22,16 @@ export * from "./domains/presentation/types/presentation.types";
 // POS Domain
 export * from "./domains/pos/index";
 
+// Billing Domain
+export * from "./domains/billing/components/PlanSelector";
+export * from "./domains/billing/components/CheckoutView";
+
 // KDS Domain
 export * from "./domains/kds/index";
+
+// Sales Domain
+export * from "./domains/sales/components/SalesDashboard";
+export * from "./domains/sales/hooks/useSales";
 
 // Home Domain
 export * from "./domains/home/components/HomeView";
@@ -62,3 +70,20 @@ export * from "./domains/docs/components/ComponentPlayground";
 
 // Shared Components
 export * from "./components/CodeEditor";
+
+// Support Domain
+export * from "./domains/support/components/SupportForm";
+export * from "./domains/support/components/FeedbackModal";
+export * from "./domains/support/hooks/useSupport";
+export * from "./domains/support/types";
+
+// Platform Domain
+export * from "./domains/core/platform/components/PlatformSettingsView";
+export * from "./domains/core/platform/components/PlatformDashboard";
+export * from "./domains/core/platform/hooks/usePlatformSettings";
+export * from "./domains/core/platform/hooks/usePlatformMetrics";
+
+// OAuth Domain
+export * from "./domains/iam/oauth/components/DeveloperPortal";
+export * from "./domains/iam/oauth/components/ConsentView";
+export * from "./domains/iam/oauth/hooks/useOAuthClients";

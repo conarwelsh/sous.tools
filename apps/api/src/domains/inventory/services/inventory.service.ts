@@ -11,7 +11,7 @@ export class InventoryService {
     const filters = [eq(stockLedger.organizationId, organizationId)];
     if (locationId) filters.push(eq(stockLedger.locationId, locationId));
 
-    return this.dbService.db
+    return this.dbService.readDb
       .select()
       .from(stockLedger)
       .where(and(...filters));

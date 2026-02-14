@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { brandingConfigSchema, config, resolveConfig } from "@sous/config";
+import { brandingConfigSchema, config } from "@sous/config";
 
 function findMonorepoRoot(startDir: string): string {
   let current = startDir;
@@ -36,8 +36,6 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  await resolveConfig();
-  
   // Only allow in development
   if (config.env !== "development") {
     return NextResponse.json(

@@ -3,8 +3,10 @@ import { relations } from 'drizzle-orm';
 // 1. Base / Independent
 export * from '../../iam/iam.schema';
 export * from '../../iam/organizations/organizations.schema';
+export * from '../../iam/oauth/oauth.schema';
 export * from '../../iam/invitations/invitations.schema';
 export * from '../../iam/auth/password-reset.schema';
+export * from './platform.schema';
 
 // 2. Depends on Organizations
 export * from '../../iam/locations/locations.schema';
@@ -12,6 +14,7 @@ export * from '../../iam/users/users.schema';
 export * from '../../media/media.schema';
 export * from '../../culinary/culinary.schema';
 export * from '../../culinary/catalog/catalog.schema';
+export * from '../../sales/sales.schema';
 export * from '../../accounting/accounting.schema';
 export * from '../../integrations/integrations.schema';
 export * from '../tags/tags.schema';
@@ -22,6 +25,7 @@ export * from '../../procurement/procurement.schema';
 export * from '../../pos/pos.schema';
 export * from '../../hardware/hardware.schema';
 export * from '../../presentation/presentation.schema';
+export * from '../../billing/billing.schema';
 
 // 4. Heavy Dependencies
 export * from '../../inventory/inventory.schema';
@@ -58,6 +62,14 @@ import {
   wastageEvents,
 } from '../../inventory/inventory.schema';
 import { recipeSteps, cookNotes } from '../../culinary/culinary.schema';
+import {
+  plans,
+  usageMetrics,
+} from '../../iam/organizations/organizations.schema';
+import {
+  billingPlans,
+  billingSubscriptions,
+} from '../../billing/billing.schema';
 
 import { invitations } from '../../iam/invitations/invitations.schema';
 import { passwordResetTokens } from '../../iam/auth/password-reset.schema';
@@ -85,12 +97,16 @@ export const passwordResetTokensRelations = relations(
   }),
 );
 
-export const organizationsRelations = relations(organizations, ({ many }) => ({
+export const organizationsRelations = relations(organizations, ({ one, many }) => ({
   users: many(users),
   locations: many(locations),
   categories: many(categories),
   products: many(products),
   tags: many(tags),
+  plan: one(plans, {
+    fields: [organizations.planId],
+    references: [plans.id],
+  }),
 }));
 
 import { locations } from '../../iam/locations/locations.schema';
@@ -240,3 +256,35 @@ export const posOrderItemsRelations = relations(posOrderItems, ({ one }) => ({
     references: [posOrders.id],
   }),
 }));
+
+export const cookNotesRelations = relations(cookNotes, ({ one }) => ({
+  recipe: one(recipes, {
+    fields: [cookNotes.recipeId],
+    references: [recipes.id],
+  }),
+  user: one(users, {
+    fields: [cookNotes.userId],
+    references: [users.id],
+  }),
+}));
+
+export const plansRelations = relations(plans, ({ many }) => ({
+  organizations: many(organizations),
+}));
+
+export const usageMetricsRelations = relations(usageMetrics, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [usageMetrics.organizationId],
+    references: [organizations.id],
+  }),
+}));
+
+export const billingSubscriptionsRelations = relations(
+  billingSubscriptions,
+  ({ one }) => ({
+    organization: one(organizations, {
+      fields: [billingSubscriptions.organizationId],
+      references: [organizations.id],
+    }),
+  }),
+);

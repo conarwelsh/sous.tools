@@ -23,7 +23,12 @@ export class IngestionService {
       logger.info(
         `[AI Ingestion] Initializing Gemini with API Key (length: ${apiKey.length})`,
       );
-      this.genAI = new GoogleGenerativeAI(apiKey);
+      try {
+        this.genAI = new GoogleGenerativeAI(apiKey);
+        logger.info('[AI Ingestion] Gemini initialized successfully');
+      } catch (e) {
+        logger.error('[AI Ingestion] Failed to initialize Gemini', e);
+      }
     } else {
       logger.warn(
         '[AI Ingestion] GOOGLE_GENERATIVE_AI_API_KEY is not set in configuration.',

@@ -1,17 +1,25 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import Redis from 'ioredis';
-import { configPromise } from '@sous/config';
+import { config } from '@sous/config';
+import { logger } from '@sous/logger';
 
 @Injectable()
 export class SessionService {
   private redis: Redis | null = null;
 
+  /*
   async onModuleInit() {
-    const config = await configPromise;
     if (config.redis.url) {
-      this.redis = new Redis(config.redis.url);
+      this.redis = new Redis(config.redis.url, {
+        maxRetriesPerRequest: 0,
+        connectTimeout: 5000,
+      });
+      this.redis.on('error', (err) => {
+        // Silent error to prevent hanging/crashing
+      });
     }
   }
+  */
 
   async revokeToken(jti: string, exp: number) {
     if (!this.redis) return;

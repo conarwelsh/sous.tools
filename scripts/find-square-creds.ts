@@ -1,12 +1,12 @@
-import { resolveConfig } from '@sous/config';
+import { config as appConfig } from '@sous/config';
 import { DatabaseService } from '../apps/api/src/domains/core/database/database.service.js';
 import { organizations, integrationConfigs } from '../apps/api/src/domains/core/database/schema.js';
 import { eq, and } from 'drizzle-orm';
 import { logger } from '@sous/logger';
 
 async function findCreds() {
-    await resolveConfig();
     const dbService = new DatabaseService();
+    await dbService.onModuleInit();
     
     logger.info('🔍 Searching for Square credentials in DB...');
     

@@ -26,7 +26,11 @@ import {
   Sun,
   Moon,
   Globe,
+  LifeBuoy,
+  ShieldAlert,
+  Code2,
 } from "lucide-react";
+import { FeedbackModal } from "@sous/features";
 
 function AdminContent({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, loading } = useAuth();
@@ -49,7 +53,12 @@ function AdminContent({ children }: { children: React.ReactNode }) {
       const callbackUrl = encodeURIComponent(pathname);
       router.replace(`/login?callbackUrl=${callbackUrl}`);
     }
-  }, [isMounted, loading, isAuthenticated, router, pathname]);
+
+    if (isMounted && !loading && isAuthenticated && user?.organization?.planStatus === "pending_payment" && pathname !== "/checkout") {
+      console.log("[AdminLayout] Organization payment pending, redirecting to checkout...");
+      router.replace("/checkout");
+    }
+  }, [isMounted, loading, isAuthenticated, router, pathname, user]);
 
   if (loading || !isMounted || !isAuthenticated) {
     return (
@@ -64,6 +73,9 @@ function AdminContent({ children }: { children: React.ReactNode }) {
       title: "Core",
       items: [
         { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
+        ...(user?.role === "salesman" || user?.role === "superadmin"
+          ? [{ label: "Sales Portal", icon: TrendingUp, href: "/sales" }]
+          : []),
       ]
     },
     {
@@ -96,6 +108,16 @@ function AdminContent({ children }: { children: React.ReactNode }) {
       title: "System",
       items: [
         { label: "Settings", icon: Settings, href: "/settings/organization" },
+        ...(user?.role === "admin" || user?.role === "superadmin"
+          ? [{ label: "Developer", icon: Code2, href: "/settings/developer" }]
+          : []),
+        ...(user?.role === "superadmin" 
+          ? [
+              { label: "Platform", icon: ShieldAlert, href: "/platform" },
+              { label: "Platform Settings", icon: Settings, href: "/settings/platform" }
+            ] 
+          : []),
+        { label: "Support", icon: LifeBuoy, href: "/support" },
       ]
     },
   ];
@@ -185,7 +207,26 @@ function AdminContent({ children }: { children: React.ReactNode }) {
         </ScrollView>
 
         {/* Footer (Fixed) */}
-        <View className="p-6">
+        <View className="p-6 space-y-2">
+          <FeedbackModal>
+            <Button
+              variant="ghost"
+              className={cn(
+                "flex items-center p-4 rounded-xl hover:bg-primary/10 group w-full transition-all justify-start gap-4",
+                isCollapsed && "justify-center px-0"
+              )}
+            >
+              <Activity
+                size={20}
+                className="text-muted-foreground group-hover:text-primary transition-colors"
+              />
+              {!isCollapsed && (
+                <Text className="text-muted-foreground group-hover:text-primary font-bold uppercase text-[10px] tracking-widest transition-colors">
+                  Feedback
+                </Text>
+              )}
+            </Button>
+          </FeedbackModal>
           <SidebarFooter 
             isCollapsed={isCollapsed} 
             router={router} 

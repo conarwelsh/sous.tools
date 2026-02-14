@@ -1,9 +1,8 @@
 
 import { createClient } from '@supabase/supabase-js';
-import { resolveConfig } from '../packages/config/src/index.js';
+import { config } from '../packages/config/src/index.js';
 
 async function main() {
-  const config = await resolveConfig();
   const supabaseUrl = config.storage.supabase.url;
   const supabaseKey = config.storage.supabase.serviceRoleKey;
   const BUCKET = config.storage.supabase.bucket;

@@ -5,8 +5,13 @@ import { DriverFactory } from './drivers/driver.factory.js';
 import { CulinaryModule } from '../culinary/culinary.module.js';
 import { IngestionModule } from '../ingestion/ingestion.module.js';
 
+const skipIngestion = process.env.SKIP_INGESTION === 'true';
+
 @Module({
-  imports: [forwardRef(() => CulinaryModule), IngestionModule],
+  imports: [
+    forwardRef(() => CulinaryModule),
+    ...(skipIngestion ? [] : [IngestionModule])
+  ],
   providers: [IntegrationsService, DriverFactory],
   controllers: [IntegrationsController],
   exports: [IntegrationsService],

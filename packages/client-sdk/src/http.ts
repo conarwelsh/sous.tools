@@ -3,13 +3,35 @@ import { localConfig } from "@sous/config";
 export class HttpClient {
   private baseUrl: string;
   public token: string | null = null;
+  private queue: { path: string; options: RequestInit; id: string }[] = [];
+  private isProcessingQueue = false;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+    
+    // Attempt to process queue when back online
+    if (typeof window !== "undefined") {
+      window.addEventListener("online", () => this.processQueue());
+    }
   }
 
-  setToken(token: string | null) {
-    this.token = token;
+  private async processQueue() {
+    if (this.isProcessingQueue || this.queue.length === 0) return;
+    this.isProcessingQueue = true;
+    console.log(`[HttpClient] Online! Processing ${this.queue.length} queued requests...`);
+
+    const currentQueue = [...this.queue];
+    this.queue = [];
+
+    for (const req of currentQueue) {
+      try {
+        await this.request(req.path, req.options);
+      } catch (e) {
+        console.error(`[HttpClient] Failed to process queued request ${req.id}, re-queueing...`, e);
+        this.queue.push(req);
+      }
+    }
+    this.isProcessingQueue = false;
   }
 
   private async request<T>(
@@ -26,6 +48,11 @@ export class HttpClient {
 
     if (options.body && !(options.body instanceof FormData)) {
       headers.set("Content-Type", "application/json");
+    }
+
+    // Add Idempotency-Key for mutations if not present
+    if (["POST", "PUT", "PATCH", "DELETE"].includes(options.method || "") && !headers.has("X-Idempotency-Key")) {
+      headers.set("X-Idempotency-Key", crypto.randomUUID());
     }
 
     // Trigger global loading start
@@ -55,6 +82,26 @@ export class HttpClient {
       } catch (e) {
         return text as unknown as T;
       }
+    } catch (e: any) {
+      // 1. Try Edge Node Fallback if cloud fails
+      if (!url.includes("sous.local") && !url.includes("localhost")) {
+        console.warn(`[HttpClient] Cloud API unreachable. Attempting Edge Node fallback...`);
+        const edgeUrl = url.replace(this.baseUrl, "http://sous.local:4000");
+        try {
+          return await this.request(edgeUrl.replace("http://sous.local:4000", ""), options);
+        } catch (edgeError) {
+          console.error(`[HttpClient] Edge Node also unreachable.`);
+        }
+      }
+
+      // 2. Offline handling (existing logic)
+      if (typeof window !== "undefined" && !window.navigator.onLine && ["POST", "PUT", "PATCH", "DELETE"].includes(options.method || "")) {
+        console.warn(`[HttpClient] Offline. Queuing ${options.method} request to ${path}`);
+        this.queue.push({ path, options: { ...options, headers: Object.fromEntries(headers.entries()) }, id: crypto.randomUUID() });
+        // Return a optimistic response or throw a specific error
+        return { queued: true } as any;
+      }
+      throw e;
     } finally {
       // Trigger global loading end
       if (typeof window !== "undefined") {

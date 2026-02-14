@@ -54,8 +54,7 @@ export const useHardware = (type: "kds" | "pos" | "signage" | string): {
     if (!hardwareId) return;
 
     // 2. Connect Socket
-    const { config } = require("@sous/config");
-    const apiUrl = config.api.url;
+    const apiUrl = localConfig.api.url;
     console.log("Connecting to API Realtime at:", apiUrl);
     const s = io(apiUrl, {
       auth: { hardwareId },
@@ -81,7 +80,7 @@ export const useHardware = (type: "kds" | "pos" | "signage" | string): {
         const metadata = {
           userAgent: navigator.userAgent,
           platform: (navigator as any).platform,
-          version: config.features.appVersion || "0.1.0",
+          version: localConfig.features.appVersion || "0.1.0",
           timestamp: new Date().toISOString(),
         };
         console.log(`[Hardware] Sending heartbeat for ${hardwareId}...`);

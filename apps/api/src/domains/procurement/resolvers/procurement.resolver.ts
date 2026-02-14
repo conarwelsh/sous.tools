@@ -25,6 +25,39 @@ export class SupplierType {
   @Field({ nullable: true })
   contactEmail?: string;
 
+  @Field({ nullable: true })
+  contactPhone?: string;
+
+  @Field({ nullable: true })
+  address?: string;
+
+  @Field(() => [Int], { nullable: true })
+  deliveryDays?: number[];
+
+  @Field({ nullable: true })
+  cutoffTime?: string;
+
+  @Field(() => Int, { nullable: true })
+  minOrderValue?: number;
+}
+
+@InputType()
+export class CreateSupplierInput {
+  @Field()
+  name: string;
+
+  @Field({ nullable: true })
+  contactEmail?: string;
+
+  @Field({ nullable: true })
+  contactPhone?: string;
+
+  @Field({ nullable: true })
+  address?: string;
+
+  @Field(() => Int, { nullable: true })
+  minOrderValue?: number;
+
   @Field(() => [Int], { nullable: true })
   deliveryDays?: number[];
 
@@ -113,6 +146,17 @@ export class ProcurementResolver {
   @Query(() => [ShoppingListItemType])
   async shoppingList(@Args('orgId') orgId: string) {
     return this.procurementService.getShoppingList(orgId);
+  }
+
+  @Mutation(() => SupplierType)
+  async createSupplier(
+    @Args('orgId') orgId: string,
+    @Args('input') input: CreateSupplierInput,
+  ) {
+    return this.procurementService.createSupplier({
+      ...input,
+      organizationId: orgId,
+    });
   }
 
   @Mutation(() => [ShoppingListItemType])

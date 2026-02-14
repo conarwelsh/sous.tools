@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   BadRequestException,
   Inject,
+  Optional,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { DatabaseService } from '../../../domains/core/database/database.service.js';
@@ -13,19 +14,22 @@ import {
   locations,
   invitations,
   passwordResetTokens,
+  plans,
 } from '../../../domains/core/database/schema.js';
 import { eq, and, gt } from 'drizzle-orm';
 import * as bcrypt from 'bcrypt';
 import { logger } from '@sous/logger';
 import { config } from '@sous/config';
+import { PlanType, FeatureScope, MetricKey } from '@sous/features/constants/plans';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    @Inject(DatabaseService) private readonly dbService: DatabaseService,
-    private readonly jwtService: JwtService,
-    private readonly mailService: MailService,
-  ) {}
+    constructor(
+      @Inject(DatabaseService) private readonly dbService: DatabaseService,
+      private readonly jwtService: JwtService,
+      @Optional() private readonly mailService?: MailService,
+    ) {
+  }
 
   async forgotPassword(email: string) {
     const user = await this.dbService.db.query.users.findFirst({
@@ -48,7 +52,9 @@ export class AuthService {
     });
 
     const resetLink = `${config.web.url}/reset-password?token=${token}`;
-    await this.mailService.sendPasswordResetEmail(user.email, resetLink);
+    if (this.mailService) {
+      await this.mailService.sendPasswordResetEmail(user.email, resetLink);
+    }
 
     return { success: true };
   }
@@ -87,7 +93,55 @@ export class AuthService {
   async seedSystem() {
     logger.info('🌱 Seeding IAM System & Admin Context...');
 
-    // 1. System Organization (for templates/global data)
+    // 1. Core Plans
+    try {
+      await this.dbService.db
+        .insert(plans)
+        .values([
+          {
+            name: 'Commis',
+            slug: PlanType.COMMIS,
+            baseScopes: [
+              FeatureScope.CULINARY_RECIPE_CREATE,
+              FeatureScope.CULINARY_COOK_MODE,
+            ],
+            limits: { 
+              [MetricKey.MAX_RECIPES]: 10,
+              [MetricKey.MAX_USERS]: 2,
+            },
+          },
+          {
+            name: 'Chef de Partie',
+            slug: PlanType.CHEF_DE_PARTIE,
+            baseScopes: [
+              FeatureScope.CULINARY_RECIPE_CREATE,
+              FeatureScope.CULINARY_RECIPE_AI_PARSE,
+              FeatureScope.CULINARY_COOK_MODE,
+              FeatureScope.PROCURE_INVOICE_CREATE,
+              FeatureScope.PROCURE_INVOICE_VIEW,
+            ],
+            limits: {
+              [MetricKey.MAX_RECIPES]: 100,
+              [MetricKey.MAX_USERS]: 10,
+            },
+          },
+          {
+            name: 'Executive Chef',
+            slug: PlanType.EXECUTIVE_CHEF,
+            baseScopes: Object.values(FeatureScope),
+            limits: {
+              [MetricKey.MAX_RECIPES]: 10000,
+              [MetricKey.MAX_USERS]: 100,
+            },
+          },
+        ])
+        .onConflictDoNothing();
+      logger.info('  └─ Plans ensured');
+    } catch (e) {
+      logger.error('  ❌ Failed to seed Plans', e);
+    }
+
+    // 2. System Organization (for templates/global data)
     try {
       await this.dbService.db
         .insert(organizations)
@@ -213,7 +267,11 @@ export class AuthService {
     return await this.dbService.db.query.users.findFirst({
       where: eq(users.id, userId),
       with: {
-        organization: true,
+        organization: {
+          with: {
+            plan: true,
+          },
+        },
       },
     });
   }
@@ -317,11 +375,19 @@ export class AuthService {
   }
 
   async login(user: any) {
+    const org = await this.dbService.db.query.organizations.findFirst({
+      where: eq(organizations.id, user.organizationId),
+    });
+
+    const isPendingPayment = org?.planStatus === 'pending_payment';
+    const scopes = isPendingPayment ? ['billing:setup'] : undefined;
+
     const payload = {
       email: user.email,
       sub: user.id,
       orgId: user.organizationId,
       role: user.role,
+      scopes,
       jti: crypto.randomUUID(),
     };
     return {
@@ -370,6 +436,7 @@ export class AuthService {
           .values({
             name: data.organizationName,
             slug: data.organizationName.toLowerCase().replace(/\s+/g, '-'),
+            planStatus: 'pending_payment',
           })
           .returning();
         orgId = org.id;
@@ -393,7 +460,9 @@ export class AuthService {
         .returning();
 
       // 5. Trigger Welcome Email (Async via Queue)
-      void this.mailService.sendWelcomeEmail(user.email, user.firstName || 'Chef');
+      if (this.mailService) {
+        void this.mailService.sendWelcomeEmail(user.email, user.firstName || 'Chef');
+      }
 
       return user;
     });

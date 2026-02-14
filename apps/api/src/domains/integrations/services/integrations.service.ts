@@ -1,4 +1,4 @@
-import { Injectable, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, forwardRef, Optional } from '@nestjs/common';
 import { DatabaseService } from '../../core/database/database.service.js';
 import {
   integrationConfigs,
@@ -13,16 +13,27 @@ import { CulinaryService } from '../../culinary/services/culinary.service.js';
 import { IngestionService } from '../../ingestion/services/ingestion.service.js';
 import { logger } from '@sous/logger';
 import { config } from '@sous/config';
+import { ModuleRef } from '@nestjs/core';
 
 @Injectable()
 export class IntegrationsService {
   constructor(
     @Inject(DatabaseService) private readonly dbService: DatabaseService,
     private readonly driverFactory: DriverFactory,
-    @Inject(forwardRef(() => CulinaryService))
-    private readonly culinaryService: CulinaryService,
-    private readonly ingestionService: IngestionService,
+    private readonly moduleRef: ModuleRef,
   ) {}
+
+  private get culinaryService() {
+    return this.moduleRef.get(CulinaryService, { strict: false });
+  }
+
+  private get ingestionService() {
+    try {
+      return this.moduleRef.get(IngestionService, { strict: false });
+    } catch (e) {
+      return undefined;
+    }
+  }
 
   async getIntegration(organizationId: string, provider: string) {
     return this.dbService.db.query.integrationConfigs.findFirst({
@@ -475,7 +486,7 @@ export class IntegrationsService {
 
         // Trigger AI Ingestion for this recipe
         const recipe = result[0];
-        if (recipe) {
+        if (recipe && this.ingestionService) {
           // Note: In production this should be a background job (BullMQ)
           this.ingestionService
             .processGoogleDriveRecipe(recipe.id, organizationId, driver)

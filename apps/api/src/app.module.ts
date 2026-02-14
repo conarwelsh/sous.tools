@@ -13,11 +13,15 @@ import { PresentationModule } from './domains/presentation/presentation.module.j
 import { RealtimeModule } from './domains/realtime/realtime.module.js';
 import { ProcurementModule } from './domains/procurement/procurement.module.js';
 import { CulinaryModule } from './domains/culinary/culinary.module.js';
+import { PosModule } from './domains/pos/pos.module.js';
 import { InventoryModule } from './domains/inventory/inventory.module.js';
+import { SalesModule } from './domains/sales/sales.module.js';
+import { BillingModule } from './domains/billing/billing.module.js';
 import { AccountingModule } from './domains/accounting/accounting.module.js';
 import { IntegrationsModule } from './domains/integrations/integrations.module.js';
 import { IngestionModule } from './domains/ingestion/ingestion.module.js';
 import { MaintenanceModule } from './domains/maintenance/maintenance.module.js';
+import { SupportModule } from './domains/support/support.module.js';
 import { TagsModule } from './domains/core/tags/tags.module.js';
 import { MetricsModule } from './domains/metrics/metrics.module';
 import { join } from 'path';
@@ -49,11 +53,15 @@ import { join } from 'path';
     RealtimeModule,
     ProcurementModule,
     CulinaryModule,
+    PosModule,
     InventoryModule,
+    SalesModule,
+    BillingModule,
     AccountingModule,
     IntegrationsModule,
     IngestionModule,
     MaintenanceModule,
+    SupportModule,
     TagsModule,
     MetricsModule,
   ],

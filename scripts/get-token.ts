@@ -1,11 +1,11 @@
-import { resolveConfig } from '@sous/config';
+import { config as appConfig } from '@sous/config';
 import { DatabaseService } from '../apps/api/src/domains/core/database/database.service.js';
 import { integrationConfigs } from '../apps/api/src/domains/core/database/schema.js';
 import { eq, and } from 'drizzle-orm';
 
 async function getFullToken() {
-    await resolveConfig();
     const dbService = new DatabaseService();
+    await dbService.onModuleInit();
     const config = await dbService.db.query.integrationConfigs.findFirst({
         where: and(
             eq(integrationConfigs.organizationId, '4c36d045-3c8c-48e5-9d59-849e2b58e427'),

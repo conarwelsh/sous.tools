@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { View, Text, Button, Card, Input, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@sous/ui";
+import { View, Text, Button, Card, Input, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, cn } from "@sous/ui";
 import { Truck, Plus, Search, Mail, Phone, MapPin } from "lucide-react";
 import { useAuth } from "@sous/features";
 import { gql } from "@apollo/client";
@@ -29,11 +29,29 @@ const CREATE_SUPPLIER = gql`
   }
 `;
 
+const DAYS = [
+  { label: "S", value: 0 },
+  { label: "M", value: 1 },
+  { label: "T", value: 2 },
+  { label: "W", value: 3 },
+  { label: "T", value: 4 },
+  { label: "F", value: 5 },
+  { label: "S", value: 6 },
+];
+
 export default function SuppliersPage() {
   const { user } = useAuth();
   const orgId = user?.organizationId || "";
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newSupplier, setNewSupplier] = useState({ name: "", email: "", phone: "" });
+  const [newSupplier, setNewSupplier] = useState<any>({ 
+    name: "", 
+    contactEmail: "", 
+    contactPhone: "", 
+    address: "",
+    deliveryDays: [],
+    cutoffTime: "16:00",
+    minOrderValue: 0
+  });
 
   const { data, loading, refetch } = useQuery<any>(GET_SUPPLIERS, {
     variables: { orgId },
@@ -47,14 +65,34 @@ export default function SuppliersPage() {
       await createSupplier({
         variables: {
           orgId,
-          input: newSupplier,
+          input: {
+            ...newSupplier,
+            minOrderValue: parseInt(newSupplier.minOrderValue) * 100 // Convert to cents
+          },
         },
       });
       setShowAddModal(false);
-      setNewSupplier({ name: "", email: "", phone: "" });
+      setNewSupplier({ 
+        name: "", 
+        contactEmail: "", 
+        contactPhone: "", 
+        address: "",
+        deliveryDays: [],
+        cutoffTime: "16:00",
+        minOrderValue: 0
+      });
       refetch();
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const toggleDay = (day: number) => {
+    const current = [...newSupplier.deliveryDays];
+    if (current.includes(day)) {
+      setNewSupplier({ ...newSupplier, deliveryDays: current.filter(d => d !== day) });
+    } else {
+      setNewSupplier({ ...newSupplier, deliveryDays: [...current, day].sort() });
     }
   };
 
@@ -105,7 +143,7 @@ export default function SuppliersPage() {
                 <View className="p-3 bg-muted border border-border rounded-xl">
                   <Truck size={20} className="text-muted-foreground group-hover:text-sky-500 transition-colors" />
                 </View>
-                <div className="px-2 py-1 bg-muted rounded text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                <div className="px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded text-[10px] font-black text-emerald-500 uppercase tracking-widest">
                   Active
                 </div>
               </View>
@@ -114,25 +152,44 @@ export default function SuppliersPage() {
                 {supplier.name}
               </Text>
 
-              <div className="space-y-3">
-                {supplier.email && (
-                  <div className="flex items-center gap-3 text-muted-foreground">
-                    <Mail size={14} />
-                    <span className="text-xs font-mono">{supplier.email}</span>
-                  </div>
-                )}
-                {supplier.phone && (
-                  <div className="flex items-center gap-3 text-muted-foreground">
-                    <Phone size={14} />
-                    <span className="text-xs font-mono">{supplier.phone}</span>
-                  </div>
-                )}
-                {supplier.address && (
-                  <div className="flex items-center gap-3 text-muted-foreground">
-                    <MapPin size={14} />
-                    <span className="text-xs truncate">{supplier.address}</span>
-                  </div>
-                )}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  {supplier.contactEmail && (
+                    <div className="flex items-center gap-3 text-muted-foreground">
+                      <Mail size={14} />
+                      <span className="text-xs font-mono">{supplier.contactEmail}</span>
+                    </div>
+                  )}
+                  {supplier.contactPhone && (
+                    <div className="flex items-center gap-3 text-muted-foreground">
+                      <Phone size={14} />
+                      <span className="text-xs font-mono">{supplier.contactPhone}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-4 border-t border-border/50 space-y-3">
+                   <div className="flex justify-between items-center">
+                      <Text className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Delivery Days</Text>
+                      <div className="flex gap-1">
+                        {DAYS.map(d => (
+                          <div 
+                            key={d.value}
+                            className={cn(
+                              "w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-black",
+                              supplier.deliveryDays?.includes(d.value) ? "bg-sky-500 text-white" : "bg-muted text-muted-foreground/40"
+                            )}
+                          >
+                            {d.label}
+                          </div>
+                        ))}
+                      </div>
+                   </div>
+                   <div className="flex justify-between items-center">
+                      <Text className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Order Min</Text>
+                      <Text className="text-[10px] font-black text-foreground">${(supplier.minOrderValue / 100).toFixed(2)}</Text>
+                   </div>
+                </div>
               </div>
             </Card>
           ))}
@@ -140,43 +197,88 @@ export default function SuppliersPage() {
       )}
 
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-        <DialogContent className="sm:max-w-[425px] bg-background border-border">
+        <DialogContent className="sm:max-w-[500px] bg-background border-border">
           <DialogHeader>
             <DialogTitle className="text-foreground font-black uppercase tracking-tight">Add New Supplier</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest">Name</Text>
-              <Input
-                value={newSupplier.name}
-                onChange={(e) => setNewSupplier({ ...newSupplier, name: e.target.value })}
-                className="bg-muted border-border"
-                placeholder="Vendor Name"
-              />
+          <div className="grid gap-6 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest ml-1">Name</Text>
+                <Input
+                  value={newSupplier.name}
+                  onChange={(e) => setNewSupplier({ ...newSupplier, name: e.target.value })}
+                  className="bg-muted border-border"
+                  placeholder="Vendor Name"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest ml-1">Min Order ($)</Text>
+                <Input
+                  type="number"
+                  value={newSupplier.minOrderValue}
+                  onChange={(e) => setNewSupplier({ ...newSupplier, minOrderValue: e.target.value })}
+                  className="bg-muted border-border"
+                  placeholder="0.00"
+                />
+              </div>
             </div>
-            <div className="grid gap-2">
-              <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest">Email</Text>
-              <Input
-                value={newSupplier.email}
-                onChange={(e) => setNewSupplier({ ...newSupplier, email: e.target.value })}
-                className="bg-muted border-border"
-                placeholder="orders@vendor.com"
-              />
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest ml-1">Email</Text>
+                <Input
+                  value={newSupplier.contactEmail}
+                  onChange={(e) => setNewSupplier({ ...newSupplier, contactEmail: e.target.value })}
+                  className="bg-muted border-border"
+                  placeholder="orders@vendor.com"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest ml-1">Phone</Text>
+                <Input
+                  value={newSupplier.contactPhone}
+                  onChange={(e) => setNewSupplier({ ...newSupplier, contactPhone: e.target.value })}
+                  className="bg-muted border-border"
+                  placeholder="+1 (555) 000-0000"
+                />
+              </div>
             </div>
+
             <div className="grid gap-2">
-              <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest">Phone</Text>
+              <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest ml-1">Delivery Schedule</Text>
+              <div className="flex justify-between bg-muted p-3 rounded-2xl border border-border">
+                {DAYS.map(d => (
+                  <button
+                    key={d.value}
+                    onClick={() => toggleDay(d.value)}
+                    className={cn(
+                      "w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black transition-all",
+                      newSupplier.deliveryDays.includes(d.value) 
+                        ? "bg-sky-500 text-white shadow-lg shadow-sky-500/20 scale-110" 
+                        : "bg-background text-muted-foreground hover:bg-white/50"
+                    )}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest ml-1">Address</Text>
               <Input
-                value={newSupplier.phone}
-                onChange={(e) => setNewSupplier({ ...newSupplier, phone: e.target.value })}
+                value={newSupplier.address}
+                onChange={(e) => setNewSupplier({ ...newSupplier, address: e.target.value })}
                 className="bg-muted border-border"
-                placeholder="+1 (555) 000-0000"
+                placeholder="123 Vendor St, City, ST"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={handleCreate} disabled={creating} className="bg-sky-500 hover:bg-sky-600 w-full">
+            <Button onClick={handleCreate} disabled={creating} className="bg-sky-500 hover:bg-sky-600 w-full h-12 shadow-xl shadow-sky-500/20">
               <Text className="text-white font-bold uppercase text-xs tracking-widest">
-                {creating ? "Creating..." : "Create Supplier"}
+                {creating ? "Creating..." : "Create Supplier Partner"}
               </Text>
             </Button>
           </DialogFooter>

@@ -20,6 +20,7 @@ export const configSchema = z.object({
   // Database & Cache
   db: z.object({
     url: z.string().url().optional(),
+    readerUrl: z.string().url().optional(),
   }),
   redis: z.object({
     url: z.string().url().optional(),
@@ -50,6 +51,7 @@ export const configSchema = z.object({
     level: z.enum(["debug", "info", "warn", "error"]).default("info"),
     json: z.boolean().default(false),
     logtailToken: z.string().optional(),
+    hyperdxApiKey: z.string().optional(),
   }),
 
   // Integrations
@@ -73,6 +75,12 @@ export const configSchema = z.object({
     clientId: z.string().optional(),
     clientSecret: z.string().optional(),
     redirectUri: z.string().optional(),
+    token: z.string().optional(),
+    repo: z.string().default("sous-tools/sous-tools"),
+  }).default({}),
+
+  support: z.object({
+    email: z.string().email().default("support@sous.tools"),
   }).default({}),
 
   facebook: z.object({
@@ -88,6 +96,12 @@ export const configSchema = z.object({
   resend: z.object({
     apiKey: z.string().optional(),
     from: z.string().default("Sous <notifications@sous.tools>"),
+  }).default({}),
+
+  stripe: z.object({
+    secretKey: z.string().optional(),
+    publishableKey: z.string().optional(),
+    webhookSecret: z.string().optional(),
   }).default({}),
 
   // Feature Flags & Environment Context

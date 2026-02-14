@@ -41,6 +41,20 @@
   - **Multi-Channel Delivery**: Automated report routing to GitHub Issues and configured Support Email.
   - **Contextual Enrichment**: Automatic capture of app version, user ID, organization, and device metadata.
   - **SuperAdmin Configuration**: Dynamic management of support destinations via global platform settings.
+- **Smart Seeding System (Spec 032)**:
+  - **Domain-Specific Logic**: Decentralized seeding where each domain manages its own system and sample data.
+  - **External Sandbox Sync**: Automatic synchronization of local culinary catalogs to Square Sandbox for seamless development.
+  - **Modular Architecture**: Easy expansion for new domains via standardized seeder interfaces.
+- **Unified Authorization & OAuth2 (ADR 048 / Spec 037)**:
+  - **Provider-Level Scoping**: Granular scope enforcement merging User Roles, Plans, and Token grants.
+  - **OAuth2 Provider**: Full support for the Authorization Code flow for 3rd-party developers.
+  - **Consent Management**: Native UI for users to approve and revoke application permissions.
+  - **Developer Portal**: Dashboard for managing client IDs, secrets, and redirect URIs.
+- **Salesman System (Spec 030)**:
+  - **Performance Attribution**: Track organization signups and invitations back to specific sales agents.
+  - **Commission Ledger**: Automated tracking of earnings based on successful customer payments (BPS).
+  - **Agent Portal**: Specialized dashboard for salesmen to manage their "Book of Business".
+  - **Support Access**: Seamless impersonation feature for agents to assist their clients in real-time.
 - **Pricing & Plans (ADR 048 / Spec 024)**:
   - **Tiered Access**: Standard plans (Commis, Chef de Partie, Executive Chef) with hierarchical feature sets.
   - **Granular Scopes**: Fine-grained control over specific module access using shared constants.
@@ -52,9 +66,10 @@
 ## CLI Capabilities (@sous/cli)
 
 - **Development**: `sous dev` (Interactive Ink TUI), `sous install`.
-- **Configuration**: `sous env config`, `sous env branding`.
-- **Logging**: `sous env logs` (Centralized log tailing).
-- **Maintenance**: `sous maintenance housekeep` (Build artifact cleanup).
+- **Environment Orchestration**: `sous env exec` for secure secret injection and `sous env context` for managing environments.
+- **Configuration**: `sous env config` (view, list, add), `sous env branding`.
+- **Logging**: `sous env logs` (Centralized log tailing with OpenTelemetry support).
+- **Maintenance**: `sous maintenance housekeep`, `sous maintenance db` (push, seed, reset).
 
 ## Deployment Targets
 
@@ -67,11 +82,12 @@
 | **Signage Simulator** | Redroid (Docker)                | ✅ Stable       |
 | **Wear OS**         | Native Android (Kotlin/Compose)   | ✅ Functional  |
 | **Dev Bridge**      | WSL-Windows Health Recovery       | ✅ Stable       |
-| **Backend**         | Render (NestJS)                   | ✅ Stable       |
+| **Backend**         | Cloud Run / Render (NestJS)       | ✅ Stable       |
 
 ## Infrastructure & Domains
 
-- **Database**: Postgres 16 with Row-Level Security (RLS).
+- **Database**: Postgres 16 with Row-Level Security (RLS) and **Reader/Writer separation**.
+- **Observability**: **OpenTelemetry** + **HyperDX** for distributed tracing and centralized logging.
 - **Real-time**: Socket.io for instant updates.
 - **Hardware Simulation**: Dockerized Android OS (Redroid) for signage verification.
 - **Unified Tag Engine (Spec 017)**: Polymorphic tagging system with organization-level isolation and color-coding for any UUID-based entity.

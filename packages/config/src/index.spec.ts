@@ -1,4 +1,4 @@
-import { resolveConfig, configSchema } from "./index";
+import { config, configSchema } from "./index";
 
 // Mock dependencies
 jest.mock("dotenv", () => ({
@@ -74,27 +74,10 @@ describe("@sous/config", () => {
     });
   });
 
-  describe("resolveConfig", () => {
-    it("should return default development config", async () => {
-      // Resetting the module to clear top-level await side effects if any
-      jest.isolateModules(async () => {
-        const { resolveConfig } = require("./index");
-        const config = await resolveConfig();
-        expect(config.env).toBe("test");
-        expect(config.api.port).toBe(4000);
-      });
-    });
-
-    it.skip("should merge remote secrets when Infisical creds are present", async () => {
-      process.env.INFISICAL_CLIENT_ID = "test-id";
-      process.env.INFISICAL_CLIENT_SECRET = "test-secret";
-      process.env.INFISICAL_PROJECT_ID = "test-project";
-
-      jest.isolateModules(async () => {
-        const { resolveConfig } = require("./index");
-        const config = await resolveConfig();
-        expect((config as any).REMOTE_VAR).toBe("remote-value");
-      });
+  describe("config", () => {
+    it("should return default development config", () => {
+      expect(config.env).toBe("test");
+      expect(config.api.port).toBe(4000);
     });
   });
 });

@@ -6,8 +6,13 @@ import { IngestionModule } from '../ingestion/ingestion.module.js';
 import { IntegrationsModule } from '../integrations/integrations.module.js';
 import { CoreModule } from '../core/core.module.js';
 
+const skipIngestion = process.env.SKIP_INGESTION === 'true';
+
 @Module({
-  imports: [IngestionModule, forwardRef(() => IntegrationsModule), CoreModule],
+  imports: [
+    ...(skipIngestion ? [] : [IngestionModule]),
+    forwardRef(() => IntegrationsModule),
+  ],
   providers: [CulinaryService, CulinaryResolver],
   controllers: [CulinaryController],
   exports: [CulinaryService],

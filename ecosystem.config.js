@@ -24,7 +24,7 @@ module.exports = {
     // --- Core Services ---
     {
       name: "sous-api",
-      script: "pnpm nest start --watch",
+      script: "node ../../apps/cli/dist/main.js env exec -- pnpm nest start --watch",
       cwd: "apps/api",
       env: {
         NODE_ENV: "development",
@@ -34,7 +34,7 @@ module.exports = {
     },
     {
       name: "sous-web",
-      script: "pnpm next dev --turbo",
+      script: "node ../../apps/cli/dist/main.js env exec -- pnpm next dev --turbo",
       cwd: "apps/web",
       env: {
         NODE_ENV: "development",
@@ -44,7 +44,7 @@ module.exports = {
     },
     {
       name: "sous-docs",
-      script: "pnpm next dev --turbo",
+      script: "node ../../apps/cli/dist/main.js env exec -- pnpm next dev --turbo",
       cwd: "apps/docs",
       env: {
         NODE_ENV: "development",
@@ -54,10 +54,9 @@ module.exports = {
     },
 
     // --- Native Deployments (One-Shot) ---
-    // Note: These use scripts/device-manager.ts to ensure the emulator is ready and get its serial
     {
       name: "sous-pos",
-      script: "SERIAL=$(pnpm tsx scripts/device-manager.ts 'Pixel_Tablet') && bash scripts/run-android.sh $SERIAL pos",
+      script: "node ./apps/cli/dist/main.js env exec -- bash -c \"SERIAL=$(pnpm tsx scripts/device-manager.ts 'Pixel_Tablet') && bash scripts/run-android.sh $SERIAL pos\"",
       cwd: ".",
       autorestart: false,
       env: {
@@ -68,7 +67,7 @@ module.exports = {
     },
     {
       name: "sous-kds",
-      script: "SERIAL=$(pnpm tsx scripts/device-manager.ts 'Medium_Desktop') && bash scripts/run-android.sh $SERIAL kds",
+      script: "node ./apps/cli/dist/main.js env exec -- bash -c \"SERIAL=$(pnpm tsx scripts/device-manager.ts 'Medium_Desktop') && bash scripts/run-android.sh $SERIAL kds\"",
       cwd: ".",
       autorestart: false,
       env: {
@@ -79,7 +78,7 @@ module.exports = {
     },
     {
       name: "sous-signage",
-      script: "SERIAL=$(pnpm tsx scripts/device-manager.ts 'Television_1080p') && bash scripts/run-android.sh $SERIAL signage",
+      script: "node ./apps/cli/dist/main.js env exec -- bash -c \"SERIAL=$(pnpm tsx scripts/device-manager.ts 'Television_1080p') && bash scripts/run-android.sh $SERIAL signage\"",
       cwd: ".",
       autorestart: false,
       env: {
@@ -90,7 +89,7 @@ module.exports = {
     },
     {
       name: "sous-wearos",
-      script: "SERIAL=$(pnpm tsx scripts/device-manager.ts 'Wear_OS_Large_Round') && bash scripts/run-wearos.sh $SERIAL",
+      script: "node ./apps/cli/dist/main.js env exec -- bash -c \"SERIAL=$(pnpm tsx scripts/device-manager.ts 'Wear_OS_Large_Round') && bash scripts/run-wearos.sh $SERIAL\"",
       cwd: ".",
       autorestart: false,
       namespace: "native"

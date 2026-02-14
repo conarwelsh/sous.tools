@@ -1,12 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
-import { resolveConfig } from '@sous/config';
-import { logger } from '@sous/logger';
+import { config } from '@sous/config';
+import { logger, initObservability } from '@sous/logger';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
 
 async function bootstrap() {
-  const config = await resolveConfig();
+  await initObservability(config);
   const app = await NestFactory.create(AppModule);
 
   app.enableCors();

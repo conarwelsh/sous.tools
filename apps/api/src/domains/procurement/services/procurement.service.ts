@@ -19,7 +19,7 @@ export class ProcurementService {
   ) {}
 
   async getSuppliers(organizationId: string) {
-    return this.dbService.db.query.suppliers.findMany({
+    return this.dbService.readDb.query.suppliers.findMany({
       where: eq(suppliers.organizationId, organizationId),
     });
   }
@@ -33,7 +33,7 @@ export class ProcurementService {
   }
 
   async getInvoices(organizationId: string) {
-    return this.dbService.db.query.invoices.findMany({
+    return this.dbService.readDb.query.invoices.findMany({
       where: eq(invoices.organizationId, organizationId),
       with: {
         supplier: true,
@@ -55,7 +55,7 @@ export class ProcurementService {
   }
 
   async getShoppingList(organizationId: string) {
-    return this.dbService.db.query.shoppingList.findMany({
+    return this.dbService.readDb.query.shoppingList.findMany({
       where: and(
         eq(shoppingList.organizationId, organizationId),
         eq(shoppingList.status, 'pending'),
@@ -74,7 +74,7 @@ export class ProcurementService {
     unit: string,
   ) {
     // Smart logic: find last supplier for this ingredient
-    const lastInvoiceItem = await this.dbService.db.query.invoiceItems.findFirst({
+    const lastInvoiceItem = await this.dbService.readDb.query.invoiceItems.findFirst({
       where: eq(invoiceItems.ingredientId, ingredientId),
       with: {
         invoice: true,

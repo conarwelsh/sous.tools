@@ -42,12 +42,38 @@ export const Atelier: React.FC = () => {
 
   const handleSave = async () => {
     setSaving(true);
-    // Simulate API call to save workspace
-    setTimeout(() => {
-      setSaving(false);
+    try {
+      const response = await fetch("/api/branding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(config),
+      });
+
+      if (response.ok) {
+        alert("Configuration saved to workspace (branding.config.json)");
+      } else {
+        const error = await response.json();
+        alert(`Failed to save: ${error.error}`);
+        // Fallback to clipboard
+        navigator.clipboard.writeText(JSON.stringify(config, null, 2));
+      }
+    } catch (e) {
+      console.error("Save error:", e);
       navigator.clipboard.writeText(JSON.stringify(config, null, 2));
-      alert("Atelier workspace state committed to clipboard. In dev mode, this would write to branding.configon.");
-    }, 800);
+      alert("Atelier workspace state committed to clipboard (Local API unavailable).");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePasteConfig = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    try {
+      const pasted = JSON.parse(e.target.value);
+      // Basic validation or just set it
+      setConfig(pasted);
+    } catch (e) {
+      // Invalid JSON, ignore
+    }
   };
 
   if (loading) return (
@@ -141,11 +167,21 @@ export const Atelier: React.FC = () => {
         <main className="flex-1 overflow-y-auto bg-[radial-gradient(var(--color-border)_1px,transparent_1px)] [background-size:32px_32px] p-12">
           <div className="max-w-6xl mx-auto space-y-24">
             
-            {/* Stage: Primary Identity */}
+            {/* Stage: Identity Core */}
             <section className="space-y-8">
-              <div className="flex items-center space-x-4">
-                <div className="p-2 bg-sky-500/10 rounded-lg"><Sparkles size={16} className="text-sky-500" /></div>
-                <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">Identity Core</h2>
+              <div className="flex flex-row items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="p-2 bg-sky-500/10 rounded-lg"><Sparkles size={16} className="text-sky-500" /></div>
+                  <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">Identity Core</h2>
+                </div>
+                <div className="flex flex-row items-center gap-4">
+                  <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">Import State</span>
+                  <textarea 
+                    placeholder="Paste JSON config..."
+                    onChange={handlePasteConfig}
+                    className="h-8 w-48 bg-muted/50 border border-border/50 rounded-lg px-3 py-1 text-[8px] font-mono focus:w-96 transition-all focus:h-24 resize-none"
+                  />
+                </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

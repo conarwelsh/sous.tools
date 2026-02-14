@@ -45,6 +45,7 @@ High-level applications (`@sous/web`, `@sous/native`) are treated as thin **Shel
 
 ## Constraints
 
-- **Environment Variables**: Only `@sous/config` can access `process.env`. The use of `.env` files in applications is strictly forbidden.
-- **Logging**: All logging must use `@sous/logger`.
+- **Environment Variables**: Only `@sous/config` can access `process.env`. The package is strictly **synchronous**; all secrets must be injected via the CLI (`sous env exec`) or host environment (Mandate 3, ADR 057).
+- **Database**: The `DatabaseService` uses **Reader/Writer separation** to scale with high traffic. Writes and transactions go to the primary pool, while reads are distributed to one or more replicas (Spec 035).
+- **Logging & Observability**: All logging must use `@sous/logger`, which integrates **OpenTelemetry** and **HyperDX** for distributed tracing and centralized log aggregation (Spec 033).
 - **UI Architecture**: Standard Shadcn UI patterns (Radix UI + Tailwind CSS).

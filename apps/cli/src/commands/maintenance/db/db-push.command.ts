@@ -1,7 +1,7 @@
 import { SubCommand, CommandRunner } from 'nest-commander';
 import { execSync } from 'child_process';
 import { logger } from '@sous/logger';
-import { resolveConfig } from '@sous/config';
+import { config } from '@sous/config';
 
 @SubCommand({
   name: 'push',
@@ -11,7 +11,6 @@ export class DbPushCommand extends CommandRunner {
   async run(): Promise<void> {
     logger.info('🚀 Pushing schema to database...');
     try {
-      const config = await resolveConfig();
       if (!config.db.url) {
         throw new Error('Database URL not found in config');
       }

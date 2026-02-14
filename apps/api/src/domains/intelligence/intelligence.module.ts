@@ -6,18 +6,13 @@ import { PriceTrendService } from './services/price-trend.service.js';
 import { DataPruningService } from './services/data-pruning.service.js';
 import { IntelligenceProcessor } from './services/intelligence.processor.js';
 import { IntelligenceController } from './controllers/intelligence.controller.js';
-import { configPromise } from '@sous/config';
+import { config } from '@sous/config';
 
 @Module({
   imports: [
-    BullModule.forRootAsync({
-      useFactory: async () => {
-        const config = await configPromise;
-        return {
-          connection: {
-            url: config.redis.url,
-          },
-        };
+    BullModule.forRoot({
+      connection: {
+        url: config.redis.url,
       },
     }),
     BullModule.registerQueue({

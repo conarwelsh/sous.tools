@@ -5,11 +5,12 @@ import {
   recipes,
   recipeIngredients,
   recipeSteps,
+  cookNotes,
   categories,
   products,
 } from '../../core/database/schema.js';
 import { tags, tagAssignments } from '../../core/tags/tags.schema.js';
-import { eq, and, ilike, exists } from 'drizzle-orm';
+import { eq, and, ilike, exists, desc } from 'drizzle-orm';
 import { logger } from '@sous/logger';
 
 @Injectable()
@@ -18,9 +19,28 @@ export class CulinaryService {
     @Inject(DatabaseService) private readonly dbService: DatabaseService,
   ) {}
 
+  // --- Cook Notes ---
+  async getCookNotes(recipeId: string) {
+    return this.dbService.readDb.query.cookNotes.findMany({
+      where: eq(cookNotes.recipeId, recipeId),
+      with: {
+        user: true,
+      },
+      orderBy: [desc(cookNotes.createdAt)],
+    });
+  }
+
+  async addCookNote(data: typeof cookNotes.$inferInsert) {
+    const result = await this.dbService.db
+      .insert(cookNotes)
+      .values(data)
+      .returning();
+    return result[0];
+  }
+
   // --- Catalog ---
   async getCategories(organizationId: string) {
-    return this.dbService.db
+    return this.dbService.readDb
       .select()
       .from(categories)
       .where(eq(categories.organizationId, organizationId));
@@ -40,14 +60,14 @@ export class CulinaryService {
       filters.push(eq(products.categoryId, categoryId));
     }
 
-    return this.dbService.db
+    return this.dbService.readDb
       .select()
       .from(products)
       .where(and(...filters));
   }
 
   async getProductByName(organizationId: string, name: string) {
-      return this.dbService.db.query.products.findFirst({
+      return this.dbService.readDb.query.products.findFirst({
           where: and(
               eq(products.organizationId, organizationId),
               eq(products.name, name)
@@ -151,7 +171,7 @@ export class CulinaryService {
   }
 
   async getIngredients(organizationId: string) {
-    return this.dbService.db
+    return this.dbService.readDb
       .select()
       .from(ingredients)
       .where(eq(ingredients.organizationId, organizationId));
@@ -175,7 +195,7 @@ export class CulinaryService {
     if (options?.tags && options.tags.length > 0) {
       filters.push(
         exists(
-          this.dbService.db
+          this.dbService.readDb
             .select()
             .from(tagAssignments)
             .innerJoin(tags, eq(tagAssignments.tagId, tags.id))
@@ -190,7 +210,7 @@ export class CulinaryService {
       );
     }
 
-    return this.dbService.db.query.recipes.findMany({
+    return this.dbService.readDb.query.recipes.findMany({
       where: options?.search 
         ? and(...filters, ilike(recipes.name, `%${options.search}%`))
         : and(...filters),
@@ -206,7 +226,7 @@ export class CulinaryService {
   }
 
   async getRecipe(id: string, organizationId: string) {
-    return this.dbService.db.query.recipes.findFirst({
+    return this.dbService.readDb.query.recipes.findFirst({
       where: and(
         eq(recipes.id, id),
         eq(recipes.organizationId, organizationId),

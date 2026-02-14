@@ -5,15 +5,30 @@ export interface Secret {
   value: string;
 }
 
+export interface InfisicalCredentials {
+  clientId: string;
+  clientSecret: string;
+  projectId: string;
+}
+
 export class SecretManager {
   private client: any = null;
   private isInitialized = false;
+  private _credentials: InfisicalCredentials | null = null;
 
-  private get credentials() {
+  constructor(credentials?: InfisicalCredentials) {
+    if (credentials) {
+      this._credentials = credentials;
+    }
+  }
+
+  private get credentials(): InfisicalCredentials {
+    if (this._credentials) return this._credentials;
+
     return {
-      clientId: process.env.INFISICAL_CLIENT_ID,
-      clientSecret: process.env.INFISICAL_CLIENT_SECRET,
-      projectId: process.env.INFISICAL_PROJECT_ID,
+      clientId: process.env.INFISICAL_CLIENT_ID || "",
+      clientSecret: process.env.INFISICAL_CLIENT_SECRET || "",
+      projectId: process.env.INFISICAL_PROJECT_ID || "",
     };
   }
 
@@ -37,7 +52,7 @@ export class SecretManager {
       });
       this.isInitialized = true;
     } catch (e: any) {
-      logger.error("❌ Failed to initialize Infisical SDK:", e.message);
+      logger.error(`❌ Failed to initialize Infisical SDK: ${e.message}`);
       throw e;
     }
   }

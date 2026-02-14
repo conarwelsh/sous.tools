@@ -2,6 +2,7 @@ import { logger } from '@sous/logger';
 import { SubCommand, CommandRunner, Option } from 'nest-commander';
 import { ConfigAddCommand } from './config-add.command.js';
 import { ConfigListCommand } from './config-list.command.js';
+import { ConfigViewCommand } from './config-view.command.js';
 
 interface ConfigOptions {
   env?: string;
@@ -10,11 +11,14 @@ interface ConfigOptions {
 @SubCommand({
   name: 'config',
   description: 'Manage platform configuration',
-  subCommands: [ConfigAddCommand, ConfigListCommand],
+  subCommands: [ConfigAddCommand, ConfigListCommand, ConfigViewCommand],
 })
 export class ConfigCommand extends CommandRunner {
   async run(passedParam: string[], options?: ConfigOptions): Promise<void> {
-    if (passedParam.length > 0 && ['add', 'list'].includes(passedParam[0])) {
+    if (
+      passedParam.length > 0 &&
+      ['add', 'list', 'view'].includes(passedParam[0])
+    ) {
       return;
     }
 

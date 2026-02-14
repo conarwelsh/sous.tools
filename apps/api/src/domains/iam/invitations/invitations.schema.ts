@@ -14,6 +14,7 @@ export const invitations = pgTable('invitations', {
   invitedById: uuid('invited_by_id')
     .notNull()
     .references(() => users.id),
+  salesmanId: uuid('salesman_id'),
   expiresAt: timestamp('expires_at').notNull(),
   acceptedAt: timestamp('accepted_at'),
   createdAt: timestamp('created_at').notNull().defaultNow(),

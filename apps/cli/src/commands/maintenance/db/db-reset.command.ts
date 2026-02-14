@@ -27,8 +27,11 @@ export class DbResetCommand extends CommandRunner {
       runCommand('docker compose rm -f postgres');
       runCommand('docker volume rm -f soustools_postgres_data');
 
-      logger.info('  └─ Starting postgres...');
-      runCommand('docker compose up -d postgres');
+      logger.info('  └─ Starting infrastructure (postgres, redis)...');
+      runCommand('docker compose up -d postgres redis');
+
+      logger.info('  └─ Waiting for redis (5s)...');
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
       logger.info('  └─ Waiting for database to be ready (10s)...');
       await new Promise((resolve) => setTimeout(resolve, 10000));
@@ -37,7 +40,7 @@ export class DbResetCommand extends CommandRunner {
       runCommand('pnpm --filter @sous/api run db:push');
 
       logger.info('  └─ Seeding database (system + sample)...');
-      runCommand('pnpm --filter @sous/api run db:seed sample');
+      runCommand('SKIP_MAIL=true SKIP_INGESTION=true SKIP_GATEWAYS=true pnpm --filter @sous/api run db:seed sample');
 
       logger.info('✅ Database reset and seeded with sample data successfully.');
     } catch (error: any) {

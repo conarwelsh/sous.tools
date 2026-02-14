@@ -10,7 +10,10 @@ import {
   PasswordResetEmail, 
   WelcomeEmail, 
   OrderEmail, 
-  LowStockEmail 
+  LowStockEmail,
+  SupportTicketEmail,
+  SupportNotificationEmail,
+  SubscriptionConfirmedEmail,
 } from '@sous/emails';
 import { EmailJobData } from './mail.service.js';
 
@@ -32,7 +35,7 @@ export class EmailProcessor extends WorkerHost {
 
     let component: React.ReactElement;
 
-    switch (template) {
+    switch (template as string) {
       case 'invitation':
         component = React.createElement(InvitationEmail, context as any);
         break;
@@ -47,6 +50,15 @@ export class EmailProcessor extends WorkerHost {
         break;
       case 'low-stock':
         component = React.createElement(LowStockEmail, context as any);
+        break;
+      case 'support-ticket':
+        component = React.createElement(SupportTicketEmail, context as any);
+        break;
+      case 'support-notification':
+        component = React.createElement(SupportNotificationEmail, context as any);
+        break;
+      case 'subscription-confirmed':
+        component = React.createElement(SubscriptionConfirmedEmail, context as any);
         break;
       default:
         throw new Error(`Unknown template: ${template}`);

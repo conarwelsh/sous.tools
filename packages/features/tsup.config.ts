@@ -5,6 +5,7 @@ export default defineConfig([
     entry: {
       client: "src/client.ts",
       index: "src/index.ts",
+      "constants/plans": "src/constants/plans.ts",
     },
     format: ["cjs", "esm"],
     dts: true,

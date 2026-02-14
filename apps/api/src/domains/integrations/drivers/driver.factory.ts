@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { SquareDriver } from './square.driver.js';
 import { GoogleDriveDriver } from './google-drive.driver.js';
+import { logger } from '@sous/logger';
 
 @Injectable()
 export class DriverFactory {
   getPOSDriver(provider: string, credentials: any) {
+
+
     switch (provider) {
       case 'square':
         return new SquareDriver(credentials);

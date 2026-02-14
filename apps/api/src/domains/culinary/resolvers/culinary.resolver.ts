@@ -7,8 +7,9 @@ import {
   Field,
   ID,
   Int,
+  Context,
 } from '@nestjs/graphql';
-import { Inject, forwardRef } from '@nestjs/common';
+import { Inject, forwardRef, Optional } from '@nestjs/common';
 import { CulinaryService } from '../services/culinary.service.js';
 import { IngestionService } from '../../ingestion/services/ingestion.service.js';
 import { IntegrationsService } from '../../integrations/services/integrations.service.js';
@@ -68,6 +69,21 @@ export class RecipeStepType {
 }
 
 @ObjectType()
+export class CookNoteType {
+  @Field(() => ID)
+  id: string;
+
+  @Field()
+  note: string;
+
+  @Field()
+  createdAt: string;
+
+  @Field(() => UserType)
+  user: any;
+}
+
+@ObjectType()
 export class RecipeType {
   @Field(() => ID)
   id: string;
@@ -95,9 +111,22 @@ export class RecipeType {
 
   @Field(() => [RecipeStepType])
   steps: RecipeStepType[];
+
+  @Field(() => [CookNoteType])
+  notes: CookNoteType[];
 }
 
 import { InputType } from '@nestjs/graphql';
+import { UserType } from '../../iam/users/resolvers/users.resolver.js';
+
+@InputType()
+export class AddCookNoteInput {
+  @Field()
+  recipeId: string;
+
+  @Field()
+  note: string;
+}
 
 @InputType()
 export class CreateIngredientInput {
@@ -165,11 +194,11 @@ export class UpdateRecipeInput {
   steps?: RecipeStepInput[];
 }
 
-@Resolver()
+@Resolver(() => RecipeType)
 export class CulinaryResolver {
   constructor(
     private readonly culinaryService: CulinaryService,
-    private readonly ingestionService: IngestionService,
+    @Optional() private readonly ingestionService: IngestionService,
     @Inject(forwardRef(() => IntegrationsService))
     private readonly integrationsService: IntegrationsService,
   ) {}
@@ -191,7 +220,26 @@ export class CulinaryResolver {
 
   @Query(() => RecipeType, { nullable: true })
   async recipe(@Args('id') id: string, @Args('orgId') orgId: string) {
-    return this.culinaryService.getRecipe(id, orgId);
+    const recipe = await this.culinaryService.getRecipe(id, orgId);
+    if (!recipe) return null;
+
+    const notes = await this.culinaryService.getCookNotes(id);
+    return { ...recipe, notes };
+  }
+
+  @Mutation(() => CookNoteType)
+  async addCookNote(
+    @Args('input') input: AddCookNoteInput,
+    @Context() context: any,
+  ) {
+    const userId =
+      context.req?.user?.id || '4c36d045-3c8c-48e5-9d59-849e2b58e427';
+
+    return this.culinaryService.addCookNote({
+      recipeId: input.recipeId,
+      note: input.note,
+      userId,
+    });
   }
 
   @Mutation(() => IngredientType)
