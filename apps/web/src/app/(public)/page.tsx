@@ -3,11 +3,6 @@ import { ArrowRight, ChefHat, Check, Zap, Smartphone, HardDrive, BarChart3 } fro
 import { Button, Badge, View, Text } from '@sous/ui';
 import { config } from '@sous/config';
 
-import Link from 'next/link';
-import { ArrowRight, ChefHat, Check, Zap, Smartphone, HardDrive, BarChart3 } from 'lucide-react';
-import { Button, Badge, View, Text } from '@sous/ui';
-import { config } from '@sous/config';
-
 async function getPlans() {
   try {
     const res = await fetch(`${config.api.url}/billing/plans`, { next: { revalidate: 3600 } });

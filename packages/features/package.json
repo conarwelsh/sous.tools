@@ -16,7 +16,10 @@
       "require": "./dist/server.js"
     },
     "./constants/plans": {
-      "types": "./dist/constants/plans.d.ts",
+      "types": {
+        "import": "./dist/constants/plans.d.mts",
+        "require": "./dist/constants/plans.d.ts"
+      },
       "import": "./dist/constants/plans.mjs",
       "require": "./dist/constants/plans.js"
     }

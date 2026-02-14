@@ -86,7 +86,6 @@ export const Atelier: React.FC = () => {
       // Invalid JSON, ignore
     }
   };
-  };
 
   if (loading)
     return (

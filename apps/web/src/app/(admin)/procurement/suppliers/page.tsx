@@ -252,7 +252,6 @@ export default function SuppliersPage() {
                 />
               </div>
             </div>
-            </div>
 
             <div className="grid gap-2">
               <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest ml-1">Delivery Schedule</Text>
