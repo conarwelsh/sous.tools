@@ -11,7 +11,12 @@ import { SecretManager } from "./secrets.js";
  */
 export const secrets = new SecretManager();
 
-export { SecretManager, configSchema, brandingConfigSchema, type BrandingConfig };
+export {
+  SecretManager,
+  configSchema,
+  brandingConfigSchema,
+  type BrandingConfig,
+};
 
 export function parseBootstrapEnv(): any {
   throw new Error("parseBootstrapEnv is only available on the server");
@@ -22,7 +27,10 @@ export function parseBootstrapEnv(): any {
  */
 function buildConfig(): Config {
   // In the browser, process.env is usually pre-populated by bundlers (e.g. Next.js)
-  const envVars = (typeof process !== 'undefined' ? process.env : {}) as Record<string, string>;
+  const envVars = (typeof process !== "undefined" ? process.env : {}) as Record<
+    string,
+    string
+  >;
   const env = envVars.NODE_ENV || "development";
 
   const rawConfig = {
@@ -52,7 +60,8 @@ function buildConfig(): Config {
     storage: {
       supabase: {
         url: envVars.NEXT_PUBLIC_SUPABASE_URL || envVars.SUPABASE_URL,
-        anonKey: envVars.NEXT_PUBLIC_SUPABASE_ANON_KEY || envVars.SUPABASE_ANON_KEY,
+        anonKey:
+          envVars.NEXT_PUBLIC_SUPABASE_ANON_KEY || envVars.SUPABASE_ANON_KEY,
         serviceRoleKey: envVars.SUPABASE_SERVICE_ROLE_KEY,
         bucket: envVars.SUPABASE_BUCKET || "media",
       },
@@ -69,7 +78,8 @@ function buildConfig(): Config {
     },
     features: {
       enableRegistration: envVars.ENABLE_REGISTRATION !== "false",
-      appVersion: envVars.NEXT_PUBLIC_APP_VERSION || envVars.APP_VERSION || "0.1.0",
+      appVersion:
+        envVars.NEXT_PUBLIC_APP_VERSION || envVars.APP_VERSION || "0.1.0",
       appEnv: envVars.APP_ENV || env,
     },
     square: {
@@ -79,7 +89,8 @@ function buildConfig(): Config {
       redirectUri: envVars.SQUARE_REDIRECT_URI,
       merchantId: envVars.SQUARE_MERCHANT_ID,
       endpoint: envVars.SQUARE_ENDPOINT,
-      environment: envVars.SQUARE_ENVIRONMENT === "sandbox" ? "sandbox" : "production",
+      environment:
+        envVars.SQUARE_ENVIRONMENT === "sandbox" ? "sandbox" : "production",
     },
     google: {
       clientId: envVars.GOOGLE_CLIENT_ID,

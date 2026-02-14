@@ -11,9 +11,11 @@ Implement a centralized brand asset generation engine that ensures 100% uniformi
 ## 1. Core Logic
 
 ### 1.1 Source of Truth
+
 The forge uses `branding.config.json` as its input. This file contains the finalized tweaks from the **Branding Lab** (Spec 005).
 
 ### 1.2 Rendering Pipeline
+
 1.  **SVG Injection**: Load master SVG templates (Logos, Icons, Splashes).
 2.  **Rasterization**: Use `resvg-js` to render the SVGs to high-resolution PNGs.
 3.  **Optimization**: Use `sharp` to resize, optimize, and generate the required density variants (mdpi, hdpi, xhdpi, etc.).
@@ -21,10 +23,12 @@ The forge uses `branding.config.json` as its input. This file contains the final
 ## 2. CLI Command (`sous quality forge`)
 
 ### Flags
+
 - `--target`: web, android, ios, all (Default: all).
 - `--clean`: Wipe existing assets before generating.
 
 ### Process
+
 1.  Read `branding.config.json`.
 2.  Identify all targets.
 3.  Generate:
@@ -34,6 +38,7 @@ The forge uses `branding.config.json` as its input. This file contains the final
     - **WearOS**: Watch Face background elements.
 
 ## 3. Storage
+
 Generated assets are written directly to the `public/` or `assets/` folders of the respective apps.
 
 ## Implementation Plan

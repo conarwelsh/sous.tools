@@ -20,8 +20,16 @@ export class InventoryService {
     return this.moduleRef.get(CulinaryService, { strict: false });
   }
 
-  async depleteStockByRecipe(organizationId: string, locationId: string, recipeId: string, quantity: number) {
-    const recipe = await this.culinaryService.getRecipe(recipeId, organizationId);
+  async depleteStockByRecipe(
+    organizationId: string,
+    locationId: string,
+    recipeId: string,
+    quantity: number,
+  ) {
+    const recipe = await this.culinaryService.getRecipe(
+      recipeId,
+      organizationId,
+    );
     if (!recipe) throw new Error('Recipe not found');
 
     for (const item of recipe.ingredients) {
@@ -30,7 +38,7 @@ export class InventoryService {
           organizationId,
           locationId,
           item.ingredientId,
-          item.amount * quantity // Scale by number of portions/yields
+          item.amount * quantity, // Scale by number of portions/yields
         );
       }
     }
@@ -51,7 +59,7 @@ export class InventoryService {
       .insert(stockLedger)
       .values(data)
       .returning();
-    
+
     // Trigger Low Stock Check (Async)
     void this.checkLowStock(data.organizationId, data.ingredientId);
 
@@ -64,13 +72,21 @@ export class InventoryService {
       const [ingredient] = await this.dbService.readDb
         .select()
         .from(ingredients)
-        .where(and(eq(ingredients.id, ingredientId), eq(ingredients.organizationId, organizationId)))
+        .where(
+          and(
+            eq(ingredients.id, ingredientId),
+            eq(ingredients.organizationId, organizationId),
+          ),
+        )
         .limit(1);
 
       if (!ingredient || !ingredient.parLevel) return;
 
       // 2. Check if we sent an alert recently (e.g. within 1 hour)
-      if (ingredient.lastAlertAt && Date.now() - new Date(ingredient.lastAlertAt).getTime() < 3600000) {
+      if (
+        ingredient.lastAlertAt &&
+        Date.now() - new Date(ingredient.lastAlertAt).getTime() < 3600000
+      ) {
         return;
       }
 
@@ -78,15 +94,23 @@ export class InventoryService {
       const stockResult = await this.dbService.readDb
         .select({ total: sql<number>`sum(amount)` })
         .from(stockLedger)
-        .where(and(eq(stockLedger.ingredientId, ingredientId), eq(stockLedger.organizationId, organizationId)));
+        .where(
+          and(
+            eq(stockLedger.ingredientId, ingredientId),
+            eq(stockLedger.organizationId, organizationId),
+          ),
+        );
 
       const currentStock = Number(stockResult[0]?.total || 0);
 
       if (currentStock < ingredient.parLevel) {
-        logger.warn(`⚠️ Low Stock Alert: ${ingredient.name} is at ${currentStock} (Par: ${ingredient.parLevel})`);
+        logger.warn(
+          `⚠️ Low Stock Alert: ${ingredient.name} is at ${currentStock} (Par: ${ingredient.parLevel})`,
+        );
 
         // 4. Update lastAlertAt to prevent spam
-        await this.dbService.db.update(ingredients)
+        await this.dbService.db
+          .update(ingredients)
           .set({ lastAlertAt: new Date() })
           .where(eq(ingredients.id, ingredientId));
 
@@ -94,7 +118,12 @@ export class InventoryService {
         const admins = await this.dbService.readDb
           .select()
           .from(users)
-          .where(and(eq(users.organizationId, organizationId), eq(users.role, 'admin')));
+          .where(
+            and(
+              eq(users.organizationId, organizationId),
+              eq(users.role, 'admin'),
+            ),
+          );
 
         for (const admin of admins) {
           await this.mailService.sendEmail({
@@ -102,13 +131,15 @@ export class InventoryService {
             subject: `Low Stock Alert: ${ingredient.name}`,
             template: 'low-stock',
             context: {
-              items: [{
-                name: ingredient.name,
-                current: currentStock,
-                threshold: ingredient.parLevel,
-                unit: ingredient.baseUnit
-              }]
-            }
+              items: [
+                {
+                  name: ingredient.name,
+                  current: currentStock,
+                  threshold: ingredient.parLevel,
+                  unit: ingredient.baseUnit,
+                },
+              ],
+            },
           });
         }
       }

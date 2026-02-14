@@ -14,7 +14,13 @@ export interface PaymentIntentResult {
 export interface IPaymentDriver {
   name: string;
   createCustomer(org: { name: string; id: string }): Promise<string>;
-  createSubscription(customerId: string, planSlug: string): Promise<SubscriptionResult>;
+  createSubscription(
+    customerId: string,
+    planSlug: string,
+  ): Promise<SubscriptionResult>;
   cancelSubscription(subscriptionId: string): Promise<void>;
-  createPaymentIntent(amount: number, metadata: any): Promise<PaymentIntentResult>;
+  createPaymentIntent(
+    amount: number,
+    metadata: any,
+  ): Promise<PaymentIntentResult>;
 }

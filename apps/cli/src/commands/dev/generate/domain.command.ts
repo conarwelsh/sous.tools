@@ -7,7 +7,8 @@ import chalk from 'chalk';
 
 @SubCommand({
   name: 'domain',
-  description: 'Scaffold a new strategic umbrella domain in the API and Features',
+  description:
+    'Scaffold a new strategic umbrella domain in the API and Features',
 })
 export class DomainGenerateCommand extends CommandRunner {
   private findRootDir(): string {
@@ -99,7 +100,11 @@ export class ${className}Controller {
       );
 
       // --- Features Scaffolding ---
-      const featuresPath = join(root, 'packages/features/src/domains', domainName);
+      const featuresPath = join(
+        root,
+        'packages/features/src/domains',
+        domainName,
+      );
       await mkdir(featuresPath, { recursive: true });
       await mkdir(join(featuresPath, 'components'), { recursive: true });
       await mkdir(join(featuresPath, 'hooks'), { recursive: true });

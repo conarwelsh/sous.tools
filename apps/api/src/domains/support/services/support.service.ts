@@ -21,12 +21,13 @@ export class SupportReport {
 @Injectable()
 export class SupportService {
   constructor(
-    @InjectQueue('support-queue') private readonly supportQueue: Queue<SupportReport>,
+    @InjectQueue('support-queue')
+    private readonly supportQueue: Queue<SupportReport>,
   ) {}
 
   async report(data: SupportReport) {
     logger.info(`[Support] Queueing ${data.type} report: ${data.subject}`);
-    
+
     await this.supportQueue.add('process-report', data, {
       attempts: 3,
       backoff: { type: 'exponential', delay: 5000 },

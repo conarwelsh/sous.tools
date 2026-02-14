@@ -18,7 +18,9 @@ export class HardwareListCommand extends CommandRunner {
     const cliConfig = await this.configService.getConfig();
 
     if (!cliConfig.token) {
-      logger.error('You must be logged in to view hardware. Run "sous context login" first.');
+      logger.error(
+        'You must be logged in to view hardware. Run "sous context login" first.',
+      );
       return;
     }
 
@@ -27,7 +29,7 @@ export class HardwareListCommand extends CommandRunner {
     try {
       const client = await getHttpClient();
       client.setToken(cliConfig.token);
-      
+
       const devices: any[] = await client.get('/hardware');
 
       if (devices.length === 0) {
@@ -40,14 +42,15 @@ export class HardwareListCommand extends CommandRunner {
       console.log(
         `${chalk.bold('ID'.padEnd(38))} ${chalk.bold('NAME'.padEnd(20))} ${chalk.bold('TYPE'.padEnd(10))} ${chalk.bold('STATUS')}`,
       );
-      
+
       for (const device of devices) {
-        const statusColor = device.status === 'online' ? chalk.green : chalk.gray;
+        const statusColor =
+          device.status === 'online' ? chalk.green : chalk.gray;
         console.log(
           `${device.id.padEnd(38)} ${device.name.padEnd(20)} ${device.type.padEnd(10)} ${statusColor(device.status.toUpperCase())}`,
         );
       }
-      
+
       console.log('='.repeat(80) + '\n');
     } catch (error: any) {
       logger.error(`Failed to fetch hardware list: ${error.message}`);

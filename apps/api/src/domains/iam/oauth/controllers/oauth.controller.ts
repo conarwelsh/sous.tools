@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Body, Query, UseGuards, Req, Res, BadRequestException, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Query,
+  UseGuards,
+  Req,
+  Res,
+  BadRequestException,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { OAuthService } from '../services/oauth.service.js';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard.js';
 import { logger } from '@sous/logger';
@@ -16,7 +28,7 @@ export class OAuthController {
     @Req() req: any,
   ) {
     const client = await this.oauthService.getClient(clientId);
-    
+
     const uris = client.redirectUris as string[];
     if (!uris.includes(redirectUri)) {
       throw new BadRequestException('Invalid redirect URI');
@@ -46,7 +58,7 @@ export class OAuthController {
 
     const url = new URL(body.redirectUri);
     url.searchParams.append('code', code);
-    
+
     return { redirectUrl: url.toString() };
   }
 
@@ -74,8 +86,15 @@ export class OAuthController {
 
   @Post('clients')
   @UseGuards(JwtAuthGuard)
-  async registerClient(@Body() body: { name: string; redirectUris: string[] }, @Req() req: any) {
-    return this.oauthService.registerClient(req.user.organizationId, body.name, body.redirectUris);
+  async registerClient(
+    @Body() body: { name: string; redirectUris: string[] },
+    @Req() req: any,
+  ) {
+    return this.oauthService.registerClient(
+      req.user.organizationId,
+      body.name,
+      body.redirectUris,
+    );
   }
 
   @Post('clients/:clientId/rotate-secret')

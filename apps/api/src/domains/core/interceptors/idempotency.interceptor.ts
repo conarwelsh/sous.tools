@@ -13,9 +13,12 @@ import { CacheService } from '../services/cache.service.js';
 export class IdempotencyInterceptor implements NestInterceptor {
   constructor(private readonly cacheService: CacheService) {}
 
-  async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
+  async intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
-    
+
     // Only apply to mutations
     if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)) {
       return next.handle();
@@ -38,9 +41,9 @@ export class IdempotencyInterceptor implements NestInterceptor {
     await this.cacheService.set(cacheKey, 'IN_PROGRESS', 60);
 
     return next.handle().pipe(
-      tap(async (response) => {
+      tap((response) => {
         // Store the result for 24h
-        await this.cacheService.set(cacheKey, JSON.stringify(response), 86400);
+        void this.cacheService.set(cacheKey, JSON.stringify(response), 86400);
       }),
     );
   }

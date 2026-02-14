@@ -11,7 +11,10 @@ import { ShellInstallCommand } from './shell-install.command.js';
 })
 export class OpsCommand extends CommandRunner {
   async run(passedParam: string[]): Promise<void> {
-    if (passedParam.length > 0 && ['housekeep', 'db', 'kill', 'shell-install'].includes(passedParam[0])) {
+    if (
+      passedParam.length > 0 &&
+      ['housekeep', 'db', 'kill', 'shell-install'].includes(passedParam[0])
+    ) {
       return;
     }
     this.command.help();

@@ -18,8 +18,8 @@ export class CliConfigService {
   async getConfig(): Promise<CliConfig> {
     try {
       const data = await readFile(this.configPath, 'utf8');
-      return JSON.parse(data);
-    } catch (error) {
+      return JSON.parse(data) as CliConfig;
+    } catch {
       return {};
     }
   }
@@ -28,7 +28,7 @@ export class CliConfigService {
     try {
       const current = await this.getConfig();
       const updated = { ...current, ...config };
-      
+
       await mkdir(this.configDir, { recursive: true });
       await writeFile(this.configPath, JSON.stringify(updated, null, 2));
     } catch (error: any) {

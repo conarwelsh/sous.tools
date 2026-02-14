@@ -8,7 +8,7 @@ import { AuthModule } from '../iam/auth/auth.module.js';
 
 @Module({
   imports: [
-    CoreModule, 
+    CoreModule,
     AuthModule,
     BullModule.registerQueue({
       name: 'sales-queue',

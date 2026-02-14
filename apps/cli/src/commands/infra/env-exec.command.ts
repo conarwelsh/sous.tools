@@ -15,7 +15,7 @@ interface EnvExecOptions {
 export class EnvExecCommand extends CommandRunner {
   async run(passedParam: string[], options: EnvExecOptions): Promise<void> {
     const command = passedParam.join(' ');
-    
+
     if (!command) {
       logger.error('No command provided to execute');
       process.exit(1);
@@ -27,7 +27,7 @@ export class EnvExecCommand extends CommandRunner {
     try {
       // 1. Parse .env for bootstrap credentials
       const bootstrap = parseBootstrapEnv();
-      
+
       // 2. Initialize SecretManager with these credentials
       const secrets = new SecretManager({
         clientId: bootstrap.INFISICAL_CLIENT_ID,
@@ -38,11 +38,15 @@ export class EnvExecCommand extends CommandRunner {
       // 3. Fetch all secrets for the target environment
       logger.info(`🔐 Fetching secrets from Infisical vault...`);
       const vaultSecrets = await secrets.listSecrets(envName);
-      
+
       // 4. Merge into current environment
       const [cmd, ...args] = passedParam;
-      const serviceName = cmd.includes('api') ? '@sous/api' : (cmd.includes('web') ? '@sous/web' : '@sous/cli');
-      
+      const serviceName = cmd.includes('api')
+        ? '@sous/api'
+        : cmd.includes('web')
+          ? '@sous/web'
+          : '@sous/cli';
+
       const mergedEnv = {
         ...process.env,
         ...vaultSecrets,
@@ -82,7 +86,6 @@ export class EnvExecCommand extends CommandRunner {
           reject(err);
         });
       });
-
     } catch (error: any) {
       logger.error(`❌ Failed to execute command: ${error.message}`);
       process.exit(1);

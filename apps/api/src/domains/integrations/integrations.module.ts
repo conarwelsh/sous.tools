@@ -13,7 +13,7 @@ const skipIngestion = process.env.SKIP_INGESTION === 'true';
   imports: [
     forwardRef(() => CulinaryModule),
     forwardRef(() => PosModule),
-    ...(skipIngestion ? [] : [forwardRef(() => IngestionModule)])
+    ...(skipIngestion ? [] : [forwardRef(() => IngestionModule)]),
   ],
   providers: [IntegrationsService, IntegrationsResolver, DriverFactory],
   controllers: [IntegrationsController],

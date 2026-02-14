@@ -154,7 +154,7 @@ export const KioskManager = () => {
           <Logo size={48} animate />
         </div>
       ) : (
-        <motion.div 
+        <motion.div
           layout
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
@@ -168,9 +168,7 @@ export const KioskManager = () => {
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.2 }}
               >
-                <Card
-                  className="p-6 bg-card border-border border-2 hover:border-primary/50 transition-all group overflow-hidden"
-                >
+                <Card className="p-6 bg-card border-border border-2 hover:border-primary/50 transition-all group overflow-hidden">
                   <div className="flex flex-row justify-between items-start mb-6">
                     <div className="h-10 w-10 rounded-xl bg-muted border border-border flex items-center justify-center">
                       {!display.hardwareId ? (
@@ -216,7 +214,10 @@ export const KioskManager = () => {
                         onClick={() => copyPublicUrl(display.id)}
                         className="h-10 w-10 bg-secondary hover:bg-secondary/80 flex items-center justify-center border border-border"
                       >
-                        <Share2 size={14} className="text-secondary-foreground" />
+                        <Share2
+                          size={14}
+                          className="text-secondary-foreground"
+                        />
                       </Button>
                     </div>
                     <Button

@@ -16,7 +16,10 @@ export class UsageGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const metricKey = this.reflector.get<MetricKey>('metric_key', context.getHandler());
+    const metricKey = this.reflector.get<MetricKey>(
+      'metric_key',
+      context.getHandler(),
+    );
 
     if (!metricKey) {
       return true;
@@ -27,7 +30,10 @@ export class UsageGuard implements CanActivate {
       return false;
     }
 
-    const hasCapacity = await this.planService.checkLimit(user.organizationId, metricKey);
+    const hasCapacity = await this.planService.checkLimit(
+      user.organizationId,
+      metricKey,
+    );
 
     if (!hasCapacity) {
       throw new ForbiddenException(`Usage limit reached for ${metricKey}`);

@@ -16,7 +16,10 @@ import {
 
 interface DevicePairingFlowProps {
   type: "kds" | "pos" | "signage" | "kiosk" | "gateway" | "watch";
-  children: (props: { hardwareId: string; organizationId: string | null }) => React.ReactNode;
+  children: (props: {
+    hardwareId: string;
+    organizationId: string | null;
+  }) => React.ReactNode;
 }
 
 export const DevicePairingFlow: React.FC<DevicePairingFlowProps> = ({
@@ -194,7 +197,8 @@ export const DevicePairingFlow: React.FC<DevicePairingFlowProps> = ({
           </div>
           {typeof window !== "undefined" && (
             <Text className="text-[8px] font-mono opacity-50">
-              API: {localConfig.api.url || "default"} | Host: {(window as any).sous_host_ip || "none"}
+              API: {localConfig.api.url || "default"} | Host:{" "}
+              {(window as any).sous_host_ip || "none"}
             </Text>
           )}
         </div>

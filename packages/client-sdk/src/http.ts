@@ -59,13 +59,19 @@ export class HttpClient {
     // Dynamic Hardware Context
     if (typeof window !== "undefined") {
       const hardwareId = localStorage.getItem("sous_hardware_id");
-      const organizationId = hardwareId ? localStorage.getItem(`sous_org_id_${hardwareId}`) : null;
-      
+      const organizationId = hardwareId
+        ? localStorage.getItem(`sous_org_id_${hardwareId}`)
+        : null;
+
       if (hardwareId && hardwareId !== "undefined" && hardwareId !== "null") {
         headers.set("x-hardware-id", hardwareId);
       }
-      
-      if (organizationId && organizationId !== "undefined" && organizationId !== "null") {
+
+      if (
+        organizationId &&
+        organizationId !== "undefined" &&
+        organizationId !== "null"
+      ) {
         headers.set("x-organization-id", organizationId);
       }
     }
@@ -96,13 +102,17 @@ export class HttpClient {
         const error = await response
           .json()
           .catch(() => ({ message: `HTTP Error ${response.status}` }));
-        
+
         // Don't log 404s as errors to the console, they are often expected (e.g. public signage fallback)
         if (response.status !== 404) {
-          console.error(`[HttpClient] Request failed with status ${response.status}: ${url}`);
+          console.error(
+            `[HttpClient] Request failed with status ${response.status}: ${url}`,
+          );
         }
-        
-        throw new Error(error.message || `API Request failed (${response.status})`);
+
+        throw new Error(
+          error.message || `API Request failed (${response.status})`,
+        );
       }
 
       if (response.status === 204) return {} as T;
@@ -112,7 +122,7 @@ export class HttpClient {
 
       try {
         return JSON.parse(text);
-      } catch (e) {
+      } catch {
         return text as unknown as T;
       }
     } catch (e: any) {
@@ -121,15 +131,14 @@ export class HttpClient {
         console.warn(
           `[HttpClient] Cloud API unreachable (${e.message}). Attempting Edge Node fallback...`,
         );
-        const edgeUrl = url.replace(this.baseUrl, "http://sous.local:4000");
         try {
           const relativePath = path.startsWith("/") ? path : `/${path}`;
-          return await this.request(
-            relativePath,
-            { ...options, headers: Object.fromEntries((headers as any).entries()) }
-          );
-        } catch (edgeError: any) {
-          console.error(`[HttpClient] Edge Node fallback also failed: ${edgeError.message}`);
+          return await this.request(relativePath, {
+            ...options,
+            headers: Object.fromEntries((headers as any).entries()),
+          });
+        } catch {
+          console.error(`[HttpClient] Edge Node fallback also failed`);
         }
       }
 
@@ -203,13 +212,15 @@ export const getHttpClient = async (baseUrl?: string): Promise<HttpClient> => {
   }
 
   if (clientInstance && !baseUrl) return clientInstance;
-  
+
   if (baseUrl) {
     return new HttpClient(resolveApiUrl(baseUrl));
   }
 
   const { config } = await import("@sous/config");
-  clientInstance = new HttpClient(resolveApiUrl(config.api.url || "http://localhost:4000"));
+  clientInstance = new HttpClient(
+    resolveApiUrl(config.api.url || "http://localhost:4000"),
+  );
 
   if (typeof window !== "undefined") {
     (window as any).__SOUS_HTTP_CLIENT__ = clientInstance;

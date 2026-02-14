@@ -14,7 +14,7 @@ export const useSales = () => {
       const http = await getHttpClient();
       const [m, o] = await Promise.all([
         http.get("/sales/metrics"),
-        http.get("/sales/organizations")
+        http.get("/sales/organizations"),
       ]);
       setMetrics(m);
       setOrganizations(o as any[]);

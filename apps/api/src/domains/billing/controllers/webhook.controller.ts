@@ -19,7 +19,11 @@ export class WebhookController {
   }
 
   @Post()
-  async handleWebhook(@Req() req: any, @Res() res: any, @Headers('stripe-signature') sig: string) {
+  async handleWebhook(
+    @Req() req: any,
+    @Res() res: any,
+    @Headers('stripe-signature') sig: string,
+  ) {
     if (!this.stripe) return res.status(500).send('Stripe not configured');
 
     let event: Stripe.Event;
@@ -31,7 +35,7 @@ export class WebhookController {
       event = this.stripe.webhooks.constructEvent(
         payload,
         sig,
-        config.stripe.webhookSecret!
+        config.stripe.webhookSecret!,
       );
     } catch (err: any) {
       logger.error(`[Stripe Webhook] Verification failed: ${err.message}`);
@@ -42,19 +46,26 @@ export class WebhookController {
 
     try {
       switch (event.type) {
-        case 'invoice.payment_succeeded':
-          const invoice = event.data.object as Stripe.Invoice;
+        case 'invoice.payment_succeeded': {
+          const invoice = event.data.object;
           const orgId = invoice.metadata?.organizationId;
           if (orgId) {
-            await this.salesService.recordCommission(orgId, invoice.amount_paid, invoice.id);
+            await this.salesService.recordCommission(
+              orgId,
+              invoice.amount_paid,
+              invoice.id,
+            );
           }
           break;
+        }
         case 'customer.subscription.deleted':
           // Handle downgrade/cancellation logic
           break;
       }
     } catch (e: any) {
-      logger.error(`[Stripe Webhook] Error processing event ${event.type}: ${e.message}`);
+      logger.error(
+        `[Stripe Webhook] Error processing event ${event.type}: ${e.message}`,
+      );
     }
 
     res.json({ received: true });

@@ -43,14 +43,21 @@ export class VersionCommand extends CommandRunner {
       let content = fs.readFileSync(changelogPath, 'utf-8');
       const date = new Date().toISOString().split('T')[0];
       const header = `## [${newVersion}] - ${date}`;
-      
+
       if (content.includes('## [Unreleased]')) {
-        content = content.replace('## [Unreleased]', `## [Unreleased]\n\n${header}`);
+        content = content.replace(
+          '## [Unreleased]',
+          `## [Unreleased]\n\n${header}`,
+        );
       } else {
         // Fallback if no Unreleased section
         const insertionPoint = content.indexOf('## [');
         if (insertionPoint !== -1) {
-          content = content.slice(0, insertionPoint) + header + '\n\n' + content.slice(insertionPoint);
+          content =
+            content.slice(0, insertionPoint) +
+            header +
+            '\n\n' +
+            content.slice(insertionPoint);
         } else {
           content += `\n\n${header}\n`;
         }
@@ -61,9 +68,11 @@ export class VersionCommand extends CommandRunner {
 
     // 3. Git Commit & Tag (Optional, but good practice)
     try {
-        logger.info(`✅ Version bumped to ${newVersion}. Run 'git commit -am "chore: bump version to ${newVersion}"' to save.`);
+      logger.info(
+        `✅ Version bumped to ${newVersion}. Run 'git commit -am "chore: bump version to ${newVersion}"' to save.`,
+      );
     } catch (e) {
-        // Ignore
+      // Ignore
     }
   }
 

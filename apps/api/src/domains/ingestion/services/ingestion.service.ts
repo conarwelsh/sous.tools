@@ -251,7 +251,9 @@ export class IngestionService {
     }
 
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = this.genAI.getGenerativeModel({
+        model: 'gemini-1.5-flash',
+      });
       const prompt = `
         Extract the following invoice data into JSON:
         - supplierName (string)
@@ -265,9 +267,12 @@ export class IngestionService {
 
       const result = await model.generateContent(prompt);
       const text = result.response.text();
-      
+
       // Basic cleanup
-      const jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim();
+      const jsonStr = text
+        .replace(/```json/g, '')
+        .replace(/```/g, '')
+        .trim();
       return JSON.parse(jsonStr);
     } catch (e: any) {
       logger.error(`[AI Ingestion] Invoice extraction failed: ${e.message}`);

@@ -60,11 +60,11 @@ export class CulinaryService {
       .insert(categories)
       .values(data)
       .returning();
-    
+
     if (result[0]) {
       this.publishCatalogUpdate(result[0].organizationId);
     }
-    
+
     return result[0];
   }
 
@@ -81,12 +81,12 @@ export class CulinaryService {
   }
 
   async getProductByName(organizationId: string, name: string) {
-      return this.dbService.readDb.query.products.findFirst({
-          where: and(
-              eq(products.organizationId, organizationId),
-              eq(products.name, name)
-          )
-      });
+    return this.dbService.readDb.query.products.findFirst({
+      where: and(
+        eq(products.organizationId, organizationId),
+        eq(products.name, name),
+      ),
+    });
   }
 
   async createProduct(data: typeof products.$inferInsert) {
@@ -94,11 +94,11 @@ export class CulinaryService {
       .insert(products)
       .values(data)
       .returning();
-    
+
     if (result[0]) {
       this.publishCatalogUpdate(result[0].organizationId);
     }
-    
+
     return result[0];
   }
 
@@ -233,7 +233,7 @@ export class CulinaryService {
     }
 
     return this.dbService.readDb.query.recipes.findMany({
-      where: options?.search 
+      where: options?.search
         ? and(...filters, ilike(recipes.name, `%${options.search}%`))
         : and(...filters),
       with: {
@@ -274,7 +274,7 @@ export class CulinaryService {
         // Simple logic: assume price is per base unit and amount matches
         // Real implementation requires unit conversion (e.g. kg to g)
         // For now, we assume 1:1 if unit matches, or just raw calc
-        totalCost += (ri.amount * ri.ingredient.currentPrice);
+        totalCost += ri.amount * ri.ingredient.currentPrice;
       }
     }
     return totalCost;
@@ -287,10 +287,10 @@ export class CulinaryService {
     return {
       ...recipe,
       yieldAmount: (recipe.yieldAmount || 0) * factor,
-      ingredients: recipe.ingredients.map(ri => ({
+      ingredients: recipe.ingredients.map((ri) => ({
         ...ri,
         amount: ri.amount * factor,
-      }))
+      })),
     };
   }
 

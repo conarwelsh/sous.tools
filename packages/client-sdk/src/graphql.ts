@@ -1,4 +1,4 @@
-import { ApolloClient, InMemoryCache, HttpLink, split, ApolloLink } from "@apollo/client";
+import { ApolloClient, InMemoryCache, HttpLink, split } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { createClient } from "graphql-ws";
@@ -19,7 +19,7 @@ export interface ApolloClientConfig {
  * Creates and configures a new Apollo Client instance.
  * Automatically sets up a WebSocket link for subscriptions
  * and an HTTP link for queries and mutations.
- * 
+ *
  * Headers are dynamically resolved from localStorage to handle
  * hardware pairing updates without client re-initialization.
  *
@@ -37,16 +37,22 @@ export const createApolloClient = (config: ApolloClientConfig) => {
     if (typeof window === "undefined") return { headers };
 
     const hardwareId = localStorage.getItem("sous_hardware_id");
-    const organizationId = hardwareId ? localStorage.getItem(`sous_org_id_${hardwareId}`) : null;
+    const organizationId = hardwareId
+      ? localStorage.getItem(`sous_org_id_${hardwareId}`)
+      : null;
     const token = localStorage.getItem("token");
 
     const headersConfig: any = { ...headers };
-    
+
     if (hardwareId && hardwareId !== "undefined" && hardwareId !== "null") {
       headersConfig["x-hardware-id"] = hardwareId;
     }
-    
-    if (organizationId && organizationId !== "undefined" && organizationId !== "null") {
+
+    if (
+      organizationId &&
+      organizationId !== "undefined" &&
+      organizationId !== "null"
+    ) {
       headersConfig["x-organization-id"] = organizationId;
     }
 
@@ -66,7 +72,9 @@ export const createApolloClient = (config: ApolloClientConfig) => {
             url: `${apiUrl.replace("http", "ws")}/graphql`,
             connectionParams: () => {
               const hardwareId = localStorage.getItem("sous_hardware_id");
-              const organizationId = hardwareId ? localStorage.getItem(`sous_org_id_${hardwareId}`) : null;
+              const organizationId = hardwareId
+                ? localStorage.getItem(`sous_org_id_${hardwareId}`)
+                : null;
               const token = localStorage.getItem("token");
 
               return {

@@ -1,6 +1,6 @@
-import { config } from '@sous/config';
-import { logger } from '@sous/logger';
-import path from 'path';
+import { config } from "@sous/config";
+import { logger } from "@sous/logger";
+import path from "path";
 
 const squareDriverPath = path.resolve(
   "apps/api/src/domains/integrations/drivers/square.driver.ts",
@@ -8,12 +8,15 @@ const squareDriverPath = path.resolve(
 
 async function test() {
   logger.info(`🌐 Environment: ${config.env}`);
-  
+
   const { SquareDriver } = await import(squareDriverPath);
 
   if (!config.square.accessToken) {
-    logger.error('❌ Square access token is missing from config');
-    logger.info('Current square config:', JSON.stringify(config.square, null, 2));
+    logger.error("❌ Square access token is missing from config");
+    logger.info(
+      "Current square config:",
+      JSON.stringify(config.square, null, 2),
+    );
     process.exit(1);
   }
 

@@ -180,7 +180,7 @@ export const Canvas: React.FC<CanvasProps> = ({
         isEditMode={!isPreviewMode}
         className={cn(
           "template-stage shadow-[0_0_100px_rgba(0,0,0,0.5)]",
-          !isPreviewMode && "border border-white/5"
+          !isPreviewMode && "border border-white/5",
         )}
       >
         <DesignerRenderer

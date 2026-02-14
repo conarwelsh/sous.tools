@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useState, useEffect, useMemo } from "react";
+import React, { use, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -112,11 +112,12 @@ export default function RecipeDetailPage({
   const [formDataOverride, setFormDataOverride] = useState<any>(null);
   const [isDirty, setIsDirty] = useState(false);
 
+  const recipe = data?.recipe;
   const formData = useMemo(() => {
     if (formDataOverride) return formDataOverride;
-    if (data?.recipe) return JSON.parse(JSON.stringify(data.recipe));
+    if (recipe) return JSON.parse(JSON.stringify(recipe));
     return null;
-  }, [data?.recipe, formDataOverride]);
+  }, [recipe, formDataOverride]);
 
   const handleFieldChange = (updates: any) => {
     setFormDataOverride((prev: any) => ({ ...(prev || formData), ...updates }));
@@ -126,14 +127,20 @@ export default function RecipeDetailPage({
   const handleIngredientChange = (idx: number, updates: any) => {
     const newIngredients = [...formData.ingredients];
     newIngredients[idx] = { ...newIngredients[idx], ...updates };
-    setFormDataOverride((prev: any) => ({ ...(prev || formData), ingredients: newIngredients }));
+    setFormDataOverride((prev: any) => ({
+      ...(prev || formData),
+      ingredients: newIngredients,
+    }));
     setIsDirty(true);
   };
 
   const handleStepChange = (idx: number, updates: any) => {
     const newSteps = [...formData.steps];
     newSteps[idx] = { ...newSteps[idx], ...updates };
-    setFormDataOverride((prev: any) => ({ ...(prev || formData), steps: newSteps }));
+    setFormDataOverride((prev: any) => ({
+      ...(prev || formData),
+      steps: newSteps,
+    }));
     setIsDirty(true);
   };
 
@@ -147,7 +154,10 @@ export default function RecipeDetailPage({
         ingredient: { id: "", name: "New Ingredient" },
       },
     ];
-    setFormDataOverride((prev: any) => ({ ...(prev || formData), ingredients: newIngredients }));
+    setFormDataOverride((prev: any) => ({
+      ...(prev || formData),
+      ingredients: newIngredients,
+    }));
     setIsDirty(true);
   };
 
@@ -161,7 +171,10 @@ export default function RecipeDetailPage({
         timerDuration: null,
       },
     ];
-    setFormDataOverride((prev: any) => ({ ...(prev || formData), steps: newSteps }));
+    setFormDataOverride((prev: any) => ({
+      ...(prev || formData),
+      steps: newSteps,
+    }));
     setIsDirty(true);
   };
 

@@ -27,28 +27,44 @@ export class CulinarySeeder implements Seeder {
     await this.culinaryService.seedSample(orgId);
 
     // External Sync to Square Sandbox if configured
-    if (config.square.applicationId && config.square.environment === 'sandbox') {
+    if (
+      config.square.applicationId &&
+      config.square.environment === 'sandbox'
+    ) {
       await this.seedExternal(orgId);
     }
   }
 
   async seedExternal(orgId: string): Promise<void> {
-    logger.info(`🌐 CulinarySeeder: Pushing local catalog to Square Sandbox for org ${orgId}...`);
-    
+    logger.info(
+      `🌐 CulinarySeeder: Pushing local catalog to Square Sandbox for org ${orgId}...`,
+    );
+
     try {
       // Find Square integration for this org
-      const integration = await this.integrationsService.getIntegration(orgId, 'square');
-      
+      const integration = await this.integrationsService.getIntegration(
+        orgId,
+        'square',
+      );
+
       if (integration) {
-        logger.info(`🌐 CulinarySeeder: Found Square integration for org ${orgId}. Triggering driver seed...`);
+        logger.info(
+          `🌐 CulinarySeeder: Found Square integration for org ${orgId}. Triggering driver seed...`,
+        );
         await this.integrationsService.seed(orgId, 'square');
         logger.info(`✅ CulinarySeeder: Square Sandbox seeded successfully.`);
       } else {
-        logger.warn(`🌐 CulinarySeeder: No Square integration found for org ${orgId}. Skipping external seed.`);
-        logger.info(`💡 Tip: Connect Square in the Integrations Manager to enable automatic external seeding.`);
+        logger.warn(
+          `🌐 CulinarySeeder: No Square integration found for org ${orgId}. Skipping external seed.`,
+        );
+        logger.info(
+          `💡 Tip: Connect Square in the Integrations Manager to enable automatic external seeding.`,
+        );
       }
     } catch (error: any) {
-      logger.error(`❌ CulinarySeeder: Failed to seed external Square Sandbox: ${error.message}`);
+      logger.error(
+        `❌ CulinarySeeder: Failed to seed external Square Sandbox: ${error.message}`,
+      );
     }
   }
 }

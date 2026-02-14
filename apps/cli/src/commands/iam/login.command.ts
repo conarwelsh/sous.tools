@@ -22,10 +22,13 @@ export class LoginCommand extends CommandRunner {
 
     try {
       const client = await getHttpClient();
-      const response = await client.post<{ access_token: string }>('/auth/login', {
-        username: email, // Passport local strategy usually expects 'username'
-        password,
-      });
+      const response = await client.post<{ access_token: string }>(
+        '/auth/login',
+        {
+          username: email, // Passport local strategy usually expects 'username'
+          password,
+        },
+      );
 
       if (response.access_token) {
         // Get user profile to store org context

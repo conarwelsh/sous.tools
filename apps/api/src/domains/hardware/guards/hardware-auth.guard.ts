@@ -16,7 +16,7 @@ export class HardwareAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     let request: any;
-    
+
     if (context.getType<string>() === 'graphql') {
       const ctx = GqlExecutionContext.create(context);
       request = ctx.getContext().req;
@@ -29,8 +29,15 @@ export class HardwareAuthGuard implements CanActivate {
     const hardwareId = request.headers['x-hardware-id'];
     const orgId = request.headers['x-organization-id'];
 
-    if (!hardwareId || !orgId || orgId === 'undefined' || orgId === 'null' || !hardwareId.length || !orgId.length) {
-      return false; 
+    if (
+      !hardwareId ||
+      !orgId ||
+      orgId === 'undefined' ||
+      orgId === 'null' ||
+      !hardwareId.length ||
+      !orgId.length
+    ) {
+      return false;
     }
 
     // Verify hardware belongs to org and is active
@@ -38,12 +45,12 @@ export class HardwareAuthGuard implements CanActivate {
       where: and(
         eq(devices.hardwareId, hardwareId as string),
         eq(devices.organizationId, orgId as string),
-        eq(devices.status, 'online')
+        eq(devices.status, 'online'),
       ),
     });
 
     if (!device) {
-      return false; 
+      return false;
     }
 
     // Populate user context for resolvers

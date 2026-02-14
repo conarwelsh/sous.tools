@@ -13,8 +13,15 @@ export class BillingController {
 
   @Post('subscribe')
   @UseGuards(JwtAuthGuard)
-  async subscribe(@Body() body: { planSlug: string; provider?: string }, @Req() req: any) {
-    return this.billingService.subscribe(req.user.organizationId, body.planSlug, body.provider);
+  async subscribe(
+    @Body() body: { planSlug: string; provider?: string },
+    @Req() req: any,
+  ) {
+    return this.billingService.subscribe(
+      req.user.organizationId,
+      body.planSlug,
+      body.provider,
+    );
   }
 
   @Get('subscription')

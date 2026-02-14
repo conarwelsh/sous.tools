@@ -32,13 +32,15 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
     },
     {
-      command: "pnpm sous infra exec pnpm --filter @sous/web run dev -- --port 1423",
+      command:
+        "pnpm sous infra exec pnpm --filter @sous/web run dev -- --port 1423",
       url: "http://localhost:1423",
       timeout: 120000,
       reuseExistingServer: !process.env.CI,
     },
     {
-      command: "pnpm sous infra exec pnpm --filter @sous/web run dev -- --port 1424",
+      command:
+        "pnpm sous infra exec pnpm --filter @sous/web run dev -- --port 1424",
       url: "http://localhost:1424",
       timeout: 120000,
       reuseExistingServer: !process.env.CI,

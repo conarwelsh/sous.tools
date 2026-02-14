@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Logo, Wordmark, LogoVariant, Environment, KioskLoading } from "@sous/ui";
+import {
+  Logo,
+  Wordmark,
+  LogoVariant,
+  Environment,
+  KioskLoading,
+} from "@sous/ui";
 import { type BrandingConfig } from "@sous/config";
 import {
   Save,
@@ -53,23 +59,23 @@ export const Atelier: React.FC = () => {
             "android-adaptive-foreground": {
               variant: "neon",
               size: 512,
-              props: { animate: false }
+              props: { animate: false },
             },
             "ios-app-icon": {
               variant: "neon",
               size: 1024,
-              props: { animate: false }
+              props: { animate: false },
             },
             "wearos-app-icon": {
               variant: "neon",
               size: 512,
-              props: { animate: false }
+              props: { animate: false },
             },
             "pos-logo": { variant: "pos", size: 512, props: {} },
             "kds-logo": { variant: "kds", size: 512, props: {} },
             "signage-logo": { variant: "signage", size: 512, props: {} },
             "api-logo": { variant: "api", size: 512, props: {} },
-            "kiosk-logo": { variant: "kiosk", size: 512, props: {} }
+            "kiosk-logo": { variant: "kiosk", size: 512, props: {} },
           });
         }
       } catch (e) {
@@ -117,7 +123,9 @@ export const Atelier: React.FC = () => {
     } catch (e) {
       console.error("Save error:", e);
       navigator.clipboard.writeText(JSON.stringify(config, null, 2));
-      alert("Atelier workspace state committed to clipboard (Local API unavailable).");
+      alert(
+        "Atelier workspace state committed to clipboard (Local API unavailable).",
+      );
     } finally {
       setSaving(false);
     }
@@ -277,13 +285,16 @@ export const Atelier: React.FC = () => {
         {/* Main Workspace */}
         <main className="flex-1 overflow-y-auto bg-[radial-gradient(var(--color-border)_1px,transparent_1px)] [background-size:32px_32px] p-12">
           <div className="max-w-6xl mx-auto space-y-24 pb-32">
-            
             {/* Stage: Vector & Mask Validation */}
             <section className="space-y-8">
               <div className="flex flex-row items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className="p-2 bg-sky-500/10 rounded-lg"><Grid size={16} className="text-sky-500" /></div>
-                  <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">Active Manifest Validation</h2>
+                  <div className="p-2 bg-sky-500/10 rounded-lg">
+                    <Grid size={16} className="text-sky-500" />
+                  </div>
+                  <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">
+                    Active Manifest Validation
+                  </h2>
                 </div>
               </div>
 
@@ -296,13 +307,13 @@ export const Atelier: React.FC = () => {
                   else if (key.includes("apple-touch")) mask = "rounded";
 
                   return (
-                    <IconPreviewCard 
+                    <IconPreviewCard
                       key={key}
-                      label={key} 
-                      type={cfg.variant.toUpperCase()} 
-                      color="text-sky-500" 
-                      mask={mask} 
-                      variant={cfg.variant} 
+                      label={key}
+                      type={cfg.variant.toUpperCase()}
+                      color="text-sky-500"
+                      mask={mask}
+                      variant={cfg.variant}
                       env={globalEnvironment}
                       size={cfg.size}
                     />
@@ -312,44 +323,69 @@ export const Atelier: React.FC = () => {
 
               {/* Density Grid */}
               <div className="bg-card/30 border border-border/50 rounded-[2rem] p-8 flex flex-row items-center justify-between">
-                 {[16, 24, 32, 48, 64, 128].map(size => (
-                   <div key={size} className="flex flex-col items-center gap-3">
-                      <Logo 
-                        variant={selectedVariant || "cloud"} 
-                        size={size} 
-                        showWordmark={false} 
-                        environment={globalEnvironment}
-                      />
-                      <span className="text-[8px] font-mono font-bold text-muted-foreground uppercase">{size}px</span>
-                   </div>
-                 ))}
+                {[16, 24, 32, 48, 64, 128].map((size) => (
+                  <div key={size} className="flex flex-col items-center gap-3">
+                    <Logo
+                      variant={selectedVariant || "cloud"}
+                      size={size}
+                      showWordmark={false}
+                      environment={globalEnvironment}
+                    />
+                    <span className="text-[8px] font-mono font-bold text-muted-foreground uppercase">
+                      {size}px
+                    </span>
+                  </div>
+                ))}
               </div>
             </section>
 
             {/* Stage: UI Contexts */}
             <section className="space-y-8">
               <div className="flex items-center space-x-4">
-                <div className="p-2 bg-purple-500/10 rounded-lg"><Layout size={16} className="text-purple-500" /></div>
-                <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">UI Contextual Scale</h2>
+                <div className="p-2 bg-purple-500/10 rounded-lg">
+                  <Layout size={16} className="text-purple-500" />
+                </div>
+                <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">
+                  UI Contextual Scale
+                </h2>
               </div>
 
               <div className="grid grid-cols-3 gap-8">
                 {/* Sidebar Context */}
                 <div className="bg-card/50 border border-border rounded-3xl p-8 flex flex-col gap-6">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Sidebar (Collapsed)</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    Sidebar (Collapsed)
+                  </span>
                   <div className="w-16 h-64 bg-zinc-950 rounded-2xl border border-zinc-800 flex flex-col items-center py-6">
-                    <Logo variant={selectedVariant || "cloud"} size={28} showWordmark={false} environment={globalEnvironment} />
+                    <Logo
+                      variant={selectedVariant || "cloud"}
+                      size={28}
+                      showWordmark={false}
+                      environment={globalEnvironment}
+                    />
                     <div className="mt-8 flex flex-col gap-4 opacity-20">
-                      {Array.from({ length: 4 }).map((_, i) => <div key={i} className="w-8 h-8 rounded-lg bg-zinc-800" />)}
+                      {Array.from({ length: 4 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className="w-8 h-8 rounded-lg bg-zinc-800"
+                        />
+                      ))}
                     </div>
                   </div>
                 </div>
 
                 {/* Footer Context */}
                 <div className="bg-card/50 border border-border rounded-3xl p-8 flex flex-col gap-6">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Footer / Status Bar</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    Footer / Status Bar
+                  </span>
                   <div className="w-full h-12 bg-zinc-950 rounded-xl border border-zinc-800 mt-auto flex items-center px-4 justify-between">
-                    <Logo variant={selectedVariant || "cloud"} size={16} showWordmark={false} environment={globalEnvironment} />
+                    <Logo
+                      variant={selectedVariant || "cloud"}
+                      size={16}
+                      showWordmark={false}
+                      environment={globalEnvironment}
+                    />
                     <div className="flex gap-2">
                       <div className="w-12 h-2 rounded bg-zinc-800 opacity-20" />
                       <div className="w-12 h-2 rounded bg-zinc-800 opacity-20" />
@@ -359,9 +395,16 @@ export const Atelier: React.FC = () => {
 
                 {/* Navbar Context */}
                 <div className="bg-card/50 border border-border rounded-3xl p-8 flex flex-col gap-6">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Navigation Header</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    Navigation Header
+                  </span>
                   <div className="w-full h-16 bg-zinc-900 rounded-xl border border-zinc-800 flex items-center px-6 gap-4">
-                    <Logo variant={selectedVariant || "cloud"} size={32} showWordmark environment={globalEnvironment} />
+                    <Logo
+                      variant={selectedVariant || "cloud"}
+                      size={32}
+                      showWordmark
+                      environment={globalEnvironment}
+                    />
                   </div>
                 </div>
               </div>
@@ -370,20 +413,36 @@ export const Atelier: React.FC = () => {
             {/* Stage: Loading & Splash */}
             <section className="space-y-8">
               <div className="flex items-center space-x-4">
-                <div className="p-2 bg-emerald-500/10 rounded-lg"><Play size={16} className="text-emerald-500" /></div>
-                <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">Launch Experience</h2>
+                <div className="p-2 bg-emerald-500/10 rounded-lg">
+                  <Play size={16} className="text-emerald-500" />
+                </div>
+                <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">
+                  Launch Experience
+                </h2>
               </div>
 
               <div className="grid grid-cols-2 gap-8">
                 {/* Initializing Hardware */}
                 <div className="bg-card border border-border rounded-[2.5rem] p-8 flex flex-col items-center">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-8">Hardware Initialization</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-8">
+                    Hardware Initialization
+                  </span>
                   <div className="w-full aspect-video bg-black rounded-3xl border border-zinc-800 flex items-center justify-center relative overflow-hidden">
                     <div className="flex flex-col items-center gap-6">
-                      <Logo variant={selectedVariant || "cloud"} size={64} animate environment={globalEnvironment} />
+                      <Logo
+                        variant={selectedVariant || "cloud"}
+                        size={64}
+                        animate
+                        environment={globalEnvironment}
+                      />
                       <div className="flex flex-col items-center gap-2">
-                        <RefreshCcw size={24} className="text-zinc-800 animate-spin" />
-                        <span className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-600">Initializing Core...</span>
+                        <RefreshCcw
+                          size={24}
+                          className="text-zinc-800 animate-spin"
+                        />
+                        <span className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-600">
+                          Initializing Core...
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -391,9 +450,13 @@ export const Atelier: React.FC = () => {
 
                 {/* Kiosk Loading */}
                 <div className="bg-card border border-border rounded-[2.5rem] p-8 flex flex-col items-center">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-8">Service Splash</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-8">
+                    Service Splash
+                  </span>
                   <div className="w-full aspect-video bg-zinc-950 rounded-3xl border border-zinc-800 overflow-hidden relative">
-                    <KioskLoading suffix={selectedVariant === 'pos' ? 'pos' : 'kiosk'} />
+                    <KioskLoading
+                      suffix={selectedVariant === "pos" ? "pos" : "kiosk"}
+                    />
                   </div>
                 </div>
               </div>
@@ -402,23 +465,61 @@ export const Atelier: React.FC = () => {
             {/* Stage: Product Flavors */}
             <section className="space-y-8">
               <div className="flex items-center space-x-4">
-                <div className="p-2 bg-muted rounded-lg"><Layers size={16} className="text-muted-foreground" /></div>
-                <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">System Flavors</h2>
+                <div className="p-2 bg-muted rounded-lg">
+                  <Layers size={16} className="text-muted-foreground" />
+                </div>
+                <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">
+                  System Flavors
+                </h2>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
                 {[
-                  { id: "pos", label: "Point of Sale", variant: "pos" as LogoVariant },
-                  { id: "kds", label: "Kitchen Display", variant: "kds" as LogoVariant },
-                  { id: "signage", label: "Digital Signage", variant: "signage" as LogoVariant },
-                  { id: "kiosk", label: "Self-Order Kiosk", variant: "kiosk" as LogoVariant },
-                  { id: "docs", label: "Intelligence Hub", variant: "whisk" as LogoVariant },
-                ].map(flavor => (
-                  <div key={flavor.id} className="bg-card/30 border border-border/50 rounded-3xl p-8 flex flex-col items-center space-y-6 hover:border-border transition-all group">
-                    <Logo variant={flavor.variant} size={48} showWordmark={false} environment={globalEnvironment} />
+                  {
+                    id: "pos",
+                    label: "Point of Sale",
+                    variant: "pos" as LogoVariant,
+                  },
+                  {
+                    id: "kds",
+                    label: "Kitchen Display",
+                    variant: "kds" as LogoVariant,
+                  },
+                  {
+                    id: "signage",
+                    label: "Digital Signage",
+                    variant: "signage" as LogoVariant,
+                  },
+                  {
+                    id: "kiosk",
+                    label: "Self-Order Kiosk",
+                    variant: "kiosk" as LogoVariant,
+                  },
+                  {
+                    id: "docs",
+                    label: "Intelligence Hub",
+                    variant: "whisk" as LogoVariant,
+                  },
+                ].map((flavor) => (
+                  <div
+                    key={flavor.id}
+                    className="bg-card/30 border border-border/50 rounded-3xl p-8 flex flex-col items-center space-y-6 hover:border-border transition-all group"
+                  >
+                    <Logo
+                      variant={flavor.variant}
+                      size={48}
+                      showWordmark={false}
+                      environment={globalEnvironment}
+                    />
                     <div className="text-center">
-                      <div className="text-[8px] font-black uppercase tracking-widest text-muted-foreground mb-1">{flavor.id}</div>
-                      <Wordmark size={16} suffix={flavor.id} environment={globalEnvironment} />
+                      <div className="text-[8px] font-black uppercase tracking-widest text-muted-foreground mb-1">
+                        {flavor.id}
+                      </div>
+                      <Wordmark
+                        size={16}
+                        suffix={flavor.id}
+                        environment={globalEnvironment}
+                      />
                     </div>
                   </div>
                 ))}
@@ -428,8 +529,12 @@ export const Atelier: React.FC = () => {
             {/* Stage: Deployment Preview */}
             <section className="space-y-8 pb-24">
               <div className="flex items-center space-x-4">
-                <div className="p-2 bg-amber-500/10 rounded-lg"><Box size={16} className="text-amber-500" /></div>
-                <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">Deployment Preview</h2>
+                <div className="p-2 bg-amber-500/10 rounded-lg">
+                  <Box size={16} className="text-amber-500" />
+                </div>
+                <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground">
+                  Deployment Preview
+                </h2>
               </div>
 
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
@@ -442,8 +547,18 @@ export const Atelier: React.FC = () => {
                     <div className="w-12 h-1 bg-muted-foreground/20 rounded-full mx-auto mb-8" />
                     <div className="grid grid-cols-4 gap-4">
                       {Array.from({ length: 12 }).map((_, i) => (
-                        <div key={i} className={`aspect-square rounded-xl flex items-center justify-center ${i === 0 ? "bg-card shadow-xl border border-border" : "bg-card/20"}`}>
-                          {i === 0 && <Logo variant="cloud" size={24} showWordmark={false} environment={globalEnvironment} />}
+                        <div
+                          key={i}
+                          className={`aspect-square rounded-xl flex items-center justify-center ${i === 0 ? "bg-card shadow-xl border border-border" : "bg-card/20"}`}
+                        >
+                          {i === 0 && (
+                            <Logo
+                              variant="cloud"
+                              size={24}
+                              showWordmark={false}
+                              environment={globalEnvironment}
+                            />
+                          )}
                         </div>
                       ))}
                     </div>
@@ -461,8 +576,15 @@ export const Atelier: React.FC = () => {
                       <div className="w-1.5 h-1.5 rounded-full bg-amber-500/50" />
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/50" />
                       <div className="ml-4 h-4 w-32 bg-card rounded flex items-center px-2 border border-border/50">
-                        <Logo variant="cloud" size={10} showWordmark={false} environment={globalEnvironment} />
-                        <span className="text-[6px] text-muted-foreground ml-1">sous.tools</span>
+                        <Logo
+                          variant="cloud"
+                          size={10}
+                          showWordmark={false}
+                          environment={globalEnvironment}
+                        />
+                        <span className="text-[6px] text-muted-foreground ml-1">
+                          sous.tools
+                        </span>
                       </div>
                     </div>
                     <div className="flex-1 p-4 bg-card/50">
@@ -481,8 +603,16 @@ export const Atelier: React.FC = () => {
                   </div>
                   <div className="w-40 h-40 bg-muted rounded-full border-4 border-muted-foreground/20 flex items-center justify-center relative shadow-inner">
                     <div className="text-center">
-                      <Logo variant="cloud" size={32} showWordmark={false} environment={globalEnvironment} animate />
-                      <div className="text-[8px] font-mono text-sky-500 mt-2">12:45</div>
+                      <Logo
+                        variant="cloud"
+                        size={32}
+                        showWordmark={false}
+                        environment={globalEnvironment}
+                        animate
+                      />
+                      <div className="text-[8px] font-mono text-sky-500 mt-2">
+                        12:45
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -502,14 +632,24 @@ const IconPreviewCard = ({ label, type, color, mask, variant, env }: any) => (
       <span className={color}>{type}</span>
     </div>
     <div className="aspect-square bg-muted/20 rounded-2xl flex items-center justify-center border border-border/50 relative overflow-hidden">
-      {mask === 'squircle' && <div className="absolute inset-0 border-[1px] border-emerald-500/20 rounded-[35%] pointer-events-none" />}
-      <div className={cn(
-        "w-[120px] h-[120px] bg-background flex items-center justify-center overflow-hidden border border-border shadow-xl",
-        mask === 'squircle' ? "rounded-[35%]" : mask === 'rounded' ? "rounded-[22%]" : mask === 'circle' ? "rounded-full" : "rounded-none"
-      )}>
+      {mask === "squircle" && (
+        <div className="absolute inset-0 border-[1px] border-emerald-500/20 rounded-[35%] pointer-events-none" />
+      )}
+      <div
+        className={cn(
+          "w-[120px] h-[120px] bg-background flex items-center justify-center overflow-hidden border border-border shadow-xl",
+          mask === "squircle"
+            ? "rounded-[35%]"
+            : mask === "rounded"
+              ? "rounded-[22%]"
+              : mask === "circle"
+                ? "rounded-full"
+                : "rounded-none",
+        )}
+      >
         <Logo
           variant={variant || "cloud"}
-          size={mask === 'circle' ? 64 : 80}
+          size={mask === "circle" ? 64 : 80}
           showWordmark={false}
           environment={env}
         />

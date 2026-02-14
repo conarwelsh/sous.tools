@@ -30,15 +30,20 @@ export class ScopesGuard implements CanActivate {
       return false;
     }
 
-    const access = await this.planService.getEffectiveAccess(user.organizationId, user.role);
-    
+    const access = await this.planService.getEffectiveAccess(
+      user.organizationId,
+      user.role,
+    );
+
     // Calculate intersection with Token scopes if present
     let effectiveScopes = access.scopes;
     if (user.scopes && Array.isArray(user.scopes)) {
-      effectiveScopes = effectiveScopes.filter(s => user.scopes.includes(s));
+      effectiveScopes = effectiveScopes.filter((s) => user.scopes.includes(s));
     }
 
-    const hasScope = requiredScopes.every((scope) => effectiveScopes.includes(scope));
+    const hasScope = requiredScopes.every((scope) =>
+      effectiveScopes.includes(scope),
+    );
 
     if (!hasScope) {
       throw new ForbiddenException('Insufficient plan or role permissions');

@@ -91,7 +91,9 @@ export class PresentationService {
     delete safeData.updatedAt;
 
     try {
-      logger.info(`[PresentationService] Updating layout ${id}`, { safeDataKeys: Object.keys(safeData) });
+      logger.info(`[PresentationService] Updating layout ${id}`, {
+        safeDataKeys: Object.keys(safeData),
+      });
 
       const result = await this.dbService.db
         .update(layouts)
@@ -121,10 +123,13 @@ export class PresentationService {
 
       return updatedLayout;
     } catch (e: any) {
-      logger.error(`[PresentationService] Failed to update layout ${id}: ${e.message}`, {
-        stack: e.stack,
-        safeData,
-      });
+      logger.error(
+        `[PresentationService] Failed to update layout ${id}: ${e.message}`,
+        {
+          stack: e.stack,
+          safeData,
+        },
+      );
       throw e;
     }
   }
@@ -206,9 +211,11 @@ export class PresentationService {
   async seedSystem(orgId: string) {
     logger.info('🌱 Seeding Presentation System Templates...');
 
-    const systemOrg = await this.dbService.readDb.query.organizations.findFirst({
-      where: eq(organizations.slug, 'system'),
-    });
+    const systemOrg = await this.dbService.readDb.query.organizations.findFirst(
+      {
+        where: eq(organizations.slug, 'system'),
+      },
+    );
 
     const targetOrgId = systemOrg?.id || orgId;
 
@@ -279,11 +286,11 @@ export class PresentationService {
       .insert(displays)
       .values(data)
       .returning();
-    
+
     if (result[0] && this.pubSub) {
       this.pubSub.publish('displayUpdated', { displayUpdated: result[0] });
     }
-    
+
     return result[0];
   }
 
@@ -331,7 +338,9 @@ export class PresentationService {
             try {
               return str ? JSON.parse(str) : {};
             } catch (e) {
-              logger.warn(`[PresentationService] Failed to parse JSON field: ${str}`);
+              logger.warn(
+                `[PresentationService] Failed to parse JSON field: ${str}`,
+              );
               return {};
             }
           };
@@ -365,18 +374,21 @@ export class PresentationService {
 
         if (display && this.pubSub) {
           this.pubSub.publish('displayUpdated', {
-            displayUpdated: display
+            displayUpdated: display,
           });
         }
       }
 
       return result[0];
     } catch (e: any) {
-      logger.error(`[PresentationService] Failed to assign layout to display: ${e.message}`, {
-        stack: e.stack,
-        displayId: data.displayId,
-        layoutId: data.layoutId,
-      });
+      logger.error(
+        `[PresentationService] Failed to assign layout to display: ${e.message}`,
+        {
+          stack: e.stack,
+          displayId: data.displayId,
+          layoutId: data.layoutId,
+        },
+      );
       throw e;
     }
   }
@@ -389,7 +401,9 @@ export class PresentationService {
   }
 
   async getActiveLayoutByHardwareId(hardwareId: string) {
-    logger.info(`[PresentationService] Fetching active layout for hardwareId: ${hardwareId}`);
+    logger.info(
+      `[PresentationService] Fetching active layout for hardwareId: ${hardwareId}`,
+    );
     const display = await this.dbService.readDb.query.displays.findFirst({
       where: eq(displays.hardwareId, hardwareId),
       with: {
@@ -402,16 +416,22 @@ export class PresentationService {
     });
 
     if (!display) {
-      logger.warn(`[PresentationService] No display found for hardwareId: ${hardwareId}`);
+      logger.warn(
+        `[PresentationService] No display found for hardwareId: ${hardwareId}`,
+      );
       return null;
     }
 
     if (!display.assignments?.[0]) {
-      logger.warn(`[PresentationService] No assignments found for display: ${display.id} (${display.name})`);
+      logger.warn(
+        `[PresentationService] No assignments found for display: ${display.id} (${display.name})`,
+      );
       return null;
     }
 
-    logger.info(`[PresentationService] Found layout ${display.assignments[0].layout.id} for display ${display.name}`);
+    logger.info(
+      `[PresentationService] Found layout ${display.assignments[0].layout.id} for display ${display.name}`,
+    );
     return display.assignments[0].layout;
   }
 }

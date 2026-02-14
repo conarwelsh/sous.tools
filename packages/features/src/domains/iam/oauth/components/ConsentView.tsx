@@ -3,16 +3,16 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { getHttpClient } from "@sous/client-sdk";
-import { 
-  Card, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription, 
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
   CardContent,
   Button,
   View,
   Text,
-  Logo
+  Logo,
 } from "@sous/ui";
 import { CheckCircle2, ShieldCheck, XCircle, Loader2 } from "lucide-react";
 
@@ -59,7 +59,7 @@ export const ConsentView: React.FC = () => {
       const result = (await http.post(`/oauth/approve`, {
         clientId,
         scopes: clientInfo.requestedScopes,
-        redirectUri
+        redirectUri,
       })) as any;
       window.location.href = result.redirectUrl;
     } catch (e: any) {
@@ -74,33 +74,49 @@ export const ConsentView: React.FC = () => {
     window.location.href = url.toString();
   };
 
-  if (loading) return (
-    <View className="flex flex-col items-center justify-center p-12 space-y-6">
-      <Logo size={60} animate />
-      <Text className="font-bold uppercase tracking-widest text-[10px]">Verifying Application...</Text>
-    </View>
-  );
+  if (loading)
+    return (
+      <View className="flex flex-col items-center justify-center p-12 space-y-6">
+        <Logo size={60} animate />
+        <Text className="font-bold uppercase tracking-widest text-[10px]">
+          Verifying Application...
+        </Text>
+      </View>
+    );
 
-  if (error) return (
-    <Card className="max-w-md mx-auto border-destructive/20 bg-destructive/5 rounded-[2rem]">
-      <CardContent className="p-12 text-center space-y-6">
-        <XCircle className="mx-auto text-destructive" size={48} />
-        <View className="space-y-2">
-          <Text className="font-bold text-destructive uppercase italic tracking-tighter text-xl">OAuth Error</Text>
-          <Text className="text-muted-foreground">{error}</Text>
-        </View>
-        <Button onClick={() => router.push("/dashboard")} variant="outline" className="w-full">Return to Dashboard</Button>
-      </CardContent>
-    </Card>
-  );
+  if (error)
+    return (
+      <Card className="max-w-md mx-auto border-destructive/20 bg-destructive/5 rounded-[2rem]">
+        <CardContent className="p-12 text-center space-y-6">
+          <XCircle className="mx-auto text-destructive" size={48} />
+          <View className="space-y-2">
+            <Text className="font-bold text-destructive uppercase italic tracking-tighter text-xl">
+              OAuth Error
+            </Text>
+            <Text className="text-muted-foreground">{error}</Text>
+          </View>
+          <Button
+            onClick={() => router.push("/dashboard")}
+            variant="outline"
+            className="w-full"
+          >
+            Return to Dashboard
+          </Button>
+        </CardContent>
+      </Card>
+    );
 
   return (
     <Card className="max-w-lg mx-auto shadow-2xl rounded-[2.5rem] overflow-hidden border-border/50">
       <CardHeader className="pt-12 pb-8 bg-muted/30 border-b border-border/50 text-center space-y-4">
         <Logo size={40} showWordmark variant="neon" />
         <View>
-          <CardTitle className="text-2xl font-black italic uppercase tracking-tighter">Authorize Access</CardTitle>
-          <CardDescription>An external application is requesting access to your data.</CardDescription>
+          <CardTitle className="text-2xl font-black italic uppercase tracking-tighter">
+            Authorize Access
+          </CardTitle>
+          <CardDescription>
+            An external application is requesting access to your data.
+          </CardDescription>
         </View>
       </CardHeader>
       <CardContent className="p-10 space-y-8">
@@ -109,8 +125,12 @@ export const ConsentView: React.FC = () => {
             <ShieldCheck size={24} />
           </View>
           <View>
-            <Text className="font-black uppercase text-xs tracking-tight">{clientInfo.client.name}</Text>
-            <Text className="text-muted-foreground text-sm">Wants permission to access:</Text>
+            <Text className="font-black uppercase text-xs tracking-tight">
+              {clientInfo.client.name}
+            </Text>
+            <Text className="text-muted-foreground text-sm">
+              Wants permission to access:
+            </Text>
           </View>
         </View>
 
@@ -124,15 +144,15 @@ export const ConsentView: React.FC = () => {
         </View>
 
         <View className="pt-4 space-y-3">
-          <Button 
-            onClick={handleApprove} 
+          <Button
+            onClick={handleApprove}
             disabled={approving}
             className="w-full h-14 rounded-2xl text-lg font-black italic uppercase tracking-tighter shadow-xl shadow-primary/10"
           >
             {approving ? <Loader2 className="animate-spin" /> : "Allow Access"}
           </Button>
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             onClick={handleDeny}
             disabled={approving}
             className="w-full text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-destructive transition-colors"
@@ -142,7 +162,8 @@ export const ConsentView: React.FC = () => {
         </View>
 
         <Text className="text-center text-muted-foreground italic text-[10px]">
-          By allowing, you grant this app access to the data listed above. You can revoke this access at any time in your Developer Settings.
+          By allowing, you grant this app access to the data listed above. You
+          can revoke this access at any time in your Developer Settings.
         </Text>
       </CardContent>
     </Card>

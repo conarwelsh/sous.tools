@@ -1,4 +1,11 @@
-import { pgTable, uuid, varchar, timestamp, text, jsonb } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  uuid,
+  varchar,
+  timestamp,
+  text,
+  jsonb,
+} from 'drizzle-orm/pg-core';
 import { organizations } from '../organizations/organizations.schema';
 
 export const oauthClients = pgTable('oauth_clients', {

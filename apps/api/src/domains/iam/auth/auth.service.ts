@@ -21,16 +21,19 @@ import { eq, and, gt } from 'drizzle-orm';
 import * as bcrypt from 'bcrypt';
 import { logger } from '@sous/logger';
 import { config } from '@sous/config';
-import { PlanType, FeatureScope, MetricKey } from '@sous/features/constants/plans';
+import {
+  PlanType,
+  FeatureScope,
+  MetricKey,
+} from '@sous/features/constants/plans';
 
 @Injectable()
 export class AuthService {
-    constructor(
-      @Inject(DatabaseService) private readonly dbService: DatabaseService,
-      private readonly jwtService: JwtService,
-      @Optional() private readonly mailService?: MailService,
-    ) {
-  }
+  constructor(
+    @Inject(DatabaseService) private readonly dbService: DatabaseService,
+    private readonly jwtService: JwtService,
+    @Optional() private readonly mailService?: MailService,
+  ) {}
 
   async forgotPassword(email: string) {
     const user = await this.dbService.db.query.users.findFirst({
@@ -107,7 +110,7 @@ export class AuthService {
               FeatureScope.CULINARY_RECIPE_CREATE,
               FeatureScope.CULINARY_COOK_MODE,
             ],
-            limits: { 
+            limits: {
               [MetricKey.MAX_RECIPES]: 10,
               [MetricKey.MAX_USERS]: 2,
             },
@@ -267,13 +270,14 @@ export class AuthService {
         target: users.email,
         set: {
           pin: '1234',
-        }
+        },
       });
   }
 
   async getProfile(userId: string) {
     // Basic UUID validation to prevent DB crashes
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(userId)) {
       return null;
     }
@@ -494,7 +498,11 @@ export class AuthService {
       // 5. Trigger Verification Email (Async via Queue)
       if (this.mailService) {
         const verificationLink = `${config.web.url}/verify-email?token=${crypto.randomBytes(32).toString('hex')}`;
-        void this.mailService.sendVerificationEmail(user.email, user.firstName || 'Chef', verificationLink);
+        void this.mailService.sendVerificationEmail(
+          user.email,
+          user.firstName || 'Chef',
+          verificationLink,
+        );
       }
 
       return user;

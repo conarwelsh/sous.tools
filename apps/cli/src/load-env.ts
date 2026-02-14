@@ -17,7 +17,7 @@ export async function loadInfisicalEnv() {
 
     // 2. Determine target environment
     const envName = process.env.NODE_ENV || 'development';
-    
+
     // 3. Initialize SecretManager
     const secrets = new SecretManager({
       clientId: bootstrap.INFISICAL_CLIENT_ID,
@@ -28,13 +28,12 @@ export async function loadInfisicalEnv() {
     // 4. Fetch secrets
     const vaultSecrets = await secrets.listSecrets(envName);
     const keys = Object.keys(vaultSecrets);
-    
+
     // 5. Inject into process.env
     Object.assign(process.env, vaultSecrets);
-    
+
     // Mark as injected to avoid double loading
     process.env.SOUS_ENV_INJECTED = 'true';
-
   } catch (e: any) {
     console.error(`❌ Failed to load secrets from Infisical: ${e.message}`);
     process.exit(1);

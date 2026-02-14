@@ -1,4 +1,3 @@
-import path from "path";
 import { execSync } from "child_process";
 
 // Ensure critical public variables are set during build if their non-public counterparts exist

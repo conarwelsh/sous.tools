@@ -1,11 +1,22 @@
-import { Resolver, Query, Args, Subscription, ResolveField, Parent } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Args,
+  Subscription,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { HardwareService } from '../services/hardware.service.js';
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { Inject } from '@nestjs/common';
 import { PubSub } from 'graphql-subscriptions';
 import { DatabaseService } from '../../core/database/database.service.js';
 import { eq } from 'drizzle-orm';
-import { displays, displayAssignments, layouts } from '../../core/database/schema.js';
+import {
+  displays,
+  displayAssignments,
+  layouts,
+} from '../../core/database/schema.js';
 
 @ObjectType()
 class DeviceType {
@@ -58,12 +69,13 @@ export class HardwareResolver {
 
     if (!display) return null;
 
-    const assignment = await this.dbService.readDb.query.displayAssignments.findFirst({
-      where: eq(displayAssignments.displayId, display.id),
-      with: {
-        layout: true,
-      },
-    });
+    const assignment =
+      await this.dbService.readDb.query.displayAssignments.findFirst({
+        where: eq(displayAssignments.displayId, display.id),
+        with: {
+          layout: true,
+        },
+      });
 
     return assignment?.layout?.name || null;
   }

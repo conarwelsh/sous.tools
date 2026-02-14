@@ -18,7 +18,7 @@ export class CommissionProcessor extends WorkerHost {
         await this.salesService.recordCommission(
           data.organizationId,
           data.amount,
-          data.externalId
+          data.externalId,
         );
         break;
       default:

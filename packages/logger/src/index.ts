@@ -27,28 +27,30 @@ interface LoggerConfig {
  */
 export async function initObservability(config: LoggerConfig) {
   if (!isServer) return;
-  
+
   const isDev = config.env === "development";
   const forceHyperDX = process.env.FORCE_HYPERDX === "true";
 
   if (isDev && !forceHyperDX) {
     return;
   }
-  
+
   const apiKey = config.logger.hyperdxApiKey;
   if (!apiKey) {
-    console.log("ℹ️ HyperDX API Key not found. Skipping OpenTelemetry initialization.");
+    console.log(
+      "ℹ️ HyperDX API Key not found. Skipping OpenTelemetry initialization.",
+    );
     return;
   }
 
   try {
     const hyperdxPkg = "@hyperdx/node-opentelemetry";
     const HyperDX = await import(/* webpackIgnore: true */ hyperdxPkg);
-    
+
     // Temporarily silence console to suppress HyperDX bootstrap logs
     const originalLog = console.log;
     const originalInfo = console.info;
-    if (config.logger.level !== 'debug') {
+    if (config.logger.level !== "debug") {
       console.log = () => {};
       console.info = () => {};
     }
@@ -63,7 +65,7 @@ export async function initObservability(config: LoggerConfig) {
     console.log = originalLog;
     console.info = originalInfo;
 
-    if (config.logger.level === 'debug') {
+    if (config.logger.level === "debug") {
       console.log("✅ Observability initialized with HyperDX");
     }
   } catch (e: any) {
@@ -78,10 +80,10 @@ export function createLogger(options: { name: string; config?: LoggerConfig }) {
   const logConfig = options.config || {
     env: isServer ? process.env.NODE_ENV || "development" : "development",
     logger: {
-      level: isServer ? (process.env.LOG_LEVEL || "info") : "info",
-      json: isServer ? (process.env.SOUS_JSON_LOGS === "true") : false,
+      level: isServer ? process.env.LOG_LEVEL || "info" : "info",
+      json: isServer ? process.env.SOUS_JSON_LOGS === "true" : false,
       hyperdxApiKey: isServer ? process.env.HYPERDX_API_KEY : undefined,
-    }
+    },
   };
 
   const isDev = logConfig.env === "development";
@@ -90,7 +92,7 @@ export function createLogger(options: { name: string; config?: LoggerConfig }) {
   if (isServer) {
     // 1. Centralized Local Log File
     const home = process.env.HOME || process.env.USERPROFILE;
-    if (home && !isDev) { 
+    if (home && !isDev) {
       transports.push({
         target: "pino/file",
         options: {
@@ -101,20 +103,21 @@ export function createLogger(options: { name: string; config?: LoggerConfig }) {
     }
   }
 
-  const baseLogger = pino(
-    {
-      name: options.name,
-      level: logConfig.logger.level,
-      mixin() {
-        const store = loggerStorage?.getStore?.();
-        return store ? Object.fromEntries(store) : {};
-      },
-      browser: isServer ? undefined : { asObject: true },
-      transport: isServer && transports.length > 0
+  const baseLogger = pino({
+    name: options.name,
+    level: logConfig.logger.level,
+    mixin() {
+      const store = loggerStorage?.getStore?.();
+      return store ? Object.fromEntries(store) : {};
+    },
+    browser: isServer ? undefined : { asObject: true },
+    transport:
+      isServer && transports.length > 0
         ? { targets: transports }
-        : (isDev ? { target: "pino-pretty" } : undefined),
-    }
-  );
+        : isDev
+          ? { target: "pino-pretty" }
+          : undefined,
+  });
 
   return baseLogger;
 }

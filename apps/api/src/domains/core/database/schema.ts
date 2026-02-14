@@ -52,10 +52,7 @@ import {
   vendorMappings,
   shoppingList,
 } from '../../procurement/procurement.schema.js';
-import {
-  posOrders,
-  posOrderProducts,
-} from '../../pos/pos.schema.js';
+import { posOrders, posOrderProducts } from '../../pos/pos.schema.js';
 import {
   stockAudits,
   stockAuditItems,
@@ -74,6 +71,7 @@ import {
 import { invitations } from '../../iam/invitations/invitations.schema.js';
 import { passwordResetTokens } from '../../iam/auth/password-reset.schema.js';
 import { devices } from '../../hardware/hardware.schema.js';
+import { locations } from '../../iam/locations/locations.schema.js';
 
 // --- Relations ---
 
@@ -117,19 +115,20 @@ export const passwordResetTokensRelations = relations(
   }),
 );
 
-export const organizationsRelations = relations(organizations, ({ one, many }) => ({
-  users: many(users),
-  locations: many(locations),
-  categories: many(categories),
-  products: many(products),
-  tags: many(tags),
-  plan: one(plans, {
-    fields: [organizations.planId],
-    references: [plans.id],
+export const organizationsRelations = relations(
+  organizations,
+  ({ one, many }) => ({
+    users: many(users),
+    locations: many(locations),
+    categories: many(categories),
+    products: many(products),
+    tags: many(tags),
+    plan: one(plans, {
+      fields: [organizations.planId],
+      references: [plans.id],
+    }),
   }),
-}));
-
-import { locations } from '../../iam/locations/locations.schema.js';
+);
 
 export const usersRelations = relations(users, ({ one }) => ({
   organization: one(organizations, {
@@ -270,12 +269,15 @@ export const posOrdersRelations = relations(posOrders, ({ many }) => ({
   items: many(posOrderProducts),
 }));
 
-export const posOrderProductsRelations = relations(posOrderProducts, ({ one }) => ({
-  order: one(posOrders, {
-    fields: [posOrderProducts.orderId],
-    references: [posOrders.id],
+export const posOrderProductsRelations = relations(
+  posOrderProducts,
+  ({ one }) => ({
+    order: one(posOrders, {
+      fields: [posOrderProducts.orderId],
+      references: [posOrders.id],
+    }),
   }),
-}));
+);
 
 export const cookNotesRelations = relations(cookNotes, ({ one }) => ({
   recipe: one(recipes, {

@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, UseGuards, Req, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Req,
+  Param,
+} from '@nestjs/common';
 import { SalesService } from '../services/sales.service.js';
 import { JwtAuthGuard } from '../../iam/auth/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../iam/auth/guards/roles.guard.js';
@@ -24,6 +32,8 @@ export class SalesController {
   @Get('organizations')
   @Roles('salesman', 'superadmin')
   async getOrganizations(@Req() req: any) {
-    return this.salesService.getAttributedOrganizations(req.user.sub || req.user.id);
+    return this.salesService.getAttributedOrganizations(
+      req.user.sub || req.user.id,
+    );
   }
 }

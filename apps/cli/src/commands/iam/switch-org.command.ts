@@ -16,7 +16,9 @@ export class SwitchOrgCommand extends CommandRunner {
     const [orgId] = inputs;
 
     if (!orgId) {
-      logger.error('Organization ID is required. Usage: sous context switch-org <orgId>');
+      logger.error(
+        'Organization ID is required. Usage: sous context switch-org <orgId>',
+      );
       return;
     }
 

@@ -18,7 +18,9 @@ export class SalesService {
 
   @Cron(CronExpression.EVERY_HOUR)
   async handleCommissionWorker() {
-    logger.info('[Sales] CommissionWorker: Scanning for new subscription payments...');
+    logger.info(
+      '[Sales] CommissionWorker: Scanning for new subscription payments...',
+    );
     // In a real implementation, we would scan Stripe payments for the last hour
     // For now, we rely on the webhook to record commissions in real-time.
   }
@@ -30,7 +32,9 @@ export class SalesService {
     });
 
     if (!org || org.attributedSalesmanId !== salesmanId) {
-      throw new UnauthorizedException('Organization not attributed to this salesman');
+      throw new UnauthorizedException(
+        'Organization not attributed to this salesman',
+      );
     }
 
     // 2. Find the salesman user
@@ -55,17 +59,19 @@ export class SalesService {
   }
 
   async getMetrics(salesmanId: string) {
-    const attributedOrgs = await this.dbService.readDb.query.organizations.findMany({
-      where: eq(organizations.attributedSalesmanId, salesmanId),
-    });
+    const attributedOrgs =
+      await this.dbService.readDb.query.organizations.findMany({
+        where: eq(organizations.attributedSalesmanId, salesmanId),
+      });
 
-    const commissions = await this.dbService.readDb.query.salesCommissions.findMany({
-      where: eq(salesCommissions.salesmanId, salesmanId),
-    });
+    const commissions =
+      await this.dbService.readDb.query.salesCommissions.findMany({
+        where: eq(salesCommissions.salesmanId, salesmanId),
+      });
 
     const totalEarned = commissions.reduce((acc, c) => acc + c.amount, 0);
     const pendingCommissions = commissions
-      .filter(c => c.status === 'PENDING')
+      .filter((c) => c.status === 'PENDING')
       .reduce((acc, c) => acc + c.amount, 0);
 
     return {
@@ -81,18 +87,24 @@ export class SalesService {
       where: eq(organizations.attributedSalesmanId, salesmanId),
       with: {
         plan: true,
-      }
+      },
     });
   }
 
-  async recordCommission(organizationId: string, paymentAmount: number, externalPaymentId: string) {
+  async recordCommission(
+    organizationId: string,
+    paymentAmount: number,
+    externalPaymentId: string,
+  ) {
     const org = await this.dbService.readDb.query.organizations.findFirst({
       where: eq(organizations.id, organizationId),
     });
 
     if (!org || !org.attributedSalesmanId || org.commissionBps === 0) return;
 
-    const commissionAmount = Math.floor(paymentAmount * (org.commissionBps / 10000));
+    const commissionAmount = Math.floor(
+      paymentAmount * (org.commissionBps / 10000),
+    );
 
     await this.dbService.db.insert(salesCommissions).values({
       organizationId,
@@ -103,6 +115,8 @@ export class SalesService {
       status: 'PENDING',
     });
 
-    logger.info(`[Sales] Recorded commission of ${commissionAmount} cents for salesman ${org.attributedSalesmanId}`);
+    logger.info(
+      `[Sales] Recorded commission of ${commissionAmount} cents for salesman ${org.attributedSalesmanId}`,
+    );
   }
 }

@@ -17,6 +17,9 @@ export async function getPricingPlansAction() {
     return { success: true, data: plans };
   } catch (error) {
     console.error("Error fetching pricing plans:", error);
-    return { success: false, error: "Internal server error while fetching plans" };
+    return {
+      success: false,
+      error: "Internal server error while fetching plans",
+    };
   }
 }

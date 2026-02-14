@@ -327,7 +327,11 @@ export class IntegrationsService {
   async sync(
     organizationId: string,
     provider: string,
-    options?: { syncType?: 'CATALOG' | 'SALES'; dateRange?: { start: Date; end: Date }; fileId?: string },
+    options?: {
+      syncType?: 'CATALOG' | 'SALES';
+      dateRange?: { start: Date; end: Date };
+      fileId?: string;
+    },
   ) {
     const configEntry = await this.getIntegration(organizationId, provider);
     if (!configEntry) throw new Error('Integration not found');
@@ -344,98 +348,108 @@ export class IntegrationsService {
       const syncType = options?.syncType || 'CATALOG';
 
       if (syncType === 'SALES') {
-        logger.info(`[Integrations] Starting Square SALES sync for org ${organizationId}`);
-        const startDate = options?.dateRange?.start || new Date(Date.now() - 24 * 60 * 60 * 1000); // Default 24h
+        logger.info(
+          `[Integrations] Starting Square SALES sync for org ${organizationId}`,
+        );
+        const startDate =
+          options?.dateRange?.start ||
+          new Date(Date.now() - 24 * 60 * 60 * 1000); // Default 24h
         const endDate = options?.dateRange?.end || new Date();
 
         if (driver instanceof SquareDriver) {
           const orders = await driver.fetchSales(startDate, endDate);
-          logger.info(`[Integrations] Fetched ${orders.length} orders from Square`);
-          
+          logger.info(
+            `[Integrations] Fetched ${orders.length} orders from Square`,
+          );
+
           // Here we would upsert these orders into posOrders
           // For now, we log the count. Implementing full Order Upsert logic requires mapping items.
         }
       } else {
-        logger.info(`[Integrations] Starting Square CATALOG sync for org ${organizationId}`);
+        logger.info(
+          `[Integrations] Starting Square CATALOG sync for org ${organizationId}`,
+        );
         // 1. Sync Catalog
         const catalogItems = await driver.fetchCatalog();
 
-      const sqCategories = catalogItems.filter(
-        (item: any) => item.type === 'CATEGORY',
-      );
-      const sqProducts = catalogItems.filter(
-        (item: any) => item.type === 'ITEM',
-      );
+        const sqCategories = catalogItems.filter(
+          (item: any) => item.type === 'CATEGORY',
+        );
+        const sqProducts = catalogItems.filter(
+          (item: any) => item.type === 'ITEM',
+        );
 
-      const categoryMap = new Map<string, string>();
-      const categoryNameToDbId = new Map<string, string>();
+        const categoryMap = new Map<string, string>();
+        const categoryNameToDbId = new Map<string, string>();
 
-      // Upsert Categories
-      for (const cat of sqCategories) {
-        const result = await this.dbService.db
-          .insert(categories)
-          .values({
-            name: cat.name,
-            organizationId,
-          })
-          .onConflictDoNothing()
-          .returning();
+        // Upsert Categories
+        for (const cat of sqCategories) {
+          const result = await this.dbService.db
+            .insert(categories)
+            .values({
+              name: cat.name,
+              organizationId,
+            })
+            .onConflictDoNothing()
+            .returning();
 
-        if (result[0]) {
-          categoryMap.set(cat.id, result[0].id);
-          categoryNameToDbId.set(cat.name, result[0].id);
-        } else {
-          const existing = await this.dbService.db.query.categories.findFirst({
-            where: and(
-              eq(categories.name, cat.name),
-              eq(categories.organizationId, organizationId),
-            ),
-          });
-          if (existing) {
-            categoryMap.set(cat.id, existing.id);
-            categoryNameToDbId.set(cat.name, existing.id);
+          if (result[0]) {
+            categoryMap.set(cat.id, result[0].id);
+            categoryNameToDbId.set(cat.name, result[0].id);
+          } else {
+            const existing = await this.dbService.db.query.categories.findFirst(
+              {
+                where: and(
+                  eq(categories.name, cat.name),
+                  eq(categories.organizationId, organizationId),
+                ),
+              },
+            );
+            if (existing) {
+              categoryMap.set(cat.id, existing.id);
+              categoryNameToDbId.set(cat.name, existing.id);
+            }
           }
         }
-      }
 
-      // 2. Upsert Products
-      for (const prod of sqProducts) {
-        let categoryId = prod.categoryId
-          ? categoryMap.get(prod.categoryId)
-          : null;
+        // 2. Upsert Products
+        for (const prod of sqProducts) {
+          const categoryId = prod.categoryId
+            ? categoryMap.get(prod.categoryId)
+            : null;
 
-        // Secondary Fallback: If no categoryId by ID, we try to match by name if category exists in our current map
-        // This handles cases where a POS might return items without explicit category IDs but we can infer them
-        if (!categoryId) {
-          // Find if there's any category in our sqCategories that matches some logic?
-          // For now, if categoryId is missing, we check if the driver provided it elsewhere
-          // or just leave it null.
-          logger.debug(
-            `[Integrations] No category found for product: ${prod.name}`,
-          );
-        }
+          // Secondary Fallback: If no categoryId by ID, we try to match by name if category exists in our current map
+          // This handles cases where a POS might return items without explicit category IDs but we can infer them
+          if (!categoryId) {
+            // Find if there's any category in our sqCategories that matches some logic?
+            // For now, if categoryId is missing, we check if the driver provided it elsewhere
+            // or just leave it null.
+            logger.debug(
+              `[Integrations] No category found for product: ${prod.name}`,
+            );
+          }
 
-        await this.dbService.db
-          .insert(products)
-          .values({
-            name: prod.name,
-            price: prod.price,
-            categoryId,
-            organizationId,
-            linkedPosProductId: prod.id,
-          })
-          .onConflictDoUpdate({
-            target: [products.name, products.organizationId],
-            set: {
+          await this.dbService.db
+            .insert(products)
+            .values({
+              name: prod.name,
               price: prod.price,
               categoryId,
+              organizationId,
               linkedPosProductId: prod.id,
-              updatedAt: new Date(),
-            },
-          });
+            })
+            .onConflictDoUpdate({
+              target: [products.name, products.organizationId],
+              set: {
+                price: prod.price,
+                categoryId,
+                linkedPosProductId: prod.id,
+                updatedAt: new Date(),
+              },
+            });
+        }
       }
     }
-  }
 
     if (provider === 'google-drive') {
       const fileId = options?.fileId;
@@ -511,16 +525,23 @@ export class IntegrationsService {
         if (recipe && this.moduleRef) {
           const { Queue } = await import('bullmq');
           try {
-            const ingestionQueue = this.moduleRef.get('BullQueue_ingestion-queue', { strict: false });
+            const ingestionQueue = this.moduleRef.get(
+              'BullQueue_ingestion-queue',
+              { strict: false },
+            );
             if (ingestionQueue) {
               await ingestionQueue.add('process-recipe', {
                 recipeId: recipe.id,
                 organizationId,
               });
-              logger.info(`[Integrations] Queued ingestion for recipe ${recipe.id}`);
+              logger.info(
+                `[Integrations] Queued ingestion for recipe ${recipe.id}`,
+              );
             }
           } catch (e) {
-            logger.warn(`[Integrations] Failed to queue ingestion: ${e.message}`);
+            logger.warn(
+              `[Integrations] Failed to queue ingestion: ${e.message}`,
+            );
           }
         }
       }

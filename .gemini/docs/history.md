@@ -1,96 +1,96 @@
 ## 2026-02-14 (API Hardening & Auth Guard Fixes)
 
 - **API Hardening & Auth Guard Fixes:**
-    - Fixed a critical crash in `JwtAuthGuard` caused by an incorrect relative import path for `HardwareAuthGuard` (`../../` instead of `../../../`).
-    - Resolved a `TypeError: context.getHandler is not a function` in `GqlAuthGuard` by implementing a more complete `ExecutionContext` mock that delegates all core methods (`getHandler`, `getClass`, `getType`, etc.) to the original context. This ensures compatibility with decorators like `@Public()` and hardware-specific auth logic when used within a GraphQL execution context.
-    - Verified the API stability after restart, ensuring successful startup and database connection.
-    - Added comprehensive fix notes to `CHANGELOG.md`.
+  - Fixed a critical crash in `JwtAuthGuard` caused by an incorrect relative import path for `HardwareAuthGuard` (`../../` instead of `../../../`).
+  - Resolved a `TypeError: context.getHandler is not a function` in `GqlAuthGuard` by implementing a more complete `ExecutionContext` mock that delegates all core methods (`getHandler`, `getClass`, `getType`, etc.) to the original context. This ensures compatibility with decorators like `@Public()` and hardware-specific auth logic when used within a GraphQL execution context.
+  - Verified the API stability after restart, ensuring successful startup and database connection.
+  - Added comprehensive fix notes to `CHANGELOG.md`.
 
 ## 2026-02-14 (Marketing Restoration, Design Fidelity & Bug Fixes)
 
 - **Marketing Page Restoration:**
-    - Reverted the main landing page (`apps/web/src/app/(public)/page.tsx`) to its previous industrial design version.
-    - Restored the use of the `@sous/ui` design system components (`Logo`, `View`, `Text` with uppercase tracking) for better alignment with the project's brand identity.
-    - Re-introduced the interactive "Culinary Intelligence" features grid and tiered pricing section with "Most Popular" badges.
-    - Restored the dynamic theme-aware radial background gradients for enhanced visual depth.
+  - Reverted the main landing page (`apps/web/src/app/(public)/page.tsx`) to its previous industrial design version.
+  - Restored the use of the `@sous/ui` design system components (`Logo`, `View`, `Text` with uppercase tracking) for better alignment with the project's brand identity.
+  - Re-introduced the interactive "Culinary Intelligence" features grid and tiered pricing section with "Most Popular" badges.
+  - Restored the dynamic theme-aware radial background gradients for enhanced visual depth.
 - **Native Orchestration & CLI Polish:**
-    - Updated `ecosystem.config.js` to include the full suite of native application targets: **POS**, **KDS**, **Signage**, **Kiosk**, and **Tools**.
-    - Reconfigured emulator mappings to match hardware profiles: POS/Kiosk use `Pixel_Tablet`, KDS uses `Medium_Desktop`, Signage uses `Television_1080p`, and Tools uses `Pixel_9`.
-    - Hardened the `device-manager.ts` and `run-android.sh` scripts with mandatory **60s timeouts** for all Windows interop (ADB/Emulator) calls to prevent WSL hangs.
-    - Improved the **Sous Dev Dashboard** with a scrollable sidebar and visual indicators for native processes, ensuring all 10+ services are accessible in standard terminal sizes.
+  - Updated `ecosystem.config.js` to include the full suite of native application targets: **POS**, **KDS**, **Signage**, **Kiosk**, and **Tools**.
+  - Reconfigured emulator mappings to match hardware profiles: POS/Kiosk use `Pixel_Tablet`, KDS uses `Medium_Desktop`, Signage uses `Television_1080p`, and Tools uses `Pixel_9`.
+  - Hardened the `device-manager.ts` and `run-android.sh` scripts with mandatory **60s timeouts** for all Windows interop (ADB/Emulator) calls to prevent WSL hangs.
+  - Improved the **Sous Dev Dashboard** with a scrollable sidebar and visual indicators for native processes, ensuring all 10+ services are accessible in standard terminal sizes.
 - **Bug Fixes:**
-    - Fixed a critical `ReferenceError: localConfig is not defined` in the `DevicePairingFlow` component.
-    - Fixed `ReferenceError: apiUrl is not defined` in the `useHardware` hook.
-    - Resolved a database crash (`22P02: invalid input value for enum device_type`) by adding `kiosk` to the allowed device types.
-    - **Fixed POS/Kiosk Data Failure**: Added missing `products` and `categories` queries to the GraphQL schema in `CulinaryResolver`.
-    - **Stabilized Screen Designer**: Implemented defensive JSON parsing and error logging in `PresentationService` to resolve "Internal server error" crashes during layout saves.
+  - Fixed a critical `ReferenceError: localConfig is not defined` in the `DevicePairingFlow` component.
+  - Fixed `ReferenceError: apiUrl is not defined` in the `useHardware` hook.
+  - Resolved a database crash (`22P02: invalid input value for enum device_type`) by adding `kiosk` to the allowed device types.
+  - **Fixed POS/Kiosk Data Failure**: Added missing `products` and `categories` queries to the GraphQL schema in `CulinaryResolver`.
+  - **Stabilized Screen Designer**: Implemented defensive JSON parsing and error logging in `PresentationService` to resolve "Internal server error" crashes during layout saves.
 
 ## 2026-02-13 (Smart Seeding Refactor & Support UI 100% Completion)
 
 - **Smart Seeding (Spec 032):**
-    - **Refactored `SeederService`** from a monolithic class into a modular coordinator using domain-specific seeders (`IamSeeder`, `PresentationSeeder`, `ProcurementSeeder`, `CulinarySeeder`).
-    - Implemented **External Synchronization** in `CulinarySeeder`. When seeding sample data, the system now automatically pushes the culinary catalog (Categories & Products) to the **Square Sandbox** if an integration is configured.
-    - Standardized seeder interfaces across the API to ensure 100% adherence to DDD principles.
-    - Created **Spec 032** documentation to codify the seeding architecture and sync patterns.
+  - **Refactored `SeederService`** from a monolithic class into a modular coordinator using domain-specific seeders (`IamSeeder`, `PresentationSeeder`, `ProcurementSeeder`, `CulinarySeeder`).
+  - Implemented **External Synchronization** in `CulinarySeeder`. When seeding sample data, the system now automatically pushes the culinary catalog (Categories & Products) to the **Square Sandbox** if an integration is configured.
+  - Standardized seeder interfaces across the API to ensure 100% adherence to DDD principles.
+  - Created **Spec 032** documentation to codify the seeding architecture and sync patterns.
 - **Support & Feedback UI (Spec 022) - 100% Implementation:**
-    - Completed the missing UI components in `@sous/features/support`: `SupportForm`, `FeedbackModal`, and `SupportCategoryCard`.
-    - Implemented **Next.js Server Actions** (`submitFeedbackAction`) for secure, server-side feedback submission.
-    - Launched the `/support` page in the web app, providing a centralized hub for bug reports, feature requests, and documentation access.
-    - Integrated a persistent **Feedback Trigger** into the global admin layout sidebar for instant accessibility.
-    - Verified full metadata capture (app version, user agent, URL, etc.) for every support report.
+  - Completed the missing UI components in `@sous/features/support`: `SupportForm`, `FeedbackModal`, and `SupportCategoryCard`.
+  - Implemented **Next.js Server Actions** (`submitFeedbackAction`) for secure, server-side feedback submission.
+  - Launched the `/support` page in the web app, providing a centralized hub for bug reports, feature requests, and documentation access.
+  - Integrated a persistent **Feedback Trigger** into the global admin layout sidebar for instant accessibility.
+  - Verified full metadata capture (app version, user agent, URL, etc.) for every support report.
 - **Branding Lab Enhancements (Spec 005):**
-    - Upgraded the **Atelier** (Branding Lab) with a direct "Save to Workspace" feature that hits a local API in development to update `branding.config.json`.
-    - Added a **"Paste Configuration"** import field to allow rapid design synchronization and external feedback integration.
+  - Upgraded the **Atelier** (Branding Lab) with a direct "Save to Workspace" feature that hits a local API in development to update `branding.config.json`.
+  - Added a **"Paste Configuration"** import field to allow rapid design synchronization and external feedback integration.
 - **Design System Expansion:**
-    - Added the `Textarea` component to `@sous/ui` to ensure consistent form styling across the platform.
+  - Added the `Textarea` component to `@sous/ui` to ensure consistent form styling across the platform.
 - **Unified Authorization & OAuth2 (ADR 048 / Spec 037):**
-    - Implemented **Effective Scopes** calculation logic merging User Roles and Organization Plans.
-    - Created a universal **`ScopesGuard`** that enforces the intersection of allowed scopes and token-specific grants.
-    - Built a full **OAuth2 Provider** with `/authorize` and `/token` endpoints, enabling 3rd-party integrations.
-    - Launched the **Developer Portal** in the web dashboard for client registration and secret management.
+  - Implemented **Effective Scopes** calculation logic merging User Roles and Organization Plans.
+  - Created a universal **`ScopesGuard`** that enforces the intersection of allowed scopes and token-specific grants.
+  - Built a full **OAuth2 Provider** with `/authorize` and `/token` endpoints, enabling 3rd-party integrations.
+  - Launched the **Developer Portal** in the web dashboard for client registration and secret management.
 - **Payment & Billing Orchestration (Spec 026):**
-    - Built a provider-agnostic **Payment Driver Engine** with a production-ready `StripeDriver`.
-    - Implemented the **Registration-to-Checkout** flow, enforcing a `pending_payment` state for new organizations.
-    - Created a polished **Checkout UI** with tiered plan selection and confirmation emails via Resend.
-    - Added a **SuperAdmin Platform Settings** area for global configuration like `support_email`.
+  - Built a provider-agnostic **Payment Driver Engine** with a production-ready `StripeDriver`.
+  - Implemented the **Registration-to-Checkout** flow, enforcing a `pending_payment` state for new organizations.
+  - Created a polished **Checkout UI** with tiered plan selection and confirmation emails via Resend.
+  - Added a **SuperAdmin Platform Settings** area for global configuration like `support_email`.
 - **POS Financial Engine & Reliability (Spec 027):**
-    - Established the **POS Ledger** and **Financial Transaction** schemas for high-integrity accounting.
-    - Implemented a Redis-backed **`IdempotencyInterceptor`** to prevent double-charging and duplicate orders.
-    - Built the foundation for **Offline Sync** in the Client SDK, featuring a "Store and Forward" queue for mutations.
+  - Established the **POS Ledger** and **Financial Transaction** schemas for high-integrity accounting.
+  - Implemented a Redis-backed **`IdempotencyInterceptor`** to prevent double-charging and duplicate orders.
+  - Built the foundation for **Offline Sync** in the Client SDK, featuring a "Store and Forward" queue for mutations.
 - **Salesman Attribution System (Spec 030):**
-    - Expanded IAM with the **Salesman Role** and attribution tracking on organizations and invitations.
-    - Launched the **Salesman Portal** featuring commission tracking and "Support Access" (impersonation) for troubleshooting.
-    - Built a background worker for automated commission calculation.
+  - Expanded IAM with the **Salesman Role** and attribution tracking on organizations and invitations.
+  - Launched the **Salesman Portal** featuring commission tracking and "Support Access" (impersonation) for troubleshooting.
+  - Built a background worker for automated commission calculation.
 - **Edge Fleet Management (Spec 036):**
-    - Integrated **mDNS Discovery** into the Edge Node start sequence, allowing local discovery via `sous.local`.
-    - Implemented a **Local Fallback Switch** in the Client SDK to prioritize Edge Node traffic during cloud outages.
+  - Integrated **mDNS Discovery** into the Edge Node start sequence, allowing local discovery via `sous.local`.
+  - Implemented a **Local Fallback Switch** in the Client SDK to prioritize Edge Node traffic during cloud outages.
 
 ## 2026-02-13 (DB Scalability, Support System, and CLI Expansion)
 
 - **Database Scalability (Spec 035):**
-    - Implemented **Reader/Writer separation** in `DatabaseService`. All write operations and transactions now target the primary instance, while reads are distributed to a reader pool.
-    - Added automated fallback to the writer instance if a reader URL is not provided.
-    - Updated all core services to utilize `db` for writes and `readDb` for performance-sensitive reads.
+  - Implemented **Reader/Writer separation** in `DatabaseService`. All write operations and transactions now target the primary instance, while reads are distributed to a reader pool.
+  - Added automated fallback to the writer instance if a reader URL is not provided.
+  - Updated all core services to utilize `db` for writes and `readDb` for performance-sensitive reads.
 - **Production-Ready Support & Feedback (Spec 022):**
-    - Built a centralized `SupportService` in the API that bridges user feedback to **GitHub Issues** via Octokit.
-    - Implemented a dual-notification system: the internal team receives a detailed alert, and the user receives a brand-aligned confirmation email via **BullMQ/Resend**.
-    - Launched the `sous feedback` CLI command, providing a frictionless way for developers and users to report bugs or request features.
+  - Built a centralized `SupportService` in the API that bridges user feedback to **GitHub Issues** via Octokit.
+  - Implemented a dual-notification system: the internal team receives a detailed alert, and the user receives a brand-aligned confirmation email via **BullMQ/Resend**.
+  - Launched the `sous feedback` CLI command, providing a frictionless way for developers and users to report bugs or request features.
 - **CLI Expansion & Auth (Spec 021):**
-    - Implemented a robust local configuration store in `~/.sous/config.json`.
-    - Added `sous context login`, `logout`, and `switch-org` commands to manage developer sessions.
-    - Built a root-aware **Scaffolding Engine** (`sous generate domain`, `sous generate feature`, `sous generate ui`) to enforce Monorepo standards and DDD structure.
-    - Silenced excessive OpenTelemetry and HyperDX logs in the CLI to ensure a clean developer experience.
+  - Implemented a robust local configuration store in `~/.sous/config.json`.
+  - Added `sous context login`, `logout`, and `switch-org` commands to manage developer sessions.
+  - Built a root-aware **Scaffolding Engine** (`sous generate domain`, `sous generate feature`, `sous generate ui`) to enforce Monorepo standards and DDD structure.
+  - Silenced excessive OpenTelemetry and HyperDX logs in the CLI to ensure a clean developer experience.
 - **Pricing & Usage Enforcement (Spec 024):**
-    - Implemented `PlanService` for multi-tenant subscription level resolution.
-    - Created `ScopesGuard` and `UsageGuard` to enforce plan-based limits and feature access across the API.
-    - Integrated usage metrics tracking into the core request lifecycle.
+  - Implemented `PlanService` for multi-tenant subscription level resolution.
+  - Created `ScopesGuard` and `UsageGuard` to enforce plan-based limits and feature access across the API.
+  - Integrated usage metrics tracking into the core request lifecycle.
 - **Recipe Cook Mode Polish:**
-    - Added **Smart Ingredient Highlighting**: mentions of ingredients in instructions are now interactive links that reveal weights and prep details.
-    - Implemented **Persistent Cook Notes**: users can now save session-specific observations that persist across cook sessions for the same recipe.
+  - Added **Smart Ingredient Highlighting**: mentions of ingredients in instructions are now interactive links that reveal weights and prep details.
+  - Implemented **Persistent Cook Notes**: users can now save session-specific observations that persist across cook sessions for the same recipe.
 - **Infrastructure & Stability:**
-    - Resolved critical Webpack bundling failures in `@sous/web` by aliasing `@hyperdx/node-opentelemetry` for browser builds.
-    - Fixed CLI argument parsing errors where flags like `--help` were being ignored by the NestJS CLI wrapper.
-    - Synchronized all new schemas (`billing`, `support`, `plans`) via `db:push`.
+  - Resolved critical Webpack bundling failures in `@sous/web` by aliasing `@hyperdx/node-opentelemetry` for browser builds.
+  - Fixed CLI argument parsing errors where flags like `--help` were being ignored by the NestJS CLI wrapper.
+  - Synchronized all new schemas (`billing`, `support`, `plans`) via `db:push`.
 
 ## 2026-02-13 (User Management & Auth Expansion)
 

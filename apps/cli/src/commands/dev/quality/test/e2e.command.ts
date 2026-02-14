@@ -21,18 +21,17 @@ export class E2ECommand extends CommandRunner {
    * @param passedParam Additional parameters passed to the command
    * @param options Command options including video recording toggle
    */
-  async run(
-    passedParam: string[],
-    options: E2EOptions,
-  ): Promise<void> {
+  async run(passedParam: string[], options: E2EOptions): Promise<void> {
     const args = ['run', 'test:e2e'];
-    
-    const env = { 
+
+    const env = {
       ...process.env,
-      PLAYWRIGHT_VIDEO: options.video ? 'true' : undefined 
+      PLAYWRIGHT_VIDEO: options.video ? 'true' : undefined,
     };
 
-    logger.info(`🚀 Running E2E tests ${options.video ? '(with video recording)' : ''}...`);
+    logger.info(
+      `🚀 Running E2E tests ${options.video ? '(with video recording)' : ''}...`,
+    );
     logger.info(`> pnpm ${args.join(' ')}`);
 
     const rootDir = path.resolve(process.cwd(), '../../');
@@ -41,7 +40,7 @@ export class E2ECommand extends CommandRunner {
       stdio: 'inherit',
       shell: true,
       cwd: rootDir,
-      env
+      env,
     });
 
     return new Promise((resolve, reject) => {

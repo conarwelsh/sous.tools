@@ -24,7 +24,7 @@ export class Discovery {
         console.log(`[Discovery] Found Edge Node at ${candidate}`);
         return candidate;
       }
-    } catch (e) {
+    } catch {
       // Ignore errors
     }
     return null;

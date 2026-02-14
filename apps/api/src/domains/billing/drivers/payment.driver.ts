@@ -19,16 +19,27 @@ export interface NormalizedEvent {
 
 export interface IPaymentDriver {
   name: string;
-  
+
   // Recurring Subscriptions
-  createCustomer(org: { id: string; name: string; email?: string }): Promise<string>;
-  createSubscription(customerId: string, planSlug: string, paymentMethodId: string): Promise<SubscriptionResult>;
+  createCustomer(org: {
+    id: string;
+    name: string;
+    email?: string;
+  }): Promise<string>;
+  createSubscription(
+    customerId: string,
+    planSlug: string,
+    paymentMethodId: string,
+  ): Promise<SubscriptionResult>;
   cancelSubscription(subscriptionId: string): Promise<void>;
-  
+
   // Terminal & One-off Payments
-  createPaymentIntent(amount: number, metadata: any): Promise<PaymentIntentResult>;
+  createPaymentIntent(
+    amount: number,
+    metadata: any,
+  ): Promise<PaymentIntentResult>;
   capturePayment(intentId: string): Promise<void>;
-  
+
   // Normalization
   normalizeWebhook(payload: any, signature: string): Promise<NormalizedEvent>;
 }

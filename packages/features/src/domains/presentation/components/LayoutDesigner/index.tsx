@@ -232,9 +232,12 @@ export function LayoutDesigner({
           http.get<any[]>("/hardware"),
         ]);
 
-        const categoriesData = results[0].status === "fulfilled" ? results[0].value : [];
-        const productsData = results[1].status === "fulfilled" ? results[1].value : [];
-        const displaysData = results[2].status === "fulfilled" ? results[2].value : [];
+        const categoriesData =
+          results[0].status === "fulfilled" ? results[0].value : [];
+        const productsData =
+          results[1].status === "fulfilled" ? results[1].value : [];
+        const displaysData =
+          results[2].status === "fulfilled" ? results[2].value : [];
 
         setCategories(categoriesData);
         setProducts(productsData);
@@ -337,12 +340,20 @@ export function LayoutDesigner({
             );
           }
         } else if (slot.sourceType === "MEDIA" && slot.dataConfig.url) {
-          acc[id] = <img src={slot.dataConfig.url} className="w-full h-full object-cover" alt="Content" />;
+          acc[id] = (
+            <img
+              src={slot.dataConfig.url}
+              className="w-full h-full object-cover"
+              alt="Content"
+            />
+          );
         } else if (slot.sourceType === "STATIC") {
           acc[id] = (
             <View className="flex-1 p-4">
               <Text className="text-foreground/80 font-bold text-lg mb-2">
-                {slot.dataConfig.staticData?.title || slot.dataConfig.staticData?.text || "Static Content"}
+                {slot.dataConfig.staticData?.title ||
+                  slot.dataConfig.staticData?.text ||
+                  "Static Content"}
               </Text>
             </View>
           );
@@ -357,7 +368,11 @@ export function LayoutDesigner({
     (internalId: string, updates: Partial<LayoutNode>) => {
       setActiveLayout((prev) => ({
         ...prev,
-        structure: updateNodeById(prev.structure as LayoutNode, internalId, updates),
+        structure: updateNodeById(
+          prev.structure as LayoutNode,
+          internalId,
+          updates,
+        ),
       }));
       if (selectedNode && (selectedNode as any)._internalId === internalId) {
         setSelectedNode((prev) => (prev ? { ...prev, ...updates } : null));
@@ -371,7 +386,10 @@ export function LayoutDesigner({
 
   const handleDeleteNode = (internalId: string) => {
     if (internalId === (activeLayout.structure as any)._internalId) return;
-    const newRoot = deleteNodeById(activeLayout.structure as LayoutNode, internalId);
+    const newRoot = deleteNodeById(
+      activeLayout.structure as LayoutNode,
+      internalId,
+    );
     if (newRoot) {
       setActiveLayout((prev) => ({ ...prev, structure: newRoot }));
       setSelectedNode(null);
@@ -384,16 +402,27 @@ export function LayoutDesigner({
     setActiveDragType(null);
     if (!over) return;
 
-    if (active.data.current?.isMove || active.id.toString().startsWith("move-")) {
-      const activeId = active.data.current?.node?._internalId || active.id.toString().replace("move-", "");
+    if (
+      active.data.current?.isMove ||
+      active.id.toString().startsWith("move-")
+    ) {
+      const activeId =
+        active.data.current?.node?._internalId ||
+        active.id.toString().replace("move-", "");
       const targetId = over.id as string;
       if (activeId === targetId) return;
 
-      const activeNode = findNode(activeLayout.structure as LayoutNode, activeId);
+      const activeNode = findNode(
+        activeLayout.structure as LayoutNode,
+        activeId,
+      );
       if (!activeNode) return;
 
       setActiveLayout((prev) => {
-        let newStructure = deleteNodeById(prev.structure as LayoutNode, activeId)!;
+        let newStructure = deleteNodeById(
+          prev.structure as LayoutNode,
+          activeId,
+        )!;
         const targetNode = findNode(newStructure, targetId);
         if (targetNode) {
           const isFloating = activeNode.type === "fixed";
@@ -415,30 +444,40 @@ export function LayoutDesigner({
       let newNode: LayoutNode = {
         type,
         name: isGrid ? "Grid" : `New ${type}`,
-        styles: (type === "fixed" ? {
-          position: "absolute",
-          width: "20%",
-          height: "20%",
-          left: "40%",
-          top: "40%",
-          background: "#18181b",
-          borderRadius: "8px",
-          border: "1px solid rgba(255,255,255,0.1)",
-        } : {
-          display: isGrid ? "grid" : "flex",
-          flex: 1,
-          flexDirection: isGrid ? undefined : "column",
-        }) as any,
+        styles: (type === "fixed"
+          ? {
+              position: "absolute",
+              width: "20%",
+              height: "20%",
+              left: "40%",
+              top: "40%",
+              background: "#18181b",
+              borderRadius: "8px",
+              border: "1px solid rgba(255,255,255,0.1)",
+            }
+          : {
+              display: isGrid ? "grid" : "flex",
+              flex: 1,
+              flexDirection: isGrid ? undefined : "column",
+            }) as any,
         children: type === "container" || type === "fixed" ? [] : undefined,
         id: type === "slot" ? `slot-${Date.now()}` : undefined,
       };
 
-      const effectiveTargetId = newNode.type === "fixed" ? (activeLayout.structure as any)._internalId : targetId;
-      const targetNode = findNode(activeLayout.structure as LayoutNode, effectiveTargetId);
+      const effectiveTargetId =
+        newNode.type === "fixed"
+          ? (activeLayout.structure as any)._internalId
+          : targetId;
+      const targetNode = findNode(
+        activeLayout.structure as LayoutNode,
+        effectiveTargetId,
+      );
       if (targetNode) {
         const currentChildren = targetNode.children || [];
         const nodeWithId = ensureInternalIds(newNode);
-        handleUpdateNode(effectiveTargetId, { children: [...currentChildren, nodeWithId] });
+        handleUpdateNode(effectiveTargetId, {
+          children: [...currentChildren, nodeWithId],
+        });
         if (type === "container" || type === "fixed") {
           setEditingNode(nodeWithId);
           setActivePropertyTab("style");
@@ -474,7 +513,9 @@ export function LayoutDesigner({
         <Sidebar
           isVisible={!isPreviewMode}
           layout={activeLayout}
-          selectedNodeId={selectedNode ? (selectedNode as any)._internalId : undefined}
+          selectedNodeId={
+            selectedNode ? (selectedNode as any)._internalId : undefined
+          }
           onCancel={onCancel}
           onSelectNode={setSelectedNode}
           onEditNode={(node, tab) => {
@@ -490,7 +531,9 @@ export function LayoutDesigner({
           structure={activeLayout.structure as LayoutNode}
           contentMap={contentMap}
           activeLayoutType={activeLayout.type!}
-          selectedNodeId={selectedNode ? (selectedNode as any)._internalId : undefined}
+          selectedNodeId={
+            selectedNode ? (selectedNode as any)._internalId : undefined
+          }
           isPreviewMode={isPreviewMode}
           onNodeClick={setSelectedNode}
           onEditClick={(node, tab) => {
@@ -503,19 +546,33 @@ export function LayoutDesigner({
             if (node) {
               const isParentGrid = parentNode?.styles?.display === "grid";
               if (isParentGrid && parentNode) {
-                const index = parentNode.children?.findIndex((c: any) => (c._internalId || c.id) === id);
+                const index = parentNode.children?.findIndex(
+                  (c: any) => (c._internalId || c.id) === id,
+                );
                 if (index !== undefined && index !== -1) {
-                  const colsCount = String(parentNode.styles.gridTemplateColumns || "1fr").split(/\s+/).length;
+                  const colsCount = String(
+                    parentNode.styles.gridTemplateColumns || "1fr",
+                  ).split(/\s+/).length;
                   const colIdx = index % colsCount;
                   const rowIdx = Math.floor(index / colsCount);
                   const updates: any = { styles: { ...parentNode.styles } };
                   if (size.width) {
-                    const tracks = String(parentNode.styles.gridTemplateColumns || "1fr").split(/\s+/);
-                    if (tracks[colIdx]) { tracks[colIdx] = size.width; updates.styles.gridTemplateColumns = tracks.join(" "); }
+                    const tracks = String(
+                      parentNode.styles.gridTemplateColumns || "1fr",
+                    ).split(/\s+/);
+                    if (tracks[colIdx]) {
+                      tracks[colIdx] = size.width;
+                      updates.styles.gridTemplateColumns = tracks.join(" ");
+                    }
                   }
                   if (size.height) {
-                    const tracks = String(parentNode.styles.gridTemplateRows || "1fr").split(/\s+/);
-                    if (tracks[rowIdx]) { tracks[rowIdx] = size.height; updates.styles.gridTemplateRows = tracks.join(" "); }
+                    const tracks = String(
+                      parentNode.styles.gridTemplateRows || "1fr",
+                    ).split(/\s+/);
+                    if (tracks[rowIdx]) {
+                      tracks[rowIdx] = size.height;
+                      updates.styles.gridTemplateRows = tracks.join(" ");
+                    }
                   }
                   handleUpdateNode((parentNode as any)._internalId, updates);
                 }
@@ -546,22 +603,35 @@ export function LayoutDesigner({
         />
 
         <Sheet open={showJson} onOpenChange={setShowJson}>
-          <SheetContent side="right" className="w-[600px] bg-card border-border p-0 flex flex-col">
+          <SheetContent
+            side="right"
+            className="w-[600px] bg-card border-border p-0 flex flex-col"
+          >
             <SheetHeader className="p-6 border-b border-border">
               <SheetTitle className="text-foreground font-black uppercase tracking-widest text-xs flex flex-row items-center gap-3">
-                <Code size={16} className="text-sky-500" /> Advanced Presentation Styles
+                <Code size={16} className="text-sky-500" /> Advanced
+                Presentation Styles
               </SheetTitle>
             </SheetHeader>
             <Tabs defaultValue="css" className="flex-1 flex flex-col">
               <TabsList className="mx-6 mt-4 h-12 bg-muted/50 rounded-xl p-1.5">
-                <TabsTrigger value="css" className="flex-1 rounded-lg gap-2"><Palette size={14} /> CSS Overrides</TabsTrigger>
-                <TabsTrigger value="json" className="flex-1 rounded-lg gap-2"><Code size={14} /> Structure JSON</TabsTrigger>
+                <TabsTrigger value="css" className="flex-1 rounded-lg gap-2">
+                  <Palette size={14} /> CSS Overrides
+                </TabsTrigger>
+                <TabsTrigger value="json" className="flex-1 rounded-lg gap-2">
+                  <Code size={14} /> Structure JSON
+                </TabsTrigger>
               </TabsList>
               <TabsContent value="css" className="flex-1 p-6">
                 <div className="flex-1 border border-border rounded-2xl overflow-hidden min-h-[400px]">
                   <CodeEditor
                     value={activeLayout.config?.customCss || ""}
-                    onChange={(css) => setActiveLayout(prev => ({ ...prev, config: { ...prev.config, customCss: css } }))}
+                    onChange={(css) =>
+                      setActiveLayout((prev) => ({
+                        ...prev,
+                        config: { ...prev.config, customCss: css },
+                      }))
+                    }
                     language="css"
                     className="h-full"
                   />
@@ -569,23 +639,42 @@ export function LayoutDesigner({
               </TabsContent>
               <TabsContent value="json" className="flex-1 p-6">
                 <div className="h-full border border-border rounded-2xl overflow-hidden">
-                  <CodeEditor value={JSON.stringify(activeLayout, null, 2)} onChange={() => {}} language="json" className="h-full" />
+                  <CodeEditor
+                    value={JSON.stringify(activeLayout, null, 2)}
+                    onChange={() => {}}
+                    language="json"
+                    className="h-full"
+                  />
                 </div>
               </TabsContent>
             </Tabs>
           </SheetContent>
         </Sheet>
 
-        <Sheet open={!!editingNode} onOpenChange={(open) => !open && setEditingNode(null)}>
-          <SheetContent side="right" className="w-full sm:w-[450px] bg-card border-l border-border p-0 flex flex-col">
+        <Sheet
+          open={!!editingNode}
+          onOpenChange={(open) => !open && setEditingNode(null)}
+        >
+          <SheetContent
+            side="right"
+            className="w-full sm:w-[450px] bg-card border-l border-border p-0 flex flex-col"
+          >
             <SheetHeader className="p-6 border-b border-border h-20 flex-row items-center justify-between">
               <View className="flex-row items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center border border-sky-500/20">
-                  {editingNode?.type === "slot" ? <Square size={18} className="text-sky-500" /> : <Grid3X3 size={18} className="text-sky-500" />}
+                  {editingNode?.type === "slot" ? (
+                    <Square size={18} className="text-sky-500" />
+                  ) : (
+                    <Grid3X3 size={18} className="text-sky-500" />
+                  )}
                 </div>
                 <View>
-                  <SheetTitle className="text-foreground font-black uppercase tracking-widest text-[10px] leading-none mb-1">Properties Editor</SheetTitle>
-                  <Text className="text-muted-foreground text-[8px] font-black uppercase tracking-widest">Editing: {editingNode?.name || editingNode?.type}</Text>
+                  <SheetTitle className="text-foreground font-black uppercase tracking-widest text-[10px] leading-none mb-1">
+                    Properties Editor
+                  </SheetTitle>
+                  <Text className="text-muted-foreground text-[8px] font-black uppercase tracking-widest">
+                    Editing: {editingNode?.name || editingNode?.type}
+                  </Text>
                 </View>
               </View>
             </SheetHeader>
@@ -609,7 +698,9 @@ export function LayoutDesigner({
                   onSyncPOS={async () => {
                     try {
                       const http = await getHttpClient();
-                      await http.post("/integrations/sync", { provider: "square" });
+                      await http.post("/integrations/sync", {
+                        provider: "square",
+                      });
                     } catch (e) {}
                   }}
                 />
@@ -621,7 +712,9 @@ export function LayoutDesigner({
         <DragOverlay>
           {activeDragType ? (
             <div className="bg-sky-500/20 border-2 border-sky-500 p-6 rounded-3xl flex flex-col items-center justify-center backdrop-blur-md shadow-2xl">
-              <Text className="text-sky-500 font-black uppercase text-[10px] tracking-widest">Placing {activeDragType}</Text>
+              <Text className="text-sky-500 font-black uppercase text-[10px] tracking-widest">
+                Placing {activeDragType}
+              </Text>
             </div>
           ) : null}
         </DragOverlay>

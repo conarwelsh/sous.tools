@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { View, Text, Button, Card, ScrollView, Logo } from "@sous/ui";
 import { useUpdateManager } from "@sous/features";
 import { config } from "@sous/config";
@@ -18,23 +18,28 @@ import {
 } from "lucide-react";
 
 export default function DownloadPage() {
-  const [userOS, setUserOS] = useState<
-    "windows" | "macos" | "linux" | "android" | "ios" | "unknown"
-  >("unknown");
-  
-  const { manifest, updateAvailable } = useUpdateManager();
+  const [isClient, setIsClient] = useState(false);
+
+  const { manifest } = useUpdateManager();
 
   // Determine environment
   const env = config.features.appEnv || "development";
 
   useEffect(() => {
-    const ua = window.navigator.userAgent.toLowerCase();
-    if (ua.includes("win")) setUserOS("windows");
-    else if (ua.includes("mac")) setUserOS("macos");
-    else if (ua.includes("linux")) setUserOS("linux");
-    else if (ua.includes("android")) setUserOS("android");
-    else if (ua.includes("iphone") || ua.includes("ipad")) setUserOS("ios");
+    const handle = requestAnimationFrame(() => setIsClient(true));
+    return () => cancelAnimationFrame(handle);
   }, []);
+
+  const userOS = useMemo(() => {
+    if (!isClient || typeof window === "undefined") return "unknown";
+    const ua = window.navigator.userAgent.toLowerCase();
+    if (ua.includes("win")) return "windows";
+    if (ua.includes("mac")) return "macos";
+    if (ua.includes("linux")) return "linux";
+    if (ua.includes("android")) return "android";
+    if (ua.includes("iphone") || ua.includes("ipad")) return "ios";
+    return "unknown";
+  }, [isClient]);
 
   const platforms = [
     {
@@ -215,7 +220,8 @@ export default function DownloadPage() {
           <Text className="text-zinc-500 text-sm text-center leading-relaxed font-medium mb-8">
             Keep your hands free while managing timers and alerts. Search for{" "}
             <Text className="text-sky-500 italic font-black">"Sous Tools"</Text>{" "}
-            directly on the Google Play Store from your watch, or download the APK below.
+            directly on the Google Play Store from your watch, or download the
+            APK below.
           </Text>
           {manifest?.wearos && (
             <Button

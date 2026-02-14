@@ -13,9 +13,10 @@ export async function submitFeedbackAction(data: SupportReport) {
     return { success: true, data: response };
   } catch (error: any) {
     console.error("[SupportAction] Error submitting feedback:", error);
-    return { 
-      success: false, 
-      error: error.message || "Failed to submit feedback. Please try again later." 
+    return {
+      success: false,
+      error:
+        error.message || "Failed to submit feedback. Please try again later.",
     };
   }
 }

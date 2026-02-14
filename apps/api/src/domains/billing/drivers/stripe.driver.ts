@@ -1,4 +1,8 @@
-import { IPaymentDriver, SubscriptionResult, PaymentIntentResult } from './payment.interface.js';
+import {
+  IPaymentDriver,
+  SubscriptionResult,
+  PaymentIntentResult,
+} from './payment.interface.js';
 import Stripe from 'stripe';
 import { logger } from '@sous/logger';
 
@@ -18,10 +22,13 @@ export class StripeDriver implements IPaymentDriver {
     return customer.id;
   }
 
-  async createSubscription(customerId: string, planSlug: string): Promise<SubscriptionResult> {
+  async createSubscription(
+    customerId: string,
+    planSlug: string,
+  ): Promise<SubscriptionResult> {
     // Map our slug to a Stripe Price ID (In prod this would be in platform settings)
     const priceMap: Record<string, string> = {
-      'commis': 'price_commis_id',
+      commis: 'price_commis_id',
       'chef-de-partie': 'price_cdp_id',
       'executive-chef': 'price_exec_id',
     };
@@ -40,7 +47,9 @@ export class StripeDriver implements IPaymentDriver {
       externalSubscriptionId: subscription.id,
       externalCustomerId: customerId,
       status: this.mapStatus(subscription.status),
-      currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
+      currentPeriodEnd: new Date(
+        (subscription as any).current_period_end * 1000,
+      ),
     };
   }
 
@@ -48,7 +57,10 @@ export class StripeDriver implements IPaymentDriver {
     await this.stripe.subscriptions.cancel(subscriptionId);
   }
 
-  async createPaymentIntent(amount: number, metadata: any): Promise<PaymentIntentResult> {
+  async createPaymentIntent(
+    amount: number,
+    metadata: any,
+  ): Promise<PaymentIntentResult> {
     const intent = await this.stripe.paymentIntents.create({
       amount,
       currency: 'usd',
@@ -64,11 +76,16 @@ export class StripeDriver implements IPaymentDriver {
 
   private mapStatus(stripeStatus: Stripe.Subscription.Status): any {
     switch (stripeStatus) {
-      case 'active': return 'active';
-      case 'past_due': return 'past_due';
-      case 'canceled': return 'canceled';
-      case 'trialing': return 'trialing';
-      default: return 'active';
+      case 'active':
+        return 'active';
+      case 'past_due':
+        return 'past_due';
+      case 'canceled':
+        return 'canceled';
+      case 'trialing':
+        return 'trialing';
+      default:
+        return 'active';
     }
   }
 }

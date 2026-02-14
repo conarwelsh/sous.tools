@@ -81,13 +81,17 @@ function StepTimer({ duration, label }: { duration: number; label: string }) {
   useEffect(() => {
     let interval: any;
     if (isRunning && timeLeft > 0) {
-      interval = setInterval(() => setTimeLeft(prev => {
-        if (prev <= 1) {
-          setIsRunning(false);
-          return 0;
-        }
-        return prev - 1;
-      }), 1000);
+      interval = setInterval(
+        () =>
+          setTimeLeft((prev) => {
+            if (prev <= 1) {
+              setIsRunning(false);
+              return 0;
+            }
+            return prev - 1;
+          }),
+        1000,
+      );
     }
     return () => clearInterval(interval);
   }, [isRunning, timeLeft]);
@@ -149,7 +153,7 @@ export default function RecipeCookPage({
     onCompleted: () => {
       setNewNote("");
       refetch();
-    }
+    },
   });
 
   const [yieldOverride, setYieldOverride] = useState<number | null>(null);
@@ -158,7 +162,9 @@ export default function RecipeCookPage({
   );
   const [lockedWeight, setLockedWeight] = useState<number | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [hoveredIngredientId, setHoveredIngredientId] = useState<string | null>(null);
+  const [hoveredIngredientId, setHoveredIngredientId] = useState<string | null>(
+    null,
+  );
   const [newNote, setNewNote] = useState("");
 
   // Wake Lock Implementation
@@ -170,9 +176,9 @@ export default function RecipeCookPage({
           wakeLock = await (navigator as any).wakeLock.request("screen");
           console.log("[CookMode] Wake Lock Active");
         }
-          } catch (err) {
-            // Ignore
-          }
+      } catch (err) {
+        // Ignore
+      }
     };
     requestWakeLock();
     return () => {
@@ -185,37 +191,42 @@ export default function RecipeCookPage({
   // Smart Highlighting Engine
   const renderHighlightedInstruction = (text: string) => {
     if (!recipe?.ingredients) return text;
-    
+
     // Sort by length descending to match longest names first (e.g. "Salted Butter" before "Butter")
-    const sortedIngs = [...recipe.ingredients].sort((a, b) => b.ingredient.name.length - a.ingredient.name.length);
+    const sortedIngs = [...recipe.ingredients].sort(
+      (a, b) => b.ingredient.name.length - a.ingredient.name.length,
+    );
     let parts: (string | React.ReactNode)[] = [text];
 
     sortedIngs.forEach((ri) => {
       const name = ri.ingredient.name;
-      const regex = new RegExp(`\\b(${name}s?)\\b`, 'gi'); // Handle plurals basic
-      
+      const regex = new RegExp(`\\b(${name}s?)\\b`, "gi"); // Handle plurals basic
+
       const newParts: (string | React.ReactNode)[] = [];
-      parts.forEach(part => {
-        if (typeof part !== 'string') {
+      parts.forEach((part) => {
+        if (typeof part !== "string") {
           newParts.push(part);
           return;
         }
-        
+
         const segments = part.split(regex);
         for (let i = 0; i < segments.length; i++) {
-          if (i % 2 === 1) { // Match
+          if (i % 2 === 1) {
+            // Match
             newParts.push(
-              <span 
+              <span
                 key={`${ri.id}-${i}`}
                 onMouseEnter={() => setHoveredIngredientId(ri.id)}
                 onMouseLeave={() => setHoveredIngredientId(null)}
                 className={cn(
                   "text-sky-400 font-bold border-b-2 border-sky-400/20 cursor-help transition-all px-1 rounded-md",
-                  hoveredIngredientId === ri.id ? "bg-sky-400/20 border-sky-400/50 scale-105" : "hover:bg-sky-400/10"
+                  hoveredIngredientId === ri.id
+                    ? "bg-sky-400/20 border-sky-400/50 scale-105"
+                    : "hover:bg-sky-400/10",
                 )}
               >
                 {segments[i]}
-              </span>
+              </span>,
             );
           } else if (segments[i]) {
             newParts.push(segments[i]);
@@ -263,9 +274,9 @@ export default function RecipeCookPage({
       variables: {
         input: {
           recipeId: id,
-          note: newNote
-        }
-      }
+          note: newNote,
+        },
+      },
     });
   };
 
@@ -356,18 +367,29 @@ export default function RecipeCookPage({
                 const isLocked = lockedIngredientId === ri.id;
                 const isHighlighted = hoveredIngredientId === ri.id;
                 return (
-                  <Card 
-                    key={ri.id} 
+                  <Card
+                    key={ri.id}
                     onMouseEnter={() => setHoveredIngredientId(ri.id)}
                     onMouseLeave={() => setHoveredIngredientId(null)}
                     className={cn(
                       "p-6 bg-white/[0.03] border-white/5 rounded-3xl flex flex-row items-center justify-between transition-all",
-                      isLocked ? "border-sky-500 bg-sky-500/10 shadow-[0_0_30px_rgba(14,165,233,0.1)]" : "hover:bg-white/[0.05]",
-                      isHighlighted ? "border-sky-400/50 bg-sky-400/5 ring-1 ring-sky-400/20" : ""
+                      isLocked
+                        ? "border-sky-500 bg-sky-500/10 shadow-[0_0_30px_rgba(14,165,233,0.1)]"
+                        : "hover:bg-white/[0.05]",
+                      isHighlighted
+                        ? "border-sky-400/50 bg-sky-400/5 ring-1 ring-sky-400/20"
+                        : "",
                     )}
                   >
                     <View className="flex-1">
-                      <Text className={cn("font-black uppercase tracking-tight text-lg", (isLocked || isHighlighted) ? "text-sky-400" : "text-white")}>
+                      <Text
+                        className={cn(
+                          "font-black uppercase tracking-tight text-lg",
+                          isLocked || isHighlighted
+                            ? "text-sky-400"
+                            : "text-white",
+                        )}
+                      >
                         {ri.ingredient.name}
                       </Text>
                       {ri.isBase && (
@@ -396,7 +418,9 @@ export default function RecipeCookPage({
                             }}
                             className={cn(
                               "bg-transparent border-none p-0 text-2xl font-black w-24 text-right outline-none",
-                              (isLocked || isHighlighted) ? "text-sky-400" : "text-white"
+                              isLocked || isHighlighted
+                                ? "text-sky-400"
+                                : "text-white",
                             )}
                           />
                           <Text className="text-xs font-black uppercase text-white/40">
@@ -437,14 +461,18 @@ export default function RecipeCookPage({
           <View className="p-8 border-b border-white/5 flex-row items-center justify-between bg-black/20">
             <View className="flex-row items-center gap-3">
               <ChefHat size={20} className="text-amber-500" />
-              <Text className="font-black uppercase text-sm tracking-[0.2em]">Execution Protocol</Text>
+              <Text className="font-black uppercase text-sm tracking-[0.2em]">
+                Execution Protocol
+              </Text>
             </View>
             <View className="flex-row items-center gap-2">
-               <div className="w-2 h-2 rounded-full bg-emerald-500" />
-               <Text className="text-[10px] font-black uppercase tracking-widest text-white/40">Mode: Active</Text>
+              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+              <Text className="text-[10px] font-black uppercase tracking-widest text-white/40">
+                Mode: Active
+              </Text>
             </View>
           </View>
-          
+
           <ScrollView className="flex-1 p-12">
             <View className="max-w-4xl mx-auto gap-16 pb-32">
               {recipe.steps
@@ -483,25 +511,33 @@ export default function RecipeCookPage({
               <View className="mt-32 pt-16 border-t border-white/10 gap-12">
                 <View className="flex-row items-center gap-4">
                   <MessageSquare size={24} className="text-sky-500" />
-                  <Text className="text-2xl font-black uppercase tracking-tight">Cook Log</Text>
+                  <Text className="text-2xl font-black uppercase tracking-tight">
+                    Cook Log
+                  </Text>
                 </View>
 
                 {/* Add Note Input */}
                 <View className="gap-4">
-                  <textarea 
+                  <textarea
                     value={newNote}
                     onChange={(e) => setNewNote(e.target.value)}
                     placeholder="Enter observation (e.g. 'Oven ran hot', 'Used extra flour')..."
                     className="w-full h-32 bg-white/5 border border-white/10 rounded-2xl p-6 text-white outline-none focus:border-sky-500/50 focus:bg-sky-500/5 transition-all"
                   />
                   <View className="flex-row justify-end">
-                    <Button 
+                    <Button
                       onClick={handleAddNote}
                       disabled={isAddingNote || !newNote.trim()}
                       className="bg-sky-500 h-12 px-8 rounded-xl gap-3"
                     >
-                      {isAddingNote ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
-                      <Text className="text-white font-black uppercase text-xs tracking-widest">Post Log Entry</Text>
+                      {isAddingNote ? (
+                        <Loader2 size={18} className="animate-spin" />
+                      ) : (
+                        <Send size={18} />
+                      )}
+                      <Text className="text-white font-black uppercase text-xs tracking-widest">
+                        Post Log Entry
+                      </Text>
                     </Button>
                   </View>
                 </View>
@@ -509,17 +545,29 @@ export default function RecipeCookPage({
                 {/* Past Notes */}
                 <View className="gap-6">
                   {recipe.notes?.map((note: any) => (
-                    <Card key={note.id} className="p-6 bg-white/[0.02] border-white/5 rounded-2xl">
+                    <Card
+                      key={note.id}
+                      className="p-6 bg-white/[0.02] border-white/5 rounded-2xl"
+                    >
                       <View className="flex-row justify-between items-center mb-4">
                         <View className="flex-row items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-sky-500/20 flex items-center justify-center">
-                            <Text className="text-sky-500 font-black text-[10px]">{note.user.firstName[0]}{note.user.lastName[0]}</Text>
+                            <Text className="text-sky-500 font-black text-[10px]">
+                              {note.user.firstName[0]}
+                              {note.user.lastName[0]}
+                            </Text>
                           </div>
-                          <Text className="font-bold text-xs text-white/80">{note.user.firstName} {note.user.lastName}</Text>
+                          <Text className="font-bold text-xs text-white/80">
+                            {note.user.firstName} {note.user.lastName}
+                          </Text>
                         </View>
-                        <Text className="text-[10px] font-mono text-white/20">{new Date(note.createdAt).toLocaleString()}</Text>
+                        <Text className="text-[10px] font-mono text-white/20">
+                          {new Date(note.createdAt).toLocaleString()}
+                        </Text>
                       </View>
-                      <Text className="text-sm text-white/60 leading-relaxed italic">"{note.note}"</Text>
+                      <Text className="text-sm text-white/60 leading-relaxed italic">
+                        "{note.note}"
+                      </Text>
                     </Card>
                   ))}
                 </View>

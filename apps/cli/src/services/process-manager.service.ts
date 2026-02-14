@@ -5,7 +5,6 @@ import { EventEmitter } from 'events';
 import { promisify } from 'util';
 import pm2 from 'pm2';
 import * as fs from 'fs';
-import * as os from 'os';
 import path from 'path';
 import { createRequire } from 'module';
 const require = createRequire(path.resolve(process.cwd(), 'package.json'));
@@ -45,7 +44,7 @@ export class ProcessManager
   private isPm2Connected = false;
   private pollInterval: NodeJS.Timeout | null = null;
   private logTailers: Map<string, any> = new Map();
-  private ecosystemApps: any[] = [];
+  private ecosystemApps: Array<{ name: string; namespace?: string }> = [];
   private rootDir: string;
 
   constructor() {
@@ -72,7 +71,7 @@ export class ProcessManager
         const config = require(configPath);
         this.ecosystemApps = config.apps || [];
       }
-    } catch (e) {
+    } catch (e: any) {
       logger.error(`❌ Failed to load ecosystem config: ${e.message}`);
     }
   }
@@ -135,9 +134,13 @@ export class ProcessManager
         else if (pm2Status === 'errored') status = 'error';
 
         if (!this.processes.has(id)) {
-          const name = id.startsWith('sous-') ? id.replace('sous-', '').toUpperCase() : id.toUpperCase();
-          logger.info(`[ProcessManager] Registering new process: ${id} as ${name} (${(p.pm2_env as any)?.namespace || 'default'})`);
-          
+          const name = id.startsWith('sous-')
+            ? id.replace('sous-', '').toUpperCase()
+            : id.toUpperCase();
+          logger.info(
+            `[ProcessManager] Registering new process: ${id} as ${name} (${(p.pm2_env as any)?.namespace || 'default'})`,
+          );
+
           this.processes.set(id, {
             id,
             name,
@@ -274,11 +277,11 @@ export class ProcessManager
     this.emit('update');
   }
 
-  getProcesses() {
+  getProcesses(): ManagedProcess[] {
     return Array.from(this.processes.values());
   }
 
-  getCombinedLogs() {
+  getCombinedLogs(): ManagedLog[] {
     return this.combinedLogs;
   }
 

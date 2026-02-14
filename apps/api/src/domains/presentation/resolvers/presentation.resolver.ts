@@ -54,7 +54,9 @@ export class PresentationDisplayResolver {
   @ResolveField(() => LayoutType, { nullable: true })
   async activeLayout(@Parent() display: any) {
     if (!display.hardwareId) return null;
-    return this.presentationService.getActiveLayoutByHardwareId(display.hardwareId);
+    return this.presentationService.getActiveLayoutByHardwareId(
+      display.hardwareId,
+    );
   }
 }
 

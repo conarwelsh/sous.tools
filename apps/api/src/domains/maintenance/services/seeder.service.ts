@@ -31,9 +31,11 @@ export class SeederService implements OnModuleInit {
 
     // 1. IAM Seeding (returns orgId)
     const orgId = await this.iamSeeder.seedSystem();
-    
+
     if (!orgId) {
-      logger.error('❌ SeederService: Failed to seed IAM. Aborting system seeding.');
+      logger.error(
+        '❌ SeederService: Failed to seed IAM. Aborting system seeding.',
+      );
       return;
     }
 
@@ -56,7 +58,9 @@ export class SeederService implements OnModuleInit {
     });
 
     if (!sampleOrg) {
-      logger.error('❌ SeederService: Sample organization not found. Aborting sample seeding.');
+      logger.error(
+        '❌ SeederService: Sample organization not found. Aborting sample seeding.',
+      );
       return;
     }
 

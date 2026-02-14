@@ -11,7 +11,7 @@ function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   let callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
-  
+
   if (callbackUrl.includes("/login")) {
     callbackUrl = "/dashboard";
   }

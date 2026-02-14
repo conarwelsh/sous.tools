@@ -13,11 +13,7 @@ import {
   ScrollView,
   Checkbox,
 } from "@sous/ui";
-import {
-  Settings,
-  Layout as LayoutIcon,
-  MonitorPlay,
-} from "lucide-react";
+import { Settings, Layout as LayoutIcon, MonitorPlay } from "lucide-react";
 import { TagManager } from "../../../../core/tags/components/TagManager";
 import { cn } from "@sous/ui";
 import { Layout } from "../../../types/presentation.types";
@@ -127,8 +123,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                           <div
                             key={d.id}
                             onClick={() => {
-                              const current =
-                                layout.config?.hardware || [];
+                              const current = layout.config?.hardware || [];
                               const next = isAssigned
                                 ? current.filter((id) => id !== d.id)
                                 : [...current, d.id];
@@ -182,10 +177,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
               <Text className="text-muted-foreground font-black uppercase text-[8px] tracking-widest leading-none mb-1">
                 Classification Tags
               </Text>
-              <TagManager
-                entityType="layout"
-                entityId={layout.id!}
-              />
+              <TagManager entityType="layout" entityId={layout.id!} />
             </View>
           </View>
         </ScrollView>

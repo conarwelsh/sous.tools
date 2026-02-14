@@ -11,35 +11,50 @@ if (!isHyperDxDebug) {
   const originalWarn = console.warn;
   const originalError = console.error;
 
-  const filter = (orig: Function) => (...args: any[]) => {
-    const msg = args[0];
-    if (typeof msg === 'string' && (msg.includes('[⚡HyperDX]') || msg.includes('Observability initialized'))) {
-      return;
-    }
-    orig(...args);
-  };
+  const filter =
+    (orig: (...args: any[]) => void) =>
+    (...args: any[]) => {
+      const msg = args[0];
+      if (
+        typeof msg === 'string' &&
+        (msg.includes('[⚡HyperDX]') ||
+          msg.includes('Observability initialized'))
+      ) {
+        return;
+      }
+      orig(...args);
+    };
 
   console.log = filter(originalLog);
   console.info = filter(originalInfo);
   console.warn = filter(originalWarn);
   console.error = (msg, ...args) => {
-    if (typeof msg === 'string' && (msg.includes('[⚡HyperDX]') || msg.includes('deprecation'))) {
+    if (
+      typeof msg === 'string' &&
+      (msg.includes('[⚡HyperDX]') || msg.includes('deprecation'))
+    ) {
       return;
     }
     originalError(msg, ...args);
   };
 
   // Also hook into stdout/stderr for any direct writes
-  const filterWrite = (orig: any) =>
-    function (this: any, chunk: any) {
+  const filterWrite = (orig: (...args: any[]) => any) =>
+    function (chunk: any, ...args: any[]): any {
       if (typeof chunk === 'string' && chunk.includes('[⚡HyperDX]')) {
         return true;
       }
-      return orig.apply(this, arguments);
+      return orig(chunk, ...args);
     };
 
-  if (process.stdout.write) process.stdout.write = filterWrite(process.stdout.write);
-  if (process.stderr.write) process.stderr.write = filterWrite(process.stderr.write);
+  if (process.stdout.write)
+    process.stdout.write = filterWrite(
+      process.stdout.write.bind(process.stdout),
+    );
+  if (process.stderr.write)
+    process.stderr.write = filterWrite(
+      process.stderr.write.bind(process.stderr),
+    );
 }
 
 async function bootstrap() {

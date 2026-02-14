@@ -5,6 +5,7 @@ The unified frontend shell for the Sous platform. Built with **Next.js 16**, **T
 ## Responsibilities
 
 This application serves as a thin "Shell" (Mandate #15). It handles:
+
 - **Routing**: Client and Server-side routing for all platform flavors.
 - **Platform Glue**: Capacitor integration for native hardware access.
 - **Initialization**: Apollo Client, Auth Providers, and Design System setup.
@@ -16,13 +17,13 @@ This application serves as a thin "Shell" (Mandate #15). It handles:
 
 The web app is optimized for multiple deployment targets using Capacitor:
 
-| Flavor | Target | Description |
-| :--- | :--- | :--- |
-| **Admin** | Desktop Web | Central management console for organizations. |
-| **POS** | Tablet | Touch-optimized terminal for order entry. |
-| **KDS** | Large Tablet / Monitor | Kitchen Display System with real-time ticket aging. |
-| **Signage** | TV / 1080p | Digital menu board and promotional display. |
-| **Mobile** | Phone | Consumer and staff mobile companion. |
+| Flavor      | Target                 | Description                                         |
+| :---------- | :--------------------- | :-------------------------------------------------- |
+| **Admin**   | Desktop Web            | Central management console for organizations.       |
+| **POS**     | Tablet                 | Touch-optimized terminal for order entry.           |
+| **KDS**     | Large Tablet / Monitor | Kitchen Display System with real-time ticket aging. |
+| **Signage** | TV / 1080p             | Digital menu board and promotional display.         |
+| **Mobile**  | Phone                  | Consumer and staff mobile companion.                |
 
 ## Tech Stack
 
@@ -35,6 +36,7 @@ The web app is optimized for multiple deployment targets using Capacitor:
 ## Installation & Setup
 
 1.  **Dependencies**:
+
     ```bash
     pnpm install
     ```

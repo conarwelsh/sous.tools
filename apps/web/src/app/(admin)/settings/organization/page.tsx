@@ -72,11 +72,11 @@ export default function OrganizationSettingsPage() {
 
         <Card className="p-8 bg-card border-border overflow-hidden relative">
           <View className="absolute top-0 right-0 p-8">
-             <View className="px-3 py-1 bg-primary/10 border border-primary/20 rounded-full">
-                <Text className="text-primary font-bold uppercase text-[10px] tracking-widest">
-                  {(user as any)?.organization?.plan?.slug || "FREE"}
-                </Text>
-             </View>
+            <View className="px-3 py-1 bg-primary/10 border border-primary/20 rounded-full">
+              <Text className="text-primary font-bold uppercase text-[10px] tracking-widest">
+                {(user as any)?.organization?.plan?.slug || "FREE"}
+              </Text>
+            </View>
           </View>
 
           <View className="flex-row items-center gap-4 mb-8">
@@ -96,18 +96,25 @@ export default function OrganizationSettingsPage() {
           <View className="gap-6">
             <View className="bg-muted/10 border border-border rounded-xl p-4">
               <Text className="text-foreground/80 font-bold mb-1 uppercase text-xs tracking-tight">
-                {(user as any)?.organization?.plan?.slug === 'pro' ? 'Pro Plan' : 'Free Tier'}
+                {(user as any)?.organization?.plan?.slug === "pro"
+                  ? "Pro Plan"
+                  : "Free Tier"}
               </Text>
               <Text className="text-muted-foreground text-[10px] leading-relaxed uppercase tracking-wider">
-                {(user as any)?.organization?.plan?.slug === 'pro' 
-                  ? 'Unlimited recipes, unlimited screens, and priority support active.' 
-                  : 'Up to 10 recipes, 2 screens, and community support.'}
+                {(user as any)?.organization?.plan?.slug === "pro"
+                  ? "Unlimited recipes, unlimited screens, and priority support active."
+                  : "Up to 10 recipes, 2 screens, and community support."}
               </Text>
             </View>
 
-            <Button variant="outline" className="border-border hover:bg-muted/50 w-full">
+            <Button
+              variant="outline"
+              className="border-border hover:bg-muted/50 w-full"
+            >
               <Text className="text-foreground font-bold uppercase text-xs tracking-widest">
-                {(user as any)?.organization?.plan?.slug === 'pro' ? 'Manage Subscription' : 'Upgrade to Pro'}
+                {(user as any)?.organization?.plan?.slug === "pro"
+                  ? "Manage Subscription"
+                  : "Upgrade to Pro"}
               </Text>
             </Button>
           </View>

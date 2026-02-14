@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import mime from "mime-types";
 
-import { config } from '../packages/config/src/index.js';
+import { config } from "../packages/config/src/index.js";
 
 async function main() {
   const args = process.argv.slice(2);
@@ -34,7 +34,9 @@ async function main() {
     process.exit(1);
   }
 
-  const rootPkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), "package.json"), "utf8"));
+  const rootPkg = JSON.parse(
+    fs.readFileSync(path.join(process.cwd(), "package.json"), "utf8"),
+  );
   const version = rootPkg.version;
 
   const manifest: Record<string, string> = {

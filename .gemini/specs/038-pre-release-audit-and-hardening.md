@@ -117,6 +117,7 @@ Since this audit requires significant compute resources (running all test suites
 - [ ] **Cleaned Codebase**: PRs created to fix lint errors, remove dead code, and resolve placeholders.
 
 ### Initial Local Audit Findings (2026-02-13)
+
 - **Dependencies:** 5 vulnerabilities found (1 High, 1 Moderate, 3 Low).
 - **Linting:** Failures in `@sous/emails`, `@sous/client-sdk`, `@sous/docs`, `@sous/ui`, `@sous/web`.
 - **Placeholders:** No critical TODOs found in source code; verified script effectiveness.

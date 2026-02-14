@@ -1,7 +1,19 @@
 "use client";
 
 import React, { useState } from "react";
-import { View, Text, Button, Card, Input, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, cn } from "@sous/ui";
+import {
+  View,
+  Text,
+  Button,
+  Card,
+  Input,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  cn,
+} from "@sous/ui";
 import { Truck, Plus, Search, Mail, Phone, MapPin } from "lucide-react";
 import { useAuth } from "@sous/features";
 import { gql } from "@apollo/client";
@@ -43,14 +55,14 @@ export default function SuppliersPage() {
   const { user } = useAuth();
   const orgId = user?.organizationId || "";
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newSupplier, setNewSupplier] = useState<any>({ 
-    name: "", 
-    contactEmail: "", 
-    contactPhone: "", 
+  const [newSupplier, setNewSupplier] = useState<any>({
+    name: "",
+    contactEmail: "",
+    contactPhone: "",
     address: "",
     deliveryDays: [],
     cutoffTime: "16:00",
-    minOrderValue: 0
+    minOrderValue: 0,
   });
 
   const { data, loading, refetch } = useQuery<any>(GET_SUPPLIERS, {
@@ -67,19 +79,19 @@ export default function SuppliersPage() {
           orgId,
           input: {
             ...newSupplier,
-            minOrderValue: parseInt(newSupplier.minOrderValue) * 100 // Convert to cents
+            minOrderValue: parseInt(newSupplier.minOrderValue) * 100, // Convert to cents
           },
         },
       });
       setShowAddModal(false);
-      setNewSupplier({ 
-        name: "", 
-        contactEmail: "", 
-        contactPhone: "", 
+      setNewSupplier({
+        name: "",
+        contactEmail: "",
+        contactPhone: "",
         address: "",
         deliveryDays: [],
         cutoffTime: "16:00",
-        minOrderValue: 0
+        minOrderValue: 0,
       });
       refetch();
     } catch (e) {
@@ -90,9 +102,15 @@ export default function SuppliersPage() {
   const toggleDay = (day: number) => {
     const current = [...newSupplier.deliveryDays];
     if (current.includes(day)) {
-      setNewSupplier({ ...newSupplier, deliveryDays: current.filter(d => d !== day) });
+      setNewSupplier({
+        ...newSupplier,
+        deliveryDays: current.filter((d) => d !== day),
+      });
     } else {
-      setNewSupplier({ ...newSupplier, deliveryDays: [...current, day].sort() });
+      setNewSupplier({
+        ...newSupplier,
+        deliveryDays: [...current, day].sort(),
+      });
     }
   };
 
@@ -163,38 +181,50 @@ export default function SuppliersPage() {
                   {supplier.contactEmail && (
                     <div className="flex items-center gap-3 text-muted-foreground">
                       <Mail size={14} />
-                      <span className="text-xs font-mono">{supplier.contactEmail}</span>
+                      <span className="text-xs font-mono">
+                        {supplier.contactEmail}
+                      </span>
                     </div>
                   )}
                   {supplier.contactPhone && (
                     <div className="flex items-center gap-3 text-muted-foreground">
                       <Phone size={14} />
-                      <span className="text-xs font-mono">{supplier.contactPhone}</span>
+                      <span className="text-xs font-mono">
+                        {supplier.contactPhone}
+                      </span>
                     </div>
                   )}
                 </div>
 
                 <div className="pt-4 border-t border-border/50 space-y-3">
-                   <div className="flex justify-between items-center">
-                      <Text className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Delivery Days</Text>
-                      <div className="flex gap-1">
-                        {DAYS.map(d => (
-                          <div 
-                            key={d.value}
-                            className={cn(
-                              "w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-black",
-                              supplier.deliveryDays?.includes(d.value) ? "bg-sky-500 text-white" : "bg-muted text-muted-foreground/40"
-                            )}
-                          >
-                            {d.label}
-                          </div>
-                        ))}
-                      </div>
-                   </div>
-                   <div className="flex justify-between items-center">
-                      <Text className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Order Min</Text>
-                      <Text className="text-[10px] font-black text-foreground">${(supplier.minOrderValue / 100).toFixed(2)}</Text>
-                   </div>
+                  <div className="flex justify-between items-center">
+                    <Text className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                      Delivery Days
+                    </Text>
+                    <div className="flex gap-1">
+                      {DAYS.map((d) => (
+                        <div
+                          key={d.value}
+                          className={cn(
+                            "w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-black",
+                            supplier.deliveryDays?.includes(d.value)
+                              ? "bg-sky-500 text-white"
+                              : "bg-muted text-muted-foreground/40",
+                          )}
+                        >
+                          {d.label}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <Text className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                      Order Min
+                    </Text>
+                    <Text className="text-[10px] font-black text-foreground">
+                      ${(supplier.minOrderValue / 100).toFixed(2)}
+                    </Text>
+                  </div>
                 </div>
               </div>
             </Card>
@@ -212,20 +242,31 @@ export default function SuppliersPage() {
           <div className="grid gap-6 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest ml-1">Name</Text>
+                <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest ml-1">
+                  Name
+                </Text>
                 <Input
                   value={newSupplier.name}
-                  onChange={(e) => setNewSupplier({ ...newSupplier, name: e.target.value })}
+                  onChange={(e) =>
+                    setNewSupplier({ ...newSupplier, name: e.target.value })
+                  }
                   className="bg-muted border-border"
                   placeholder="Vendor Name"
                 />
               </div>
               <div className="grid gap-2">
-                <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest ml-1">Min Order ($)</Text>
+                <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest ml-1">
+                  Min Order ($)
+                </Text>
                 <Input
                   type="number"
                   value={newSupplier.minOrderValue}
-                  onChange={(e) => setNewSupplier({ ...newSupplier, minOrderValue: e.target.value })}
+                  onChange={(e) =>
+                    setNewSupplier({
+                      ...newSupplier,
+                      minOrderValue: e.target.value,
+                    })
+                  }
                   className="bg-muted border-border"
                   placeholder="0.00"
                 />
@@ -234,19 +275,33 @@ export default function SuppliersPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest ml-1">Email</Text>
+                <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest ml-1">
+                  Email
+                </Text>
                 <Input
                   value={newSupplier.contactEmail}
-                  onChange={(e) => setNewSupplier({ ...newSupplier, contactEmail: e.target.value })}
+                  onChange={(e) =>
+                    setNewSupplier({
+                      ...newSupplier,
+                      contactEmail: e.target.value,
+                    })
+                  }
                   className="bg-muted border-border"
                   placeholder="orders@vendor.com"
                 />
               </div>
               <div className="grid gap-2">
-                <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest ml-1">Phone</Text>
+                <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest ml-1">
+                  Phone
+                </Text>
                 <Input
                   value={newSupplier.contactPhone}
-                  onChange={(e) => setNewSupplier({ ...newSupplier, contactPhone: e.target.value })}
+                  onChange={(e) =>
+                    setNewSupplier({
+                      ...newSupplier,
+                      contactPhone: e.target.value,
+                    })
+                  }
                   className="bg-muted border-border"
                   placeholder="+1 (555) 000-0000"
                 />
@@ -254,17 +309,19 @@ export default function SuppliersPage() {
             </div>
 
             <div className="grid gap-2">
-              <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest ml-1">Delivery Schedule</Text>
+              <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest ml-1">
+                Delivery Schedule
+              </Text>
               <div className="flex justify-between bg-muted p-3 rounded-2xl border border-border">
-                {DAYS.map(d => (
+                {DAYS.map((d) => (
                   <button
                     key={d.value}
                     onClick={() => toggleDay(d.value)}
                     className={cn(
                       "w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black transition-all",
-                      newSupplier.deliveryDays.includes(d.value) 
-                        ? "bg-sky-500 text-white shadow-lg shadow-sky-500/20 scale-110" 
-                        : "bg-background text-muted-foreground hover:bg-white/50"
+                      newSupplier.deliveryDays.includes(d.value)
+                        ? "bg-sky-500 text-white shadow-lg shadow-sky-500/20 scale-110"
+                        : "bg-background text-muted-foreground hover:bg-white/50",
                     )}
                   >
                     {d.label}
@@ -274,17 +331,25 @@ export default function SuppliersPage() {
             </div>
 
             <div className="grid gap-2">
-              <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest ml-1">Address</Text>
+              <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest ml-1">
+                Address
+              </Text>
               <Input
                 value={newSupplier.address}
-                onChange={(e) => setNewSupplier({ ...newSupplier, address: e.target.value })}
+                onChange={(e) =>
+                  setNewSupplier({ ...newSupplier, address: e.target.value })
+                }
                 className="bg-muted border-border"
                 placeholder="123 Vendor St, City, ST"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={handleCreate} disabled={creating} className="bg-sky-500 hover:bg-sky-600 w-full h-12 shadow-xl shadow-sky-500/20">
+            <Button
+              onClick={handleCreate}
+              disabled={creating}
+              className="bg-sky-500 hover:bg-sky-600 w-full h-12 shadow-xl shadow-sky-500/20"
+            >
               <Text className="text-white font-bold uppercase text-xs tracking-widest">
                 {creating ? "Creating..." : "Create Supplier Partner"}
               </Text>

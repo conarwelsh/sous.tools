@@ -2,16 +2,16 @@
 
 import React, { useState } from "react";
 import { usePlatformSettings } from "../hooks/usePlatformSettings";
-import { 
-  Card, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription, 
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
   CardContent,
   Input,
   Button,
   View,
-  Text
+  Text,
 } from "@sous/ui";
 import { Save, ShieldAlert, Loader2 } from "lucide-react";
 
@@ -22,7 +22,7 @@ export const PlatformSettingsView: React.FC = () => {
 
   // Sync local state when settings load
   React.useEffect(() => {
-    const emailSetting = settings.find(s => s.key === "support_email");
+    const emailSetting = settings.find((s) => s.key === "support_email");
     if (emailSetting) setSupportEmail(emailSetting.value);
   }, [settings]);
 
@@ -32,11 +32,12 @@ export const PlatformSettingsView: React.FC = () => {
     setSaving(false);
   };
 
-  if (loading) return (
-    <View className="flex items-center justify-center p-12">
-      <Loader2 className="animate-spin text-primary" size={32} />
-    </View>
-  );
+  if (loading)
+    return (
+      <View className="flex items-center justify-center p-12">
+        <Loader2 className="animate-spin text-primary" size={32} />
+      </View>
+    );
 
   return (
     <View className="space-y-8">
@@ -49,9 +50,12 @@ export const PlatformSettingsView: React.FC = () => {
 
       <Card className="border-border/50 shadow-xl shadow-primary/5 rounded-[2rem] overflow-hidden">
         <CardHeader className="bg-muted/30 border-b border-border/50 p-8">
-          <CardTitle className="text-xl font-bold uppercase tracking-tight">Support Configuration</CardTitle>
+          <CardTitle className="text-xl font-bold uppercase tracking-tight">
+            Support Configuration
+          </CardTitle>
           <CardDescription>
-            Configure where internal support alerts and GitHub issues are routed.
+            Configure where internal support alerts and GitHub issues are
+            routed.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-8 space-y-6">
@@ -66,17 +70,22 @@ export const PlatformSettingsView: React.FC = () => {
                 onChange={(e) => setSupportEmail(e.target.value)}
                 className="h-12 bg-muted/20 border-border/50 rounded-xl px-6 text-foreground focus:border-primary/50 transition-all max-w-md"
               />
-              <Button 
-                onClick={handleSaveSupportEmail} 
+              <Button
+                onClick={handleSaveSupportEmail}
                 disabled={saving}
                 className="h-12 gap-2 rounded-xl font-bold uppercase italic tracking-tighter"
               >
-                {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                {saving ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Save size={16} />
+                )}
                 Save Setting
               </Button>
             </View>
             <Text className="text-muted-foreground italic text-sm">
-              Fallback if not set: {process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@sous.tools'}
+              Fallback if not set:{" "}
+              {process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@sous.tools"}
             </Text>
           </View>
         </CardContent>

@@ -2,7 +2,11 @@ import { Injectable, Inject } from '@nestjs/common';
 import { DatabaseService } from '../../../core/database/database.service.js';
 import { organizations, plans, usageMetrics } from '../organizations.schema.js';
 import { eq, and } from 'drizzle-orm';
-import { FeatureScope, MetricKey, ROLE_SCOPES } from '@sous/features/constants/plans';
+import {
+  FeatureScope,
+  MetricKey,
+  ROLE_SCOPES,
+} from '@sous/features/constants/plans';
 import { logger } from '@sous/logger';
 
 @Injectable()
@@ -22,12 +26,19 @@ export class PlanService {
     if (!org) throw new Error('Organization not found');
 
     const baseScopes = (org.plan?.baseScopes as FeatureScope[]) || [];
-    const roleScopes = role ? (ROLE_SCOPES[role] || []) : [];
-    
+    const roleScopes = role ? ROLE_SCOPES[role] || [] : [];
+
     const baseLimits = (org.plan?.limits as Record<MetricKey, number>) || {};
 
-    const combinedScopes = new Set([...baseScopes, ...roleScopes, ...(org.scopeOverrides as FeatureScope[])]);
-    const effectiveLimits = { ...baseLimits, ...(org.limitOverrides as Record<MetricKey, number>) };
+    const combinedScopes = new Set([
+      ...baseScopes,
+      ...roleScopes,
+      ...(org.scopeOverrides as FeatureScope[]),
+    ]);
+    const effectiveLimits = {
+      ...baseLimits,
+      ...(org.limitOverrides as Record<MetricKey, number>),
+    };
 
     return {
       scopes: Array.from(combinedScopes),

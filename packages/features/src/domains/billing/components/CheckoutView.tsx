@@ -25,7 +25,7 @@ export const CheckoutView: React.FC = () => {
       const http = await getHttpClient();
       await http.post("/billing/subscribe", {
         planSlug: selectedPlan,
-        provider: "stripe"
+        provider: "stripe",
       });
       // In a real app, we'd handle Stripe redirect/elements here.
       // Since this is a dev environment, we assume success.
@@ -62,8 +62,12 @@ export const CheckoutView: React.FC = () => {
                 <CreditCard size={24} />
               </View>
               <View>
-                <Text className="font-black uppercase text-xs tracking-tight">Complete Payment</Text>
-                <Text className="text-muted-foreground text-sm">Selected: {selectedPlan}</Text>
+                <Text className="font-black uppercase text-xs tracking-tight">
+                  Complete Payment
+                </Text>
+                <Text className="text-muted-foreground text-sm">
+                  Selected: {selectedPlan}
+                </Text>
               </View>
             </View>
 
@@ -78,24 +82,34 @@ export const CheckoutView: React.FC = () => {
                 </View>
                 <View className="space-y-8 relative z-10">
                   <View className="w-12 h-8 bg-amber-500/20 rounded-md border border-amber-500/30" />
-                  <Text className="text-xl font-mono tracking-[0.2em] text-white/90">•••• •••• •••• 4242</Text>
+                  <Text className="text-xl font-mono tracking-[0.2em] text-white/90">
+                    •••• •••• •••• 4242
+                  </Text>
                   <View className="flex flex-row justify-between">
-                    <Text className="text-[10px] font-mono uppercase text-white/40">Exp: 12/28</Text>
-                    <Text className="text-[10px] font-mono uppercase text-white/40">CVC: •••</Text>
+                    <Text className="text-[10px] font-mono uppercase text-white/40">
+                      Exp: 12/28
+                    </Text>
+                    <Text className="text-[10px] font-mono uppercase text-white/40">
+                      CVC: •••
+                    </Text>
                   </View>
                 </View>
               </View>
             </View>
 
-            <Button 
-              onClick={handleSubscribe} 
+            <Button
+              onClick={handleSubscribe}
               disabled={loading}
               className="w-full h-14 rounded-2xl text-lg font-black italic uppercase tracking-tighter shadow-xl shadow-primary/10"
             >
               {loading ? <Loader2 className="animate-spin" /> : "Activate Now"}
             </Button>
 
-            <Button variant="ghost" onClick={() => setStep("plan")} className="w-full text-[10px] font-bold uppercase tracking-widest">
+            <Button
+              variant="ghost"
+              onClick={() => setStep("plan")}
+              className="w-full text-[10px] font-bold uppercase tracking-widest"
+            >
               ← Change Plan
             </Button>
           </CardContent>
@@ -104,7 +118,9 @@ export const CheckoutView: React.FC = () => {
 
       <View className="flex flex-row items-center justify-center gap-2 text-muted-foreground">
         <ShieldCheck size={14} className="text-emerald-500" />
-        <Text className="italic text-sm">Encrypted, PCI-compliant payment processing</Text>
+        <Text className="italic text-sm">
+          Encrypted, PCI-compliant payment processing
+        </Text>
       </View>
     </View>
   );

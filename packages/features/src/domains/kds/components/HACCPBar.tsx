@@ -42,31 +42,37 @@ export const HACCPBar = ({ orgId }: { orgId: string }) => {
           HACCP Monitor
         </span>
       </div>
-      
+
       <div className="flex flex-row items-center gap-6 overflow-x-auto no-scrollbar">
         {sensors.map((s: any) => (
-          <div
-            key={s.id}
-            className="flex flex-row items-center gap-4 group"
-          >
+          <div key={s.id} className="flex flex-row items-center gap-4 group">
             <div className="flex flex-col">
               <span className="text-[8px] font-black uppercase text-zinc-600 tracking-widest leading-none mb-1 group-hover:text-zinc-400 transition-colors">
                 {s.name}
               </span>
               <div className="flex items-center gap-2">
                 <Thermometer size={12} className="text-zinc-500" />
-                <span className={cn(
-                  "font-mono font-bold text-sm tracking-tighter",
-                  s.temp > 5 ? "text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)]" : "text-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]"
-                )}>
-                  {s.temp?.toFixed(1)}°{s.unit || 'C'}
+                <span
+                  className={cn(
+                    "font-mono font-bold text-sm tracking-tighter",
+                    s.temp > 5
+                      ? "text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)]"
+                      : "text-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]",
+                  )}
+                >
+                  {s.temp?.toFixed(1)}°{s.unit || "C"}
                 </span>
               </div>
             </div>
-            
+
             <div className="flex flex-col items-center justify-center gap-1 opacity-40">
-               <Battery size={10} className={s.battery < 20 ? "text-red-500" : "text-zinc-500"} />
-               <span className="text-[7px] font-mono font-bold">{s.battery}%</span>
+              <Battery
+                size={10}
+                className={s.battery < 20 ? "text-red-500" : "text-zinc-500"}
+              />
+              <span className="text-[7px] font-mono font-bold">
+                {s.battery}%
+              </span>
             </div>
           </div>
         ))}

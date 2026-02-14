@@ -81,12 +81,22 @@ export class MetricsService {
   // --- Platform Wide Metrics (SuperAdmin) ---
 
   async getPlatformMetrics() {
-    const orgsResult = await this.dbService.db.select({ count: sql<number>`count(*)` }).from(organizations);
-    const usersResult = await this.dbService.db.select({ count: sql<number>`count(*)` }).from(users);
-    const ordersResult = await this.dbService.db.select({ count: sql<number>`count(*)` }).from(posOrders);
-    const recipesResult = await this.dbService.db.select({ count: sql<number>`count(*)` }).from(recipes);
-    const nodesResult = await this.dbService.db.select({ count: sql<number>`count(*)` }).from(displays);
-    
+    const orgsResult = await this.dbService.db
+      .select({ count: sql<number>`count(*)` })
+      .from(organizations);
+    const usersResult = await this.dbService.db
+      .select({ count: sql<number>`count(*)` })
+      .from(users);
+    const ordersResult = await this.dbService.db
+      .select({ count: sql<number>`count(*)` })
+      .from(posOrders);
+    const recipesResult = await this.dbService.db
+      .select({ count: sql<number>`count(*)` })
+      .from(recipes);
+    const nodesResult = await this.dbService.db
+      .select({ count: sql<number>`count(*)` })
+      .from(displays);
+
     // Revenue across all orgs (last 30 days)
     const monthAgo = new Date();
     monthAgo.setDate(monthAgo.getDate() - 30);

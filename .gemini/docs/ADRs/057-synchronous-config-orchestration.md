@@ -1,17 +1,22 @@
 # ADR 057: Synchronous Configuration and CLI-Driven Environment Injection
 
 ## Status
+
 Proposed
 
 ## Context
+
 The `@sous/config` package originally contained asynchronous logic to fetch secrets from Infisical at runtime. This introduced several problems:
+
 1.  **Startup Latency**: Every application had to wait for a network request to Infisical before it could start.
 2.  **Complexity**: Asynchronous configuration is harder to use in NestJS modules, React components, and other contexts where synchronous access is preferred.
 3.  **Security**: Runtime secret fetching requires every application to have Infisical credentials and network access to the secret manager.
 4.  **Inconsistency**: Different apps might resolve configuration differently or at different times.
 
 ## Decision
+
 We will move to a **CLI-Driven Environment Injection** model:
+
 1.  **Synchronous `@sous/config`**: The package will be strictly synchronous. It will ONLY read from `process.env`. It will NOT perform any network requests or async initialization.
 2.  **CLI Orchestrator**: The `@sous/cli` will provide a `sous env exec` command. This command is responsible for:
     - Parsing local `.env` for Infisical bootstrap credentials.
@@ -22,6 +27,7 @@ We will move to a **CLI-Driven Environment Injection** model:
 4.  **Strict Validation**: `@sous/config` will use Zod to validate the environment at startup, ensuring all required secrets are present before the app logic begins.
 
 ## Consequences
+
 - **Improved Performance**: Applications start instantly once spawned by the CLI.
 - **Simplified Code**: No more `await configPromise` or `registerAsync` for simple configuration.
 - **Centralized Management**: All environment logic is in the CLI, making it easier to audit and update.

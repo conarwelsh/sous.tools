@@ -7,17 +7,17 @@ import path from 'path';
 import { findProjectRootSync } from '@sous/config/server-utils';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { 
-  BrandCloud, 
-  BrandWhisk, 
-  BrandHatGear, 
-  BrandMorph, 
+import {
+  BrandCloud,
+  BrandWhisk,
+  BrandHatGear,
+  BrandMorph,
   BrandKitchenLine,
   ApiLogo,
   PosLogo,
   KdsLogo,
   SignageLogo,
-  DocsLogo
+  DocsLogo,
 } from '@sous/ui';
 
 @Command({
@@ -58,28 +58,33 @@ export class ForgeCommand extends CommandRunner {
   private async forgeAsset(target: string, cfg: any, rootDir: string) {
     logger.info(`  └─ Forging: ${target} (${cfg.variant}, ${cfg.size}px)...`);
 
-    let svgString = this.renderLogoToSvg(cfg.variant, cfg.size, cfg.props || {});
-    
+    let svgString = this.renderLogoToSvg(
+      cfg.variant,
+      cfg.size,
+      cfg.props || {},
+    );
+
     // Ensure xmlns is present for Resvg
     if (!svgString.includes('xmlns=')) {
-      svgString = svgString.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ');
+      svgString = svgString.replace(
+        '<svg ',
+        '<svg xmlns="http://www.w3.org/2000/svg" ',
+      );
     }
 
     const resvg = new Resvg(svgString, {
-      fitTo: { mode: 'width', value: cfg.size }
+      fitTo: { mode: 'width', value: cfg.size },
     });
     const pngBuffer = resvg.render().asPng();
 
     const paths = this.getPathsForTarget(target, rootDir);
-    
+
     for (const outPath of paths) {
       const dir = path.dirname(outPath);
       if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-      
-      await sharp(pngBuffer)
-        .resize(cfg.size, cfg.size)
-        .toFile(outPath);
-        
+
+      await sharp(pngBuffer).resize(cfg.size, cfg.size).toFile(outPath);
+
       logger.info(`     ✅ Saved: ${path.relative(rootDir, outPath)}`);
     }
   }
@@ -87,36 +92,57 @@ export class ForgeCommand extends CommandRunner {
   private renderLogoToSvg(variant: string, size: number, props: any): string {
     let Component: any;
     switch (variant) {
-      case 'api': Component = ApiLogo; break;
-      case 'cloud': 
-      case 'neon': Component = BrandCloud; break;
-      case 'morph': Component = BrandMorph; break;
-      case 'whisk': Component = BrandWhisk; break;
+      case 'api':
+        Component = ApiLogo;
+        break;
+      case 'cloud':
+      case 'neon':
+        Component = BrandCloud;
+        break;
+      case 'morph':
+        Component = BrandMorph;
+        break;
+      case 'whisk':
+        Component = BrandWhisk;
+        break;
       case 'circuit':
-      case 'hat-and-gear': Component = BrandHatGear; break;
+      case 'hat-and-gear':
+        Component = BrandHatGear;
+        break;
       case 'plate':
-      case 'kitchen-line': Component = BrandKitchenLine; break;
-      case 'pos': Component = PosLogo; break;
-      case 'kds': Component = KdsLogo; break;
-      case 'signage': Component = SignageLogo; break;
+      case 'kitchen-line':
+        Component = BrandKitchenLine;
+        break;
+      case 'pos':
+        Component = PosLogo;
+        break;
+      case 'kds':
+        Component = KdsLogo;
+        break;
+      case 'signage':
+        Component = SignageLogo;
+        break;
       case 'tools':
-      case 'line': Component = DocsLogo; break;
-      default: Component = BrandCloud;
+      case 'line':
+        Component = DocsLogo;
+        break;
+      default:
+        Component = BrandCloud;
     }
 
     return renderToStaticMarkup(
-      React.createElement(Component, { 
-        size, 
+      React.createElement(Component, {
+        size,
         animState: 'static',
-        ...props 
-      })
+        ...props,
+      }),
     );
   }
 
   private getPathsForTarget(target: string, rootDir: string): string[] {
     const webPublic = path.join(rootDir, 'apps/web/public');
     const webAssets = path.join(rootDir, 'apps/web/assets'); // Capacitor/PWA assets
-    
+
     switch (target) {
       case 'favicon-16':
         return [path.join(webPublic, 'favicon-16x16.png')];
@@ -131,15 +157,26 @@ export class ForgeCommand extends CommandRunner {
       case 'android-adaptive-foreground':
         return [
           path.join(webAssets, 'android/icon-foreground.png'),
-          path.join(rootDir, 'apps/web/android/app/src/main/res/drawable-v24/ic_launcher_foreground.png')
+          path.join(
+            rootDir,
+            'apps/web/android/app/src/main/res/drawable-v24/ic_launcher_foreground.png',
+          ),
         ];
       case 'ios-app-icon':
         return [
           path.join(webAssets, 'ios/icon.png'),
-          path.join(rootDir, 'apps/web/ios/App/App/Assets.xcassets/AppIcon.appiconset/icon-1024.png')
+          path.join(
+            rootDir,
+            'apps/web/ios/App/App/Assets.xcassets/AppIcon.appiconset/icon-1024.png',
+          ),
         ];
       case 'wearos-app-icon':
-        return [path.join(rootDir, 'apps/wearos/src/main/res/mipmap-xxxhdpi/ic_launcher.png')];
+        return [
+          path.join(
+            rootDir,
+            'apps/wearos/src/main/res/mipmap-xxxhdpi/ic_launcher.png',
+          ),
+        ];
       case 'pos-logo':
         return [path.join(webPublic, 'logos/pos.png')];
       case 'kds-logo':

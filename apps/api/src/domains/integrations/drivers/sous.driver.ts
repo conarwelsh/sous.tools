@@ -20,8 +20,8 @@ export class SousDriver implements PosInterface {
     const orders = await this.dbService.readDb.query.posOrders.findMany({
       where: (o) => eq(o.organizationId, this.organizationId),
       with: {
-        items: true
-      }
+        items: true,
+      },
     });
     return orders;
   }
@@ -36,14 +36,18 @@ export class SousDriver implements PosInterface {
     });
 
     return [
-      ...dbCategories.map(c => ({ type: 'CATEGORY', id: c.id, name: c.name })),
-      ...dbProducts.map(p => ({ 
-        type: 'ITEM', 
-        id: p.id, 
-        name: p.name, 
-        price: p.price, 
-        categoryId: p.categoryId 
-      }))
+      ...dbCategories.map((c) => ({
+        type: 'CATEGORY',
+        id: c.id,
+        name: c.name,
+      })),
+      ...dbProducts.map((p) => ({
+        type: 'ITEM',
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        categoryId: p.categoryId,
+      })),
     ];
   }
 
@@ -61,10 +65,13 @@ export class SousDriver implements PosInterface {
   }
 
   async createCategory(name: string): Promise<any> {
-    const [cat] = await this.dbService.db.insert(categories).values({
-      name,
-      organizationId: this.organizationId,
-    }).returning();
+    const [cat] = await this.dbService.db
+      .insert(categories)
+      .values({
+        name,
+        organizationId: this.organizationId,
+      })
+      .returning();
     return cat;
   }
 
@@ -75,40 +82,59 @@ export class SousDriver implements PosInterface {
     description?: string;
     sku?: string;
   }): Promise<any> {
-    const [prod] = await this.dbService.db.insert(products).values({
-      name: data.name,
-      categoryId: data.categoryId,
-      price: data.price,
-      organizationId: this.organizationId,
-    }).returning();
+    const [prod] = await this.dbService.db
+      .insert(products)
+      .values({
+        name: data.name,
+        categoryId: data.categoryId,
+        price: data.price,
+        organizationId: this.organizationId,
+      })
+      .returning();
     return prod;
   }
 
   async updateProduct(productId: string, productData: any): Promise<any> {
-    const [prod] = await this.dbService.db.update(products).set({
-      ...productData,
-      updatedAt: new Date()
-    }).where(and(
-      eq(products.id, productId),
-      eq(products.organizationId, this.organizationId)
-    )).returning();
+    const [prod] = await this.dbService.db
+      .update(products)
+      .set({
+        ...productData,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(products.id, productId),
+          eq(products.organizationId, this.organizationId),
+        ),
+      )
+      .returning();
     return prod;
   }
 
   async deleteProduct(productId: string): Promise<any> {
-    await this.dbService.db.delete(products).where(and(
-      eq(products.id, productId),
-      eq(products.organizationId, this.organizationId)
-    ));
+    await this.dbService.db
+      .delete(products)
+      .where(
+        and(
+          eq(products.id, productId),
+          eq(products.organizationId, this.organizationId),
+        ),
+      );
     return { success: true };
   }
 
   async createOrder(orderData: any): Promise<any> {
     // Get an open ledger for the location
-    const ledger = (await this.posService.getOpenLedger(orderData.locationId)) as any;
+    const ledger = (await this.posService.getOpenLedger(
+      orderData.locationId,
+    )) as any;
     if (!ledger) throw new Error('No open ledger found for this location');
 
-    return this.posService.recordSale(this.organizationId, orderData, ledger.id);
+    return this.posService.recordSale(
+      this.organizationId,
+      orderData,
+      ledger.id,
+    );
   }
 
   subscribeToOrders(callback: (order: any) => void): void {

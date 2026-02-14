@@ -30,10 +30,10 @@ export class DashboardCommand extends CommandRunner {
     // In a real standalone dashboard, we would only show the 'infra' tab
     // For now, we reuse the existing Dev Dashboard but we could specialize it further
     const { waitUntilExit } = render(
-      React.createElement(DashboardUI, { 
-        manager: this.manager, 
+      React.createElement(DashboardUI, {
+        manager: this.manager,
         initialTab: 'infra',
-        initialEnv: env as any
+        initialEnv: env as any,
       }),
     );
 

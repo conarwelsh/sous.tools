@@ -17,36 +17,46 @@ const skipBull = process.env.SKIP_BULL === 'true';
 @Global()
 @Module({
   imports: [
-    ...(skipMail || skipBull ? [] : [
-      BullModule.forRootAsync({
-        useFactory: () => {
-          const redisUrl = new URL(config.redis.url || 'redis://127.0.0.1:6380');
-          return {
-            connection: {
-              host: redisUrl.hostname,
-              port: Number(redisUrl.port),
-              maxRetriesPerRequest: null,
+    ...(skipMail || skipBull
+      ? []
+      : [
+          BullModule.forRootAsync({
+            useFactory: () => {
+              const redisUrl = new URL(
+                config.redis.url || 'redis://127.0.0.1:6380',
+              );
+              return {
+                connection: {
+                  host: redisUrl.hostname,
+                  port: Number(redisUrl.port),
+                  maxRetriesPerRequest: null,
+                },
+                defaultJobOptions: {
+                  removeOnComplete: true,
+                },
+              };
             },
-            defaultJobOptions: {
-              removeOnComplete: true,
-            }
-          };
-        },
-      }),
-      BullModule.registerQueue({
-        name: 'email-queue',
-      }),
-    ]),
+          }),
+          BullModule.registerQueue({
+            name: 'email-queue',
+          }),
+        ]),
   ],
   providers: [
-    AppService, 
-    DatabaseService, 
+    AppService,
+    DatabaseService,
     PlatformService,
     CacheService,
     ...(skipMail || skipBull ? [] : [MailService, EmailProcessor]),
-    DashboardResolver
+    DashboardResolver,
   ],
   controllers: [AppController, PlatformController],
-  exports: [AppService, DatabaseService, PlatformService, CacheService, ...(skipMail || skipBull ? [] : [MailService])],
+  exports: [
+    AppService,
+    DatabaseService,
+    PlatformService,
+    CacheService,
+    ...(skipMail || skipBull ? [] : [MailService]),
+  ],
 })
 export class CoreModule {}

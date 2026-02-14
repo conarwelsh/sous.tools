@@ -118,7 +118,9 @@ export const HardwareManager = () => {
         </View>
 
         <Button
-          onClick={() => router.push("/settings/hardware/add", { scroll: false })}
+          onClick={() =>
+            router.push("/settings/hardware/add", { scroll: false })
+          }
           className="h-12 px-8 bg-primary hover:bg-primary/90 transition-all"
         >
           <span className="text-primary-foreground font-black uppercase tracking-widest text-xs">
@@ -252,7 +254,9 @@ export const HardwareManager = () => {
               No active devices found.
             </p>
             <Button
-              onClick={() => router.push("/settings/hardware/add", { scroll: false })}
+              onClick={() =>
+                router.push("/settings/hardware/add", { scroll: false })
+              }
               className="bg-muted px-6 h-10"
             >
               <span className="text-foreground font-black uppercase tracking-widest text-[10px]">

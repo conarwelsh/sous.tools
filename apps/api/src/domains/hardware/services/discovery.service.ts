@@ -19,10 +19,17 @@ export class DiscoveryService implements OnModuleInit, OnModuleDestroy {
       .filter((i) => i?.family === 'IPv4' && !i?.internal)
       .map((i) => i?.address);
 
-    logger.info(`📡 Starting Edge Discovery broadcast on: ${addresses.join(', ')}`);
+    logger.info(
+      `📡 Starting Edge Discovery broadcast on: ${addresses.join(', ')}`,
+    );
 
     this.dns.on('query', (query: any) => {
-      if (query.questions.some((q: any) => q.name === 'sous-edge.local' || q.name === '_sous-api._tcp.local')) {
+      if (
+        query.questions.some(
+          (q: any) =>
+            q.name === 'sous-edge.local' || q.name === '_sous-api._tcp.local',
+        )
+      ) {
         logger.debug('[mDNS] Responding to query for sous-edge.local');
         this.dns.respond({
           answers: [

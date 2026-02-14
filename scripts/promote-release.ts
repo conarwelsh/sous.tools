@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
-import { config } from '../packages/config/src/index.js';
+import { createClient } from "@supabase/supabase-js";
+import { config } from "../packages/config/src/index.js";
 
 async function main() {
   const supabaseUrl = config.storage.supabase.url;

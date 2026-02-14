@@ -32,7 +32,7 @@ export class InventoryResolver {
   @Query(() => [StockLedgerEntry])
   async stockLedger(
     @CurrentUser() user: any,
-    @Args('locationId', { nullable: true }) locationId?: string
+    @Args('locationId', { nullable: true }) locationId?: string,
   ) {
     return this.inventoryService.getLedger(user.organizationId, locationId);
   }

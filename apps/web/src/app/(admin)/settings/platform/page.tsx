@@ -8,11 +8,12 @@ import { notFound } from "next/navigation";
 export default function PlatformSettingsPage() {
   const { user, loading } = useAuth();
 
-  if (loading) return (
-    <View className="flex-1 bg-background flex justify-center items-center h-screen">
-      <Logo variant="cloud" size={48} suffix="tools" animate />
-    </View>
-  );
+  if (loading)
+    return (
+      <View className="flex-1 bg-background flex justify-center items-center h-screen">
+        <Logo variant="cloud" size={48} suffix="tools" animate />
+      </View>
+    );
 
   if (user?.role !== "superadmin") {
     return notFound();

@@ -13,8 +13,10 @@ const IS_WSL = fs
   .includes("microsoft");
 
 const CMD_EXE = "/mnt/c/Windows/System32/cmd.exe";
-const ADB_PATH = "C:/Users/conar/AppData/Local/Android/Sdk/platform-tools/adb.exe";
-const EMULATOR_PATH = "C:/Users/conar/AppData/Local/Android/Sdk/emulator/emulator.exe";
+const ADB_PATH =
+  "C:/Users/conar/AppData/Local/Android/Sdk/platform-tools/adb.exe";
+const EMULATOR_PATH =
+  "C:/Users/conar/AppData/Local/Android/Sdk/emulator/emulator.exe";
 
 function winExecSync(cmd: string, options: any = {}) {
   if (IS_WSL) {
@@ -30,7 +32,9 @@ function winExecSync(cmd: string, options: any = {}) {
 // Helper to get WSL IP
 function getWslIp() {
   try {
-    return execSync("ip route show default | awk '{print $3}'", { timeout: 10000 })
+    return execSync("ip route show default | awk '{print $3}'", {
+      timeout: 10000,
+    })
       .toString()
       .trim();
   } catch (e) {
@@ -49,7 +53,9 @@ async function main() {
   // 0. Validate AVD exists
   console.error(`🔍 Validating AVD: ${AVD_NAME}...`);
   try {
-    const avdList = winExecSync(`"${EMULATOR_PATH}" -list-avds`, { timeout: 15000 }).toString();
+    const avdList = winExecSync(`"${EMULATOR_PATH}" -list-avds`, {
+      timeout: 15000,
+    }).toString();
     if (!avdList.includes(AVD_NAME)) {
       console.error(`❌ AVD "${AVD_NAME}" not found in available devices:`);
       console.error(avdList);
@@ -67,7 +73,9 @@ async function main() {
     // Ensure ADB is connected to the right IP if WSL
     if (IS_WSL) {
       try {
-        winExecSync(`${ADB_PATH} connect ${WIN_IP}:${serial.split("-")[1]}`, { timeout: 10000 });
+        winExecSync(`${ADB_PATH} connect ${WIN_IP}:${serial.split("-")[1]}`, {
+          timeout: 10000,
+        });
       } catch (e) {}
     }
     console.log(serial);
@@ -142,13 +150,13 @@ async function findSerialByAvd(targetAvd: string): Promise<string | null> {
         // Strict 10s timeout for each device query to prevent overall hang
         const avdName = winExecSync(
           `${ADB_PATH} -s ${serial} shell getprop ro.boot.qemu.avd_name`,
-          { stdio: ["pipe", "pipe", "ignore"], timeout: 10000 }
+          { stdio: ["pipe", "pipe", "ignore"], timeout: 10000 },
         )
           .toString()
           .trim();
         const model = winExecSync(
           `${ADB_PATH} -s ${serial} shell getprop ro.product.model`,
-          { stdio: ["pipe", "pipe", "ignore"], timeout: 10000 }
+          { stdio: ["pipe", "pipe", "ignore"], timeout: 10000 },
         )
           .toString()
           .trim();

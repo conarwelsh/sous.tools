@@ -6,7 +6,15 @@ import { logger } from '@sous/logger';
 export type EmailJobData = {
   to: string;
   subject: string;
-  template: 'invitation' | 'password-reset' | 'welcome' | 'order' | 'low-stock' | 'verification' | 'subscription-confirmed' | 'weekly-digest';
+  template:
+    | 'invitation'
+    | 'password-reset'
+    | 'welcome'
+    | 'order'
+    | 'low-stock'
+    | 'verification'
+    | 'subscription-confirmed'
+    | 'weekly-digest';
   context: Record<string, any>;
 };
 
@@ -61,7 +69,11 @@ export class MailService {
     });
   }
 
-  async sendVerificationEmail(to: string, userName: string, verificationLink: string) {
+  async sendVerificationEmail(
+    to: string,
+    userName: string,
+    verificationLink: string,
+  ) {
     return this.sendEmail({
       to,
       subject: 'Verify your Sous account',
@@ -70,7 +82,12 @@ export class MailService {
     });
   }
 
-  async sendSubscriptionConfirmedEmail(to: string, userName: string, planName: string, orgName: string) {
+  async sendSubscriptionConfirmedEmail(
+    to: string,
+    userName: string,
+    planName: string,
+    orgName: string,
+  ) {
     return this.sendEmail({
       to,
       subject: 'Your Kitchen is Activated',
@@ -79,7 +96,12 @@ export class MailService {
     });
   }
 
-  async sendWeeklyDigestEmail(to: string, userName: string, orgName: string, stats: any) {
+  async sendWeeklyDigestEmail(
+    to: string,
+    userName: string,
+    orgName: string,
+    stats: any,
+  ) {
     return this.sendEmail({
       to,
       subject: `Weekly Kitchen Digest: ${orgName}`,

@@ -66,6 +66,41 @@ export default function MarketingPage() {
   const { user, isAuthenticated } = useAuth();
   const [plans, setPlans] = useState<any[]>(DEFAULT_PLANS);
 
+  function getPlanDescription(slug: string) {
+    if (slug.startsWith("commis"))
+      return "Perfect for research and development.";
+    if (slug.startsWith("chef-de-partie"))
+      return "For small to medium operations.";
+    if (slug.startsWith("executive-chef"))
+      return "Full-scale enterprise infrastructure.";
+    return "Custom culinary solution.";
+  }
+
+  function getPlanFeatures(slug: string) {
+    if (slug.startsWith("commis"))
+      return [
+        "1 Active Node",
+        "Unlimited Recipes",
+        "Basic Inventory",
+        "Community Support",
+      ];
+    if (slug.startsWith("chef-de-partie"))
+      return [
+        "5 Active Nodes",
+        "Advanced Costing",
+        "Supplier Integrations",
+        "Email Support",
+      ];
+    if (slug.startsWith("executive-chef"))
+      return [
+        "Unlimited Nodes",
+        "Predictive Analytics",
+        "Multi-Unit Management",
+        "24/7 Priority Support",
+      ];
+    return [];
+  }
+
   useEffect(() => {
     async function loadPlans() {
       const result = await getPricingPlansAction();
@@ -76,7 +111,10 @@ export default function MarketingPage() {
           period: "/mo",
           desc: getPlanDescription(p.slug),
           features: getPlanFeatures(p.slug),
-          action: p.slug === "executive-chef-monthly" ? "Contact Sales" : "Get Started",
+          action:
+            p.slug === "executive-chef-monthly"
+              ? "Contact Sales"
+              : "Get Started",
           popular: p.slug === "chef-de-partie-monthly",
         }));
         setPlans(formattedPlans);
@@ -84,28 +122,6 @@ export default function MarketingPage() {
     }
     loadPlans();
   }, []);
-
-  function getPlanDescription(slug: string) {
-    if (slug.startsWith("commis")) return "Perfect for research and development.";
-    if (slug.startsWith("chef-de-partie")) return "For small to medium operations.";
-    if (slug.startsWith("executive-chef")) return "Full-scale enterprise infrastructure.";
-    return "Custom culinary solution.";
-  }
-
-  function getPlanFeatures(slug: string) {
-    if (slug.startsWith("commis"))
-      return ["1 Active Node", "Unlimited Recipes", "Basic Inventory", "Community Support"];
-    if (slug.startsWith("chef-de-partie"))
-      return ["5 Active Nodes", "Advanced Costing", "Supplier Integrations", "Email Support"];
-    if (slug.startsWith("executive-chef"))
-      return [
-        "Unlimited Nodes",
-        "Predictive Analytics",
-        "Multi-Unit Management",
-        "24/7 Priority Support",
-      ];
-    return [];
-  }
 
   const features = [
     {

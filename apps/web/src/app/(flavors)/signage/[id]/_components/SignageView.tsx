@@ -5,7 +5,10 @@ import { View, Text, Logo, KioskLoading } from "@sous/ui";
 import { PresentationRenderer, DevicePairingFlow } from "@sous/features";
 import { getHttpClient } from "@sous/client-sdk";
 import { useQuery, useSubscription } from "@apollo/client/react";
-import { GET_ACTIVE_LAYOUT, PRESENTATION_UPDATED_SUBSCRIPTION } from "@/lib/graphql";
+import {
+  GET_ACTIVE_LAYOUT,
+  PRESENTATION_UPDATED_SUBSCRIPTION,
+} from "@/lib/graphql";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -46,7 +49,10 @@ export const SignageView = ({ id }: { id: string }) => {
         setPublicPresentation(data);
       } catch (e: any) {
         // If it's a 404, we don't log it as an error because we expect to fall back to pairing mode
-        if (e.message?.includes("404") || e.message?.includes("Page not found")) {
+        if (
+          e.message?.includes("404") ||
+          e.message?.includes("Page not found")
+        ) {
           console.log("No public signage layout found for slug:", id);
         } else {
           console.error("Public screen fetch failed:", e.message);
@@ -81,43 +87,43 @@ export const SignageView = ({ id }: { id: string }) => {
 };
 
 const SignageContent = ({ hardwareId }: { hardwareId: string }) => {
-  const [presentation, setPresentation] = useState<any>(null);
-
-  // Helper to safely parse layout data
-  const parseLayout = (layout: any) => {
-    if (!layout) return null;
-    return {
-      ...layout,
-      structure: typeof layout.structure === 'string' ? JSON.parse(layout.structure) : layout.structure,
-      content: typeof layout.content === 'string' ? JSON.parse(layout.content) : layout.content,
-      config: typeof layout.config === 'string' ? JSON.parse(layout.config) : layout.config,
-    };
-  };
-
   // 1. Initial Fetch
-  const { data, loading: queryLoading, error: queryError } = useQuery<any>(GET_ACTIVE_LAYOUT, {
+  const {
+    data,
+    loading: queryLoading,
+    error: queryError,
+  } = useQuery<any>(GET_ACTIVE_LAYOUT, {
     variables: { hardwareId },
-    fetchPolicy: 'network-only'
+    fetchPolicy: "network-only",
   });
 
   // 2. Real-time Subscription
-  const { data: subData } = useSubscription<any>(PRESENTATION_UPDATED_SUBSCRIPTION, {
-    variables: { hardwareId },
-  });
+  const { data: subData } = useSubscription<any>(
+    PRESENTATION_UPDATED_SUBSCRIPTION,
+    {
+      variables: { hardwareId },
+    },
+  );
 
-  // Handle Query Data
-  useEffect(() => {
-    if (data?.activeLayout) {
-      setPresentation(parseLayout(data.activeLayout));
-    }
-  }, [data]);
-
-  // Handle Subscription Data
-  useEffect(() => {
-    if (subData?.presentationUpdated) {
-      setPresentation(parseLayout(subData.presentationUpdated));
-    }
-  }, [subData]);
+  const presentation = useMemo(() => {
+    const layout = subData?.presentationUpdated || data?.activeLayout;
+    if (!layout) return null;
+    return {
+      ...layout,
+      structure:
+        typeof layout.structure === "string"
+          ? JSON.parse(layout.structure)
+          : layout.structure,
+      content:
+        typeof layout.content === "string"
+          ? JSON.parse(layout.content)
+          : layout.content,
+      config:
+        typeof layout.config === "string"
+          ? JSON.parse(layout.config)
+          : layout.config,
+    };
+  }, [data, subData]);
 
   if (queryError) {
     return (
@@ -165,7 +171,9 @@ const SignageContent = ({ hardwareId }: { hardwareId: string }) => {
         <PresentationRenderer
           structure={presentation.structure}
           slots={presentation.content}
-          customCss={presentation.config?.customCss || (presentation as any).customCss}
+          customCss={
+            presentation.config?.customCss || (presentation as any).customCss
+          }
         />
       </motion.div>
     </AnimatePresence>

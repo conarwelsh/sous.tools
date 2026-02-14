@@ -18,8 +18,10 @@ const buttonVariants = cva(
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         neon: "bg-sky-500 text-white neon-glow hover:bg-sky-400 hover:neon-glow-lg transition-all active:scale-95",
-        "neon-outline": "border-2 border-sky-500 text-sky-500 hover:bg-sky-500/10 hover:neon-glow transition-all active:scale-95",
-        vibrant: "bg-primary text-primary-foreground neon-glow hover:neon-glow-lg hover:brightness-110 transition-all active:scale-95",
+        "neon-outline":
+          "border-2 border-sky-500 text-sky-500 hover:bg-sky-500/10 hover:neon-glow transition-all active:scale-95",
+        vibrant:
+          "bg-primary text-primary-foreground neon-glow hover:neon-glow-lg hover:brightness-110 transition-all active:scale-95",
       },
       size: {
         default: "h-10 px-4 py-2",

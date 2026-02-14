@@ -7,13 +7,13 @@ import { JwtService } from '@nestjs/jwt';
 
 async function run() {
   logger.info('🚀 Starting Bare Seeder...');
-  
+
   const dbService = new DatabaseService();
   dbService.onModuleInit(); // Initialize pools
 
   const mailService = new MailService(null as any);
   const jwtService = new JwtService({ secret: config.iam.jwtSecret });
-  
+
   const authService = new AuthService(dbService, jwtService, mailService);
 
   try {

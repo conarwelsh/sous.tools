@@ -1,6 +1,11 @@
 import { Injectable, Inject, BadRequestException } from '@nestjs/common';
 import { DatabaseService } from '../../core/database/database.service.js';
-import { posOrders, posOrderProducts, posLedgers, financialTransactions } from '../pos.schema.js';
+import {
+  posOrders,
+  posOrderProducts,
+  posLedgers,
+  financialTransactions,
+} from '../pos.schema.js';
 import { eq, and, desc } from 'drizzle-orm';
 import { logger } from '@sous/logger';
 import { PubSub } from 'graphql-subscriptions';
@@ -20,7 +25,11 @@ export class PosService {
    * Opens a new cash ledger for a location.
    * Ensures only one ledger is open per location at a time.
    */
-  async openLedger(organizationId: string, locationId: string, startingCash: number) {
+  async openLedger(
+    organizationId: string,
+    locationId: string,
+    startingCash: number,
+  ) {
     // ... logic
   }
 

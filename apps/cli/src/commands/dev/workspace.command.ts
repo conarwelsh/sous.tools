@@ -27,10 +27,14 @@ export class WorkspaceCommand extends CommandRunner {
   }
 
   private async setupDevWorkspace() {
-    logger.warn('🚀 Workspace orchestration is currently disabled (Windows Agent removed).');
+    logger.warn(
+      '🚀 Workspace orchestration is currently disabled (Windows Agent removed).',
+    );
   }
 
   private async setupChefWorkspace() {
-    logger.warn('👨‍🍳 Chef workspace orchestration is currently disabled (Windows Agent removed).');
+    logger.warn(
+      '👨‍🍳 Chef workspace orchestration is currently disabled (Windows Agent removed).',
+    );
   }
 }

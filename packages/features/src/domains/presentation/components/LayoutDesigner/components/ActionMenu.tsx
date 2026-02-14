@@ -2,12 +2,7 @@
 
 import React from "react";
 import { View, Text, Button, cn } from "@sous/ui";
-import {
-  Settings,
-  Save,
-  X,
-  MoreVertical,
-} from "lucide-react";
+import { Settings, Save, X, MoreVertical } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ActionMenuProps {
@@ -37,14 +32,16 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className={cn(
               "absolute top-1 bottom-1 w-[calc(50%-4px)] bg-sky-500 rounded-full shadow-lg shadow-sky-500/30",
-              isPreviewMode ? "left-[calc(50%+2px)]" : "left-1"
+              isPreviewMode ? "left-[calc(50%+2px)]" : "left-1",
             )}
           />
           <button
             onClick={() => setIsPreviewMode(false)}
             className={cn(
               "flex-1 rounded-full relative z-10 transition-colors h-full items-center justify-center flex",
-              !isPreviewMode ? "text-white" : "text-muted-foreground hover:text-foreground"
+              !isPreviewMode
+                ? "text-white"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             <Text className="text-[9px] font-black uppercase tracking-widest">
@@ -55,7 +52,9 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
             onClick={() => setIsPreviewMode(true)}
             className={cn(
               "flex-1 rounded-full relative z-10 transition-colors h-full items-center justify-center flex",
-              isPreviewMode ? "text-white" : "text-muted-foreground hover:text-foreground"
+              isPreviewMode
+                ? "text-white"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             <Text className="text-[9px] font-black uppercase tracking-widest">
@@ -125,7 +124,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
                   "w-16 h-16 rounded-3xl shadow-2xl items-center justify-center p-0 transition-all duration-300",
                   showMenu
                     ? "bg-card border border-border rotate-90 scale-90"
-                    : "bg-sky-500 hover:bg-sky-400"
+                    : "bg-sky-500 hover:bg-sky-400",
                 )}
               >
                 {showMenu ? (

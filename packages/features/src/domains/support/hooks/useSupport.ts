@@ -16,7 +16,10 @@ export const useSupport = () => {
         appVersion: "1.0.0", // TODO: Get from config or package.json
         orgId: user?.organizationId,
         userId: user?.id,
-        userAgent: typeof window !== "undefined" ? window.navigator.userAgent : "unknown",
+        userAgent:
+          typeof window !== "undefined"
+            ? window.navigator.userAgent
+            : "unknown",
         url: typeof window !== "undefined" ? window.location.href : "unknown",
       };
 

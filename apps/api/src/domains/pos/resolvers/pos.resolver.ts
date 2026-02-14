@@ -99,7 +99,7 @@ export class PosOrder {
 export class PosResolver {
   constructor(
     private readonly posService: PosService,
-    @Inject('PUB_SUB') private readonly pubSub: PubSub
+    @Inject('PUB_SUB') private readonly pubSub: PubSub,
   ) {}
 
   /**
@@ -108,7 +108,7 @@ export class PosResolver {
   @Query(() => PosLedger, { nullable: true })
   async openLedger(
     @CurrentUser() user: any,
-    @Args('locationId') locationId: string
+    @Args('locationId') locationId: string,
   ) {
     return this.posService.getOpenLedger(locationId);
   }
@@ -149,11 +149,15 @@ export class PosResolver {
     @CurrentUser() user: any,
     @Args('input') input: CreateOrderInput,
   ) {
-    const order = await this.posService.recordSale(user.organizationId, input, input.ledgerId || '');
-    
+    const order = await this.posService.recordSale(
+      user.organizationId,
+      input,
+      input.ledgerId || '',
+    );
+
     // Notify KDS
     await this.pubSub.publish('orderUpdated', { orderUpdated: order });
-    
+
     return order;
   }
 
@@ -167,10 +171,10 @@ export class PosResolver {
     @Args('status') status: string,
   ) {
     const order = await this.posService.updateOrderStatus(id, status);
-    
+
     // Notify subscribers
     await this.pubSub.publish('orderUpdated', { orderUpdated: order });
-    
+
     return order;
   }
 
@@ -179,7 +183,7 @@ export class PosResolver {
    * Filters by organizationId to ensure data isolation.
    */
   @Subscription(() => PosOrder, {
-    resolve: (payload) => payload.orderUpdated
+    resolve: (payload) => payload.orderUpdated,
   })
   orderUpdated() {
     return (this.pubSub as any).asyncIterator('orderUpdated');

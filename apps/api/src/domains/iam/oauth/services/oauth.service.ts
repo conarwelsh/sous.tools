@@ -1,4 +1,9 @@
-import { Injectable, Inject, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { DatabaseService } from '../../../core/database/database.service.js';
 import { oauthClients, oauthAuthorizationCodes } from '../oauth.schema.js';
 import { users } from '../../users/users.schema.js';
@@ -22,7 +27,11 @@ export class OAuthService {
     return client;
   }
 
-  async createAuthorizationCode(clientId: string, userId: string, scopes: string[]) {
+  async createAuthorizationCode(
+    clientId: string,
+    userId: string,
+    scopes: string[],
+  ) {
     const code = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 10); // 10 min expiration
@@ -40,18 +49,23 @@ export class OAuthService {
     return code;
   }
 
-  async exchangeCodeForToken(clientId: string, clientSecret: string, code: string) {
+  async exchangeCodeForToken(
+    clientId: string,
+    clientSecret: string,
+    code: string,
+  ) {
     const client = await this.getClient(clientId);
     if (client.clientSecret !== clientSecret) {
       throw new UnauthorizedException('Invalid client secret');
     }
 
-    const authCode = await this.dbService.db.query.oauthAuthorizationCodes.findFirst({
-      where: and(
-        eq(oauthAuthorizationCodes.code, code),
-        eq(oauthAuthorizationCodes.clientId, client.id),
-      ),
-    });
+    const authCode =
+      await this.dbService.db.query.oauthAuthorizationCodes.findFirst({
+        where: and(
+          eq(oauthAuthorizationCodes.code, code),
+          eq(oauthAuthorizationCodes.clientId, client.id),
+        ),
+      });
 
     if (!authCode || authCode.expiresAt < new Date()) {
       throw new BadRequestException('Invalid or expired authorization code');
@@ -73,7 +87,9 @@ export class OAuthService {
     };
 
     // Delete code after use
-    await this.dbService.db.delete(oauthAuthorizationCodes).where(eq(oauthAuthorizationCodes.id, authCode.id));
+    await this.dbService.db
+      .delete(oauthAuthorizationCodes)
+      .where(eq(oauthAuthorizationCodes.id, authCode.id));
 
     return {
       access_token: this.jwtService.sign(payload),
@@ -83,17 +99,24 @@ export class OAuthService {
     };
   }
 
-  async registerClient(organizationId: string, name: string, redirectUris: string[]) {
+  async registerClient(
+    organizationId: string,
+    name: string,
+    redirectUris: string[],
+  ) {
     const clientId = crypto.randomBytes(16).toString('hex');
     const clientSecret = crypto.randomBytes(32).toString('hex');
 
-    const [client] = await this.dbService.db.insert(oauthClients).values({
-      organizationId,
-      name,
-      clientId,
-      clientSecret,
-      redirectUris,
-    }).returning();
+    const [client] = await this.dbService.db
+      .insert(oauthClients)
+      .values({
+        organizationId,
+        name,
+        clientId,
+        clientSecret,
+        redirectUris,
+      })
+      .returning();
 
     return client;
   }
@@ -106,22 +129,29 @@ export class OAuthService {
 
   async rotateSecret(clientId: string, organizationId: string) {
     const client = await this.getClient(clientId);
-    if (client.organizationId !== organizationId) throw new UnauthorizedException();
+    if (client.organizationId !== organizationId)
+      throw new UnauthorizedException();
 
     const newSecret = crypto.randomBytes(32).toString('hex');
-    await this.dbService.db.update(oauthClients).set({
-      clientSecret: newSecret,
-      updatedAt: new Date(),
-    }).where(eq(oauthClients.id, client.id));
+    await this.dbService.db
+      .update(oauthClients)
+      .set({
+        clientSecret: newSecret,
+        updatedAt: new Date(),
+      })
+      .where(eq(oauthClients.id, client.id));
 
     return { clientSecret: newSecret };
   }
 
   async deleteClient(clientId: string, organizationId: string) {
     const client = await this.getClient(clientId);
-    if (client.organizationId !== organizationId) throw new UnauthorizedException();
+    if (client.organizationId !== organizationId)
+      throw new UnauthorizedException();
 
-    await this.dbService.db.delete(oauthClients).where(eq(oauthClients.id, client.id));
+    await this.dbService.db
+      .delete(oauthClients)
+      .where(eq(oauthClients.id, client.id));
     return { success: true };
   }
 }

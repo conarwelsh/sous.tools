@@ -19,7 +19,13 @@ import { HardwareAuthGuard } from '../../hardware/guards/hardware-auth.guard.js'
       signOptions: { expiresIn: '1d' },
     }),
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy, SessionService, HardwareAuthGuard],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    SessionService,
+    HardwareAuthGuard,
+  ],
   controllers: [AuthController],
   exports: [AuthService, JwtModule, SessionService, HardwareAuthGuard],
 })

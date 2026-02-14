@@ -24,11 +24,15 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
     const readerUrl = config.db.readerUrl || writerUrl;
 
-    logger.info(`🐘 Initializing Writer Pool: ${writerUrl.replace(/:.*@/, ':****@')}`);
+    logger.info(
+      `🐘 Initializing Writer Pool: ${writerUrl.replace(/:.*@/, ':****@')}`,
+    );
     this.writerPool = new Pool({ connectionString: writerUrl });
     this.db = drizzle(this.writerPool, { schema });
 
-    logger.info(`🐘 Initializing Reader Pool: ${readerUrl.replace(/:.*@/, ':****@')}`);
+    logger.info(
+      `🐘 Initializing Reader Pool: ${readerUrl.replace(/:.*@/, ':****@')}`,
+    );
     this.readerPool = new Pool({ connectionString: readerUrl });
     this.readDb = drizzle(this.readerPool, { schema });
 
@@ -46,7 +50,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     try {
       await this.writerPool.query('SELECT 1');
       logger.info('🐘 Writer Database connected successfully');
-      
+
       if (this.readerPool !== this.writerPool) {
         await this.readerPool.query('SELECT 1');
         logger.info('🐘 Reader Database connected successfully');

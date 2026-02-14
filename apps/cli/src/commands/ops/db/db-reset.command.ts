@@ -40,7 +40,9 @@ export class DbResetCommand extends CommandRunner {
       runCommand('pnpm --filter @sous/api run db:push');
 
       logger.info('  └─ Seeding database (system + sample)...');
-      runCommand('SKIP_MAIL=true SKIP_INGESTION=true SKIP_GATEWAYS=true pnpm --filter @sous/api run db:seed sample');
+      runCommand(
+        'SKIP_MAIL=true SKIP_INGESTION=true SKIP_GATEWAYS=true pnpm --filter @sous/api run db:seed sample',
+      );
 
       logger.info(
         '✅ Database reset and seeded with sample data successfully.',

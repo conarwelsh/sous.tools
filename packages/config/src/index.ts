@@ -11,14 +11,22 @@ import { SecretManager } from "./secrets.js";
  */
 export const secrets = new SecretManager();
 
-export { SecretManager, configSchema, brandingConfigSchema, type BrandingConfig };
+export {
+  SecretManager,
+  configSchema,
+  brandingConfigSchema,
+  type BrandingConfig,
+};
 
 /**
  * Normalizes environment name synchronously.
  * Strictly uses process.env to avoid Node.js built-in dependencies.
  */
 function getEnvSync(): "development" | "staging" | "production" | "test" {
-  const env = (typeof process !== 'undefined' ? (process.env.NODE_ENV || process.env.MODE) : "development") || "development";
+  const env =
+    (typeof process !== "undefined"
+      ? process.env.NODE_ENV || process.env.MODE
+      : "development") || "development";
   if (env === "prod") return "production";
   if (env === "stage") return "staging";
   if (env === "dev") return "development";
@@ -32,7 +40,13 @@ function ensureProtocol(url: string | undefined): string | undefined {
   if (!url) return url;
   if (url === "undefined" || url === "null") return undefined;
   if (!url.startsWith("http://") && !url.startsWith("https://")) {
-    if (url.startsWith("localhost") || url.startsWith("127.0.0.1") || url.startsWith("172.") || url.startsWith("192.") || url.startsWith("10.")) {
+    if (
+      url.startsWith("localhost") ||
+      url.startsWith("127.0.0.1") ||
+      url.startsWith("172.") ||
+      url.startsWith("192.") ||
+      url.startsWith("10.")
+    ) {
       return `http://${url}`;
     }
     return `https://${url}`;
@@ -45,7 +59,10 @@ function ensureProtocol(url: string | undefined): string | undefined {
  * No Node.js built-in dependencies here.
  */
 function buildConfig(): Config {
-  const envVars = (typeof process !== 'undefined' ? process.env : {}) as Record<string, string>;
+  const envVars = (typeof process !== "undefined" ? process.env : {}) as Record<
+    string,
+    string
+  >;
   const env = getEnvSync();
 
   const rawConfig = {
@@ -75,7 +92,8 @@ function buildConfig(): Config {
     storage: {
       supabase: {
         url: envVars.SUPABASE_URL || envVars.NEXT_PUBLIC_SUPABASE_URL,
-        anonKey: envVars.SUPABASE_ANON_KEY || envVars.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+        anonKey:
+          envVars.SUPABASE_ANON_KEY || envVars.NEXT_PUBLIC_SUPABASE_ANON_KEY,
         serviceRoleKey: envVars.SUPABASE_SERVICE_ROLE_KEY,
         bucket: envVars.SUPABASE_BUCKET || "media",
       },
@@ -93,7 +111,8 @@ function buildConfig(): Config {
     },
     features: {
       enableRegistration: envVars.ENABLE_REGISTRATION !== "false",
-      appVersion: envVars.NEXT_PUBLIC_APP_VERSION || envVars.APP_VERSION || "0.1.0",
+      appVersion:
+        envVars.NEXT_PUBLIC_APP_VERSION || envVars.APP_VERSION || "0.1.0",
       appEnv: envVars.APP_ENV || env,
     },
     infisical: {
@@ -108,7 +127,8 @@ function buildConfig(): Config {
       redirectUri: envVars.SQUARE_REDIRECT_URI,
       merchantId: envVars.SQUARE_MERCHANT_ID,
       endpoint: envVars.SQUARE_ENDPOINT,
-      environment: envVars.SQUARE_ENVIRONMENT === "sandbox" ? "sandbox" : "production",
+      environment:
+        envVars.SQUARE_ENVIRONMENT === "sandbox" ? "sandbox" : "production",
     },
     google: {
       clientId: envVars.GOOGLE_CLIENT_ID,
@@ -120,10 +140,10 @@ function buildConfig(): Config {
       clientSecret: envVars.GITHUB_CLIENT_SECRET,
       redirectUri: envVars.GITHUB_REDIRECT_URI,
       token: envVars.GITHUB_TOKEN,
-      repo: envVars.GITHUB_REPO || 'sous-tools/sous.tools',
+      repo: envVars.GITHUB_REPO || "sous-tools/sous.tools",
     },
     support: {
-      email: envVars.SUPPORT_EMAIL || 'support@sous.tools',
+      email: envVars.SUPPORT_EMAIL || "support@sous.tools",
     },
     emails: {
       support: envVars.EMAIL_SUPPORT || "support@sous.tools",
@@ -146,7 +166,9 @@ function buildConfig(): Config {
     },
     stripe: {
       secretKey: envVars.STRIPE_SECRET_KEY,
-      publishableKey: envVars.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || envVars.STRIPE_PUBLISHABLE_KEY,
+      publishableKey:
+        envVars.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
+        envVars.STRIPE_PUBLISHABLE_KEY,
       webhookSecret: envVars.STRIPE_WEBHOOK_SECRET,
     },
   };
@@ -154,12 +176,16 @@ function buildConfig(): Config {
   const result = configSchema.safeParse(rawConfig);
   if (!result.success) {
     // If we're not in a CI/Build environment, we should be strict
-    const isStrict = envVars.NODE_ENV === "production" && 
-                     envVars.SKIP_CONFIG_VALIDATION !== "true" &&
-                     envVars.CI !== "true";
-    
+    const isStrict =
+      envVars.NODE_ENV === "production" &&
+      envVars.SKIP_CONFIG_VALIDATION !== "true" &&
+      envVars.CI !== "true";
+
     if (isStrict) {
-      console.error("❌ [@sous/config] Invalid Configuration:", JSON.stringify(result.error.format(), null, 2));
+      console.error(
+        "❌ [@sous/config] Invalid Configuration:",
+        JSON.stringify(result.error.format(), null, 2),
+      );
       throw new Error("Invalid production configuration");
     }
     return rawConfig as any;

@@ -3,28 +3,21 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { 
-  Button, 
-  Input, 
-  Text, 
-  View, 
-  Textarea, 
-  cn 
-} from "@sous/ui";
-import { 
-  SupportReport, 
-  SupportReportSchema, 
-  SupportType, 
-  SupportTypeEnum 
+import { Button, Input, Text, View, Textarea, cn } from "@sous/ui";
+import {
+  SupportReport,
+  SupportReportSchema,
+  SupportType,
+  SupportTypeEnum,
 } from "../types";
 import { useSupport } from "../hooks/useSupport";
 import { SupportCategoryCard } from "./SupportCategoryCard";
-import { 
-  Bug, 
-  Lightbulb, 
-  MessageCircle, 
-  CheckCircle2, 
-  AlertCircle 
+import {
+  Bug,
+  Lightbulb,
+  MessageCircle,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 
 export const SupportForm: React.FC = () => {
@@ -68,8 +61,8 @@ export const SupportForm: React.FC = () => {
         <View className="space-y-2">
           <Text className="text-xl font-bold">Message Received!</Text>
           <Text className="text-muted-foreground">
-            Our team has been notified and we'll look into it as soon as possible.
-            You'll receive an email confirmation shortly.
+            Our team has been notified and we'll look into it as soon as
+            possible. You'll receive an email confirmation shortly.
           </Text>
         </View>
         <Button onClick={() => setSubmitted(false)}>Send Another Report</Button>
@@ -80,7 +73,9 @@ export const SupportForm: React.FC = () => {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       <View className="space-y-4">
-        <Text className="text-lg font-semibold tracking-tight">What can we help you with?</Text>
+        <Text className="text-lg font-semibold tracking-tight">
+          What can we help you with?
+        </Text>
         <View className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <SupportCategoryCard
             title="Report a Bug"
@@ -114,7 +109,10 @@ export const SupportForm: React.FC = () => {
           <Input
             placeholder="e.g. Printer not connecting to KDS"
             {...register("subject")}
-            className={cn(errors.subject && "border-destructive focus-visible:ring-destructive")}
+            className={cn(
+              errors.subject &&
+                "border-destructive focus-visible:ring-destructive",
+            )}
           />
           {errors.subject && (
             <Text className="text-destructive font-medium text-sm">
@@ -131,7 +129,8 @@ export const SupportForm: React.FC = () => {
             placeholder="Tell us more about what's happening..."
             className={cn(
               "min-h-[150px] resize-none",
-              errors.description && "border-destructive focus-visible:ring-destructive"
+              errors.description &&
+                "border-destructive focus-visible:ring-destructive",
             )}
             {...register("description")}
           />
@@ -145,12 +144,14 @@ export const SupportForm: React.FC = () => {
         {error && (
           <View className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex flex-row items-center gap-3">
             <AlertCircle size={20} className="text-destructive flex-shrink-0" />
-            <Text className="text-destructive font-medium text-sm">{error}</Text>
+            <Text className="text-destructive font-medium text-sm">
+              {error}
+            </Text>
           </View>
         )}
 
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           className="w-full h-12 text-lg font-bold uppercase italic tracking-tight"
           disabled={isSubmitting}
         >

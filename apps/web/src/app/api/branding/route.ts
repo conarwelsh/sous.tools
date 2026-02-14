@@ -1,15 +1,15 @@
-import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 
-const CONFIG_PATH = path.join(process.cwd(), '../../branding.config.json');
+const CONFIG_PATH = path.join(process.cwd(), "../../branding.config.json");
 
 export async function GET() {
   try {
     if (!fs.existsSync(CONFIG_PATH)) {
-      return NextResponse.json({ error: 'Config not found' }, { status: 404 });
+      return NextResponse.json({ error: "Config not found" }, { status: 404 });
     }
-    const config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
+    const config = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
     return NextResponse.json(config);
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });

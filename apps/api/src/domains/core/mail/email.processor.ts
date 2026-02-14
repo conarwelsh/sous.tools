@@ -5,11 +5,11 @@ import { config } from '@sous/config';
 import { logger } from '@sous/logger';
 import { render } from '@react-email/components';
 import * as React from 'react';
-import { 
-  InvitationEmail, 
-  PasswordResetEmail, 
-  WelcomeEmail, 
-  OrderEmail, 
+import {
+  InvitationEmail,
+  PasswordResetEmail,
+  WelcomeEmail,
+  OrderEmail,
   LowStockEmail,
   SupportTicketEmail,
   SupportNotificationEmail,
@@ -57,10 +57,16 @@ export class EmailProcessor extends WorkerHost {
         component = React.createElement(SupportTicketEmail, context as any);
         break;
       case 'support-notification':
-        component = React.createElement(SupportNotificationEmail, context as any);
+        component = React.createElement(
+          SupportNotificationEmail,
+          context as any,
+        );
         break;
       case 'subscription-confirmed':
-        component = React.createElement(SubscriptionConfirmedEmail, context as any);
+        component = React.createElement(
+          SubscriptionConfirmedEmail,
+          context as any,
+        );
         break;
       case 'verification':
         component = React.createElement(EmailVerificationEmail, context as any);
@@ -90,7 +96,7 @@ export class EmailProcessor extends WorkerHost {
 
       if (error) {
         logger.error(`❌ Resend Error:`, error);
-        throw error;
+        throw new Error(error.message);
       }
 
       return data;

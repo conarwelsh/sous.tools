@@ -13,15 +13,15 @@ interface ConfigViewOptions {
 export class ConfigViewCommand extends CommandRunner {
   async run(passedParam: string[], options?: ConfigViewOptions): Promise<void> {
     const env = options?.env || process.env.NODE_ENV || 'development';
-    
+
     try {
       // We need to import config AFTER potentially fetching secrets if we want to see the merged view
       // But if the user runs this command, they probably want to see the CURRENTLY resolved config.
       // If they want to see it for a specific env, they should run:
       // sous env exec -e production -- sous env config view
-      
+
       const { config } = await import('@sous/config');
-      
+
       if (options?.json) {
         console.log(JSON.stringify(config, null, 2));
       } else {

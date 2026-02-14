@@ -8,7 +8,7 @@ import { useUpdateManager } from "@sous/features";
 export function FlavorGate() {
   const router = useRouter();
   const pathname = usePathname();
-  
+
   // Initialize background update manager
   useUpdateManager();
 

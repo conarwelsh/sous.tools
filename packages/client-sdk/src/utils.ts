@@ -1,8 +1,7 @@
-
 /**
  * Resolves the API URL based on the environment.
  * Handles WSL-to-Host IP translation for Android emulators.
- * 
+ *
  * @param baseUrl - The base URL to resolve.
  * @returns The resolved URL.
  */

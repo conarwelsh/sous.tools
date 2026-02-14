@@ -69,7 +69,9 @@ ${data.description}
 
     // 2. Email Notification (to Team)
     try {
-      const supportEmail = (await this.platformService.getSetting('support_email')) || config.support.email;
+      const supportEmail =
+        (await this.platformService.getSetting('support_email')) ||
+        config.support.email;
       await this.mailService.sendEmail({
         to: supportEmail,
         subject: `[Support ${data.type}] ${data.subject}`,

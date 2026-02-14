@@ -57,8 +57,16 @@ function AdminContent({ children }: { children: React.ReactNode }) {
       router.replace(`/login?callbackUrl=${callbackUrl}`);
     }
 
-    if (isMounted && !loading && isAuthenticated && user?.organization?.planStatus === "pending_payment" && pathname !== "/checkout") {
-      console.log("[AdminLayout] Organization payment pending, redirecting to checkout...");
+    if (
+      isMounted &&
+      !loading &&
+      isAuthenticated &&
+      user?.organization?.planStatus === "pending_payment" &&
+      pathname !== "/checkout"
+    ) {
+      console.log(
+        "[AdminLayout] Organization payment pending, redirecting to checkout...",
+      );
       router.replace("/checkout");
     }
   }, [isMounted, loading, isAuthenticated, router, pathname, user]);
@@ -130,11 +138,15 @@ function AdminContent({ children }: { children: React.ReactNode }) {
         ...(user?.role === "admin" || user?.role === "superadmin"
           ? [{ label: "Developer", icon: Code2, href: "/settings/developer" }]
           : []),
-        ...(user?.role === "superadmin" 
+        ...(user?.role === "superadmin"
           ? [
               { label: "Platform", icon: ShieldAlert, href: "/platform" },
-              { label: "Platform Settings", icon: Settings, href: "/settings/platform" }
-            ] 
+              {
+                label: "Platform Settings",
+                icon: Settings,
+                href: "/settings/platform",
+              },
+            ]
           : []),
         { label: "Support", icon: LifeBuoy, href: "/support" },
       ],
@@ -233,7 +245,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
               variant="ghost"
               className={cn(
                 "flex items-center p-4 rounded-xl hover:bg-primary/10 group w-full transition-all justify-start gap-4",
-                isCollapsed && "justify-center px-0"
+                isCollapsed && "justify-center px-0",
               )}
             >
               <Activity
@@ -247,10 +259,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
               )}
             </Button>
           </FeedbackModal>
-          <SidebarFooter 
-            isCollapsed={isCollapsed} 
-            router={router} 
-          />
+          <SidebarFooter isCollapsed={isCollapsed} router={router} />
         </View>
 
         {/* Collapse Toggle Button */}

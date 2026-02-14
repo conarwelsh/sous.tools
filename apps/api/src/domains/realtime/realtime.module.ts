@@ -15,9 +15,6 @@ const skipGateways = process.env.SKIP_GATEWAYS === 'true';
       useValue: new PubSub(),
     },
   ],
-  exports: [
-    ...(skipGateways ? [] : [RealtimeGateway]),
-    'PUB_SUB'
-  ],
+  exports: [...(skipGateways ? [] : [RealtimeGateway]), 'PUB_SUB'],
 })
 export class RealtimeModule {}

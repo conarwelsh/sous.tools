@@ -10,7 +10,10 @@ import { logger } from '@sous/logger';
 })
 export class SysCommand extends CommandRunner {
   async run(passedParam: string[]): Promise<void> {
-    if (passedParam.length > 0 && ['hardware', 'integrations'].includes(passedParam[0])) {
+    if (
+      passedParam.length > 0 &&
+      ['hardware', 'integrations'].includes(passedParam[0])
+    ) {
       return;
     }
     logger.info('Please specify a subcommand: hardware, integrations');

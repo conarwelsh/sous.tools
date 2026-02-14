@@ -8,11 +8,20 @@ import { AuditCommand } from './audit.command.js';
 @SubCommand({
   name: 'quality',
   description: 'Code quality and testing tools',
-  subCommands: [TestCommand, E2ECommand, CheckCommand, ForgeCommand, AuditCommand],
+  subCommands: [
+    TestCommand,
+    E2ECommand,
+    CheckCommand,
+    ForgeCommand,
+    AuditCommand,
+  ],
 })
 export class QualityCommand extends CommandRunner {
   async run(passedParam: string[]): Promise<void> {
-    if (passedParam.length > 0 && ['test', 'e2e', 'check', 'forge', 'audit'].includes(passedParam[0])) {
+    if (
+      passedParam.length > 0 &&
+      ['test', 'e2e', 'check', 'forge', 'audit'].includes(passedParam[0])
+    ) {
       return;
     }
     console.log('Please specify a subcommand: test, e2e, check, forge, audit');

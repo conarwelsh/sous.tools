@@ -77,13 +77,14 @@ export class ProcurementService {
     unit: string,
   ) {
     // Smart logic: find last supplier for this ingredient
-    const lastInvoiceItem = await this.dbService.readDb.query.invoiceItems.findFirst({
-      where: eq(invoiceItems.ingredientId, ingredientId),
-      with: {
-        invoice: true,
-      },
-      orderBy: [desc(invoiceItems.id)], 
-    });
+    const lastInvoiceItem =
+      await this.dbService.readDb.query.invoiceItems.findFirst({
+        where: eq(invoiceItems.ingredientId, ingredientId),
+        with: {
+          invoice: true,
+        },
+        orderBy: [desc(invoiceItems.id)],
+      });
 
     const preferredSupplierId = lastInvoiceItem?.invoice?.supplierId || null;
 

@@ -28,7 +28,11 @@ export const GraphQLProvider = ({
 
   const client = useMemo(() => {
     const apiUrl = config.api.url || "http://localhost:4000";
-    
+
+    // We include hostIp in the closure to ensure the client is recreated
+    // when the detected IP changes in Capacitor environments.
+    void hostIp;
+
     return createApolloClient({
       apiUrl,
     });

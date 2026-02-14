@@ -63,10 +63,15 @@ export const useHardware = (
     setIsLoading(true);
     let apiUrl = localConfig.api.url || "http://localhost:4000";
     try {
-      if (typeof window !== "undefined" && ((window as any).Capacitor || (window as any).sous_host_ip)) {
+      if (
+        typeof window !== "undefined" &&
+        ((window as any).Capacitor || (window as any).sous_host_ip)
+      ) {
         const hostIp = (window as any).sous_host_ip;
         if (hostIp && hostIp !== "10.0.2.2") {
-          apiUrl = apiUrl.replace("localhost", hostIp).replace("127.0.0.1", hostIp);
+          apiUrl = apiUrl
+            .replace("localhost", hostIp)
+            .replace("127.0.0.1", hostIp);
         }
       }
 
@@ -97,7 +102,10 @@ export const useHardware = (
       setPairingCode(null);
       if (device.organizationId) {
         setOrganizationId(device.organizationId);
-        localStorage.setItem(`sous_org_id_${hardwareId}`, device.organizationId);
+        localStorage.setItem(
+          `sous_org_id_${hardwareId}`,
+          device.organizationId,
+        );
       }
       localStorage.setItem(`sous_paired_${hardwareId}`, "true");
       setIsLoading(false);
@@ -109,10 +117,15 @@ export const useHardware = (
     if (!hardwareId || !isPaired) return;
 
     let apiUrl = localConfig.api.url || "http://localhost:4000";
-    if (typeof window !== "undefined" && ((window as any).Capacitor || (window as any).sous_host_ip)) {
+    if (
+      typeof window !== "undefined" &&
+      ((window as any).Capacitor || (window as any).sous_host_ip)
+    ) {
       const hostIp = (window as any).sous_host_ip;
       if (hostIp && hostIp !== "10.0.2.2") {
-        apiUrl = apiUrl.replace("localhost", hostIp).replace("127.0.0.1", hostIp);
+        apiUrl = apiUrl
+          .replace("localhost", hostIp)
+          .replace("127.0.0.1", hostIp);
       }
     }
 
@@ -130,7 +143,10 @@ export const useHardware = (
           metadata,
         })) as any;
 
-        if (resp?.requiredVersion && resp.requiredVersion !== metadata.version) {
+        if (
+          resp?.requiredVersion &&
+          resp.requiredVersion !== metadata.version
+        ) {
           window.location.reload();
         }
       } catch (e: any) {

@@ -22,11 +22,13 @@ The centralized backend for the Sous platform. Built with **NestJS**, **GraphQL*
 ## Installation & Setup
 
 1.  **Infra**: Ensure Docker is running.
+
     ```bash
     pnpm db:up
     ```
 
 2.  **Migration**:
+
     ```bash
     pnpm db:push
     ```
@@ -47,6 +49,7 @@ The centralized backend for the Sous platform. Built with **NestJS**, **GraphQL*
 ## Domain Organization
 
 Following Mandate #14, the API uses a Strategic Umbrella structure:
+
 - `src/domains/iam`: Identity & Access Management.
 - `src/domains/pos`: Point of Sale and KDS logic.
 - `src/domains/culinary`: Catalog, Products, and Recipes.

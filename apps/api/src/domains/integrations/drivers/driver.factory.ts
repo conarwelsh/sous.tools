@@ -10,7 +10,8 @@ import { logger } from '@sous/logger';
 export class DriverFactory {
   constructor(
     @Inject(DatabaseService) private readonly dbService: DatabaseService,
-    @Inject(forwardRef(() => PosService)) private readonly posService: PosService,
+    @Inject(forwardRef(() => PosService))
+    private readonly posService: PosService,
   ) {}
 
   getPOSDriver(provider: string, credentials: any, organizationId?: string) {
@@ -18,7 +19,10 @@ export class DriverFactory {
       case 'square':
         return new SquareDriver(credentials);
       case 'sous':
-        if (!organizationId) throw new Error('[DriverFactory] organizationId required for Sous driver');
+        if (!organizationId)
+          throw new Error(
+            '[DriverFactory] organizationId required for Sous driver',
+          );
         return new SousDriver(this.dbService, this.posService, organizationId);
       default:
         throw new Error(

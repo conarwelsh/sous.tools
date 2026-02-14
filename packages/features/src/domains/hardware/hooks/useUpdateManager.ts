@@ -150,7 +150,9 @@ export const useUpdateManager = () => {
     const runAutoUpdateCheck = async () => {
       const business = await isBusinessHours();
       if (!business) {
-        logger.info("Non-business hours detected. Triggering automatic update.");
+        logger.info(
+          "Non-business hours detected. Triggering automatic update.",
+        );
         performUpdate();
       }
     };

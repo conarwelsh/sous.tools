@@ -47,6 +47,7 @@ High-level applications (`@sous/web`, `@sous/native`) are treated as thin **Shel
 ## Public Content Strategy
 
 To ensure optimal SEO and performance, all public-facing pages (Landing Page, Pricing, Marketing) utilize **Next.js Server Components**.
+
 - **Data Fetching**: Performed directly on the server via `fetch` with appropriate revalidation tags.
 - **Minimization**: Client-side JavaScript is strictly reserved for interactive elements (e.g., Auth forms, Toggles).
 - **Dynamic Pricing**: Pricing plans are fetched from the API's `/billing/plans` endpoint, ensuring the marketing site always reflects current commercial offerings.

@@ -8,9 +8,6 @@ import {
   ThemeProvider,
   LoadingProvider,
   GlobalLoadingBar,
-  FONT_SANS_VAR,
-  FONT_BRAND_VAR,
-  FONT_MONO_VAR,
 } from "@sous/ui";
 import { RouterChangeTracker } from "../components/RouterChangeTracker";
 

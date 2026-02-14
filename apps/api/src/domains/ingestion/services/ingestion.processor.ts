@@ -23,9 +23,16 @@ export class IngestionProcessor extends WorkerHost {
     logger.info(`⚙️ Processing Ingestion Job: ${job.id} (Recipe: ${recipeId})`);
 
     // 1. Get Storage Driver from Integrations
-    const driver = await this.integrationsService.getStorageDriver(organizationId, 'google-drive');
+    const driver = await this.integrationsService.getStorageDriver(
+      organizationId,
+      'google-drive',
+    );
 
     // 2. Process
-    return this.ingestionService.processGoogleDriveRecipe(recipeId, organizationId, driver);
+    return this.ingestionService.processGoogleDriveRecipe(
+      recipeId,
+      organizationId,
+      driver,
+    );
   }
 }
