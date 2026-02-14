@@ -19,7 +19,7 @@ const GET_SENSORS = gql`
 `;
 
 export const HACCPBar = ({ orgId }: { orgId: string }) => {
-  const { data } = useQuery(GET_SENSORS, {
+  const { data } = useQuery<any>(GET_SENSORS, {
     variables: { orgId },
     skip: !orgId,
     pollInterval: 30000,
