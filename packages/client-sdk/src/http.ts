@@ -1,8 +1,6 @@
 export class HttpClient {
   private baseUrl: string;
   public token: string | null = null;
-  public hardwareId: string | null = null;
-  public organizationId: string | null = null;
   private queue: { path: string; options: RequestInit; id: string }[] = [];
   private isProcessingQueue = false;
 
@@ -51,14 +49,21 @@ export class HttpClient {
 
     if (this.token) {
       headers.set("Authorization", `Bearer ${this.token}`);
+    } else if (typeof window !== "undefined") {
+      const storedToken = localStorage.getItem("token");
+      if (storedToken) headers.set("Authorization", `Bearer ${storedToken}`);
     }
 
-    if (this.hardwareId) {
-      headers.set("x-hardware-id", this.hardwareId);
-    }
-
-    if (this.organizationId) {
-      headers.set("x-organization-id", this.organizationId);
+    // Dynamic Hardware Context
+    if (typeof window !== "undefined") {
+      const hardwareId = localStorage.getItem("sous_hardware_id");
+      if (hardwareId) {
+        headers.set("x-hardware-id", hardwareId);
+        const organizationId = localStorage.getItem(`sous_org_id_${hardwareId}`);
+        if (organizationId) {
+          headers.set("x-organization-id", organizationId);
+        }
+      }
     }
 
     if (options.body && !(options.body instanceof FormData)) {
@@ -109,7 +114,6 @@ export class HttpClient {
         );
         const edgeUrl = url.replace(this.baseUrl, "http://sous.local:4000");
         try {
-          // IMPORTANT: strip the leading / if it exists because the recursive call adds it
           const relativePath = path.startsWith("/") ? path : `/${path}`;
           return await this.request(
             relativePath,
@@ -159,11 +163,6 @@ export class HttpClient {
     this.token = token;
   }
 
-  setHardwareContext(hardwareId: string | null, organizationId: string | null) {
-    this.hardwareId = hardwareId;
-    this.organizationId = organizationId;
-  }
-
   post<T>(path: string, body?: any, options?: RequestInit) {
     return this.request<T>(path, {
       ...options,
@@ -197,24 +196,13 @@ export const getHttpClient = async (baseUrl?: string): Promise<HttpClient> => {
   if (clientInstance && !baseUrl) return clientInstance;
   
   if (baseUrl) {
-    const client = new HttpClient(baseUrl);
-    if (typeof window !== "undefined") {
-      const hwId = localStorage.getItem("sous_hardware_id");
-      if (hwId) {
-        client.setHardwareContext(hwId, localStorage.getItem(`sous_org_id_${hwId}`));
-      }
-    }
-    return client;
+    return new HttpClient(baseUrl);
   }
 
   const { config } = await import("@sous/config");
   clientInstance = new HttpClient(config.api.url || "http://localhost:4000");
 
   if (typeof window !== "undefined") {
-    const hwId = localStorage.getItem("sous_hardware_id");
-    if (hwId) {
-      clientInstance.setHardwareContext(hwId, localStorage.getItem(`sous_org_id_${hwId}`));
-    }
     (window as any).__SOUS_HTTP_CLIENT__ = clientInstance;
   }
 

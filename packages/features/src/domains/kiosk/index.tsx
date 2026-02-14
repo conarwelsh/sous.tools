@@ -54,7 +54,7 @@ interface KioskCatalogData {
 export const KioskFeature = () => {
   return (
     <DevicePairingFlow type="kiosk">
-      {({ organizationId }) => <KioskContent orgId={organizationId || ""} />}
+      {({ organizationId }) => <KioskContent key={organizationId} orgId={organizationId || ""} />}
     </DevicePairingFlow>
   );
 };

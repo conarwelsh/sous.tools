@@ -13,6 +13,7 @@ import {
   TabsContent,
   Text,
   cn,
+  ScrollView,
 } from "@sous/ui";
 import {
   DndContext,

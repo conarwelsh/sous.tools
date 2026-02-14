@@ -50,7 +50,7 @@ interface PosCatalogData {
 export const POSFeature = () => {
   return (
     <DevicePairingFlow type="pos">
-      {({ organizationId }) => <POSContent orgId={organizationId || ""} />}
+      {({ organizationId }) => <POSContent key={organizationId} orgId={organizationId || ""} />}
     </DevicePairingFlow>
   );
 };

@@ -13,20 +13,8 @@ export const GraphQLProvider = ({
   const client = useMemo(() => {
     const apiUrl = config.api.url || "http://localhost:4000";
     
-    let hardwareId: string | null = null;
-    let organizationId: string | null = null;
-
-    if (typeof window !== "undefined") {
-      hardwareId = localStorage.getItem("sous_hardware_id");
-      if (hardwareId) {
-        organizationId = localStorage.getItem(`sous_org_id_${hardwareId}`);
-      }
-    }
-
     return createApolloClient({
       apiUrl,
-      hardwareId,
-      organizationId,
     });
   }, []);
 

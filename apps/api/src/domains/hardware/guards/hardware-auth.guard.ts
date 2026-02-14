@@ -29,9 +29,10 @@ export class HardwareAuthGuard implements CanActivate {
     const orgId = request.headers['x-organization-id'];
 
     if (!hardwareId || !orgId) {
-      // Fallback to standard JWT if present
       return false; 
     }
+
+    console.log(`[HardwareAuthGuard] Checking hardwareId: ${hardwareId}, orgId: ${orgId}`);
 
     // Verify hardware belongs to org and is active
     const device = await this.dbService.readDb.query.devices.findFirst({
@@ -43,8 +44,11 @@ export class HardwareAuthGuard implements CanActivate {
     });
 
     if (!device) {
+      console.warn(`[HardwareAuthGuard] Device not found or inactive: hw=${hardwareId}, org=${orgId}`);
       throw new UnauthorizedException('Hardware not recognized or inactive');
     }
+
+    console.log(`[HardwareAuthGuard] Success for device: ${device.name}`);
 
     // Populate user context for resolvers
     request['user'] = {

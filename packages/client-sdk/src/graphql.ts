@@ -1,4 +1,5 @@
-import { ApolloClient, InMemoryCache, HttpLink, split } from "@apollo/client";
+import { ApolloClient, InMemoryCache, HttpLink, split, ApolloLink } from "@apollo/client";
+import { setContext } from "@apollo/client/link/context";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { createClient } from "graphql-ws";
 import { getMainDefinition } from "@apollo/client/utilities";
@@ -11,29 +12,39 @@ export interface ApolloClientConfig {
    * The base URL of the GraphQL API (e.g. http://localhost:4000).
    */
   apiUrl: string;
-  /**
-   * Optional hardware context.
-   */
-  hardwareId?: string | null;
-  organizationId?: string | null;
 }
 
 /**
  * Creates and configures a new Apollo Client instance.
  * Automatically sets up a WebSocket link for subscriptions
  * and an HTTP link for queries and mutations.
+ * 
+ * Headers are dynamically resolved from localStorage to handle
+ * hardware pairing updates without client re-initialization.
  *
  * @param {ApolloClientConfig} config - The client configuration.
  * @returns {ApolloClient} A configured Apollo Client instance.
  */
 export const createApolloClient = (config: ApolloClientConfig) => {
-  const headers: Record<string, string> = {};
-  if (config.hardwareId) headers["x-hardware-id"] = config.hardwareId;
-  if (config.organizationId) headers["x-organization-id"] = config.organizationId;
-
   const httpLink = new HttpLink({
     uri: `${config.apiUrl}/graphql`,
-    headers,
+  });
+
+  const authLink = setContext((_, { headers }) => {
+    if (typeof window === "undefined") return { headers };
+
+    const hardwareId = localStorage.getItem("sous_hardware_id");
+    const organizationId = hardwareId ? localStorage.getItem(`sous_org_id_${hardwareId}`) : null;
+    const token = localStorage.getItem("token");
+
+    return {
+      headers: {
+        ...headers,
+        "x-hardware-id": hardwareId || "",
+        "x-organization-id": organizationId || "",
+        ...(token ? { authorization: `Bearer ${token}` } : {}),
+      },
+    };
   });
 
   const wsLink =
@@ -41,7 +52,17 @@ export const createApolloClient = (config: ApolloClientConfig) => {
       ? new GraphQLWsLink(
           createClient({
             url: `${config.apiUrl.replace("http", "ws")}/graphql`,
-            connectionParams: headers,
+            connectionParams: () => {
+              const hardwareId = localStorage.getItem("sous_hardware_id");
+              const organizationId = hardwareId ? localStorage.getItem(`sous_org_id_${hardwareId}`) : null;
+              const token = localStorage.getItem("token");
+
+              return {
+                "x-hardware-id": hardwareId || "",
+                "x-organization-id": organizationId || "",
+                ...(token ? { authorization: `Bearer ${token}` } : {}),
+              };
+            },
           }),
         )
       : null;
@@ -61,9 +82,9 @@ export const createApolloClient = (config: ApolloClientConfig) => {
             );
           },
           wsLink,
-          httpLink,
+          authLink.concat(httpLink),
         )
-      : httpLink;
+      : authLink.concat(httpLink);
 
   return new ApolloClient({
     link: splitLink,
