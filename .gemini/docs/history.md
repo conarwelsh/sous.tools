@@ -1,3 +1,20 @@
+## 2026-02-14 (Monorepo Hardening & Build Cleanup)
+
+- **Build & Lint Stabilization:**
+  - Performed a comprehensive audit of the entire monorepo, resolving all remaining build and linting errors to achieve a "Green Check" state (`pnpm check`).
+  - **API Schema Fix:** Resolved a critical `ReferenceError: Cannot access before initialization` in Drizzle relations by reordering table exports and relations definitions.
+  - **React 19 Compatibility:** Fixed "cascading render" warnings in the download page and signage components by refactoring synchronous `setState` calls in `useEffect` to use asynchronous patterns (`requestAnimationFrame`) or `useMemo` derivations.
+  - **Type Safety Hardening:**
+    - Resolved multiple "Unsafe return of type any" errors in `@sous/cli` by adding explicit type casts to JSON parsing and process management logic.
+    - Fixed ESM import issues in the API by ensuring consistent use of `.js` extensions for relative imports and reverting sub-path imports from `@sous/features` to avoid pulling in heavy React dependencies.
+  - **Syntax & File Cleanup:**
+    - Renamed misconfigured `.ts` files containing TSX to `.tsx` (Billing Overview).
+    - Removed dozens of unused imports and variables across all packages to ensure a clean codebase.
+    - Synchronized Prettier and ESLint configurations in `@sous/client-sdk` to prevent conflicting formatting rules.
+- **OTA & Release Pipeline:**
+  - Verified the end-to-end flow for the dynamic download portal, ensuring release manifests from Supabase are correctly consumed.
+  - Pushed all fixes to both `development` and `staging` branches to unblock remote builds.
+
 ## 2026-02-14 (API Hardening & Auth Guard Fixes)
 
 - **API Hardening & Auth Guard Fixes:**

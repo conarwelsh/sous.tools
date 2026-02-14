@@ -38,7 +38,7 @@ export const POSDashboard = ({ orgId }: { orgId: string }) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12 relative z-10">
-        <MetricCard
+        <POSMetricCard
           label="Net Sales"
           value="$1,245.50"
           icon={DollarSign}
@@ -46,7 +46,7 @@ export const POSDashboard = ({ orgId }: { orgId: string }) => {
           glow="shadow-[0_0_40px_-5px_rgba(14,165,233,0.3)] border-sky-500/30"
           bg="bg-sky-500/5"
         />
-        <MetricCard
+        <POSMetricCard
           label="Open Tickets"
           value="08"
           icon={FileText}
@@ -54,7 +54,7 @@ export const POSDashboard = ({ orgId }: { orgId: string }) => {
           glow="shadow-[0_0_40px_-5px_rgba(245,158,11,0.2)] border-amber-500/20"
           bg="bg-amber-500/5"
         />
-        <MetricCard
+        <POSMetricCard
           label="Live Covers"
           value="32"
           icon={Utensils}
@@ -62,7 +62,7 @@ export const POSDashboard = ({ orgId }: { orgId: string }) => {
           glow="shadow-[0_0_40px_-5px_rgba(16,185,129,0.2)] border-emerald-500/20"
           bg="bg-emerald-500/5"
         />
-        <MetricCard
+        <POSMetricCard
           label="Avg. Ticket"
           value="$42.10"
           icon={TrendingUp}
@@ -183,7 +183,7 @@ export const POSDashboard = ({ orgId }: { orgId: string }) => {
   );
 };
 
-const MetricCard = ({ label, value, icon: Icon, color, glow, bg }: any) => (
+const POSMetricCard = ({ label, value, icon: Icon, color, glow, bg }: any) => (
   <div
     className={cn(
       "border p-8 rounded-[2.5rem] flex flex-col justify-between h-48 relative overflow-hidden group transition-all duration-700 backdrop-blur-md cursor-default",

@@ -5,10 +5,12 @@ import { PresentationModule } from '../presentation/presentation.module.js';
 import { ProcurementModule } from '../procurement/procurement.module.js';
 import { CulinaryModule } from '../culinary/culinary.module.js';
 import { AuthModule } from '../iam/auth/auth.module.js';
+import { HardwareModule } from '../hardware/hardware.module.js';
 import { IamSeeder } from './seeders/iam.seeder.js';
 import { PresentationSeeder } from './seeders/presentation.seeder.js';
 import { ProcurementSeeder } from './seeders/procurement.seeder.js';
 import { CulinarySeeder } from './seeders/culinary.seeder.js';
+import { HardwareSeeder } from './seeders/hardware.seeder.js';
 import { logger } from '@sous/logger';
 
 @Module({
@@ -18,6 +20,7 @@ import { logger } from '@sous/logger';
     forwardRef(() => ProcurementModule),
     forwardRef(() => PresentationModule),
     forwardRef(() => CulinaryModule),
+    forwardRef(() => HardwareModule),
   ],
   providers: [
     SeederService,
@@ -25,6 +28,7 @@ import { logger } from '@sous/logger';
     ProcurementSeeder,
     PresentationSeeder,
     CulinarySeeder,
+    HardwareSeeder,
   ],
   exports: [SeederService],
 })

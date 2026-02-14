@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Monorepo Hardening Pass:** Full audit and cleanup of all packages to achieve 100% build and lint success.
 - **Signage GraphQL Subscriptions**: Implemented backend support for real-time signage updates via GraphQL Subscriptions in `PresentationResolver` and `PresentationService`.
 - **Culinary GraphQL**: Added missing `products` and `categories` queries to `CulinaryResolver`, enabling POS and Kiosk data fetching.
 - **Resilient Data Parsing**: Implemented defensive JSON parsing in `PresentationService` to prevent server crashes during screen layout updates.
@@ -19,6 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Monorepo Stabilization:** Resolved all build and linting errors across the entire codebase, achieving a stable "Green Check" state.
+- **API/Drizzle:** Fixed a critical `ReferenceError` during relation initialization by reordering table exports and relations definitions in the main schema.
+- **Web/React:** Resolved React 19 "cascading render" warnings by refactoring synchronous `setState` calls in `useEffect` to use `requestAnimationFrame` or `useMemo` derivations.
+- **CLI/Type Safety:** Hardened the CLI with explicit type casts for JSON parsing and process management, resolving multiple "Unsafe return of any" errors.
+- **Architecture:** Fixed ESM import issues in the API and ensured sub-path package exports correctly resolve types.
+- **UI/Components:** Fixed a syntax error in the Billing Overview component caused by an incorrect file extension.
 - **API/IAM**: Fixed a critical crash in `JwtAuthGuard` caused by a broken relative import path for `HardwareAuthGuard`.
 - **API/IAM**: Resolved `TypeError: context.getHandler is not a function` in `GqlAuthGuard` by providing a complete `ExecutionContext` mock to the base class, ensuring compatibility with GraphQL requests and decorator-based logic.
 
