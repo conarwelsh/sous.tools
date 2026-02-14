@@ -20,8 +20,18 @@ if [ "$WSL_IP" == "127.0.0.1" ] || [ -z "$WSL_IP" ]; then
 fi
 export CAPACITOR_LIVE_RELOAD_URL="http://$WSL_IP:${PORT:-3000}"
 
-echo "🚀 Running Capacitor Android on target $1 with flavor $FLAVOR..."
+echo "🚀 Resolving target device $1..."
+SERIAL=$(pnpm tsx scripts/device-manager.ts "$1" | tail -n 1)
+if [ -z "$SERIAL" ] || [[ "$SERIAL" == *"Failed"* ]]; then
+  echo "❌ Could not resolve or start device: $1"
+  exit 1
+fi
+echo "✅ Target resolved to: $SERIAL"
+
+echo "🚀 Running Capacitor Android on target $SERIAL with flavor $FLAVOR..."
 echo "🔗 Live Reload URL: $CAPACITOR_LIVE_RELOAD_URL"
+
+# ... (rest of the script uses $SERIAL instead of $1)
 
 # Inject Host IP into strings.xml
 STRINGS_FILE="android/app/src/main/res/values/strings.xml"
@@ -71,15 +81,15 @@ call_agent() {
   curl -s -X POST -H 'Content-Type: application/json' -d "$payload" "$AGENT_URL"
 }
 
-echo "📲 Reinstalling $PKG_ID on $1 via Agent..."
+echo "📲 Reinstalling $PKG_ID on $SERIAL via Agent..."
 
 # Uninstall
 echo "🗑️  Uninstalling..."
-call_agent "adb" "-s $1 uninstall $PKG_ID"
+call_agent "adb" "-s $SERIAL uninstall $PKG_ID"
 
 # Clear (Ignore error as uninstall might have removed it already)
 echo "🧹 Wiping data..."
-call_agent "adb" "-s $1 shell pm clear $PKG_ID" > /dev/null 2>&1
+call_agent "adb" "-s $SERIAL shell pm clear $PKG_ID" > /dev/null 2>&1
 
 sleep 2
 
@@ -89,22 +99,22 @@ APK_DIR=$(echo "$FLAVOR" | tr '[:upper:]' '[:lower:]')
 APK_PATH="\\\\wsl.localhost\\Ubuntu-22.04\\home\\conar\\sous.tools\\apps\\web\\android\\app\\build\\outputs\\apk\\$APK_DIR\\debug\\app-$APK_DIR-debug.apk"
 
 echo "🏗️  Installing APK from $APK_PATH..."
-PAYLOAD=$(python3 -c "import json, sys; print(json.dumps({'command': 'adb', 'args': f'-s $1 install -r \"{sys.argv[1]}\"'}))" "$APK_PATH")
+PAYLOAD=$(python3 -c "import json, sys; print(json.dumps({'command': 'adb', 'args': f'-s $SERIAL install -r \"{sys.argv[1]}\"'}))" "$APK_PATH")
 curl -s -X POST -H 'Content-Type: application/json' -d "$PAYLOAD" "$AGENT_URL"
 
 sleep 5
 
 echo "🚀 Starting app..."
-call_agent "adb" "-s $1 shell am start -n $PKG_ID/$ACTIVITY --es url \"$CAPACITOR_LIVE_RELOAD_URL\""
+call_agent "adb" "-s $SERIAL shell am start -n $PKG_ID/$ACTIVITY --es url \"$CAPACITOR_LIVE_RELOAD_URL\""
 
 # Foreground
 (
   sleep 10
   # Try various titles for the emulator window
-  echo "🪟 Bringing $1 to foreground..."
+  echo "🪟 Bringing $SERIAL to foreground..."
   # Common emulator titles: "Android Emulator - <serial>", "<avd_name>", etc.
   # We try to use the serial as a fallback in the title check
-  PAYLOAD=$(python3 -c "import json, sys; print(json.dumps({'command': 'position-window', 'title': sys.argv[1], 'x': 100, 'y': 100, 'width': 1280, 'height': 800}))" "$1")
+  PAYLOAD=$(python3 -c "import json, sys; print(json.dumps({'command': 'position-window', 'title': sys.argv[1], 'x': 100, 'y': 100, 'width': 1280, 'height': 800}))" "$SERIAL")
   curl -s -X POST -H 'Content-Type: application/json' -d "$PAYLOAD" "$AGENT_URL" > /dev/null 2>&1
 ) &
 

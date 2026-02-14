@@ -49,6 +49,15 @@ module.exports = {
         PORT: 3001
       },
       namespace: "core"
+    },
+
+    // --- Native Applications ---
+    {
+      name: "sous-pos-android",
+      script: "bash ./scripts/run-android.sh Pixel_9 pos",
+      cwd: ".",
+      autorestart: false,
+      namespace: "native"
     }
   ]
 };

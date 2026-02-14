@@ -58,24 +58,24 @@ async function main() {
 
     // Check if emulator is in PATH
     try {
-      execSync("cmd.exe /c where emulator.exe", { stdio: "ignore" });
+      execSync("cmd.exe /c where emulator.exe", { timeout: 60000, stdio: "ignore" });
     } catch {
       // Not in path, search standard locations
-      const userProfile = execSync("cmd.exe /c echo %USERPROFILE%")
+      const userProfile = execSync("cmd.exe /c echo %USERPROFILE%", { timeout: 60000 })
         .toString()
         .trim();
       const candidates = [
         `${userProfile}\\AppData\\Local\\Android\\Sdk\\emulator\\emulator.exe`,
-        `C:\\Users\\${process.env.USER}\\AppData\\Local\\Android\\Sdk\\emulator\\emulator.exe`,
+        `C:\\Users\\conar\\AppData\\Local\\Android\\Sdk\\emulator\\emulator.exe`,
         `C:\\Android\\emulator\\emulator.exe`,
       ];
 
       for (const candidate of candidates) {
         try {
           // Check if file exists via cmd
-          execSync(`cmd.exe /c if exist "${candidate}" echo found`);
+          execSync(`cmd.exe /c if exist "${candidate}" echo found`, { timeout: 60000 });
           emulatorCmd = `"${candidate}"`;
-          console.log(`Found emulator at: ${emulatorCmd}`);
+          console.error(`Found emulator at: ${emulatorCmd}`);
           break;
         } catch {}
       }
@@ -131,7 +131,7 @@ async function findSerialByAvd(targetAvd: string): Promise<string | null> {
   try {
     // Add timeout to adb commands to prevent hangs
     const devicesOutput = execSync(`${ADB} devices`, {
-      timeout: 5000,
+      timeout: 60000,
       stdio: ["pipe", "pipe", "ignore"],
     }).toString();
     const lines = devicesOutput
@@ -143,7 +143,7 @@ async function findSerialByAvd(targetAvd: string): Promise<string | null> {
       try {
         const avdName = execSync(
           `${ADB} -s ${serial} shell getprop ro.boot.qemu.avd_name`,
-          { timeout: 3000, stdio: ["pipe", "pipe", "ignore"] },
+          { timeout: 60000, stdio: ["pipe", "pipe", "ignore"] },
         )
           .toString()
           .trim();
@@ -152,7 +152,7 @@ async function findSerialByAvd(targetAvd: string): Promise<string | null> {
         // Fallback to model check
         const model = execSync(
           `${ADB} -s ${serial} shell getprop ro.product.model`,
-          { timeout: 3000, stdio: ["pipe", "pipe", "ignore"] },
+          { timeout: 60000, stdio: ["pipe", "pipe", "ignore"] },
         )
           .toString()
           .trim();
