@@ -3,12 +3,12 @@
 import React from "react";
 import { View, Text, cn } from "@sous/ui";
 import { useRouter, usePathname } from "next/navigation";
-import { 
-  Settings as SettingsIcon, 
-  Link as LinkIcon, 
-  Cpu, 
-  User, 
-  Building2 
+import {
+  Settings as SettingsIcon,
+  Link as LinkIcon,
+  Cpu,
+  User,
+  Building2,
 } from "lucide-react";
 
 export default function SettingsLayout({
@@ -48,12 +48,19 @@ export default function SettingsLayout({
                 onClick={() => router.push(tab.href)}
                 className={cn(
                   "flex-row items-center gap-2 pb-4 border-b-2 transition-all group",
-                  isActive 
-                    ? "border-primary text-foreground" 
-                    : "border-transparent text-muted-foreground hover:text-foreground"
+                  isActive
+                    ? "border-primary text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground",
                 )}
               >
-                <tab.icon size={14} className={cn(isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
+                <tab.icon
+                  size={14}
+                  className={cn(
+                    isActive
+                      ? "text-primary"
+                      : "text-muted-foreground group-hover:text-foreground",
+                  )}
+                />
                 <Text className="text-[10px] font-black uppercase tracking-widest">
                   {tab.label}
                 </Text>
@@ -64,9 +71,7 @@ export default function SettingsLayout({
       </View>
 
       {/* Page Content */}
-      <View className="flex-1 overflow-auto bg-muted/5">
-        {children}
-      </View>
+      <View className="flex-1 overflow-auto bg-muted/5">{children}</View>
     </View>
   );
 }

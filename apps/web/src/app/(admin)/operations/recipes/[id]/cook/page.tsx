@@ -2,7 +2,20 @@
 
 import React, { use, useState, useEffect, useMemo } from "react";
 import { View, Text, Button, Card, ScrollView, cn, Logo } from "@sous/ui";
-import { ChefHat, Scale, ArrowLeft, Loader2, Clock, ListChecks, Maximize2, Minimize2, Timer, Zap, Lock, Unlock } from "lucide-react";
+import {
+  ChefHat,
+  Scale,
+  ArrowLeft,
+  Loader2,
+  Clock,
+  ListChecks,
+  Maximize2,
+  Minimize2,
+  Timer,
+  Zap,
+  Lock,
+  Unlock,
+} from "lucide-react";
 import { useAuth } from "@sous/features";
 import { useRouter } from "next/navigation";
 import { gql } from "@apollo/client";
@@ -35,14 +48,14 @@ const GET_RECIPE_FOR_COOK = gql`
   }
 `;
 
-function StepTimer({ duration, label }: { duration: number, label: string }) {
+function StepTimer({ duration, label }: { duration: number; label: string }) {
   const [timeLeft, setTimeLeft] = useState(duration);
   const [isRunning, setIsRunning] = useState(false);
 
   useEffect(() => {
     let interval: any;
     if (isRunning && timeLeft > 0) {
-      interval = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+      interval = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
     } else if (timeLeft === 0) {
       setIsRunning(false);
     }
@@ -53,26 +66,45 @@ function StepTimer({ duration, label }: { duration: number, label: string }) {
   const seconds = timeLeft % 60;
 
   return (
-    <Button 
+    <Button
       onClick={() => setIsRunning(!isRunning)}
       variant={isRunning ? "default" : "outline"}
       className={cn(
         "h-12 px-6 rounded-2xl gap-3 transition-all",
-        isRunning ? "bg-amber-500 hover:bg-amber-600 animate-pulse border-amber-400" : "border-border hover:bg-muted"
+        isRunning
+          ? "bg-amber-500 hover:bg-amber-600 animate-pulse border-amber-400"
+          : "border-border hover:bg-muted",
       )}
     >
-      <Timer size={18} className={isRunning ? "text-white" : "text-amber-500"} />
-      <Text className={cn("font-mono font-bold text-lg", isRunning ? "text-white" : "text-foreground")}>
-        {minutes}:{seconds.toString().padStart(2, '0')}
+      <Timer
+        size={18}
+        className={isRunning ? "text-white" : "text-amber-500"}
+      />
+      <Text
+        className={cn(
+          "font-mono font-bold text-lg",
+          isRunning ? "text-white" : "text-foreground",
+        )}
+      >
+        {minutes}:{seconds.toString().padStart(2, "0")}
       </Text>
-      <Text className={cn("text-[10px] font-black uppercase tracking-widest", isRunning ? "text-amber-100" : "text-muted-foreground")}>
+      <Text
+        className={cn(
+          "text-[10px] font-black uppercase tracking-widest",
+          isRunning ? "text-amber-100" : "text-muted-foreground",
+        )}
+      >
         {label}
       </Text>
     </Button>
   );
 }
 
-export default function RecipeCookPage({ params }: { params: Promise<{ id: string }> }) {
+export default function RecipeCookPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = use(params);
   const router = useRouter();
   const { user } = useAuth();
@@ -84,7 +116,9 @@ export default function RecipeCookPage({ params }: { params: Promise<{ id: strin
   });
 
   const [yieldOverride, setYieldOverride] = useState<number | null>(null);
-  const [lockedIngredientId, setLockedIngredientId] = useState<string | null>(null);
+  const [lockedIngredientId, setLockedIngredientId] = useState<string | null>(
+    null,
+  );
   const [lockedWeight, setLockedWeight] = useState<number | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -93,9 +127,9 @@ export default function RecipeCookPage({ params }: { params: Promise<{ id: strin
     let wakeLock: any = null;
     const requestWakeLock = async () => {
       try {
-        if ('wakeLock' in navigator) {
-          wakeLock = await (navigator as any).wakeLock.request('screen');
-          console.log('[CookMode] Wake Lock Active');
+        if ("wakeLock" in navigator) {
+          wakeLock = await (navigator as any).wakeLock.request("screen");
+          console.log("[CookMode] Wake Lock Active");
         }
       } catch (err) {}
     };
@@ -110,7 +144,7 @@ export default function RecipeCookPage({ params }: { params: Promise<{ id: strin
   // Baker's Math & Scaling Engine
   const scaledIngredients = useMemo(() => {
     if (!recipe) return [];
-    
+
     const baseIngredients = recipe.ingredients;
     const originalYield = recipe.yieldAmount || 1;
 
@@ -118,7 +152,9 @@ export default function RecipeCookPage({ params }: { params: Promise<{ id: strin
     let scale = 1;
 
     if (lockedIngredientId && lockedWeight !== null) {
-      const targetIng = baseIngredients.find((i: any) => i.id === lockedIngredientId);
+      const targetIng = baseIngredients.find(
+        (i: any) => i.id === lockedIngredientId,
+      );
       if (targetIng && targetIng.amount > 0) {
         scale = lockedWeight / targetIng.amount;
       }
@@ -128,7 +164,7 @@ export default function RecipeCookPage({ params }: { params: Promise<{ id: strin
 
     return baseIngredients.map((ri: any) => ({
       ...ri,
-      scaledAmount: ri.amount * scale
+      scaledAmount: ri.amount * scale,
     }));
   }, [recipe, yieldOverride, lockedIngredientId, lockedWeight]);
 
@@ -138,22 +174,37 @@ export default function RecipeCookPage({ params }: { params: Promise<{ id: strin
     return (
       <View className="flex-1 bg-background items-center justify-center h-screen">
         <Loader2 className="animate-spin text-primary mb-4" size={48} />
-        <Text className="text-muted-foreground font-black uppercase text-xs tracking-[0.2em]">Synchronizing Protocol...</Text>
+        <Text className="text-muted-foreground font-black uppercase text-xs tracking-[0.2em]">
+          Synchronizing Protocol...
+        </Text>
       </View>
     );
   }
 
   return (
-    <View className={cn("flex-1 bg-[#050505] text-white flex flex-col h-screen overflow-hidden", isFullscreen ? "fixed inset-0 z-[1000]" : "")}>
+    <View
+      className={cn(
+        "flex-1 bg-[#050505] text-white flex flex-col h-screen overflow-hidden",
+        isFullscreen ? "fixed inset-0 z-[1000]" : "",
+      )}
+    >
       {/* HUD Header */}
       <View className="h-24 border-b border-white/5 flex flex-row items-center justify-between px-8 bg-black/40 backdrop-blur-xl">
         <View className="flex-row items-center gap-6">
-          <Button onClick={() => router.back()} variant="ghost" className="text-white/40 hover:text-white p-0">
+          <Button
+            onClick={() => router.back()}
+            variant="ghost"
+            className="text-white/40 hover:text-white p-0"
+          >
             <ArrowLeft size={24} />
           </Button>
           <View>
-            <Text className="text-sky-500 font-black uppercase text-[10px] tracking-[0.3em] mb-1">Cook Protocol Alpha</Text>
-            <Text className="text-2xl font-black uppercase tracking-tight">{recipe.name}</Text>
+            <Text className="text-sky-500 font-black uppercase text-[10px] tracking-[0.3em] mb-1">
+              Cook Protocol Alpha
+            </Text>
+            <Text className="text-2xl font-black uppercase tracking-tight">
+              {recipe.name}
+            </Text>
           </View>
         </View>
 
@@ -161,9 +212,11 @@ export default function RecipeCookPage({ params }: { params: Promise<{ id: strin
           <div className="flex flex-row items-center gap-3 bg-white/5 border border-white/10 px-6 py-3 rounded-2xl">
             <Scale size={18} className="text-sky-500" />
             <div className="flex flex-col">
-              <Text className="text-[8px] font-black uppercase text-white/40 leading-none mb-1">Target Yield</Text>
+              <Text className="text-[8px] font-black uppercase text-white/40 leading-none mb-1">
+                Target Yield
+              </Text>
               <div className="flex flex-row items-end gap-1.5">
-                <input 
+                <input
                   type="number"
                   value={currentYield}
                   onChange={(e) => {
@@ -172,14 +225,16 @@ export default function RecipeCookPage({ params }: { params: Promise<{ id: strin
                   }}
                   className="bg-transparent border-none p-0 text-xl font-black text-white w-20 outline-none focus:text-sky-400 transition-colors"
                 />
-                <Text className="text-xs font-black uppercase text-white/60 mb-1">{recipe.yieldUnit}</Text>
+                <Text className="text-xs font-black uppercase text-white/60 mb-1">
+                  {recipe.yieldUnit}
+                </Text>
               </div>
             </div>
           </div>
 
-          <Button 
+          <Button
             onClick={() => setIsFullscreen(!isFullscreen)}
-            variant="ghost" 
+            variant="ghost"
             className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 p-0"
           >
             {isFullscreen ? <Minimize2 size={24} /> : <Maximize2 size={24} />}
@@ -192,35 +247,50 @@ export default function RecipeCookPage({ params }: { params: Promise<{ id: strin
         <View className="w-[450px] border-r border-white/5 flex flex-col bg-black/20">
           <View className="p-8 border-b border-white/5 flex-row items-center gap-3">
             <ListChecks size={20} className="text-sky-500" />
-            <Text className="font-black uppercase text-sm tracking-[0.2em]">Components</Text>
+            <Text className="font-black uppercase text-sm tracking-[0.2em]">
+              Components
+            </Text>
           </View>
           <ScrollView className="flex-1 p-6">
             <View className="gap-3">
               {scaledIngredients.map((ri: any) => {
                 const isLocked = lockedIngredientId === ri.id;
                 return (
-                  <Card 
-                    key={ri.id} 
+                  <Card
+                    key={ri.id}
                     className={cn(
                       "p-6 bg-white/[0.03] border-white/5 rounded-3xl flex flex-row items-center justify-between transition-all",
-                      isLocked ? "border-sky-500 bg-sky-500/10 shadow-[0_0_30px_rgba(14,165,233,0.1)]" : "hover:bg-white/[0.05]"
+                      isLocked
+                        ? "border-sky-500 bg-sky-500/10 shadow-[0_0_30px_rgba(14,165,233,0.1)]"
+                        : "hover:bg-white/[0.05]",
                     )}
                   >
                     <View className="flex-1">
-                      <Text className={cn("font-black uppercase tracking-tight text-lg", isLocked ? "text-sky-400" : "text-white")}>
+                      <Text
+                        className={cn(
+                          "font-black uppercase tracking-tight text-lg",
+                          isLocked ? "text-sky-400" : "text-white",
+                        )}
+                      >
                         {ri.ingredient.name}
                       </Text>
                       {ri.isBase && (
                         <div className="flex flex-row items-center gap-1.5 mt-1">
-                          <Zap size={10} fill="#0ea5e9" className="text-sky-500" />
-                          <Text className="text-[8px] font-black uppercase text-sky-500 tracking-widest">Base Component</Text>
+                          <Zap
+                            size={10}
+                            fill="#0ea5e9"
+                            className="text-sky-500"
+                          />
+                          <Text className="text-[8px] font-black uppercase text-sky-500 tracking-widest">
+                            Base Component
+                          </Text>
                         </div>
                       )}
                     </View>
                     <div className="flex flex-row items-center gap-4">
                       <div className="flex flex-col items-end">
                         <div className="flex flex-row items-baseline gap-1.5">
-                          <input 
+                          <input
                             type="number"
                             value={ri.scaledAmount.toFixed(1)}
                             onChange={(e) => {
@@ -230,13 +300,15 @@ export default function RecipeCookPage({ params }: { params: Promise<{ id: strin
                             }}
                             className={cn(
                               "bg-transparent border-none p-0 text-2xl font-black w-24 text-right outline-none",
-                              isLocked ? "text-sky-400" : "text-white"
+                              isLocked ? "text-sky-400" : "text-white",
                             )}
                           />
-                          <Text className="text-xs font-black uppercase text-white/40">{ri.unit}</Text>
+                          <Text className="text-xs font-black uppercase text-white/40">
+                            {ri.unit}
+                          </Text>
                         </div>
                       </div>
-                      <button 
+                      <button
                         onClick={() => {
                           if (isLocked) {
                             setLockedIngredientId(null);
@@ -249,7 +321,9 @@ export default function RecipeCookPage({ params }: { params: Promise<{ id: strin
                         }}
                         className={cn(
                           "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
-                          isLocked ? "bg-sky-500 text-white" : "bg-white/5 text-white/20 hover:bg-white/10"
+                          isLocked
+                            ? "bg-sky-500 text-white"
+                            : "bg-white/5 text-white/20 hover:bg-white/10",
                         )}
                       >
                         {isLocked ? <Lock size={16} /> : <Unlock size={16} />}
@@ -266,34 +340,43 @@ export default function RecipeCookPage({ params }: { params: Promise<{ id: strin
         <View className="flex-1 flex flex-col">
           <View className="p-8 border-b border-white/5 flex-row items-center gap-3 bg-black/20">
             <ChefHat size={20} className="text-amber-500" />
-            <Text className="font-black uppercase text-sm tracking-[0.2em]">Execution Protocol</Text>
+            <Text className="font-black uppercase text-sm tracking-[0.2em]">
+              Execution Protocol
+            </Text>
           </View>
           <ScrollView className="flex-1 p-12">
             <View className="max-w-4xl mx-auto gap-16 pb-32">
-              {recipe.steps.sort((a: any, b: any) => a.order - b.order).map((step: any, idx: number) => (
-                <View key={step.id} className="flex flex-row gap-12 group/step">
-                  <View className="items-center">
-                    <View className="w-16 h-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center group-hover/step:border-amber-500/50 group-hover/step:bg-amber-500/5 transition-all duration-500">
-                      <Text className="text-white/20 font-black text-xl group-hover/step:text-amber-500">{idx + 1}</Text>
+              {recipe.steps
+                .sort((a: any, b: any) => a.order - b.order)
+                .map((step: any, idx: number) => (
+                  <View
+                    key={step.id}
+                    className="flex flex-row gap-12 group/step"
+                  >
+                    <View className="items-center">
+                      <View className="w-16 h-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center group-hover/step:border-amber-500/50 group-hover/step:bg-amber-500/5 transition-all duration-500">
+                        <Text className="text-white/20 font-black text-xl group-hover/step:text-amber-500">
+                          {idx + 1}
+                        </Text>
+                      </View>
+                      {idx < recipe.steps.length - 1 && (
+                        <View className="w-px flex-1 bg-white/5 my-4" />
+                      )}
                     </View>
-                    {idx < recipe.steps.length - 1 && (
-                      <View className="w-px flex-1 bg-white/5 my-4" />
-                    )}
+                    <View className="flex-1 pt-2">
+                      <Text className="text-2xl font-medium leading-relaxed text-white/90 mb-8 select-text">
+                        {step.instruction}
+                      </Text>
+
+                      {step.timerDuration && (
+                        <StepTimer
+                          duration={step.timerDuration}
+                          label={`Phase ${idx + 1} Timer`}
+                        />
+                      )}
+                    </View>
                   </View>
-                  <View className="flex-1 pt-2">
-                    <Text className="text-2xl font-medium leading-relaxed text-white/90 mb-8 select-text">
-                      {step.instruction}
-                    </Text>
-                    
-                    {step.timerDuration && (
-                      <StepTimer 
-                        duration={step.timerDuration} 
-                        label={`Phase ${idx + 1} Timer`}
-                      />
-                    )}
-                  </View>
-                </View>
-              ))}
+                ))}
             </View>
           </ScrollView>
         </View>
@@ -304,15 +387,23 @@ export default function RecipeCookPage({ params }: { params: Promise<{ id: strin
         <View className="flex-row items-center gap-8">
           <View className="flex-row items-center gap-3">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <Text className="text-[10px] font-black uppercase tracking-widest text-emerald-500/80">Bio-Metric Monitoring Active</Text>
+            <Text className="text-[10px] font-black uppercase tracking-widest text-emerald-500/80">
+              Bio-Metric Monitoring Active
+            </Text>
           </View>
           <View className="h-4 w-px bg-white/10" />
           <View className="flex-row items-center gap-3 text-white/40">
             <Clock size={14} />
-            <Text className="text-[10px] font-black uppercase tracking-widest">Protocol Started: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+            <Text className="text-[10px] font-black uppercase tracking-widest">
+              Protocol Started:{" "}
+              {new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </Text>
           </View>
         </View>
-        
+
         <Logo variant="cloud" size={24} suffix="os" className="opacity-20" />
       </View>
     </View>

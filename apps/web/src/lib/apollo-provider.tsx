@@ -12,6 +12,10 @@ const client = createApolloClient({
   apiUrl,
 });
 
-export const GraphQLProvider = ({ children }: { children: React.ReactNode }) => {
+export const GraphQLProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   return <ApolloProvider client={client}>{children}</ApolloProvider>;
 };

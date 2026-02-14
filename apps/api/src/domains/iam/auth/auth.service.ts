@@ -54,12 +54,13 @@ export class AuthService {
   }
 
   async resetPassword(data: { token: string; newPass: string }) {
-    const resetToken = await this.dbService.db.query.passwordResetTokens.findFirst({
-      where: and(
-        eq(passwordResetTokens.token, data.token),
-        gt(passwordResetTokens.expiresAt, new Date()),
-      ),
-    });
+    const resetToken =
+      await this.dbService.db.query.passwordResetTokens.findFirst({
+        where: and(
+          eq(passwordResetTokens.token, data.token),
+          gt(passwordResetTokens.expiresAt, new Date()),
+        ),
+      });
 
     if (!resetToken) {
       throw new BadRequestException('Invalid or expired reset token');
@@ -239,11 +240,14 @@ export class AuthService {
   }) {
     // 1. Try to find by providerId
     let condition;
-    if (profile.provider === 'google') condition = eq(users.googleId, profile.providerId);
-    else if (profile.provider === 'github') condition = eq(users.githubId, profile.providerId);
-    else if (profile.provider === 'facebook') condition = eq(users.facebookId, profile.providerId);
+    if (profile.provider === 'google')
+      condition = eq(users.googleId, profile.providerId);
+    else if (profile.provider === 'github')
+      condition = eq(users.githubId, profile.providerId);
+    else if (profile.provider === 'facebook')
+      condition = eq(users.facebookId, profile.providerId);
 
-    let [user] = condition 
+    let [user] = condition
       ? await this.dbService.db.select().from(users).where(condition).limit(1)
       : [null];
 
@@ -258,9 +262,12 @@ export class AuthService {
       // 3. Link providerId to existing user if email matches
       if (user) {
         const updateData: any = { updatedAt: new Date() };
-        if (profile.provider === 'google') updateData.googleId = profile.providerId;
-        if (profile.provider === 'github') updateData.githubId = profile.providerId;
-        if (profile.provider === 'facebook') updateData.facebookId = profile.providerId;
+        if (profile.provider === 'google')
+          updateData.googleId = profile.providerId;
+        if (profile.provider === 'github')
+          updateData.githubId = profile.providerId;
+        if (profile.provider === 'facebook')
+          updateData.facebookId = profile.providerId;
 
         await this.dbService.db
           .update(users)
@@ -393,7 +400,10 @@ export class AuthService {
         .returning();
 
       // 5. Trigger Welcome Email (Async via Queue)
-      void this.mailService.sendWelcomeEmail(user.email, user.firstName || 'Chef');
+      void this.mailService.sendWelcomeEmail(
+        user.email,
+        user.firstName || 'Chef',
+      );
 
       return user;
     });

@@ -44,17 +44,22 @@ async function main() {
     const response = await result.response;
     const review = response.text();
 
-    await fetch(`https://api.github.com/repos/${repoFull}/issues/${prNumber}/comments`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${githubToken}`,
-        "Content-Type": "application/json",
-        "User-Agent": "Gemini-Agent"
-      },
-      body: JSON.stringify({ body: `🧐 **Gemini Code Review:**
+    await fetch(
+      `https://api.github.com/repos/${repoFull}/issues/${prNumber}/comments`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${githubToken}`,
+          "Content-Type": "application/json",
+          "User-Agent": "Gemini-Agent",
+        },
+        body: JSON.stringify({
+          body: `🧐 **Gemini Code Review:**
 
-${review}` })
-    });
+${review}`,
+        }),
+      },
+    );
 
     console.log("Review posted.");
   } catch (error) {

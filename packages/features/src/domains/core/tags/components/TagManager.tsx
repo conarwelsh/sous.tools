@@ -16,7 +16,10 @@ interface TagManagerProps {
   entityId: string;
 }
 
-export const TagManager: React.FC<TagManagerProps> = ({ entityType, entityId }) => {
+export const TagManager: React.FC<TagManagerProps> = ({
+  entityType,
+  entityId,
+}) => {
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [assignedTagIds, setAssignedTagIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,7 +30,10 @@ export const TagManager: React.FC<TagManagerProps> = ({ entityType, entityId }) 
 
   const fetchData = async () => {
     // Skip if entityId is a placeholder (e.g., 'new-layout' in designer)
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(entityId);
+    const isUuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        entityId,
+      );
     if (!isUuid) {
       setIsLoading(false);
       return;
@@ -58,7 +64,10 @@ export const TagManager: React.FC<TagManagerProps> = ({ entityType, entityId }) 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownOpen(false);
       }
     };
@@ -68,7 +77,7 @@ export const TagManager: React.FC<TagManagerProps> = ({ entityType, entityId }) 
 
   const filteredTags = useMemo(() => {
     return availableTags.filter((tag) =>
-      tag.name.toLowerCase().includes(search.toLowerCase())
+      tag.name.toLowerCase().includes(search.toLowerCase()),
     );
   }, [availableTags, search]);
 
@@ -102,19 +111,26 @@ export const TagManager: React.FC<TagManagerProps> = ({ entityType, entityId }) 
 
   const createTag = async () => {
     if (!search.trim()) return;
-    
+
     setIsSaving(true);
     try {
       const http = await getHttpClient();
       // Random professional color
-      const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+      const colors = [
+        "#3b82f6",
+        "#10b981",
+        "#f59e0b",
+        "#ef4444",
+        "#8b5cf6",
+        "#ec4899",
+      ];
       const randomColor = colors[Math.floor(Math.random() * colors.length)];
-      
+
       const newTag = await http.post<Tag>("/tags", {
         name: search.trim(),
         color: randomColor,
       });
-      
+
       setAvailableTags([...availableTags, newTag]);
       void updateAssignments([...assignedTagIds, newTag.id]);
       setSearch("");
@@ -134,7 +150,9 @@ export const TagManager: React.FC<TagManagerProps> = ({ entityType, entityId }) 
     );
   }
 
-  const showCreateOption = search.trim() !== "" && !availableTags.some(t => t.name.toLowerCase() === search.toLowerCase());
+  const showCreateOption =
+    search.trim() !== "" &&
+    !availableTags.some((t) => t.name.toLowerCase() === search.toLowerCase());
 
   return (
     <View className="space-y-3 relative" ref={dropdownRef}>
@@ -156,9 +174,9 @@ export const TagManager: React.FC<TagManagerProps> = ({ entityType, entityId }) 
             key={tag.id}
             className="flex flex-row items-center gap-1.5 px-2 py-1 rounded-md border border-zinc-800 bg-zinc-900/50 group transition-colors hover:border-zinc-700"
           >
-            <div 
-              className="w-1.5 h-1.5 rounded-full" 
-              style={{ backgroundColor: tag.color }} 
+            <div
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ backgroundColor: tag.color }}
             />
             <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-tight">
               {tag.name}
@@ -202,9 +220,9 @@ export const TagManager: React.FC<TagManagerProps> = ({ entityType, entityId }) 
                 className="w-full flex flex-row items-center justify-between px-4 py-2 hover:bg-zinc-800 transition-colors text-left"
               >
                 <div className="flex flex-row items-center gap-3">
-                  <div 
-                    className="w-2 h-2 rounded-full" 
-                    style={{ backgroundColor: tag.color }} 
+                  <div
+                    className="w-2 h-2 rounded-full"
+                    style={{ backgroundColor: tag.color }}
                   />
                   <span className="text-xs font-bold text-white uppercase tracking-tight">
                     {tag.name}

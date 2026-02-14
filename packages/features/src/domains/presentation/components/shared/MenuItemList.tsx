@@ -2,22 +2,22 @@
 
 import React from "react";
 import { View, Text, cn, Button } from "@sous/ui";
-import { 
-  DndContext, 
-  closestCenter, 
-  KeyboardSensor, 
-  PointerSensor, 
-  useSensor, 
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
   useSensors,
-  DragEndEvent 
+  DragEndEvent,
 } from "@dnd-kit/core";
-import { 
-  arrayMove, 
-  SortableContext, 
-  sortableKeyboardCoordinates, 
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
   verticalListSortingStrategy,
   rectSortingStrategy,
-  useSortable
+  useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Star, Flame, Ban, GripVertical } from "lucide-react";
@@ -28,19 +28,30 @@ export interface MenuItemListProps {
   showDescription?: boolean;
   showPrice?: boolean;
   isEditMode?: boolean;
-  overrides?: Record<string, { featured?: boolean; soldOut?: boolean; hidden?: boolean }>;
+  overrides?: Record<
+    string,
+    { featured?: boolean; soldOut?: boolean; hidden?: boolean }
+  >;
   onUpdateOverrides?: (itemId: string, updates: any) => void;
   onUpdateSort?: (itemIds: string[]) => void;
 }
 
-function SortableItem({ item, showPrice, showDescription, isEditMode, override, onUpdateOverrides, columns = 2 }: any) {
+function SortableItem({
+  item,
+  showPrice,
+  showDescription,
+  isEditMode,
+  override,
+  onUpdateOverrides,
+  columns = 2,
+}: any) {
   const {
     attributes,
     listeners,
     setNodeRef,
     transform,
     transition,
-    isDragging
+    isDragging,
   } = useSortable({ id: item.id, disabled: !isEditMode });
 
   const style = {
@@ -53,33 +64,50 @@ function SortableItem({ item, showPrice, showDescription, isEditMode, override, 
   const isSoldOut = override?.soldOut;
 
   return (
-    <div ref={setNodeRef} style={style} className={cn(
-      "relative group/item rounded-2xl transition-all",
-      isDragging && "opacity-50 scale-95 shadow-2xl ring-2 ring-primary",
-      isFeatured && "bg-primary/5 ring-1 ring-primary/20 p-4 -m-4",
-      isSoldOut && "opacity-40 grayscale"
-    )}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "relative group/item rounded-2xl transition-all",
+        isDragging && "opacity-50 scale-95 shadow-2xl ring-2 ring-primary",
+        isFeatured && "bg-primary/5 ring-1 ring-primary/20 p-4 -m-4",
+        isSoldOut && "opacity-40 grayscale",
+      )}
+    >
       {isEditMode && (
         <div className="absolute -top-3 -left-3 flex flex-row gap-1 opacity-0 group-hover/item:opacity-100 transition-opacity z-50">
-          <Button 
-            size="sm" 
-            variant="secondary" 
-            {...attributes} 
+          <Button
+            size="sm"
+            variant="secondary"
+            {...attributes}
             {...listeners}
             className="h-8 w-8 p-0 rounded-full bg-background border border-border shadow-lg cursor-grab active:cursor-grabbing"
           >
             <GripVertical size={14} className="text-muted-foreground" />
           </Button>
-          <Button 
-            size="sm" 
+          <Button
+            size="sm"
             variant={isFeatured ? "default" : "secondary"}
-            onClick={() => onUpdateOverrides(item.id, { featured: !isFeatured })}
-            className={cn("h-8 w-8 p-0 rounded-full border border-border shadow-lg", isFeatured && "bg-primary hover:bg-primary/90")}
+            onClick={() =>
+              onUpdateOverrides(item.id, { featured: !isFeatured })
+            }
+            className={cn(
+              "h-8 w-8 p-0 rounded-full border border-border shadow-lg",
+              isFeatured && "bg-primary hover:bg-primary/90",
+            )}
           >
-            <Star size={14} className={cn(isFeatured ? "text-primary-foreground" : "text-muted-foreground")} fill={isFeatured ? "currentColor" : "none"} />
+            <Star
+              size={14}
+              className={cn(
+                isFeatured
+                  ? "text-primary-foreground"
+                  : "text-muted-foreground",
+              )}
+              fill={isFeatured ? "currentColor" : "none"}
+            />
           </Button>
-          <Button 
-            size="sm" 
+          <Button
+            size="sm"
             variant={isSoldOut ? "destructive" : "secondary"}
             onClick={() => onUpdateOverrides(item.id, { soldOut: !isSoldOut })}
             className="h-8 w-8 p-0 rounded-full border border-border shadow-lg"
@@ -92,32 +120,40 @@ function SortableItem({ item, showPrice, showDescription, isEditMode, override, 
       {isFeatured && (
         <div className="flex flex-row items-center gap-1.5 mb-2">
           <Flame size={12} className="text-primary fill-primary" />
-          <Text className="text-[8px] font-black uppercase tracking-widest text-primary">Chef Featured</Text>
+          <Text className="text-[8px] font-black uppercase tracking-widest text-primary">
+            Chef Featured
+          </Text>
         </div>
       )}
 
       <View className="gap-2">
         <View className="flex-row justify-between items-start gap-4">
-          <Text className={cn(
-            "font-black text-foreground uppercase tracking-tight leading-none flex-1",
-            columns > 3 ? "text-sm" : "text-xl"
-          )}>
+          <Text
+            className={cn(
+              "font-black text-foreground uppercase tracking-tight leading-none flex-1",
+              columns > 3 ? "text-sm" : "text-xl",
+            )}
+          >
             {item.name}
           </Text>
           {showPrice && (
-            <Text className={cn(
-              "font-mono font-bold text-primary",
-              columns > 3 ? "text-xs" : "text-lg"
-            )}>
+            <Text
+              className={cn(
+                "font-mono font-bold text-primary",
+                columns > 3 ? "text-xs" : "text-lg",
+              )}
+            >
               ${(item.price / 100).toFixed(2)}
             </Text>
           )}
         </View>
         {showDescription && item.description && (
-          <Text className={cn(
-            "text-muted-foreground font-medium leading-relaxed max-w-prose",
-            columns > 3 ? "text-[10px]" : "text-xs"
-          )}>
+          <Text
+            className={cn(
+              "text-muted-foreground font-medium leading-relaxed max-w-prose",
+              columns > 3 ? "text-[10px]" : "text-xs",
+            )}
+          >
             {item.description}
           </Text>
         )}
@@ -126,7 +162,9 @@ function SortableItem({ item, showPrice, showDescription, isEditMode, override, 
       {isSoldOut && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="px-4 py-1 bg-destructive rounded-full shadow-lg rotate-[-12deg] border-2 border-white/20">
-            <Text className="text-destructive-foreground font-black uppercase text-[10px] tracking-widest">Sold Out</Text>
+            <Text className="text-destructive-foreground font-black uppercase text-[10px] tracking-widest">
+              Sold Out
+            </Text>
           </div>
         </div>
       )}
@@ -142,58 +180,63 @@ export function MenuItemList({
   isEditMode = false,
   overrides = {},
   onUpdateOverrides,
-  onUpdateSort
+  onUpdateSort,
 }: MenuItemListProps) {
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   if (items.length === 0) {
     return (
       <View className="flex-1 items-center justify-center p-8 opacity-20 border-2 border-dashed border-border m-4 rounded-3xl">
-        <Text className="text-foreground font-black uppercase text-xs tracking-widest">No Items in View</Text>
+        <Text className="text-foreground font-black uppercase text-xs tracking-widest">
+          No Items in View
+        </Text>
       </View>
     );
   }
 
-  const gridColsClass = {
-    1: "grid-cols-1",
-    2: "grid-cols-2",
-    3: "grid-cols-3",
-    4: "grid-cols-4",
-    5: "grid-cols-5",
-    6: "grid-cols-6",
-  }[columns as 1 | 2 | 3 | 4 | 5 | 6] || "grid-cols-2";
+  const gridColsClass =
+    {
+      1: "grid-cols-1",
+      2: "grid-cols-2",
+      3: "grid-cols-3",
+      4: "grid-cols-4",
+      5: "grid-cols-5",
+      6: "grid-cols-6",
+    }[columns as 1 | 2 | 3 | 4 | 5 | 6] || "grid-cols-2";
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (over && active.id !== over.id) {
       const oldIndex = items.findIndex((i) => i.id === active.id);
       const newIndex = items.findIndex((i) => i.id === over.id);
-      const newOrder = arrayMove(items, oldIndex, newIndex).map(i => i.id);
+      const newOrder = arrayMove(items, oldIndex, newIndex).map((i) => i.id);
       onUpdateSort?.(newOrder);
     }
   }
 
   return (
-    <DndContext 
+    <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
       <div className={cn("grid gap-x-12 gap-y-12 p-12 w-full", gridColsClass)}>
-        <SortableContext 
-          items={items.map(i => i.id)} 
-          strategy={columns > 1 ? rectSortingStrategy : verticalListSortingStrategy}
+        <SortableContext
+          items={items.map((i) => i.id)}
+          strategy={
+            columns > 1 ? rectSortingStrategy : verticalListSortingStrategy
+          }
         >
           {items.map((item) => (
-            <SortableItem 
-              key={item.id} 
-              item={item} 
-              showPrice={showPrice} 
+            <SortableItem
+              key={item.id}
+              item={item}
+              showPrice={showPrice}
               showDescription={showDescription}
               isEditMode={isEditMode}
               override={overrides[item.id]}

@@ -18,12 +18,23 @@ export const PageManager = () => {
     try {
       const http = await getHttpClient();
       const data = await http.get<Layout[]>("/presentation/layouts?type=PAGE");
-      setPages(data.map(p => ({
-        ...p,
-        structure: typeof p.structure === 'string' ? JSON.parse(p.structure) : p.structure,
-        content: typeof p.content === 'string' ? JSON.parse(p.content) : (p.content || {}),
-        config: typeof p.config === 'string' ? JSON.parse(p.config) : (p.config || {})
-      })));
+      setPages(
+        data.map((p) => ({
+          ...p,
+          structure:
+            typeof p.structure === "string"
+              ? JSON.parse(p.structure)
+              : p.structure,
+          content:
+            typeof p.content === "string"
+              ? JSON.parse(p.content)
+              : p.content || {},
+          config:
+            typeof p.config === "string"
+              ? JSON.parse(p.config)
+              : p.config || {},
+        })),
+      );
     } catch (e) {
       console.error("Failed to fetch pages", e);
     } finally {
@@ -40,13 +51,13 @@ export const PageManager = () => {
       const http = await getHttpClient();
       const payload = {
         ...page,
-        type: 'PAGE',
+        type: "PAGE",
         structure: JSON.stringify(page.structure),
         content: JSON.stringify(page.content),
-        config: JSON.stringify(page.config)
+        config: JSON.stringify(page.config),
       };
 
-      if (page.id && page.id !== 'new') {
+      if (page.id && page.id !== "new") {
         await http.patch(`/presentation/layouts/${page.id}`, payload);
       } else {
         await http.post("/presentation/layouts", payload);
@@ -72,20 +83,23 @@ export const PageManager = () => {
 
   if (editingPage || isCreating) {
     return (
-      <ScreenEditor 
-        screen={editingPage || {
-          id: "new",
-          name: "New Web Page",
-          type: 'PAGE',
-          structure: { type: 'container', styles: { flex: 1 }, children: [] },
-          content: {},
-          config: {}
-        } as any} 
-        onSave={handleSave} 
+      <ScreenEditor
+        screen={
+          editingPage ||
+          ({
+            id: "new",
+            name: "New Web Page",
+            type: "PAGE",
+            structure: { type: "container", styles: { flex: 1 }, children: [] },
+            content: {},
+            config: {},
+          } as any)
+        }
+        onSave={handleSave}
         onCancel={() => {
           setEditingPage(null);
           setIsCreating(false);
-        }} 
+        }}
       />
     );
   }
@@ -102,7 +116,10 @@ export const PageManager = () => {
           </p>
         </View>
 
-        <Button onClick={() => setIsCreating(true)} className="bg-primary h-12 px-8">
+        <Button
+          onClick={() => setIsCreating(true)}
+          className="bg-primary h-12 px-8"
+        >
           <View className="flex-row items-center gap-2">
             <Plus size={16} className="text-primary-foreground" />
             <span className="text-primary-foreground font-black uppercase tracking-widest text-xs">
@@ -125,9 +142,13 @@ export const PageManager = () => {
             No Pages Configured
           </Text>
           <Text className="text-muted-foreground text-sm font-medium mb-8 max-w-sm text-center">
-            Create beautiful, responsive web pages using our layout designer. Perfect for menus, landing pages, and announcements.
+            Create beautiful, responsive web pages using our layout designer.
+            Perfect for menus, landing pages, and announcements.
           </Text>
-          <Button onClick={() => setIsCreating(true)} className="h-12 px-8 bg-primary hover:bg-primary/90">
+          <Button
+            onClick={() => setIsCreating(true)}
+            className="h-12 px-8 bg-primary hover:bg-primary/90"
+          >
             <span className="text-primary-foreground font-black uppercase tracking-widest text-xs">
               Create Your First Page
             </span>
@@ -141,13 +162,13 @@ export const PageManager = () => {
               className="p-6 bg-card border-border border-2 hover:border-primary/50 transition-all group"
             >
               <div className="aspect-video bg-zinc-100 dark:bg-zinc-900 rounded-xl border border-border mb-6 flex items-center justify-center overflow-hidden relative">
-                 <Globe size={32} className="text-zinc-300 dark:text-zinc-800" />
-                 <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Globe size={32} className="text-zinc-300 dark:text-zinc-800" />
+                <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
 
               <div className="flex flex-row justify-between items-start mb-2">
                 <Text className="text-lg font-black text-foreground uppercase tracking-tight">
-                    {page.name}
+                  {page.name}
                 </Text>
                 <View className="flex-row gap-1">
                   {page.config?.webSlug && (
@@ -157,13 +178,16 @@ export const PageManager = () => {
                   )}
                 </View>
               </div>
-              
+
               <Text className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-6">
                 {Object.keys(page.content || {}).length} Slots Configured
               </Text>
 
               <div className="flex flex-row gap-2">
-                <Button onClick={() => setEditingPage(page)} className="flex-1 h-10 bg-muted hover:bg-muted/80">
+                <Button
+                  onClick={() => setEditingPage(page)}
+                  className="flex-1 h-10 bg-muted hover:bg-muted/80"
+                >
                   <View className="flex-row items-center gap-2">
                     <Settings size={14} className="text-foreground" />
                     <span className="text-foreground text-[10px] font-black uppercase tracking-widest">
@@ -171,11 +195,14 @@ export const PageManager = () => {
                     </span>
                   </View>
                 </Button>
-                <Button 
+                <Button
                   onClick={() => handleDelete(page.id)}
                   className="h-10 w-10 bg-muted hover:bg-destructive/20 flex items-center justify-center border-none"
                 >
-                  <Trash2 size={14} className="text-muted-foreground group-hover:text-destructive" />
+                  <Trash2
+                    size={14}
+                    className="text-muted-foreground group-hover:text-destructive"
+                  />
                 </Button>
               </div>
             </Card>

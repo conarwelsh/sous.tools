@@ -1,19 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { 
-  View, 
-  Text, 
-  Button, 
-  Card, 
-  cn,
-} from "@sous/ui";
-import { 
-  Shield, 
-  User, 
-  Trash2, 
-  Loader2,
-} from "lucide-react";
+import { View, Text, Button, Card, cn } from "@sous/ui";
+import { Shield, User, Trash2, Loader2 } from "lucide-react";
 import { getHttpClient } from "@sous/client-sdk";
 import { useAuth } from "../../auth/hooks/useAuth";
 
@@ -25,7 +14,7 @@ export function TeamList() {
   const fetchMembers = async () => {
     try {
       const client = await getHttpClient();
-      const data = await client.get("/iam/users") as any[];
+      const data = (await client.get("/iam/users")) as any[];
       setMembers(data);
     } catch (e) {
       console.error(e);
@@ -49,7 +38,12 @@ export function TeamList() {
   };
 
   const handleRemove = async (id: string) => {
-    if (!confirm("Are you sure you want to remove this member from the organization?")) return;
+    if (
+      !confirm(
+        "Are you sure you want to remove this member from the organization?",
+      )
+    )
+      return;
     try {
       const client = await getHttpClient();
       await client.delete(`/iam/users/${id}`);
@@ -71,16 +65,22 @@ export function TeamList() {
     <View className="gap-4">
       <View className="flex-row items-center gap-3 ml-1">
         <User size={16} className="text-primary" />
-        <Text className="font-black uppercase tracking-widest text-sm">Active Team Members</Text>
+        <Text className="font-black uppercase tracking-widest text-sm">
+          Active Team Members
+        </Text>
       </View>
 
       <View className="gap-3">
         {members.map((member) => (
-          <Card key={member.id} className="p-4 flex-row items-center justify-between border-border bg-card">
+          <Card
+            key={member.id}
+            className="p-4 flex-row items-center justify-between border-border bg-card"
+          >
             <View className="flex-row items-center gap-4">
               <div className="h-10 w-10 border border-border rounded-full flex items-center justify-center bg-primary/5">
                 <Text className="text-primary text-[10px] font-black uppercase">
-                  {member.firstName?.[0]}{member.lastName?.[0]}
+                  {member.firstName?.[0]}
+                  {member.lastName?.[0]}
                 </Text>
               </div>
               <View>
@@ -90,7 +90,9 @@ export function TeamList() {
                   </Text>
                   {member.id === currentUser?.id && (
                     <div className="px-2 py-0.5 bg-primary/10 rounded-full">
-                      <Text className="text-[8px] font-black text-primary uppercase tracking-widest">You</Text>
+                      <Text className="text-[8px] font-black text-primary uppercase tracking-widest">
+                        You
+                      </Text>
                     </div>
                   )}
                 </View>
@@ -103,26 +105,34 @@ export function TeamList() {
             <View className="flex-row items-center gap-2">
               {/* Role Badge / Switcher */}
               <div className="flex-row gap-1 bg-muted/20 p-1 rounded-xl border border-border/50">
-                <Button 
-                  variant={member.role === 'admin' ? 'default' : 'ghost'}
+                <Button
+                  variant={member.role === "admin" ? "default" : "ghost"}
                   size="sm"
                   className={cn(
                     "h-8 px-3 rounded-lg text-[8px] font-black uppercase tracking-widest",
-                    member.role !== 'admin' && "text-muted-foreground hover:bg-background"
+                    member.role !== "admin" &&
+                      "text-muted-foreground hover:bg-background",
                   )}
-                  onClick={() => member.role !== 'admin' && handleUpdateRole(member.id, 'admin')}
+                  onClick={() =>
+                    member.role !== "admin" &&
+                    handleUpdateRole(member.id, "admin")
+                  }
                   disabled={member.id === currentUser?.id}
                 >
                   <Shield size={10} className="mr-1.5" /> Admin
                 </Button>
-                <Button 
-                  variant={member.role === 'user' ? 'default' : 'ghost'}
+                <Button
+                  variant={member.role === "user" ? "default" : "ghost"}
                   size="sm"
                   className={cn(
                     "h-8 px-3 rounded-lg text-[8px] font-black uppercase tracking-widest",
-                    member.role !== 'user' && "text-muted-foreground hover:bg-background"
+                    member.role !== "user" &&
+                      "text-muted-foreground hover:bg-background",
                   )}
-                  onClick={() => member.role !== 'user' && handleUpdateRole(member.id, 'user')}
+                  onClick={() =>
+                    member.role !== "user" &&
+                    handleUpdateRole(member.id, "user")
+                  }
                   disabled={member.id === currentUser?.id}
                 >
                   <User size={10} className="mr-1.5" /> Member
@@ -131,8 +141,8 @@ export function TeamList() {
 
               {/* Actions */}
               {member.id !== currentUser?.id && (
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   onClick={() => handleRemove(member.id)}
                   className="h-10 w-10 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/5"
                 >

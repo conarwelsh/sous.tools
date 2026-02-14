@@ -38,12 +38,15 @@
 Branding artifacts are centrally managed and automatically generated from high-fidelity definitions using `scripts/generate-splash.ts`.
 
 ### Asset Generation
+
 To synchronize branding across all platforms, run:
+
 ```bash
 pnpm tsx scripts/generate-splash.ts
 ```
 
 This script generates:
+
 - **Web/Mobile**: Icons (`icon.png`, `icon-only.png`, etc.) and Splash screens (`splash.png`, `splash-dark.png`) in `apps/web/assets/`.
 - **Infrastructure**: Raspberry Pi boot splash and Windows Agent system tray icons.
 - **UI Package**: Scaled logos in `packages/ui/assets/logos/`.

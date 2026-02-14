@@ -24,15 +24,15 @@ interface LoggerConfig {
 
 export function createLogger(options: { name: string; config?: LoggerConfig }) {
   const transports: any[] = [];
-  
+
   // Use provided config or safe fallbacks for bootstrap/browser
   const logConfig = options.config || {
-    env: isServer ? (process.env.NODE_ENV || "development") : "development",
+    env: isServer ? process.env.NODE_ENV || "development" : "development",
     logger: {
-      level: isServer ? (process.env.LOG_LEVEL || "info") : "info",
-      json: isServer ? (process.env.SOUS_JSON_LOGS === "true") : false,
+      level: isServer ? process.env.LOG_LEVEL || "info" : "info",
+      json: isServer ? process.env.SOUS_JSON_LOGS === "true" : false,
       logtailToken: isServer ? process.env.LOGTAIL_SOURCE_TOKEN : undefined,
-    }
+    },
   };
 
   const isDev = logConfig.env === "development";
@@ -43,10 +43,14 @@ export function createLogger(options: { name: string; config?: LoggerConfig }) {
     // 1. Centralized Local Log File
     // Note: We avoid dynamic path detection here to keep it stable
     const home = process.env.HOME || process.env.USERPROFILE;
-    if (home && !isDev) { // Only file log in prod/staging to save I/O in dev
+    if (home && !isDev) {
+      // Only file log in prod/staging to save I/O in dev
       transports.push({
         target: "pino/file",
-        options: { destination: `${home}/.sous/logs/combined.log`, mkdir: true },
+        options: {
+          destination: `${home}/.sous/logs/combined.log`,
+          mkdir: true,
+        },
       });
     }
 
@@ -59,20 +63,17 @@ export function createLogger(options: { name: string; config?: LoggerConfig }) {
     }
   }
 
-  const baseLogger = pino(
-    {
-      name: options.name,
-      level: logConfig.logger.level,
-      mixin() {
-        const store = loggerStorage?.getStore?.();
-        return store ? Object.fromEntries(store) : {};
-      },
-      browser: isServer ? undefined : { asObject: true },
-      transport: isServer && transports.length > 0
-        ? { targets: transports }
-        : undefined,
-    }
-  );
+  const baseLogger = pino({
+    name: options.name,
+    level: logConfig.logger.level,
+    mixin() {
+      const store = loggerStorage?.getStore?.();
+      return store ? Object.fromEntries(store) : {};
+    },
+    browser: isServer ? undefined : { asObject: true },
+    transport:
+      isServer && transports.length > 0 ? { targets: transports } : undefined,
+  });
 
   return baseLogger;
 }

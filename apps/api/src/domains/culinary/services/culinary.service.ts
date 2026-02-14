@@ -47,12 +47,12 @@ export class CulinaryService {
   }
 
   async getProductByName(organizationId: string, name: string) {
-      return this.dbService.db.query.products.findFirst({
-          where: and(
-              eq(products.organizationId, organizationId),
-              eq(products.name, name)
-          )
-      });
+    return this.dbService.db.query.products.findFirst({
+      where: and(
+        eq(products.organizationId, organizationId),
+        eq(products.name, name),
+      ),
+    });
   }
 
   async createProduct(data: typeof products.$inferInsert) {
@@ -165,9 +165,12 @@ export class CulinaryService {
     return result[0];
   }
 
-  async getRecipes(organizationId: string, options?: { search?: string; source?: string; tags?: string[] }) {
+  async getRecipes(
+    organizationId: string,
+    options?: { search?: string; source?: string; tags?: string[] },
+  ) {
     const filters = [eq(recipes.organizationId, organizationId)];
-    
+
     if (options?.source) {
       filters.push(eq(recipes.sourceType, options.source));
     }
@@ -183,15 +186,15 @@ export class CulinaryService {
               and(
                 eq(tagAssignments.entityType, 'recipe'),
                 eq(tagAssignments.entityId, recipes.id),
-                and(...options.tags.map(t => eq(tags.name, t)))
-              )
-            )
-        )
+                and(...options.tags.map((t) => eq(tags.name, t))),
+              ),
+            ),
+        ),
       );
     }
 
     return this.dbService.db.query.recipes.findMany({
-      where: options?.search 
+      where: options?.search
         ? and(...filters, ilike(recipes.name, `%${options.search}%`))
         : and(...filters),
       with: {
@@ -253,14 +256,18 @@ export class CulinaryService {
       const [recipe] = await tx
         .update(recipes)
         .set({ ...data, updatedAt: new Date() })
-        .where(and(eq(recipes.id, id), eq(recipes.organizationId, organizationId)))
+        .where(
+          and(eq(recipes.id, id), eq(recipes.organizationId, organizationId)),
+        )
         .returning();
 
       if (!recipe) throw new Error('Recipe not found or access denied');
 
       // 2. Update ingredients if provided
       if (ingredientsList) {
-        await tx.delete(recipeIngredients).where(eq(recipeIngredients.recipeId, id));
+        await tx
+          .delete(recipeIngredients)
+          .where(eq(recipeIngredients.recipeId, id));
         if (ingredientsList.length > 0) {
           await tx
             .insert(recipeIngredients)
@@ -284,14 +291,18 @@ export class CulinaryService {
 
   async deleteRecipe(id: string, organizationId: string) {
     return await this.dbService.db.transaction(async (tx) => {
-      await tx.delete(recipeIngredients).where(eq(recipeIngredients.recipeId, id));
+      await tx
+        .delete(recipeIngredients)
+        .where(eq(recipeIngredients.recipeId, id));
       await tx.delete(recipeSteps).where(eq(recipeSteps.recipeId, id));
-      
+
       const [deleted] = await tx
         .delete(recipes)
-        .where(and(eq(recipes.id, id), eq(recipes.organizationId, organizationId)))
+        .where(
+          and(eq(recipes.id, id), eq(recipes.organizationId, organizationId)),
+        )
         .returning();
-        
+
       return deleted;
     });
   }

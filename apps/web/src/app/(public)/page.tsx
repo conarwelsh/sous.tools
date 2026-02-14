@@ -13,7 +13,7 @@ import {
   Download,
   Moon,
   Sun,
-  LayoutDashboard
+  LayoutDashboard,
 } from "lucide-react";
 
 export default function MarketingPage() {
@@ -51,12 +51,15 @@ export default function MarketingPage() {
   return (
     <main className="flex-1 bg-background min-h-screen relative overflow-hidden transition-colors duration-500">
       {/* Subtle Radial Gradient for Depth */}
-      <div 
+      <div
         className="absolute inset-0 pointer-events-none opacity-40 dark:opacity-20"
         style={{
-          background: theme === "dark" ? "radial-gradient(circle at 50% 50%, var(--color-sky-500) 0%, transparent 70%)" : "radial-gradient(circle at 50% 50%, var(--color-sky-200) 0%, transparent 70%)",
+          background:
+            theme === "dark"
+              ? "radial-gradient(circle at 50% 50%, var(--color-sky-500) 0%, transparent 70%)"
+              : "radial-gradient(circle at 50% 50%, var(--color-sky-200) 0%, transparent 70%)",
           filter: "blur(120px)",
-          transform: "translateY(-20%)"
+          transform: "translateY(-20%)",
         }}
       />
 
@@ -69,7 +72,7 @@ export default function MarketingPage() {
               Download
             </Text>
           </button>
-          
+
           <Button
             variant="ghost"
             size="icon"
@@ -85,7 +88,10 @@ export default function MarketingPage() {
               className="px-6 h-10 bg-primary border border-primary"
             >
               <View className="flex flex-row items-center gap-2">
-                <LayoutDashboard size={16} className="text-primary-foreground" />
+                <LayoutDashboard
+                  size={16}
+                  className="text-primary-foreground"
+                />
                 <Text className="text-primary-foreground font-bold uppercase text-xs tracking-widest">
                   Dashboard
                 </Text>
@@ -101,7 +107,7 @@ export default function MarketingPage() {
               </Text>
             </Button>
           )}
-          
+
           {!isAuthenticated && (
             <Button
               onClick={() => router.push("/register")}
@@ -179,8 +185,12 @@ export default function MarketingPage() {
       {/* Pricing Section */}
       <View className="px-8 py-32 items-center flex flex-col relative z-10">
         <View className="mb-16 text-center">
-          <Text className="text-primary font-bold text-xs uppercase tracking-[0.3em] mb-4 block">Pricing Plans</Text>
-          <Text className="text-5xl font-black text-foreground tracking-tighter uppercase">Scales with your <Text className="text-primary">Kitchen</Text></Text>
+          <Text className="text-primary font-bold text-xs uppercase tracking-[0.3em] mb-4 block">
+            Pricing Plans
+          </Text>
+          <Text className="text-5xl font-black text-foreground tracking-tighter uppercase">
+            Scales with your <Text className="text-primary">Kitchen</Text>
+          </Text>
         </View>
 
         <View className="flex flex-row flex-wrap gap-8 justify-center max-w-7xl mx-auto w-full">
@@ -189,57 +199,86 @@ export default function MarketingPage() {
               name: "Commis",
               price: "Free",
               desc: "Perfect for research and development.",
-              features: ["1 Active Node", "Unlimited Recipes", "Basic Inventory", "Community Support"],
+              features: [
+                "1 Active Node",
+                "Unlimited Recipes",
+                "Basic Inventory",
+                "Community Support",
+              ],
               action: "Get Started",
-              popular: false
+              popular: false,
             },
             {
               name: "Chef de Partie",
               price: "$49",
               period: "/mo",
               desc: "For small to medium operations.",
-              features: ["5 Active Nodes", "Advanced Costing", "Supplier Integrations", "Email Support"],
+              features: [
+                "5 Active Nodes",
+                "Advanced Costing",
+                "Supplier Integrations",
+                "Email Support",
+              ],
               action: "Start Trial",
-              popular: true
+              popular: true,
             },
             {
               name: "Executive Chef",
               price: "$149",
               period: "/mo",
               desc: "Full-scale enterprise infrastructure.",
-              features: ["Unlimited Nodes", "Predictive Analytics", "Multi-Unit Management", "24/7 Priority Support"],
+              features: [
+                "Unlimited Nodes",
+                "Predictive Analytics",
+                "Multi-Unit Management",
+                "24/7 Priority Support",
+              ],
               action: "Contact Sales",
-              popular: false
-            }
+              popular: false,
+            },
           ].map((plan) => (
-            <Card 
-              key={plan.name} 
-              className={`p-10 w-full md:w-[calc(33.33%-22px)] bg-card flex flex-col relative ${plan.popular ? 'border-primary shadow-[0_0_40px_rgba(var(--primary),0.1)]' : 'border-border/50'}`}
+            <Card
+              key={plan.name}
+              className={`p-10 w-full md:w-[calc(33.33%-22px)] bg-card flex flex-col relative ${plan.popular ? "border-primary shadow-[0_0_40px_rgba(var(--primary),0.1)]" : "border-border/50"}`}
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary px-4 py-1 rounded-full">
-                  <Text className="text-[10px] font-black uppercase text-primary-foreground tracking-widest">Most Popular</Text>
+                  <Text className="text-[10px] font-black uppercase text-primary-foreground tracking-widest">
+                    Most Popular
+                  </Text>
                 </div>
               )}
-              <Text className="text-xl font-bold text-foreground uppercase tracking-tight mb-2">{plan.name}</Text>
+              <Text className="text-xl font-bold text-foreground uppercase tracking-tight mb-2">
+                {plan.name}
+              </Text>
               <View className="flex-row items-baseline gap-1 mb-4">
-                <Text className="text-4xl font-black text-foreground tracking-tighter">{plan.price}</Text>
-                {plan.period && <Text className="text-muted-foreground font-bold">{plan.period}</Text>}
+                <Text className="text-4xl font-black text-foreground tracking-tighter">
+                  {plan.price}
+                </Text>
+                {plan.period && (
+                  <Text className="text-muted-foreground font-bold">
+                    {plan.period}
+                  </Text>
+                )}
               </View>
-              <Text className="text-muted-foreground text-sm mb-8 leading-relaxed">{plan.desc}</Text>
-              
+              <Text className="text-muted-foreground text-sm mb-8 leading-relaxed">
+                {plan.desc}
+              </Text>
+
               <View className="flex flex-col gap-4 mb-10">
                 {plan.features.map((f) => (
                   <View key={f} className="flex-row items-center gap-3">
                     <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                    <Text className="text-sm text-foreground/80 font-medium">{f}</Text>
+                    <Text className="text-sm text-foreground/80 font-medium">
+                      {f}
+                    </Text>
                   </View>
                 ))}
               </View>
 
-              <Button 
+              <Button
                 onClick={() => router.push("/register")}
-                variant={plan.popular ? "default" : "outline"} 
+                variant={plan.popular ? "default" : "outline"}
                 className="mt-auto h-12 uppercase font-black tracking-widest text-xs"
               >
                 {plan.action}

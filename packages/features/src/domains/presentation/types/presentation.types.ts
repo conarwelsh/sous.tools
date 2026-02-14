@@ -1,5 +1,5 @@
 export type LayoutNodeType = "container" | "slot" | "fixed";
-export type LayoutType = 'TEMPLATE' | 'SCREEN' | 'LABEL' | 'PAGE';
+export type LayoutType = "TEMPLATE" | "SCREEN" | "LABEL" | "PAGE";
 
 export interface LayoutNode {
   type: LayoutNodeType;
@@ -10,11 +10,14 @@ export interface LayoutNode {
 }
 
 export interface SlotAssignment {
-  sourceType: 'POS' | 'MEDIA' | 'STATIC';
+  sourceType: "POS" | "MEDIA" | "STATIC";
   dataConfig: {
     filters?: { categoryId?: string; tags?: string[]; itemIds?: string[] };
     sortOrder?: string[];
-    overrides?: Record<string, { featured?: boolean; soldOut?: boolean; hidden?: boolean }>;
+    overrides?: Record<
+      string,
+      { featured?: boolean; soldOut?: boolean; hidden?: boolean }
+    >;
     staticData?: any;
     mediaId?: string;
     url?: string;
@@ -26,7 +29,7 @@ export interface SlotAssignment {
 export interface LayoutConfig {
   webSlug?: string;
   isPublic?: boolean;
-  dimensions?: { width: number; height: number; unit: 'px' | 'mm' | 'in' };
+  dimensions?: { width: number; height: number; unit: "px" | "mm" | "in" };
   refreshInterval?: number;
   customCss?: string;
   hardware?: string[]; // Display IDs for Screen assignments
@@ -65,4 +68,3 @@ export interface TemplateStructure {
   config: Record<string, any>;
   slots: TemplateSlot[];
 }
-

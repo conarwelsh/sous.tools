@@ -8,10 +8,14 @@ let serverUrl = process.env.CAPACITOR_SERVER_URL;
 
 // 2. Dev Detection (if not in CI)
 if (!serverUrl) {
-  serverUrl = "http://10.0.2.2:3000"; 
+  serverUrl = "http://10.0.2.2:3000";
   try {
     const output = execSync("hostname -I").toString().trim();
-    const wslIp = output.split(" ").find(ip => ip !== "127.0.0.1" && ip.startsWith("172.")) || output.split(" ")[0];
+    const wslIp =
+      output
+        .split(" ")
+        .find((ip) => ip !== "127.0.0.1" && ip.startsWith("172.")) ||
+      output.split(" ")[0];
     const port = sousConfig.web.port || "3000";
     if (wslIp) {
       serverUrl = `http://${wslIp}:${port}`;
@@ -31,11 +35,11 @@ const config: CapacitorConfig = {
   server: {
     url: serverUrl,
     cleartext: true,
-    allowNavigation: ["*"]
+    allowNavigation: ["*"],
   },
   android: {
     allowMixedContent: true,
-  }
+  },
 };
 
 export default config;

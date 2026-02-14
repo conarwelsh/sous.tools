@@ -29,7 +29,13 @@ function ensureProtocol(url: string | undefined): string | undefined {
   if (url === "undefined" || url === "null") return undefined;
   if (!url.startsWith("http://") && !url.startsWith("https://")) {
     // If it's a local address without protocol, use http
-    if (url.startsWith("localhost") || url.startsWith("127.0.0.1") || url.startsWith("172.") || url.startsWith("192.") || url.startsWith("10.")) {
+    if (
+      url.startsWith("localhost") ||
+      url.startsWith("127.0.0.1") ||
+      url.startsWith("172.") ||
+      url.startsWith("192.") ||
+      url.startsWith("10.")
+    ) {
       return `http://${url}`;
     }
     return `https://${url}`;
@@ -40,7 +46,9 @@ function ensureProtocol(url: string | undefined): string | undefined {
 /**
  * Normalizes environment name
  */
-async function getEnv(): Promise<"development" | "staging" | "production" | "test"> {
+async function getEnv(): Promise<
+  "development" | "staging" | "production" | "test"
+> {
   // 1. Check for context override file (Local Dev only)
   if (isServer) {
     try {
@@ -72,7 +80,10 @@ async function findProjectRoot(): Promise<string> {
   const fs = await import("fs");
   const path = await import("path");
   let current = process.cwd();
-  while (current !== "/" && !fs.existsSync(path.join(current, "pnpm-workspace.yaml"))) {
+  while (
+    current !== "/" &&
+    !fs.existsSync(path.join(current, "pnpm-workspace.yaml"))
+  ) {
     const parent = path.dirname(current);
     if (parent === current) break;
     current = parent;
@@ -88,7 +99,9 @@ async function fetchVaultSecrets(env: string): Promise<Record<string, string>> {
   try {
     return await secrets.listSecrets(env);
   } catch (error) {
-    console.warn("⚠️  [@sous/config] Vault fetch failed, falling back to process.env/cli");
+    console.warn(
+      "⚠️  [@sous/config] Vault fetch failed, falling back to process.env/cli",
+    );
     return {};
   }
 }
@@ -115,7 +128,8 @@ function getPublicEnv() {
       NEXT_PUBLIC_DOCS_URL: process.env.NEXT_PUBLIC_DOCS_URL,
       NEXT_PUBLIC_APP_ENV: process.env.NEXT_PUBLIC_APP_ENV,
       NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION,
-      NEXT_PUBLIC_ENABLE_REGISTRATION: process.env.NEXT_PUBLIC_ENABLE_REGISTRATION,
+      NEXT_PUBLIC_ENABLE_REGISTRATION:
+        process.env.NEXT_PUBLIC_ENABLE_REGISTRATION,
       NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
       NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     };
@@ -128,22 +142,30 @@ function getPublicEnv() {
  */
 function buildPublicConfig(): Config {
   const envVars = getPublicEnv();
-  const env = (envVars.NEXT_PUBLIC_APP_ENV || process.env.NODE_ENV || "development") as any;
+  const env = (envVars.NEXT_PUBLIC_APP_ENV ||
+    process.env.NODE_ENV ||
+    "development") as any;
   const isDev = env === "development" || env === "dev";
 
   return {
     env,
     api: {
       port: 4000,
-      url: ensureProtocol(envVars.NEXT_PUBLIC_API_URL) || (isDev ? "http://localhost:4000" : undefined),
+      url:
+        ensureProtocol(envVars.NEXT_PUBLIC_API_URL) ||
+        (isDev ? "http://localhost:4000" : undefined),
     },
     web: {
       port: 3000,
-      url: ensureProtocol(envVars.NEXT_PUBLIC_WEB_URL) || (isDev ? "http://localhost:3000" : undefined),
+      url:
+        ensureProtocol(envVars.NEXT_PUBLIC_WEB_URL) ||
+        (isDev ? "http://localhost:3000" : undefined),
     },
     docs: {
       port: 3001,
-      url: ensureProtocol(envVars.NEXT_PUBLIC_DOCS_URL) || (isDev ? "http://localhost:3001" : undefined),
+      url:
+        ensureProtocol(envVars.NEXT_PUBLIC_DOCS_URL) ||
+        (isDev ? "http://localhost:3001" : undefined),
     },
     features: {
       enableRegistration: envVars.NEXT_PUBLIC_ENABLE_REGISTRATION !== "false",
@@ -151,7 +173,11 @@ function buildPublicConfig(): Config {
       appEnv: env,
     },
     // Other fields as empty/defaults for client
-    db: { url: isDev ? "postgres://sous_user:sous_password@localhost:5433/sous_db" : "" },
+    db: {
+      url: isDev
+        ? "postgres://sous_user:sous_password@localhost:5433/sous_db"
+        : "",
+    },
     redis: { url: isDev ? "redis://localhost:6380" : "" },
     iam: { jwtSecret: "" },
     storage: {
@@ -174,7 +200,7 @@ export async function resolveConfig(): Promise<Config> {
       const path = await import("path");
       const fs = await import("fs");
       const root = await findProjectRoot();
-      
+
       // 1. Load from package (defaults)
       const envPath = path.join(root, "packages/config/.env");
       if (fs.existsSync(envPath)) {
@@ -205,7 +231,10 @@ export async function resolveConfig(): Promise<Config> {
   if (isServer) {
     try {
       const cp = await import("child_process");
-      const stdout = cp.execSync("ip route show default | awk '{print $3}'").toString().trim();
+      const stdout = cp
+        .execSync("ip route show default | awk '{print $3}'")
+        .toString()
+        .trim();
       if (stdout) wslIp = stdout;
     } catch (e) {
       // Fallback to localhost
@@ -216,7 +245,7 @@ export async function resolveConfig(): Promise<Config> {
   if (isServer && env !== "test") {
     const vaultSecrets = await fetchVaultSecrets(env);
     Object.assign(envVars, vaultSecrets);
-    
+
     // Export to process.env so child processes (like drizzle-kit) can see them
     for (const [key, value] of Object.entries(vaultSecrets)) {
       if (!process.env[key]) {
@@ -225,10 +254,14 @@ export async function resolveConfig(): Promise<Config> {
     }
 
     // Ensure public equivalents are set for critical variables if they exist in vault without prefix
-    if (process.env.API_URL && !process.env.NEXT_PUBLIC_API_URL) process.env.NEXT_PUBLIC_API_URL = process.env.API_URL;
-    if (process.env.WEB_URL && !process.env.NEXT_PUBLIC_WEB_URL) process.env.NEXT_PUBLIC_WEB_URL = process.env.WEB_URL;
-    if (process.env.DOCS_URL && !process.env.NEXT_PUBLIC_DOCS_URL) process.env.NEXT_PUBLIC_DOCS_URL = process.env.DOCS_URL;
-    if (process.env.APP_ENV && !process.env.NEXT_PUBLIC_APP_ENV) process.env.NEXT_PUBLIC_APP_ENV = process.env.APP_ENV;
+    if (process.env.API_URL && !process.env.NEXT_PUBLIC_API_URL)
+      process.env.NEXT_PUBLIC_API_URL = process.env.API_URL;
+    if (process.env.WEB_URL && !process.env.NEXT_PUBLIC_WEB_URL)
+      process.env.NEXT_PUBLIC_WEB_URL = process.env.WEB_URL;
+    if (process.env.DOCS_URL && !process.env.NEXT_PUBLIC_DOCS_URL)
+      process.env.NEXT_PUBLIC_DOCS_URL = process.env.DOCS_URL;
+    if (process.env.APP_ENV && !process.env.NEXT_PUBLIC_APP_ENV)
+      process.env.NEXT_PUBLIC_APP_ENV = process.env.APP_ENV;
   }
 
   // 2. Map environment variables to schema
@@ -236,35 +269,51 @@ export async function resolveConfig(): Promise<Config> {
     env,
     api: {
       port: Number(envVars.PORT_API || 4000),
-      url: ensureProtocol(envVars.API_URL) || 
-           ensureProtocol(envVars.NEXT_PUBLIC_API_URL) || 
-           `http://${wslIp}:${envVars.PORT_API || 4000}`,
+      url:
+        ensureProtocol(envVars.API_URL) ||
+        ensureProtocol(envVars.NEXT_PUBLIC_API_URL) ||
+        `http://${wslIp}:${envVars.PORT_API || 4000}`,
     },
     web: {
       port: Number(envVars.PORT_WEB || 3000),
-      url: ensureProtocol(envVars.WEB_URL) || 
-           ensureProtocol(envVars.NEXT_PUBLIC_WEB_URL) || 
-           `http://${wslIp}:${envVars.PORT_WEB || 3000}`,
+      url:
+        ensureProtocol(envVars.WEB_URL) ||
+        ensureProtocol(envVars.NEXT_PUBLIC_WEB_URL) ||
+        `http://${wslIp}:${envVars.PORT_WEB || 3000}`,
     },
     docs: {
       port: Number(envVars.PORT_DOCS || 3001),
-      url: ensureProtocol(envVars.DOCS_URL) || 
-           ensureProtocol(envVars.NEXT_PUBLIC_DOCS_URL) || 
-           `http://${wslIp}:${envVars.PORT_DOCS || 3001}`,
+      url:
+        ensureProtocol(envVars.DOCS_URL) ||
+        ensureProtocol(envVars.NEXT_PUBLIC_DOCS_URL) ||
+        `http://${wslIp}:${envVars.PORT_DOCS || 3001}`,
     },
     db: {
-      url: envVars.DATABASE_URL || "postgres://sous_user:sous_password@localhost:5433/sous_db",
+      url:
+        envVars.DATABASE_URL ||
+        "postgres://sous_user:sous_password@localhost:5433/sous_db",
     },
     redis: {
-      url: envVars.REDIS_URL || (envVars.REDIS_HOST ? `redis://${envVars.REDIS_HOST}:${envVars.REDIS_PORT || 6380}` : "redis://localhost:6380"),
+      url:
+        envVars.REDIS_URL ||
+        (envVars.REDIS_HOST
+          ? `redis://${envVars.REDIS_HOST}:${envVars.REDIS_PORT || 6380}`
+          : "redis://localhost:6380"),
     },
     iam: {
-      jwtSecret: envVars.JWT_SECRET || envVars.SESSION_SECRET || "fallback-secret-too-short",
+      jwtSecret:
+        envVars.JWT_SECRET ||
+        envVars.SESSION_SECRET ||
+        "fallback-secret-too-short",
     },
     storage: {
       supabase: {
         url: envVars.SUPABASE_URL || "http://localhost:54321",
-        anonKey: envVars.NEXT_PUBLIC_SUPABASE_ANON_KEY || envVars.SUPABASE_ANON_KEY || envVars.SUPABASE_PASSWORD || "placeholder",
+        anonKey:
+          envVars.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+          envVars.SUPABASE_ANON_KEY ||
+          envVars.SUPABASE_PASSWORD ||
+          "placeholder",
         serviceRoleKey: envVars.SUPABASE_SERVICE_ROLE_KEY,
         bucket: envVars.SUPABASE_BUCKET || "media",
       },
@@ -281,7 +330,8 @@ export async function resolveConfig(): Promise<Config> {
     },
     features: {
       enableRegistration: envVars.ENABLE_REGISTRATION !== "false",
-      appVersion: envVars.NEXT_PUBLIC_APP_VERSION || envVars.APP_VERSION || "0.1.0",
+      appVersion:
+        envVars.NEXT_PUBLIC_APP_VERSION || envVars.APP_VERSION || "0.1.0",
       appEnv: env,
     },
     infisical: {
@@ -296,7 +346,11 @@ export async function resolveConfig(): Promise<Config> {
       redirectUri: envVars.SQUARE_REDIRECT_URI,
       merchantId: envVars.SQUARE_MERCHANT_ID,
       endpoint: envVars.SQUARE_ENDPOINT,
-      environment: envVars.SQUARE_ENVIRONMENT === "sandbox" || (envVars.SQUARE_ENDPOINT && envVars.SQUARE_ENDPOINT.includes("sandbox")) ? "sandbox" : "production",
+      environment:
+        envVars.SQUARE_ENVIRONMENT === "sandbox" ||
+        (envVars.SQUARE_ENDPOINT && envVars.SQUARE_ENDPOINT.includes("sandbox"))
+          ? "sandbox"
+          : "production",
     },
     google: {
       clientId: envVars.GOOGLE_CLIENT_ID,
@@ -329,7 +383,7 @@ export async function resolveConfig(): Promise<Config> {
 export const configPromise = resolveConfig();
 
 /**
- * Synchronous access to configuration. 
+ * Synchronous access to configuration.
  */
 export const config = (() => {
   // Client-side initialization: if we're in the browser, we can pre-build
@@ -342,15 +396,15 @@ export const config = (() => {
     get(_, prop) {
       if (!cachedConfig) {
         if (!isServer) {
-           cachedConfig = buildPublicConfig();
-           isFullyResolved = true;
+          cachedConfig = buildPublicConfig();
+          isFullyResolved = true;
         } else {
-           // Fallback to public config even on server if it's accessed before resolveConfig
-           return buildPublicConfig()[prop as keyof Config];
+          // Fallback to public config even on server if it's accessed before resolveConfig
+          return buildPublicConfig()[prop as keyof Config];
         }
       }
       return (cachedConfig as any)[prop];
-    }
+    },
   });
 })();
 

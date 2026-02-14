@@ -27,9 +27,15 @@ export class SeederService {
     logger.info(`🌱 SeederService: IAM seeded, orgId: ${orgId}`);
 
     // Resolve domain services on demand
-    const presentationService = this.moduleRef.get(PresentationService, { strict: false });
-    const procurementService = this.moduleRef.get(ProcurementService, { strict: false });
-    const culinaryService = this.moduleRef.get(CulinaryService, { strict: false });
+    const presentationService = this.moduleRef.get(PresentationService, {
+      strict: false,
+    });
+    const procurementService = this.moduleRef.get(ProcurementService, {
+      strict: false,
+    });
+    const culinaryService = this.moduleRef.get(CulinaryService, {
+      strict: false,
+    });
 
     // 5. Delegate to Domain Services
     if (presentationService) {
@@ -54,9 +60,15 @@ export class SeederService {
     logger.info('🧪 Seeding sample data for development...');
 
     // Resolve domain services on demand
-    const presentationService = this.moduleRef.get(PresentationService, { strict: false });
-    const procurementService = this.moduleRef.get(ProcurementService, { strict: false });
-    const culinaryService = this.moduleRef.get(CulinaryService, { strict: false });
+    const presentationService = this.moduleRef.get(PresentationService, {
+      strict: false,
+    });
+    const procurementService = this.moduleRef.get(ProcurementService, {
+      strict: false,
+    });
+    const culinaryService = this.moduleRef.get(CulinaryService, {
+      strict: false,
+    });
 
     // 1. IAM (Org & User)
     await this.authService.seedSample();

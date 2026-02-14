@@ -36,6 +36,7 @@ We use Android Product Flavors to build specialized APKs from this single codeba
 - `signage`: Digital Signage node (`com.sous.signage`)
 
 To build a specific flavor:
+
 ```bash
 cd android
 ./gradlew assembleKdsRelease

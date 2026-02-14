@@ -11,6 +11,7 @@ Create a centralized dashboard for managing third-party connections (Square, Goo
 ## Core Features
 
 ### 1. Integrations Gallery
+
 - **Layout:** A grid of cards representing available integration providers.
 - **Card States:**
   - **Not Connected:** "Connect" button (Primary action).
@@ -20,6 +21,7 @@ Create a centralized dashboard for managing third-party connections (Square, Goo
   - **Google:** Drive (for Recipe ingestion).
 
 ### 2. Connection Workflow (OAuth)
+
 - **Action:** Clicking "Connect" opens a popup or redirects to the provider's OAuth consent screen.
 - **Callback Handling:**
   - The return URL (`/api/integrations/callback/[provider]`) handles the code exchange.
@@ -27,25 +29,29 @@ Create a centralized dashboard for managing third-party connections (Square, Goo
 - **Security:** Credentials (Refresh Tokens) are encrypted at rest in the `IntegrationConfiguration` table (ADR 027).
 
 ### 3. Management & Sync (Connected State)
+
 Clicking "Manage" on a connected provider opens a detailed modal/drawer:
 
 #### A. Status & Health
+
 - Shows "Last Synced At" timestamp.
 - Shows current Token status (Active/Expired).
 
 #### B. Manual Sync Actions
+
 - **Catalog Sync:** "Pull Menu/Items" (Square -> Sous).
 - **Sales Sync:** "Pull Sales Data".
-  - *Date Range Picker:* Option to sync "Last 24h", "Last 7 Days", or "Custom Range".
-  - *Full Sync:* A "Resync All" danger zone button for disaster recovery.
+  - _Date Range Picker:_ Option to sync "Last 24h", "Last 7 Days", or "Custom Range".
+  - _Full Sync:_ A "Resync All" danger zone button for disaster recovery.
 - **Feedback:** Visual progress indicator during sync jobs (driven by BullMQ job progress events).
 
 #### C. Disconnection
+
 - **"Disconnect" Button:** Destructive action.
 - **Behavior:**
   - Deletes the `IntegrationConfiguration` row.
   - Revokes tokens with the provider (if supported).
-  - Does *not* delete historical data imported (Invoices/Sales), but prevents future syncs.
+  - Does _not_ delete historical data imported (Invoices/Sales), but prevents future syncs.
 
 ## Data Model (Schema Reference)
 
@@ -54,8 +60,8 @@ Clicking "Manage" on a connected provider opens a detailed modal/drawer:
 {
   id: string;
   organizationId: string;
-  provider: 'SQUARE' | 'GOOGLE' | 'TOAST';
-  status: 'ACTIVE' | 'ERROR' | 'EXPIRED';
+  provider: "SQUARE" | "GOOGLE" | "TOAST";
+  status: "ACTIVE" | "ERROR" | "EXPIRED";
   config: EncryptedJSON; // Stores tokens/metadata
   lastSyncedAt: Date;
 }

@@ -170,7 +170,10 @@ export class ProcessManager
             this.processes.set(id, {
               id,
               name: id.replace('sous-', '').toUpperCase(),
-              type: id.startsWith('sous-db') || id.startsWith('sous-redis') ? 'docker' : 'pm2',
+              type:
+                id.startsWith('sous-db') || id.startsWith('sous-redis')
+                  ? 'docker'
+                  : 'pm2',
               status: 'stopped',
               logs: [],
               namespace: app.namespace,
@@ -187,7 +190,7 @@ export class ProcessManager
       }
 
       // 3. Cleanup removed processes (not in PM2 AND not in Ecosystem)
-      const ecosystemIds = new Set(this.ecosystemApps.map(a => a.name));
+      const ecosystemIds = new Set(this.ecosystemApps.map((a) => a.name));
       for (const id of this.processes.keys()) {
         if (!pm2Ids.has(id) && !ecosystemIds.has(id)) {
           this.processes.delete(id);
@@ -319,18 +322,22 @@ export class ProcessManager
     // 2.0 Approach: Ensure docker is up, then start ONLY core services via PM2
     try {
       await execAsync('docker compose up -d');
-      
+
       return new Promise<void>((resolve) => {
         const configPath = path.join(this.rootDir, 'ecosystem.config.js');
         // Only start infrastructure and core (api, web)
         // Docs and Native remain 'stopped' in our UI until manually started
         // PM2 programmatic API expects 'only' to be a string
-        pm2.start(configPath, { 
-          only: 'sous-db,sous-redis,sous-api,sous-web'
-        } as any, (err) => {
-          if (err) logger.error(`Core PM2 start failed: ${err.message}`);
-          resolve();
-        });
+        pm2.start(
+          configPath,
+          {
+            only: 'sous-db,sous-redis,sous-api,sous-web',
+          } as any,
+          (err) => {
+            if (err) logger.error(`Core PM2 start failed: ${err.message}`);
+            resolve();
+          },
+        );
       });
     } catch (e: any) {
       logger.error(`Core startup failed: ${e.message}`);

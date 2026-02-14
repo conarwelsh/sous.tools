@@ -5,7 +5,9 @@ import { getHttpClient } from "@sous/client-sdk";
 import { io, Socket } from "socket.io-client";
 import { localConfig } from "@sous/config";
 
-export const useHardware = (type: "kds" | "pos" | "signage" | string): {
+export const useHardware = (
+  type: "kds" | "pos" | "signage" | string,
+): {
   hardwareId: string | null;
   pairingCode: string | null;
   isPaired: boolean;
@@ -85,33 +87,55 @@ export const useHardware = (type: "kds" | "pos" | "signage" | string): {
           timestamp: new Date().toISOString(),
         };
         console.log(`[Hardware] Sending heartbeat for ${hardwareId}...`);
-        const resp = (await http.post("/hardware/heartbeat", { hardwareId, metadata })) as any;
-        
+        const resp = (await http.post("/hardware/heartbeat", {
+          hardwareId,
+          metadata,
+        })) as any;
+
         // 4. Remote Update Check
-        if (resp && resp.requiredVersion && resp.requiredVersion !== metadata.version) {
-          console.log(`🚀 New version required: ${resp.requiredVersion}. Performing whole app update...`);
-          
+        if (
+          resp &&
+          resp.requiredVersion &&
+          resp.requiredVersion !== metadata.version
+        ) {
+          console.log(
+            `🚀 New version required: ${resp.requiredVersion}. Performing whole app update...`,
+          );
+
           // Clear service worker caches if they exist
-          if ('caches' in window) {
+          if ("caches" in window) {
             const cacheNames = await caches.keys();
-            await Promise.all(cacheNames.map(name => caches.delete(name)));
+            await Promise.all(cacheNames.map((name) => caches.delete(name)));
           }
-          
+
           // Clear local storage (except pairing)
           const pairingId = localStorage.getItem("sous_hardware_id");
-          const pairingState = localStorage.getItem(`sous_paired_${hardwareId}`);
+          const pairingState = localStorage.getItem(
+            `sous_paired_${hardwareId}`,
+          );
           localStorage.clear();
           if (pairingId) localStorage.setItem("sous_hardware_id", pairingId);
-          if (pairingState) localStorage.setItem(`sous_paired_${hardwareId}`, pairingState);
+          if (pairingState)
+            localStorage.setItem(`sous_paired_${hardwareId}`, pairingState);
 
           // Force a hard reload from the server (bypassing browser cache)
-          window.location.href = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'update=' + Date.now();
+          window.location.href =
+            window.location.href +
+            (window.location.href.includes("?") ? "&" : "?") +
+            "update=" +
+            Date.now();
         }
       } catch (e: any) {
         console.error("Heartbeat failed", e);
         // If the server doesn't know about this device (404), clear pairing
-        if (e.response?.status === 404 || e.status === 404 || e.message?.includes("404")) {
-          console.warn("⚠️ Device pairing lost (not found on server). Returning to pairing mode.");
+        if (
+          e.response?.status === 404 ||
+          e.status === 404 ||
+          e.message?.includes("404")
+        ) {
+          console.warn(
+            "⚠️ Device pairing lost (not found on server). Returning to pairing mode.",
+          );
           localStorage.removeItem(`sous_paired_${hardwareId}`);
           setIsPaired(false);
           setIsLoading(false);

@@ -13,7 +13,8 @@ export default function NotFound() {
         Layout Not Found
       </Text>
       <Text className="text-muted-foreground font-bold uppercase tracking-widest text-xs mb-8 max-w-md leading-relaxed">
-        The layout template you are looking for does not exist or has been moved.
+        The layout template you are looking for does not exist or has been
+        moved.
       </Text>
       <Link href="/presentation/layouts">
         <Button variant="default" className="h-12 px-8">

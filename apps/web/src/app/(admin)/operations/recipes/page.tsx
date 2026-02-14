@@ -1,16 +1,52 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { View, Text, Button, Card, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Input, GoogleDriveLogo, ScrollView, cn } from "@sous/ui";
-import { ChefHat, Plus, Scale, ArrowRight, HardDrive, Loader2, CloudUpload, Search, Filter, Trash2, X } from "lucide-react";
-import { useAuth, DrivePicker, GoogleDriveFile, RecipeForm } from "@sous/features";
+import {
+  View,
+  Text,
+  Button,
+  Card,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  Input,
+  GoogleDriveLogo,
+  ScrollView,
+  cn,
+} from "@sous/ui";
+import {
+  ChefHat,
+  Plus,
+  Scale,
+  ArrowRight,
+  HardDrive,
+  Loader2,
+  CloudUpload,
+  Search,
+  Filter,
+  Trash2,
+  X,
+} from "lucide-react";
+import {
+  useAuth,
+  DrivePicker,
+  GoogleDriveFile,
+  RecipeForm,
+} from "@sous/features";
 import { useRouter } from "next/navigation";
 import { gql } from "@apollo/client";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { getHttpClient } from "@sous/client-sdk";
 
 const GET_RECIPES = gql`
-  query GetRecipes($orgId: String!, $search: String, $source: String, $tags: [String!]) {
+  query GetRecipes(
+    $orgId: String!
+    $search: String
+    $source: String
+    $tags: [String!]
+  ) {
     recipes(orgId: $orgId, search: $search, source: $source, tags: $tags) {
       id
       name
@@ -66,7 +102,7 @@ export default function RecipesPage() {
   const [showDrivePicker, setShowDrivePicker] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [hasGDrive, setHasGDrive] = useState(false);
-  
+
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
   const [sourceFilter, setSourceFilter] = useState<string | null>(null);
@@ -77,18 +113,22 @@ export default function RecipesPage() {
       try {
         const http = await getHttpClient();
         const data = await http.get<any[]>("/integrations");
-        setHasGDrive(data.some(i => i.provider === 'google-drive' && (i.isActive || i.is_active)));
+        setHasGDrive(
+          data.some(
+            (i) => i.provider === "google-drive" && (i.isActive || i.is_active),
+          ),
+        );
       } catch (e) {}
     };
     if (orgId) checkIntegrations();
   }, [orgId]);
 
   const { data, loading, refetch } = useQuery<any>(GET_RECIPES, {
-    variables: { 
-      orgId, 
+    variables: {
+      orgId,
       search: searchQuery || undefined,
       source: sourceFilter || undefined,
-      tags: selectedTags.length > 0 ? selectedTags : undefined
+      tags: selectedTags.length > 0 ? selectedTags : undefined,
     },
     skip: !orgId,
   });
@@ -112,9 +152,9 @@ export default function RecipesPage() {
     try {
       const http = await getHttpClient();
       for (const file of selectedFiles) {
-        await http.post("/integrations/sync", { 
+        await http.post("/integrations/sync", {
           provider: "google-drive",
-          fileId: file.id 
+          fileId: file.id,
         });
       }
       await refetch();
@@ -133,7 +173,7 @@ export default function RecipesPage() {
           input: {
             name: recipeData.name,
             yieldAmount: recipeData.yieldAmount,
-            yieldUnit: recipeData.yieldUnit
+            yieldUnit: recipeData.yieldUnit,
           },
         },
       });
@@ -159,8 +199,10 @@ export default function RecipesPage() {
   const tags = tagData?.tags || [];
 
   const toggleTag = (tagName: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tagName) ? prev.filter(t => t !== tagName) : [...prev, tagName]
+    setSelectedTags((prev) =>
+      prev.includes(tagName)
+        ? prev.filter((t) => t !== tagName)
+        : [...prev, tagName],
     );
   };
 
@@ -183,7 +225,7 @@ export default function RecipesPage() {
         </View>
         <div className="flex flex-row gap-3">
           {hasGDrive && (
-            <Button 
+            <Button
               variant="outline"
               className="border-border hover:bg-primary/5 px-6 h-12"
               onClick={() => setShowDrivePicker(true)}
@@ -201,7 +243,7 @@ export default function RecipesPage() {
               </View>
             </Button>
           )}
-          <Button 
+          <Button
             className="bg-primary hover:bg-primary/90 px-6 h-12 shadow-xl shadow-primary/20"
             onClick={() => setShowAddModal(true)}
           >
@@ -219,8 +261,11 @@ export default function RecipesPage() {
       <View className="gap-4 mb-8">
         <View className="flex-row gap-4">
           <div className="flex-1 relative">
-            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input 
+            <Search
+              size={18}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+            />
+            <Input
               placeholder="Search recipe box..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -229,23 +274,34 @@ export default function RecipesPage() {
           </div>
           <div className="flex flex-row gap-2 bg-muted/30 p-1 rounded-xl border border-border">
             {[
-              { id: null, label: 'All Sources', icon: Filter },
-              { id: 'google-drive', label: 'Drive', icon: GoogleDriveLogo },
-              { id: 'manual', label: 'Manual', icon: ChefHat },
-            ].map(s => (
+              { id: null, label: "All Sources", icon: Filter },
+              { id: "google-drive", label: "Drive", icon: GoogleDriveLogo },
+              { id: "manual", label: "Manual", icon: ChefHat },
+            ].map((s) => (
               <Button
                 key={s.label}
                 variant={sourceFilter === s.id ? "default" : "ghost"}
                 onClick={() => setSourceFilter(s.id)}
-                className={cn("h-10 px-4 gap-2", sourceFilter === s.id ? "bg-primary shadow-lg" : "text-muted-foreground")}
+                className={cn(
+                  "h-10 px-4 gap-2",
+                  sourceFilter === s.id
+                    ? "bg-primary shadow-lg"
+                    : "text-muted-foreground",
+                )}
               >
                 <s.icon size={14} />
-                <span className="text-[10px] font-black uppercase">{s.label}</span>
+                <span className="text-[10px] font-black uppercase">
+                  {s.label}
+                </span>
               </Button>
             ))}
           </div>
           {(searchQuery || sourceFilter || selectedTags.length > 0) && (
-            <Button variant="ghost" onClick={clearFilters} className="h-12 px-4 text-sky-500 hover:text-sky-400">
+            <Button
+              variant="ghost"
+              onClick={clearFilters}
+              className="h-12 px-4 text-sky-500 hover:text-sky-400"
+            >
               <X size={16} className="mr-2" />
               <span className="text-[10px] font-black uppercase">Clear</span>
             </Button>
@@ -253,7 +309,11 @@ export default function RecipesPage() {
         </View>
 
         {tags.length > 0 && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="pb-2">
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className="pb-2"
+          >
             <div className="flex flex-row gap-2">
               {tags.map((tag: any) => {
                 const isSelected = selectedTags.includes(tag.name);
@@ -265,11 +325,13 @@ export default function RecipesPage() {
                     onClick={() => toggleTag(tag.name)}
                     className={cn(
                       "h-7 px-3 rounded-full border-border transition-all",
-                      isSelected && "bg-primary border-primary shadow-sm"
+                      isSelected && "bg-primary border-primary shadow-sm",
                     )}
                     style={isSelected ? { backgroundColor: tag.color } : {}}
                   >
-                    <span className="text-[8px] font-black uppercase tracking-widest">{tag.name}</span>
+                    <span className="text-[8px] font-black uppercase tracking-widest">
+                      {tag.name}
+                    </span>
                   </Button>
                 );
               })}
@@ -278,7 +340,7 @@ export default function RecipesPage() {
         )}
       </View>
 
-      <DrivePicker 
+      <DrivePicker
         open={showDrivePicker}
         onSelect={handleDriveImport}
         onCancel={() => setShowDrivePicker(false)}
@@ -298,7 +360,7 @@ export default function RecipesPage() {
           <Text className="text-muted-foreground text-sm max-w-xs text-center mb-8">
             Try adjusting your search filters or create a new recipe.
           </Text>
-          <Button 
+          <Button
             className="bg-primary hover:bg-primary/90 px-8 h-12"
             onClick={() => setShowAddModal(true)}
           >
@@ -310,31 +372,40 @@ export default function RecipesPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {recipes.map((recipe: any) => (
-            <Card 
-              key={recipe.id} 
+            <Card
+              key={recipe.id}
               className="p-6 bg-card border-border hover:border-primary/50 transition-all group cursor-pointer hover:bg-muted/50 overflow-hidden"
               onClick={() => router.push(`/operations/recipes/${recipe.id}`)}
             >
               <View className="flex-row justify-between items-start mb-6">
                 <View className="p-3 bg-muted border border-border rounded-xl">
-                  {recipe.sourceType === 'google-drive' ? (
-                    <GoogleDriveLogo size={20} className="text-muted-foreground group-hover:text-primary transition-colors" />
+                  {recipe.sourceType === "google-drive" ? (
+                    <GoogleDriveLogo
+                      size={20}
+                      className="text-muted-foreground group-hover:text-primary transition-colors"
+                    />
                   ) : (
-                    <ChefHat size={20} className="text-muted-foreground group-hover:text-primary transition-colors" />
+                    <ChefHat
+                      size={20}
+                      className="text-muted-foreground group-hover:text-primary transition-colors"
+                    />
                   )}
                 </View>
                 <div className="flex flex-row items-center gap-2">
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     onClick={(e) => handleDelete(e, recipe.id)}
                     className="h-8 w-8 p-0 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <Trash2 size={14} />
                   </Button>
-                  <ArrowRight size={16} className="text-muted-foreground/30 group-hover:text-primary transition-colors" />
+                  <ArrowRight
+                    size={16}
+                    className="text-muted-foreground/30 group-hover:text-primary transition-colors"
+                  />
                 </div>
               </View>
-              
+
               <Text className="text-xl font-black text-foreground uppercase tracking-tight mb-4 truncate">
                 {recipe.name}
               </Text>
@@ -343,11 +414,14 @@ export default function RecipesPage() {
                 <div className="flex items-center gap-2 text-muted-foreground bg-muted/50 px-3 py-2 rounded-lg border border-border w-fit">
                   <Scale size={14} />
                   <span className="text-xs font-mono font-bold uppercase">
-                    Yield: {recipe.yieldAmount || '0'} {recipe.yieldUnit || '---'}
+                    Yield: {recipe.yieldAmount || "0"}{" "}
+                    {recipe.yieldUnit || "---"}
                   </span>
                 </div>
-                {recipe.sourceType === 'google-drive' && (
-                  <Text className="text-[8px] font-black uppercase tracking-widest text-primary bg-primary/10 px-2 py-1 rounded-full border border-primary/20">Drive Asset</Text>
+                {recipe.sourceType === "google-drive" && (
+                  <Text className="text-[8px] font-black uppercase tracking-widest text-primary bg-primary/10 px-2 py-1 rounded-full border border-primary/20">
+                    Drive Asset
+                  </Text>
                 )}
               </div>
             </Card>
@@ -359,13 +433,19 @@ export default function RecipesPage() {
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
         <DialogContent className="max-w-4xl max-h-[90vh] bg-background border-border overflow-hidden flex flex-col p-0">
           <DialogHeader className="p-6 border-b border-border flex-row items-center justify-between space-y-0">
-            <DialogTitle className="text-foreground font-black uppercase tracking-widest text-sm">Create New IP</DialogTitle>
-            <Button variant="ghost" onClick={() => setShowAddModal(false)} className="h-8 w-8 p-0 rounded-full">
+            <DialogTitle className="text-foreground font-black uppercase tracking-widest text-sm">
+              Create New IP
+            </DialogTitle>
+            <Button
+              variant="ghost"
+              onClick={() => setShowAddModal(false)}
+              className="h-8 w-8 p-0 rounded-full"
+            >
               <X size={18} />
             </Button>
           </DialogHeader>
           <ScrollView className="flex-1 p-6">
-            <RecipeForm 
+            <RecipeForm
               ingredients={ingData?.ingredients || []}
               onSave={handleSaveNew}
               onCancel={() => setShowAddModal(false)}

@@ -13,6 +13,7 @@ Define the specifications for the core reusable UI components that power the Pre
 A modal interface for browsing and selecting structural templates.
 
 ### Features
+
 - **Visual Grid:** Renders a grid of available layouts using the `TemplateSkeletonRenderer` (scaled down).
 - **Filtering:**
   - **Tags:** Filter by user-defined tags (e.g., "Menu Board", "Promo", "Horizontal").
@@ -21,6 +22,7 @@ A modal interface for browsing and selecting structural templates.
 - **States:** Loading (skeletons), Empty (no results), Error.
 
 ### Usage
+
 - **Screen Manager:** To switch the layout of the current screen.
 - **Label Manager:** To choose a print label structure.
 
@@ -29,14 +31,16 @@ A modal interface for browsing and selecting structural templates.
 A centralized media picker for the Organization.
 
 ### Features
+
 - **Gallery View:** Grid of thumbnails for uploaded assets.
 - **Upload Zone:** Drag-and-drop area to upload new files directly within the modal.
-  - *Processing:* auto-converts to WebP/Grayscale per ADR 028 if configured, or standard optimization for screens.
+  - _Processing:_ auto-converts to WebP/Grayscale per ADR 028 if configured, or standard optimization for screens.
 - **External URL:** Option to input a direct image URL instead of uploading.
 - **Selection:** Returns the `mediaId` or `url` to the parent.
 - **Metadata:** Shows resolution and file size on hover.
 
 ### Usage
+
 - **Screen Manager:** Assigning content to "Image" slots.
 - **Layout Manager:** Adding static background images or logos to templates.
 
@@ -45,6 +49,7 @@ A centralized media picker for the Organization.
 The core visualization engine for Layout Templates. This component is responsible for translating the abstract JSON structure into a visual DOM representation.
 
 ### Features
+
 - **Recursive Rendering:** Traverses the JSON tree (Rows, Columns, Slots).
 - **Layout Engine:** Applies correct CSS Grid and Flexbox styles based on the template's configuration.
 - **Placeholder Mode:**
@@ -54,6 +59,7 @@ The core visualization engine for Layout Templates. This component is responsibl
 - **Scaleable:** Accepts a `scale` prop (or uses CSS `transform`) to render miniature versions for the `LayoutTemplateSelector` without breaking layout logic.
 
 ### Props Interface
+
 ```typescript
 interface TemplateSkeletonRendererProps {
   template: LayoutTemplate;

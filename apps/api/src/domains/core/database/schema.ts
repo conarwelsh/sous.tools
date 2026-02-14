@@ -48,10 +48,7 @@ import {
   vendorMappings,
   shoppingList,
 } from '../../procurement/procurement.schema';
-import {
-  posOrders,
-  posOrderItems,
-} from '../../pos/pos.schema';
+import { posOrders, posOrderItems } from '../../pos/pos.schema';
 import {
   stockAudits,
   stockAuditItems,

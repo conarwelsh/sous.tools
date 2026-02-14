@@ -6,7 +6,8 @@ import { homedir } from 'os';
 
 @Command({
   name: 'login-as',
-  description: 'Force login as a specific organization ID for local development',
+  description:
+    'Force login as a specific organization ID for local development',
 })
 export class LoginAsCommand extends CommandRunner {
   async run(inputs: string[], options?: Record<string, any>): Promise<void> {
@@ -26,11 +27,13 @@ export class LoginAsCommand extends CommandRunner {
       } catch {}
 
       config.currentOrgId = orgId;
-      
+
       await writeFile(configPath, JSON.stringify(config, null, 2));
-      
+
       logger.success(`Successfully switched context to Organization: ${orgId}`);
-      logger.info('Future CLI commands will use this context where applicable.');
+      logger.info(
+        'Future CLI commands will use this context where applicable.',
+      );
     } catch (error) {
       logger.error('Failed to update context configuration');
     }

@@ -13,7 +13,8 @@ export type EmailJobData = {
 @Injectable()
 export class MailService {
   constructor(
-    @InjectQueue('email-queue') private readonly emailQueue: Queue<EmailJobData>,
+    @InjectQueue('email-queue')
+    private readonly emailQueue: Queue<EmailJobData>,
   ) {}
 
   async sendEmail(data: EmailJobData) {
@@ -27,7 +28,13 @@ export class MailService {
     });
   }
 
-  async sendInvitationEmail(to: string, orgName: string, inviteLink: string, invitedBy: string, role: string) {
+  async sendInvitationEmail(
+    to: string,
+    orgName: string,
+    inviteLink: string,
+    invitedBy: string,
+    role: string,
+  ) {
     return this.sendEmail({
       to,
       subject: `You've been invited to join ${orgName} on Sous`,

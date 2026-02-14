@@ -22,20 +22,20 @@ export function TemplateStage({
     <View
       className={cn(
         "flex-1 w-full h-full min-h-screen relative overflow-hidden bg-background",
-        className
+        className,
       )}
     >
       {/* Background Grid Pattern for Edit Mode */}
       {isEditMode && (
-        <div 
+        <div
           className="absolute inset-0 opacity-[0.03] pointer-events-none"
           style={{
             backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-            backgroundSize: '32px 32px'
+            backgroundSize: "32px 32px",
           }}
         />
       )}
-      
+
       <div className="flex-1 w-full h-full flex flex-col relative z-10">
         {children}
       </div>

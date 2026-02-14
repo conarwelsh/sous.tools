@@ -103,7 +103,11 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
       args = ['logs', projectName, '--env', activeEnv];
     } else {
       command = 'vercel';
-      args = ['logs', projectName, activeEnv === 'production' ? '--prod' : '--staging'];
+      args = [
+        'logs',
+        projectName,
+        activeEnv === 'production' ? '--prod' : '--staging',
+      ];
     }
 
     try {
@@ -116,7 +120,9 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
       });
 
       child.stderr?.on('data', (data: Buffer) => {
-        setCloudLogs((prev) => [...prev, `[ERR] ${data.toString()}`].slice(-1000));
+        setCloudLogs((prev) =>
+          [...prev, `[ERR] ${data.toString()}`].slice(-1000),
+        );
       });
 
       child.on('error', (err: Error) => {
@@ -156,14 +162,14 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
     [allCombinedLogs, filter],
   );
 
-  const mainViewHeight = terminalSize.rows - 3 - 2 - 2; 
+  const mainViewHeight = terminalSize.rows - 3 - 2 - 2;
   const visibleLines = mainViewHeight - 2;
 
   useInput((input, key) => {
     if (isFilterMode) return;
 
     if (input === 'q') exit();
-    
+
     if (input === '/') {
       setIsFilterMode(true);
       setScrollOffset(0);
@@ -231,24 +237,42 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'running': return <Text color="#10b981">●</Text>;
-      case 'starting': return <Text color="#f59e0b"><Spinner type="dots" /></Text>;
-      case 'error': return <Text color="#ef4444">●</Text>;
-      default: return <Text color="#6b7280">○</Text>;
+      case 'running':
+        return <Text color="#10b981">●</Text>;
+      case 'starting':
+        return (
+          <Text color="#f59e0b">
+            <Spinner type="dots" />
+          </Text>
+        );
+      case 'error':
+        return <Text color="#ef4444">●</Text>;
+      default:
+        return <Text color="#6b7280">○</Text>;
     }
   };
 
   return (
-    <Box flexDirection="column" width={terminalSize.columns} height={terminalSize.rows} paddingX={1}>
+    <Box
+      flexDirection="column"
+      width={terminalSize.columns}
+      height={terminalSize.rows}
+      paddingX={1}
+    >
       {/* Header */}
       <Box height={3} alignItems="center" justifyContent="space-between">
         <Box alignItems="center">
-          <Text bold color={BRAND_BLUE}>SOUS</Text>
+          <Text bold color={BRAND_BLUE}>
+            SOUS
+          </Text>
           <Text color={BRAND_GRAY}>.dev</Text>
           <Box marginLeft={4}>
             {(['services', 'combined', 'infra', 'cloud'] as const).map((t) => (
               <Box key={t} marginLeft={2}>
-                <Text bold={activeTab === t} color={activeTab === t ? BRAND_BLUE : BRAND_GRAY}>
+                <Text
+                  bold={activeTab === t}
+                  color={activeTab === t ? BRAND_BLUE : BRAND_GRAY}
+                >
                   {t.toUpperCase()}
                 </Text>
               </Box>
@@ -256,12 +280,24 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
           </Box>
         </Box>
         <Box alignItems="center">
-          <Text color={activeEnv === 'production' ? BRAND_BLUE : activeEnv === 'staging' ? '#f59e0b' : '#10b981'} bold>
+          <Text
+            color={
+              activeEnv === 'production'
+                ? BRAND_BLUE
+                : activeEnv === 'staging'
+                  ? '#f59e0b'
+                  : '#10b981'
+            }
+            bold
+          >
             [{activeEnv.toUpperCase()}]
           </Text>
           <Box marginLeft={2}>
             <Text color="gray">
-              {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              {new Date().toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
             </Text>
           </Box>
         </Box>
@@ -270,11 +306,30 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
       {/* Body */}
       <Box flexGrow={1}>
         {/* Sidebar */}
-        <Box flexDirection="column" width={20} borderStyle="round" borderColor={DARK_GRAY} paddingX={1}>
-          <Box marginBottom={1}><Text bold color={BRAND_GRAY}>STATUS</Text></Box>
+        <Box
+          flexDirection="column"
+          width={20}
+          borderStyle="round"
+          borderColor={DARK_GRAY}
+          paddingX={1}
+        >
+          <Box marginBottom={1}>
+            <Text bold color={BRAND_GRAY}>
+              STATUS
+            </Text>
+          </Box>
           {processes.map((p, idx) => (
             <Box key={p.id} justifyContent="space-between">
-              <Text color={idx === selectedIdx ? BRAND_BLUE : (p.type === 'docker' ? '#6366f1' : 'white')} bold={idx === selectedIdx}>
+              <Text
+                color={
+                  idx === selectedIdx
+                    ? BRAND_BLUE
+                    : p.type === 'docker'
+                      ? '#6366f1'
+                      : 'white'
+                }
+                bold={idx === selectedIdx}
+              >
                 {p.name.slice(0, 12)}
               </Text>
               {getStatusIcon(p.status)}
@@ -283,16 +338,29 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
         </Box>
 
         {/* Main Content Area */}
-        <Box flexDirection="column" flexGrow={1} marginLeft={1} borderStyle="round" borderColor={DARK_GRAY} paddingX={1}>
+        <Box
+          flexDirection="column"
+          flexGrow={1}
+          marginLeft={1}
+          borderStyle="round"
+          borderColor={DARK_GRAY}
+          paddingX={1}
+        >
           {activeTab === 'services' && (
             <Box flexDirection="column" flexGrow={1}>
               <Box justifyContent="space-between" marginBottom={1}>
-                <Text bold color={BRAND_BLUE}>LOGS: {selectedApp?.name || 'N/A'}</Text>
-                <Text color="gray">{selectedApp?.status?.toUpperCase() || 'UNKNOWN'}</Text>
+                <Text bold color={BRAND_BLUE}>
+                  LOGS: {selectedApp?.name || 'N/A'}
+                </Text>
+                <Text color="gray">
+                  {selectedApp?.status?.toUpperCase() || 'UNKNOWN'}
+                </Text>
               </Box>
               <Box flexDirection="column" flexGrow={1} overflow="hidden">
                 {(selectedApp?.logs || []).slice(-visibleLines).map((l, i) => (
-                  <Text key={i} wrap="truncate-end" color="#d1d5db">{l.message}</Text>
+                  <Text key={i} wrap="truncate-end" color="#d1d5db">
+                    {l.message}
+                  </Text>
                 ))}
               </Box>
             </Box>
@@ -301,19 +369,43 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
           {activeTab === 'combined' && (
             <Box flexDirection="column" flexGrow={1}>
               <Box justifyContent="space-between" marginBottom={1}>
-                <Text bold color={BRAND_BLUE}>COMBINED STREAM</Text>
+                <Text bold color={BRAND_BLUE}>
+                  COMBINED STREAM
+                </Text>
                 {isFilterMode ? (
-                  <Box><Text color={BRAND_BLUE}>/</Text><TextInput value={filter} onChange={setFilter} onSubmit={() => setIsFilterMode(false)} /></Box>
+                  <Box>
+                    <Text color={BRAND_BLUE}>/</Text>
+                    <TextInput
+                      value={filter}
+                      onChange={setFilter}
+                      onSubmit={() => setIsFilterMode(false)}
+                    />
+                  </Box>
                 ) : (
-                  <Text color="gray" dimColor>{filter ? `Filter: ${filter}` : 'Press [/] to filter'}</Text>
+                  <Text color="gray" dimColor>
+                    {filter ? `Filter: ${filter}` : 'Press [/] to filter'}
+                  </Text>
                 )}
               </Box>
               <Box flexDirection="column" flexGrow={1} overflow="hidden">
                 {combinedLogs.slice(-visibleLines).map((l, i) => (
                   <Box key={i}>
-                    <Text color="gray" dimColor>[{l.timestamp.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}] </Text>
-                    <Text color={BRAND_BLUE} bold>{l.name.padEnd(10)} </Text>
-                    <Text color={l.level === 'error' ? '#ef4444' : '#d1d5db'}>{l.message}</Text>
+                    <Text color="gray" dimColor>
+                      [
+                      {l.timestamp.toLocaleTimeString([], {
+                        hour12: false,
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                      })}
+                      ]{' '}
+                    </Text>
+                    <Text color={BRAND_BLUE} bold>
+                      {l.name.padEnd(10)}{' '}
+                    </Text>
+                    <Text color={l.level === 'error' ? '#ef4444' : '#d1d5db'}>
+                      {l.message}
+                    </Text>
                   </Box>
                 ))}
               </Box>
@@ -324,8 +416,16 @@ export const Dashboard: React.FC<Props> = ({ manager }) => {
 
       {/* Footer */}
       <Box height={2} paddingX={1} justifyContent="space-between">
-        <Text color="gray" dimColor>[Tab] Tabs [↑/↓] Scroll [Enter] Start/Stop [r] Restart [c] Clear [d] DB Reset [q] Quit</Text>
-        <Box><Text color={BRAND_BLUE} bold>SOUS</Text><Text color={BRAND_GRAY}>.dev</Text></Box>
+        <Text color="gray" dimColor>
+          [Tab] Tabs [↑/↓] Scroll [Enter] Start/Stop [r] Restart [c] Clear [d]
+          DB Reset [q] Quit
+        </Text>
+        <Box>
+          <Text color={BRAND_BLUE} bold>
+            SOUS
+          </Text>
+          <Text color={BRAND_GRAY}>.dev</Text>
+        </Box>
       </Box>
     </Box>
   );

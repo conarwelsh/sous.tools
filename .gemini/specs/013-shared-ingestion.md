@@ -13,6 +13,7 @@ Define the shared infrastructure for ingesting unstructured physical or digital 
 A universal dropzone and camera interface for capturing source documents.
 
 ### Features
+
 - **Multi-Source Support:**
   - **Camera (Mobile/Tablet):** Accesses the device camera for direct capture. Supports multi-page scanning (capturing multiple images for one logical document).
   - **Upload (Web):** Drag-and-drop support for PDF, JPG, PNG, WEBP.
@@ -27,6 +28,7 @@ A universal dropzone and camera interface for capturing source documents.
 The core UI for associating unstructured text (OCR results) with structured platform entities (Ingredients).
 
 ### Features
+
 - **Fuzzy Matching:**
   - Takes an input string (e.g., "SYSCO RED TOM 5X6" or "1 cup chopped toms") and suggests existing `CatalogItems` or `Ingredients` based on string similarity.
 - **Confidence Scoring:**
@@ -42,6 +44,7 @@ The core UI for associating unstructured text (OCR results) with structured plat
 A split-screen or side-by-side interface for verifying AI extraction results against the original document.
 
 ### Layout
+
 - **Left Panel (Source):**
   - Zoomable/Pannable view of the original scanned image/PDF.
   - Highlights the region currently being edited (if coordinate data is available from OCR).
@@ -66,7 +69,7 @@ type ScannedItemCandidate = {
 type IngestionSession = {
   id: string;
   sourceImages: string[];
-  status: 'PROCESSING' | 'REVIEW' | 'COMPLETED';
+  status: "PROCESSING" | "REVIEW" | "COMPLETED";
   extractedData: any;
 };
 ```

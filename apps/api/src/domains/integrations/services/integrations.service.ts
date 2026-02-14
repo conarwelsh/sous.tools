@@ -373,15 +373,19 @@ export class IntegrationsService {
 
       // 2. Upsert Products
       for (const prod of sqProducts) {
-        let categoryId = prod.categoryId ? categoryMap.get(prod.categoryId) : null;
-        
+        let categoryId = prod.categoryId
+          ? categoryMap.get(prod.categoryId)
+          : null;
+
         // Secondary Fallback: If no categoryId by ID, we try to match by name if category exists in our current map
         // This handles cases where a POS might return items without explicit category IDs but we can infer them
         if (!categoryId) {
-            // Find if there's any category in our sqCategories that matches some logic? 
-            // For now, if categoryId is missing, we check if the driver provided it elsewhere
-            // or just leave it null.
-            logger.debug(`[Integrations] No category found for product: ${prod.name}`);
+          // Find if there's any category in our sqCategories that matches some logic?
+          // For now, if categoryId is missing, we check if the driver provided it elsewhere
+          // or just leave it null.
+          logger.debug(
+            `[Integrations] No category found for product: ${prod.name}`,
+          );
         }
 
         await this.dbService.db

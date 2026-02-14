@@ -37,7 +37,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   await resolveConfig();
-  
+
   // Only allow in development
   if (config.env !== "development") {
     return NextResponse.json(

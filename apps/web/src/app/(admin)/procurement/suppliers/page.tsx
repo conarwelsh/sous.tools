@@ -1,7 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { View, Text, Button, Card, Input, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@sous/ui";
+import {
+  View,
+  Text,
+  Button,
+  Card,
+  Input,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@sous/ui";
 import { Truck, Plus, Search, Mail, Phone, MapPin } from "lucide-react";
 import { useAuth } from "@sous/features";
 import { gql } from "@apollo/client";
@@ -33,7 +44,11 @@ export default function SuppliersPage() {
   const { user } = useAuth();
   const orgId = user?.organizationId || "";
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newSupplier, setNewSupplier] = useState({ name: "", email: "", phone: "" });
+  const [newSupplier, setNewSupplier] = useState({
+    name: "",
+    email: "",
+    phone: "",
+  });
 
   const { data, loading, refetch } = useQuery<any>(GET_SUPPLIERS, {
     variables: { orgId },
@@ -71,7 +86,7 @@ export default function SuppliersPage() {
             Suppliers
           </Text>
         </View>
-        <Button 
+        <Button
           className="bg-sky-500 hover:bg-sky-600 px-6 h-12"
           onClick={() => setShowAddModal(true)}
         >
@@ -93,23 +108,29 @@ export default function SuppliersPage() {
             No Suppliers Found
           </Text>
           <Text className="text-muted-foreground/60 text-sm max-w-xs text-center">
-            Start by adding your vendors to track invoices and ingredient pricing
-            trends.
+            Start by adding your vendors to track invoices and ingredient
+            pricing trends.
           </Text>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {suppliers.map((supplier: any) => (
-            <Card key={supplier.id} className="p-6 bg-card border-border hover:border-primary/50 transition-all group">
+            <Card
+              key={supplier.id}
+              className="p-6 bg-card border-border hover:border-primary/50 transition-all group"
+            >
               <View className="flex-row justify-between items-start mb-6">
                 <View className="p-3 bg-muted border border-border rounded-xl">
-                  <Truck size={20} className="text-muted-foreground group-hover:text-sky-500 transition-colors" />
+                  <Truck
+                    size={20}
+                    className="text-muted-foreground group-hover:text-sky-500 transition-colors"
+                  />
                 </View>
                 <div className="px-2 py-1 bg-muted rounded text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                   Active
                 </div>
               </View>
-              
+
               <Text className="text-xl font-black text-foreground uppercase tracking-tight mb-4">
                 {supplier.name}
               </Text>
@@ -142,39 +163,57 @@ export default function SuppliersPage() {
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
         <DialogContent className="sm:max-w-[425px] bg-background border-border">
           <DialogHeader>
-            <DialogTitle className="text-foreground font-black uppercase tracking-tight">Add New Supplier</DialogTitle>
+            <DialogTitle className="text-foreground font-black uppercase tracking-tight">
+              Add New Supplier
+            </DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest">Name</Text>
+              <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest">
+                Name
+              </Text>
               <Input
                 value={newSupplier.name}
-                onChange={(e) => setNewSupplier({ ...newSupplier, name: e.target.value })}
+                onChange={(e) =>
+                  setNewSupplier({ ...newSupplier, name: e.target.value })
+                }
                 className="bg-muted border-border"
                 placeholder="Vendor Name"
               />
             </div>
             <div className="grid gap-2">
-              <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest">Email</Text>
+              <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest">
+                Email
+              </Text>
               <Input
                 value={newSupplier.email}
-                onChange={(e) => setNewSupplier({ ...newSupplier, email: e.target.value })}
+                onChange={(e) =>
+                  setNewSupplier({ ...newSupplier, email: e.target.value })
+                }
                 className="bg-muted border-border"
                 placeholder="orders@vendor.com"
               />
             </div>
             <div className="grid gap-2">
-              <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest">Phone</Text>
+              <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest">
+                Phone
+              </Text>
               <Input
                 value={newSupplier.phone}
-                onChange={(e) => setNewSupplier({ ...newSupplier, phone: e.target.value })}
+                onChange={(e) =>
+                  setNewSupplier({ ...newSupplier, phone: e.target.value })
+                }
                 className="bg-muted border-border"
                 placeholder="+1 (555) 000-0000"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={handleCreate} disabled={creating} className="bg-sky-500 hover:bg-sky-600 w-full">
+            <Button
+              onClick={handleCreate}
+              disabled={creating}
+              className="bg-sky-500 hover:bg-sky-600 w-full"
+            >
               <Text className="text-white font-bold uppercase text-xs tracking-widest">
                 {creating ? "Creating..." : "Create Supplier"}
               </Text>

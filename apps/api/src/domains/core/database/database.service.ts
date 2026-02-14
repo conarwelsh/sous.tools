@@ -13,7 +13,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   constructor() {}
 
   private initializePool(url: string) {
-    logger.info(`🐘 Initializing Database Pool: ${url.replace(/:.*@/, ':****@')}`);
+    logger.info(
+      `🐘 Initializing Database Pool: ${url.replace(/:.*@/, ':****@')}`,
+    );
     this.pool = new Pool({
       connectionString: url,
     });

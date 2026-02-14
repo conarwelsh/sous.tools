@@ -175,7 +175,9 @@ const LoginFormContent = ({
                   <span className="w-full border-t border-border/50" />
                 </div>
                 <div className="relative flex justify-center text-[8px] uppercase font-black">
-                  <span className="bg-card px-4 text-muted-foreground tracking-[0.3em]">Identity Hub</span>
+                  <span className="bg-card px-4 text-muted-foreground tracking-[0.3em]">
+                    Identity Hub
+                  </span>
                 </div>
               </div>
 
@@ -222,7 +224,9 @@ const LoginFormContent = ({
                 Lost Access?
               </button>
               <div className="flex flex-row gap-2 items-center">
-                <span className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest opacity-40">New to Sous?</span>
+                <span className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest opacity-40">
+                  New to Sous?
+                </span>
                 <button
                   type="button"
                   onClick={() => router.push("/register")}
@@ -244,7 +248,13 @@ export const LoginForm = (props: {
   showClose?: boolean;
   callbackUrl?: string;
 }) => (
-  <React.Suspense fallback={<div className="flex items-center justify-center p-12"><Loader2 className="animate-spin text-primary" size={32} /></div>}>
+  <React.Suspense
+    fallback={
+      <div className="flex items-center justify-center p-12">
+        <Loader2 className="animate-spin text-primary" size={32} />
+      </div>
+    }
+  >
     <LoginFormContent {...props} />
   </React.Suspense>
 );

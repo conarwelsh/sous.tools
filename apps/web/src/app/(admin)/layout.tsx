@@ -45,7 +45,9 @@ function AdminContent({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (isMounted && !loading && !isAuthenticated) {
-      console.log("[AdminLayout] User not authenticated, redirecting to login...");
+      console.log(
+        "[AdminLayout] User not authenticated, redirecting to login...",
+      );
       const callbackUrl = encodeURIComponent(pathname);
       router.replace(`/login?callbackUrl=${callbackUrl}`);
     }
@@ -64,39 +66,55 @@ function AdminContent({ children }: { children: React.ReactNode }) {
       title: "Core",
       items: [
         { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-      ]
+      ],
     },
     {
       title: "Procurement",
       items: [
-        { label: "Suppliers", icon: UtensilsCrossed, href: "/procurement/suppliers" },
+        {
+          label: "Suppliers",
+          icon: UtensilsCrossed,
+          href: "/procurement/suppliers",
+        },
         { label: "Invoices", icon: FileText, href: "/procurement/invoices" },
         { label: "Orders", icon: ShoppingCart, href: "/procurement/orders" },
-      ]
+      ],
     },
     {
       title: "Operations",
       items: [
-        { label: "Recipes", icon: UtensilsCrossed, href: "/operations/recipes" },
-        { label: "Ingredients", icon: Package, href: "/operations/ingredients" },
+        {
+          label: "Recipes",
+          icon: UtensilsCrossed,
+          href: "/operations/recipes",
+        },
+        {
+          label: "Ingredients",
+          icon: Package,
+          href: "/operations/ingredients",
+        },
         { label: "Inventory", icon: Package, href: "/inventory" },
         { label: "Finances", icon: Activity, href: "/operations/intelligence" },
-      ]
+      ],
     },
     {
       title: "Presentation",
       items: [
         { label: "Signage", icon: Monitor, href: "/presentation/signage" },
         { label: "Web Pages", icon: Globe, href: "/presentation/pages" },
-        { label: "Layouts", icon: LayoutDashboard, href: "/presentation/layouts" },
+        {
+          label: "Layouts",
+          icon: LayoutDashboard,
+          href: "/presentation/layouts",
+        },
         { label: "Labels", icon: Palette, href: "/presentation/labels" },
-      ]
+      ],
     },
     {
       title: "System",
       items: [
         { label: "Settings", icon: Settings, href: "/settings/organization" },
-      ]
+      ],
     },
   ];
 
@@ -119,23 +137,25 @@ function AdminContent({ children }: { children: React.ReactNode }) {
             className="relative w-10 h-10 flex items-center justify-center overflow-hidden z-[70]"
           >
             <div className="relative w-6 h-5">
-              <span 
+              <span
                 className={cn(
                   "absolute block w-6 h-0.5 bg-sky-500 transition-all duration-300 ease-in-out",
-                  isMobileMenuOpen ? "rotate-45 top-2" : "top-0"
-                )} 
+                  isMobileMenuOpen ? "rotate-45 top-2" : "top-0",
+                )}
               />
-              <span 
+              <span
                 className={cn(
                   "absolute block w-6 h-0.5 bg-sky-500 transition-all duration-300 ease-in-out top-2",
-                  isMobileMenuOpen ? "opacity-0 -left-full" : "opacity-100 left-0"
-                )} 
+                  isMobileMenuOpen
+                    ? "opacity-0 -left-full"
+                    : "opacity-100 left-0",
+                )}
               />
-              <span 
+              <span
                 className={cn(
                   "absolute block w-6 h-0.5 bg-sky-500 transition-all duration-300 ease-in-out",
-                  isMobileMenuOpen ? "-rotate-45 top-2" : "top-4"
-                )} 
+                  isMobileMenuOpen ? "-rotate-45 top-2" : "top-4",
+                )}
               />
             </div>
           </Button>
@@ -145,51 +165,48 @@ function AdminContent({ children }: { children: React.ReactNode }) {
       {/* Mobile Navigation Drawer */}
       {isMobileMenuOpen && (
         <View className="md:hidden fixed inset-0 z-50 bg-background p-6 pt-20">
-          <SidebarContent 
-            mobile 
-            isCollapsed={isCollapsed} 
-            theme={theme} 
-            toggleTheme={toggleTheme} 
-            menuGroups={menuGroups} 
-            pathname={pathname} 
-            router={router} 
-            setIsMobileMenuOpen={setIsMobileMenuOpen} 
+          <SidebarContent
+            mobile
+            isCollapsed={isCollapsed}
+            theme={theme}
+            toggleTheme={toggleTheme}
+            menuGroups={menuGroups}
+            pathname={pathname}
+            router={router}
+            setIsMobileMenuOpen={setIsMobileMenuOpen}
           />
         </View>
       )}
 
       {/* Desktop Sidebar */}
-      <View 
+      <View
         className={cn(
           "border-r border-border/50 flex flex-col hidden md:flex shrink-0 h-screen sticky top-0 transition-all duration-300 ease-in-out group/sidebar relative",
-          isCollapsed ? "w-24" : "w-72"
+          isCollapsed ? "w-24" : "w-72",
         )}
       >
         {/* Header (Fixed) */}
         <View className="p-6">
-          <SidebarHeader 
-            isCollapsed={isCollapsed} 
-            theme={theme} 
-            toggleTheme={toggleTheme} 
+          <SidebarHeader
+            isCollapsed={isCollapsed}
+            theme={theme}
+            toggleTheme={toggleTheme}
           />
         </View>
 
         {/* Menu (Scrollable) */}
         <ScrollView className="flex-1 px-6">
-          <SidebarMenu 
-            isCollapsed={isCollapsed} 
-            menuGroups={menuGroups} 
-            pathname={pathname} 
-            router={router} 
+          <SidebarMenu
+            isCollapsed={isCollapsed}
+            menuGroups={menuGroups}
+            pathname={pathname}
+            router={router}
           />
         </ScrollView>
 
         {/* Footer (Fixed) */}
         <View className="p-6">
-          <SidebarFooter 
-            isCollapsed={isCollapsed} 
-            router={router} 
-          />
+          <SidebarFooter isCollapsed={isCollapsed} router={router} />
         </View>
 
         {/* Collapse Toggle Button */}
@@ -197,10 +214,12 @@ function AdminContent({ children }: { children: React.ReactNode }) {
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="absolute -right-4 top-10 w-8 h-8 rounded-full bg-card border border-border flex items-center justify-center hover:bg-muted hover:border-primary/50 transition-all z-50 shadow-xl"
         >
-          <div className={cn(
-            "w-4 h-4 flex items-center justify-center transition-transform duration-300",
-            isCollapsed ? "rotate-180" : "rotate-0"
-          )}>
+          <div
+            className={cn(
+              "w-4 h-4 flex items-center justify-center transition-transform duration-300",
+              isCollapsed ? "rotate-180" : "rotate-0",
+            )}
+          >
             <ChevronLeft size={16} className="text-primary" />
           </div>
         </button>
@@ -208,23 +227,31 @@ function AdminContent({ children }: { children: React.ReactNode }) {
 
       {/* Content Area */}
       <View className="flex-1 min-w-0 h-screen flex flex-col overflow-hidden relative">
-        <View className="flex-1 overflow-auto">
-          {children}
-        </View>
+        <View className="flex-1 overflow-auto">{children}</View>
       </View>
     </View>
   );
 }
 
-function SidebarHeader({ 
-  mobile = false, 
-  isCollapsed, 
-  theme, 
-  toggleTheme 
+function SidebarHeader({
+  mobile = false,
+  isCollapsed,
+  theme,
+  toggleTheme,
 }: any) {
   return (
-    <View className={cn("mb-6 transition-all duration-300 flex flex-row items-center justify-between", isCollapsed && !mobile ? "ml-0 justify-center" : "ml-2")}>
-      <Logo variant="cloud" size={24} suffix={isCollapsed && !mobile ? undefined : "tools"} showWordmark={!isCollapsed || mobile} />
+    <View
+      className={cn(
+        "mb-6 transition-all duration-300 flex flex-row items-center justify-between",
+        isCollapsed && !mobile ? "ml-0 justify-center" : "ml-2",
+      )}
+    >
+      <Logo
+        variant="cloud"
+        size={24}
+        suffix={isCollapsed && !mobile ? undefined : "tools"}
+        showWordmark={!isCollapsed || mobile}
+      />
       {(!isCollapsed || mobile) && (
         <button
           onClick={toggleTheme}
@@ -237,13 +264,13 @@ function SidebarHeader({
   );
 }
 
-function SidebarMenu({ 
-  mobile = false, 
-  isCollapsed, 
-  menuGroups, 
-  pathname, 
-  router, 
-  setIsMobileMenuOpen 
+function SidebarMenu({
+  mobile = false,
+  isCollapsed,
+  menuGroups,
+  pathname,
+  router,
+  setIsMobileMenuOpen,
 }: any) {
   return (
     <View className="flex flex-col gap-8 pb-8">
@@ -256,7 +283,9 @@ function SidebarMenu({
           )}
           <View className="flex flex-col gap-1">
             {group.items.map((item: any) => {
-              const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+              const isActive =
+                pathname === item.href ||
+                (item.href !== "/dashboard" && pathname.startsWith(item.href));
               return (
                 <Button
                   key={item.label}
@@ -270,28 +299,38 @@ function SidebarMenu({
                     isActive
                       ? "bg-primary/10 border border-primary/20"
                       : "hover:bg-muted/50 border border-transparent",
-                    isCollapsed && !mobile ? "justify-center px-0" : "justify-between"
+                    isCollapsed && !mobile
+                      ? "justify-center px-0"
+                      : "justify-between",
                   )}
                 >
                   <View className="flex flex-row items-center gap-3">
                     <item.icon
                       size={18}
-                      className={isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}
+                      className={
+                        isActive
+                          ? "text-primary"
+                          : "text-muted-foreground group-hover:text-foreground"
+                      }
                     />
                     {(!isCollapsed || mobile) && (
                       <Text
                         className={cn(
                           "font-bold uppercase text-[10px] tracking-[0.1em] whitespace-nowrap",
-                          isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                          isActive
+                            ? "text-primary"
+                            : "text-muted-foreground group-hover:text-foreground",
                         )}
                       >
                         {item.label}
                       </Text>
                     )}
                   </View>
-                  {!isCollapsed || mobile ? (
-                    isActive && <ChevronRight size={12} className="text-primary" />
-                  ) : null}
+                  {!isCollapsed || mobile
+                    ? isActive && (
+                        <ChevronRight size={12} className="text-primary" />
+                      )
+                    : null}
 
                   {/* Tooltip for collapsed state */}
                   {isCollapsed && !mobile && (
@@ -311,18 +350,14 @@ function SidebarMenu({
   );
 }
 
-function SidebarFooter({ 
-  mobile = false, 
-  isCollapsed, 
-  router 
-}: any) {
+function SidebarFooter({ mobile = false, isCollapsed, router }: any) {
   return (
     <Button
       variant="ghost"
       onClick={() => router.push("/logout")}
       className={cn(
         "flex items-center p-4 rounded-xl hover:bg-destructive/10 group w-full transition-all",
-        isCollapsed && !mobile ? "justify-center" : "gap-4"
+        isCollapsed && !mobile ? "justify-center" : "gap-4",
       )}
     >
       <LogOut
@@ -338,40 +373,40 @@ function SidebarFooter({
   );
 }
 
-function SidebarContent({ 
-  mobile = false, 
-  isCollapsed, 
-  theme, 
-  toggleTheme, 
-  menuGroups, 
-  pathname, 
-  router, 
-  setIsMobileMenuOpen 
+function SidebarContent({
+  mobile = false,
+  isCollapsed,
+  theme,
+  toggleTheme,
+  menuGroups,
+  pathname,
+  router,
+  setIsMobileMenuOpen,
 }: any) {
   return (
     <View className="flex flex-col h-full justify-between pb-8">
       <View>
-        <SidebarHeader 
-          mobile={mobile} 
-          isCollapsed={isCollapsed} 
-          theme={theme} 
-          toggleTheme={toggleTheme} 
+        <SidebarHeader
+          mobile={mobile}
+          isCollapsed={isCollapsed}
+          theme={theme}
+          toggleTheme={toggleTheme}
         />
-        <SidebarMenu 
-          mobile={mobile} 
-          isCollapsed={isCollapsed} 
-          menuGroups={menuGroups} 
-          pathname={pathname} 
-          router={router} 
-          setIsMobileMenuOpen={setIsMobileMenuOpen} 
+        <SidebarMenu
+          mobile={mobile}
+          isCollapsed={isCollapsed}
+          menuGroups={menuGroups}
+          pathname={pathname}
+          router={router}
+          setIsMobileMenuOpen={setIsMobileMenuOpen}
         />
       </View>
 
       <View>
-        <SidebarFooter 
-          mobile={mobile} 
-          isCollapsed={isCollapsed} 
-          router={router} 
+        <SidebarFooter
+          mobile={mobile}
+          isCollapsed={isCollapsed}
+          router={router}
         />
       </View>
     </View>

@@ -6,7 +6,9 @@ export function generateStaticParams() {
   return [{ id: "default" }];
 }
 
-export default async function DisplayPage(props: { params: Promise<{ id: string }> }) {
+export default async function DisplayPage(props: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await props.params;
   return (
     <Suspense fallback={<KioskLoading suffix="signage" />}>

@@ -16,7 +16,7 @@ import {
   Utensils,
   Box,
   DollarSign,
-  Loader2
+  Loader2,
 } from "lucide-react";
 
 const GET_DASHBOARD_METRICS = gql`
@@ -122,20 +122,29 @@ export default function DashboardPage() {
               <View className="p-3 bg-muted rounded-xl">
                 <s.icon size={20} className={s.color} />
               </View>
-              <Text className="text-muted-foreground/50 font-mono text-[10px]">LIVE</Text>
+              <Text className="text-muted-foreground/50 font-mono text-[10px]">
+                LIVE
+              </Text>
             </View>
             <View className="relative z-10">
               <Text className="text-3xl font-black text-foreground block">
-                {loading ? <Loader2 className="animate-spin text-muted-foreground" size={24} /> : s.value}
+                {loading ? (
+                  <Loader2
+                    className="animate-spin text-muted-foreground"
+                    size={24}
+                  />
+                ) : (
+                  s.value
+                )}
               </Text>
               <Text className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest mt-1 block">
                 {s.label}
               </Text>
             </View>
-            
+
             {/* Background Accent */}
             <div className={`absolute -right-4 -bottom-4 opacity-5 ${s.color}`}>
-               <s.icon size={120} />
+              <s.icon size={120} />
             </div>
           </Card>
         ))}
@@ -162,19 +171,17 @@ export default function DashboardPage() {
               {[
                 { label: "Scan Invoice", href: "/procurement/invoices" },
                 { label: "Add Recipe", href: "/operations/recipes" },
-                { label: "New Inventory Count", href: "/inventory" }
-              ].map(
-                (action) => (
-                  <Button
-                    key={action.label}
-                    className="p-4 bg-muted rounded-xl border border-border hover:bg-muted/80 transition-colors text-left"
-                  >
-                    <Text className="text-foreground font-bold text-sm uppercase tracking-tight">
-                      {action.label}
-                    </Text>
-                  </Button>
-                ),
-              )}
+                { label: "New Inventory Count", href: "/inventory" },
+              ].map((action) => (
+                <Button
+                  key={action.label}
+                  className="p-4 bg-muted rounded-xl border border-border hover:bg-muted/80 transition-colors text-left"
+                >
+                  <Text className="text-foreground font-bold text-sm uppercase tracking-tight">
+                    {action.label}
+                  </Text>
+                </Button>
+              ))}
             </View>
           </Card>
         </View>

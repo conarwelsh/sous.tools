@@ -22,7 +22,7 @@ The component transitions between four primary states:
     - **Behavior:**
       - Generates a transient `pairingCode` on mount.
       - Polls the API (or connects via WebSocket channel `pairing:{code}`) waiting for an Organization to claim it.
-      - *Timeout:* Codes expire every 15 minutes; auto-regenerate if expired.
+      - _Timeout:_ Codes expire every 15 minutes; auto-regenerate if expired.
 
 2.  **PENDING_CONFIG (Paired, No Content)**
     - **Trigger:** Successfully claimed by an Organization, but no specific `Screen` (Signage) or `Station` (KDS/POS) has been assigned yet.
@@ -48,6 +48,7 @@ The component transitions between four primary states:
 ## Logic & Resilience
 
 ### 1. Persistence
+
 - **Storage:** `localStorage` (Web) or `SQLite` (Native) stores:
   - `device_id`: The UUID generated upon successful pairing.
   - `device_token`: The long-lived JWT for hardware authentication.
@@ -57,12 +58,14 @@ The component transitions between four primary states:
   - If missing/invalid -> Go to **UNPAIRED**.
 
 ### 2. "Steal" & Reassignment Handling
+
 - **Scenario:** A user in Screen Manager assigns "HDMI 1" to a new Screen, "Lunch Menu".
 - **Event:** Server emits `device:config_update` to the specific `deviceId`.
 - **Action:** The `<DevicePairingFlow />` receives the payload containing the new `screenId`.
 - **Reaction:** It immediately updates the internal state, causing the `ACTIVE` view to re-render with the new content (Hot Swap). No reboot required.
 
 ### 3. Remote Unpair / Wipe
+
 - **Scenario:** Admin deletes the device from the Hardware Dashboard.
 - **Event:** Server emits `device:unpair` or returns 401 on Heartbeat.
 - **Action:**
@@ -71,7 +74,8 @@ The component transitions between four primary states:
   - Generate new pairing code.
 
 ### 4. Flavor Awareness
-- The Pairing Screen should visually indicate *what* flavor of app is running (e.g., "Sous KDS", "Sous POS", "Sous Signage") to help the Admin identify it during the pairing process in the web dashboard.
+
+- The Pairing Screen should visually indicate _what_ flavor of app is running (e.g., "Sous KDS", "Sous POS", "Sous Signage") to help the Admin identify it during the pairing process in the web dashboard.
 
 ## Implementation Plan
 

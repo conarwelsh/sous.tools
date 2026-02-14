@@ -27,11 +27,11 @@ import { config } from '@sous/config';
     }),
   ],
   providers: [
-    AppService, 
-    DatabaseService, 
-    MailService, 
+    AppService,
+    DatabaseService,
+    MailService,
     EmailProcessor,
-    DashboardResolver
+    DashboardResolver,
   ],
   controllers: [AppController],
   exports: [AppService, DatabaseService, MailService],

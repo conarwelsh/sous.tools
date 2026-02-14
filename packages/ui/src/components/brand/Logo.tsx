@@ -132,31 +132,65 @@ export const Logo: React.FC<LogoProps> = ({
   const renderIcon = () => {
     switch (variant) {
       case "api":
-        return <ApiLogo size={size} environment={logoEnv} animState={animState} />;
+        return (
+          <ApiLogo size={size} environment={logoEnv} animState={animState} />
+        );
       case "neon":
       case "cloud":
-        return <BrandCloud size={size} environment={logoEnv} animState={animState} />;
+        return (
+          <BrandCloud size={size} environment={logoEnv} animState={animState} />
+        );
       case "morph":
-        return <BrandMorph size={size} environment={logoEnv} animState={animState} />;
+        return (
+          <BrandMorph size={size} environment={logoEnv} animState={animState} />
+        );
       case "whisk":
-        return <BrandWhisk size={size} environment={logoEnv} animState={animState} />;
+        return (
+          <BrandWhisk size={size} environment={logoEnv} animState={animState} />
+        );
       case "circuit":
       case "hat-and-gear":
-        return <BrandHatGear size={size} environment={logoEnv} animState={animState} />;
+        return (
+          <BrandHatGear
+            size={size}
+            environment={logoEnv}
+            animState={animState}
+          />
+        );
       case "plate":
       case "kitchen-line":
-        return <BrandKitchenLine size={size} environment={logoEnv} animState={animState} />;
+        return (
+          <BrandKitchenLine
+            size={size}
+            environment={logoEnv}
+            animState={animState}
+          />
+        );
       case "pos":
-        return <PosLogo size={size} environment={logoEnv} animState={animState} />;
+        return (
+          <PosLogo size={size} environment={logoEnv} animState={animState} />
+        );
       case "kds":
-        return <KdsLogo size={size} environment={logoEnv} animState={animState} />;
+        return (
+          <KdsLogo size={size} environment={logoEnv} animState={animState} />
+        );
       case "signage":
-        return <SignageLogo size={size} environment={logoEnv} animState={animState} />;
+        return (
+          <SignageLogo
+            size={size}
+            environment={logoEnv}
+            animState={animState}
+          />
+        );
       case "tools":
       case "line":
-        return <DocsLogo size={size} environment={logoEnv} animState={animState} />;
+        return (
+          <DocsLogo size={size} environment={logoEnv} animState={animState} />
+        );
       default:
-        return <BrandCloud size={size} environment={logoEnv} animState={animState} />;
+        return (
+          <BrandCloud size={size} environment={logoEnv} animState={animState} />
+        );
     }
   };
 

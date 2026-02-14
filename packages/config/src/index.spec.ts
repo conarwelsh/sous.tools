@@ -47,16 +47,19 @@ describe("@sous/config", () => {
             url: "http://localhost:54321",
             anonKey: "test-key",
           },
-          cloudinary: {}
+          cloudinary: {},
         },
         logger: {
           level: "info",
-          json: false
-        }
+          json: false,
+        },
       };
       const result = configSchema.safeParse(validConfig);
       if (!result.success) {
-        console.log("Validation Errors:", JSON.stringify(result.error.format(), null, 2));
+        console.log(
+          "Validation Errors:",
+          JSON.stringify(result.error.format(), null, 2),
+        );
       }
       expect(result.success).toBe(true);
     });

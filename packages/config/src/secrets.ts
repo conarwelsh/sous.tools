@@ -24,7 +24,7 @@ export class SecretManager {
 
     if (!clientId || !clientSecret || !projectId) {
       throw new Error(
-        "Missing Infisical bootstrap credentials (INFISICAL_CLIENT_ID, INFISICAL_CLIENT_SECRET, INFISICAL_PROJECT_ID)"
+        "Missing Infisical bootstrap credentials (INFISICAL_CLIENT_ID, INFISICAL_CLIENT_SECRET, INFISICAL_PROJECT_ID)",
       );
     }
 
@@ -60,7 +60,7 @@ export class SecretManager {
   async listSecrets(env: string): Promise<Record<string, string>> {
     await this.ensureInitialized();
     const infisicalEnv = this.mapEnv(env);
-    
+
     const response = await this.client.secrets().listSecrets({
       environment: infisicalEnv,
       projectId: this.credentials.projectId,
@@ -86,7 +86,7 @@ export class SecretManager {
         secretPath: "/",
         type: "shared" as any,
       });
-      
+
       // Update existing
       await this.client.secrets().updateSecret(key, {
         environment: infisicalEnv,

@@ -223,14 +223,17 @@ export class CulinaryResolver {
     @Args('input') input: UpdateRecipeInput,
   ) {
     const { ingredients, steps, ...data } = input;
-    return this.culinaryService.updateRecipe(id, orgId, data, ingredients as any, steps as any);
+    return this.culinaryService.updateRecipe(
+      id,
+      orgId,
+      data,
+      ingredients as any,
+      steps as any,
+    );
   }
 
   @Mutation(() => RecipeType, { nullable: true })
-  async deleteRecipe(
-    @Args('orgId') orgId: string,
-    @Args('id') id: string,
-  ) {
+  async deleteRecipe(@Args('orgId') orgId: string, @Args('id') id: string) {
     return this.culinaryService.deleteRecipe(id, orgId);
   }
 

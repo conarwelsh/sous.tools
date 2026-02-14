@@ -5,12 +5,12 @@ import { config } from '@sous/config';
 import { logger } from '@sous/logger';
 import { render } from '@react-email/components';
 import * as React from 'react';
-import { 
-  InvitationEmail, 
-  PasswordResetEmail, 
-  WelcomeEmail, 
-  OrderEmail, 
-  LowStockEmail 
+import {
+  InvitationEmail,
+  PasswordResetEmail,
+  WelcomeEmail,
+  OrderEmail,
+  LowStockEmail,
 } from '@sous/emails';
 import { EmailJobData } from './mail.service.js';
 
@@ -27,7 +27,7 @@ export class EmailProcessor extends WorkerHost {
 
   async process(job: Job<EmailJobData>): Promise<any> {
     const { to, subject, template, context } = job.data;
-    
+
     logger.info(`⚙️ Processing Email Job: ${job.id} (${template})`);
 
     let component: React.ReactElement;

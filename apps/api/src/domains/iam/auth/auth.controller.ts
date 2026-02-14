@@ -161,19 +161,22 @@ export class AuthController {
     const { clientId, clientSecret, redirectUri } = config.github;
 
     // 1. Exchange code for token
-    const tokenRes = await fetch('https://github.com/login/oauth/access_token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
+    const tokenRes = await fetch(
+      'https://github.com/login/oauth/access_token',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          code,
+          client_id: clientId || '',
+          client_secret: clientSecret || '',
+          redirect_uri: redirectUri || `${config.api.url}/auth/github-callback`,
+        }),
       },
-      body: JSON.stringify({
-        code,
-        client_id: clientId || '',
-        client_secret: clientSecret || '',
-        redirect_uri: redirectUri || `${config.api.url}/auth/github-callback`,
-      }),
-    });
+    );
 
     const tokenData = await tokenRes.json();
     if (!tokenRes.ok || !tokenData.access_token)

@@ -2,12 +2,23 @@
 
 import React, { useState } from "react";
 import { View, Text, Button, Card, Input, GoogleLogo } from "@sous/ui";
-import { User, Save, Lock, Loader2, CheckCircle2, Link as LinkIcon } from "lucide-react";
+import {
+  User,
+  Save,
+  Lock,
+  Loader2,
+  CheckCircle2,
+  Link as LinkIcon,
+} from "lucide-react";
 import { useAuth, AuthService } from "@sous/features";
 
 export default function PersonalSettingsPage() {
   const { user } = useAuth();
-  const [passwords, setPasswords] = useState({ currentPass: "", newPass: "", confirmPass: "" });
+  const [passwords, setPasswords] = useState({
+    currentPass: "",
+    newPass: "",
+    confirmPass: "",
+  });
   const [isChangingPass, setIsChangingPass] = useState(false);
   const [passError, setPassError] = useState<string | null>(null);
   const [passSuccess, setPassSuccess] = useState(false);
@@ -21,7 +32,7 @@ export default function PersonalSettingsPage() {
     setPassError(null);
     try {
       // Mock call or AuthService.changePassword
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setPassSuccess(true);
       setPasswords({ currentPass: "", newPass: "", confirmPass: "" });
     } catch (e) {
@@ -55,20 +66,24 @@ export default function PersonalSettingsPage() {
                     Your account preferences
                   </Text>
                 </View>
-                
+
                 {!(user as any)?.googleId ? (
-                  <Button 
+                  <Button
                     onClick={handleLinkGoogle}
                     variant="outline"
                     className="h-10 border-border hover:bg-muted gap-2"
                   >
                     <GoogleLogo size={16} />
-                    <Text className="text-[10px] font-black uppercase tracking-widest">Link Google Profile</Text>
+                    <Text className="text-[10px] font-black uppercase tracking-widest">
+                      Link Google Profile
+                    </Text>
                   </Button>
                 ) : (
                   <View className="flex-row items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full">
                     <CheckCircle2 size={12} className="text-emerald-500" />
-                    <Text className="text-emerald-500 font-black uppercase text-[8px] tracking-widest">Google Linked</Text>
+                    <Text className="text-emerald-500 font-black uppercase text-[8px] tracking-widest">
+                      Google Linked
+                    </Text>
                   </View>
                 )}
               </View>
@@ -119,10 +134,12 @@ export default function PersonalSettingsPage() {
               <Text className="text-muted-foreground/60 font-bold uppercase text-[10px] tracking-widest ml-1">
                 Current Password
               </Text>
-              <Input 
-                type="password" 
+              <Input
+                type="password"
                 value={passwords.currentPass}
-                onChange={(e) => setPasswords({ ...passwords, currentPass: e.target.value })}
+                onChange={(e) =>
+                  setPasswords({ ...passwords, currentPass: e.target.value })
+                }
                 className="bg-muted/20 border-border h-12"
               />
             </View>
@@ -132,10 +149,12 @@ export default function PersonalSettingsPage() {
                 <Text className="text-muted-foreground/60 font-bold uppercase text-[10px] tracking-widest ml-1">
                   New Password
                 </Text>
-                <Input 
-                  type="password" 
+                <Input
+                  type="password"
                   value={passwords.newPass}
-                  onChange={(e) => setPasswords({ ...passwords, newPass: e.target.value })}
+                  onChange={(e) =>
+                    setPasswords({ ...passwords, newPass: e.target.value })
+                  }
                   className="bg-muted/20 border-border h-12"
                 />
               </View>
@@ -143,10 +162,12 @@ export default function PersonalSettingsPage() {
                 <Text className="text-muted-foreground/60 font-bold uppercase text-[10px] tracking-widest ml-1">
                   Confirm New Password
                 </Text>
-                <Input 
-                  type="password" 
+                <Input
+                  type="password"
                   value={passwords.confirmPass}
-                  onChange={(e) => setPasswords({ ...passwords, confirmPass: e.target.value })}
+                  onChange={(e) =>
+                    setPasswords({ ...passwords, confirmPass: e.target.value })
+                  }
                   className="bg-muted/20 border-border h-12"
                 />
               </View>
@@ -154,26 +175,37 @@ export default function PersonalSettingsPage() {
 
             {passError && (
               <View className="p-4 bg-destructive/10 border border-destructive/20 rounded-xl">
-                <Text className="text-destructive text-xs font-bold uppercase text-center">{passError}</Text>
+                <Text className="text-destructive text-xs font-bold uppercase text-center">
+                  {passError}
+                </Text>
               </View>
             )}
 
             {passSuccess && (
               <View className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex-row items-center justify-center gap-2">
                 <CheckCircle2 size={16} className="text-emerald-500" />
-                <Text className="text-emerald-500 text-xs font-bold uppercase">Password updated successfully</Text>
+                <Text className="text-emerald-500 text-xs font-bold uppercase">
+                  Password updated successfully
+                </Text>
               </View>
             )}
 
-            <Button 
+            <Button
               onClick={handleChangePassword}
-              disabled={isChangingPass || !passwords.currentPass || !passwords.newPass}
+              disabled={
+                isChangingPass || !passwords.currentPass || !passwords.newPass
+              }
               className="h-12 bg-primary hover:bg-primary/90 mt-2"
             >
               {isChangingPass ? (
-                <Loader2 size={18} className="animate-spin text-primary-foreground" />
+                <Loader2
+                  size={18}
+                  className="animate-spin text-primary-foreground"
+                />
               ) : (
-                <Text className="text-primary-foreground font-black uppercase text-xs tracking-widest">Update Password</Text>
+                <Text className="text-primary-foreground font-black uppercase text-xs tracking-widest">
+                  Update Password
+                </Text>
               )}
             </Button>
           </View>

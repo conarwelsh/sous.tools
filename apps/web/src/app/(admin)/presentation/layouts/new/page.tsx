@@ -13,7 +13,7 @@ export default function NewLayoutPage() {
       const http = await getHttpClient();
       const payload = {
         name: layout.name,
-        type: layout.type || 'TEMPLATE',
+        type: layout.type || "TEMPLATE",
         structure: JSON.stringify(layout.structure),
         content: JSON.stringify(layout.content || {}),
         config: JSON.stringify(layout.config || {}),
@@ -26,9 +26,9 @@ export default function NewLayoutPage() {
   };
 
   return (
-    <LayoutDesigner 
-      onSave={handleSave} 
-      onCancel={() => router.push("/presentation/layouts")} 
+    <LayoutDesigner
+      onSave={handleSave}
+      onCancel={() => router.push("/presentation/layouts")}
     />
   );
 }

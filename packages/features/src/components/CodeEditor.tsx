@@ -96,21 +96,28 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   onChange,
   language,
   placeholder,
-  className
+  className,
 }) => {
   return (
-    <div className={cn("relative group border border-border rounded-xl bg-background overflow-hidden flex flex-col", className)}>
+    <div
+      className={cn(
+        "relative group border border-border rounded-xl bg-background overflow-hidden flex flex-col",
+        className,
+      )}
+    >
       <style dangerouslySetInnerHTML={{ __html: prismStyles }} />
       <div className="flex-1 overflow-auto min-h-0">
         <Editor
           value={value || ""}
           onValueChange={onChange}
-          highlight={(code) => highlight(code || "", languages[language], language)}
+          highlight={(code) =>
+            highlight(code || "", languages[language], language)
+          }
           padding={24}
           placeholder={placeholder}
           className="prism-editor min-h-full outline-none text-foreground"
           style={{
-            minHeight: '100%',
+            minHeight: "100%",
           }}
         />
       </div>

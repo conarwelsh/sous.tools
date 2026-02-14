@@ -53,18 +53,21 @@ export const PresentationEditor: React.FC<PresentationEditorProps> = ({
     setStatus("loading");
     try {
       const http = await getHttpClient();
-      
+
       // Map bindings to the format expected by the API
-      const content = Object.keys(bindings).reduce((acc, slotId) => {
-        acc[slotId] = bindings[slotId].value;
-        return acc;
-      }, {} as Record<string, string>);
+      const content = Object.keys(bindings).reduce(
+        (acc, slotId) => {
+          acc[slotId] = bindings[slotId].value;
+          return acc;
+        },
+        {} as Record<string, string>,
+      );
 
       await http.post("/presentation/assignments", {
         displayId: display.id,
         templateId: selectedTemplate.id,
         content: JSON.stringify(content),
-        isActive: true
+        isActive: true,
       });
 
       setStatus("success");
@@ -85,8 +88,13 @@ export const PresentationEditor: React.FC<PresentationEditorProps> = ({
         <h1 className="text-3xl font-black text-foreground tracking-tighter uppercase">
           Editing: {display.name}
         </h1>
-        <Button onClick={onCancel} className="bg-secondary h-10 px-6 hover:bg-secondary/80">
-          <span className="text-secondary-foreground font-black uppercase tracking-widest text-[10px]">Back to list</span>
+        <Button
+          onClick={onCancel}
+          className="bg-secondary h-10 px-6 hover:bg-secondary/80"
+        >
+          <span className="text-secondary-foreground font-black uppercase tracking-widest text-[10px]">
+            Back to list
+          </span>
         </Button>
       </div>
 

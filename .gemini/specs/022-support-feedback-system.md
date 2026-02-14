@@ -11,6 +11,7 @@ Implement a high-quality, user-friendly support and feedback system that bridges
 ## User Experience (UI/UX)
 
 ### 1. The Support Hub (`<SupportPage />`)
+
 - **Location:** Accessible via `/support` in the web shell.
 - **Visuals:** Clean layout with cards for "Report a Bug", "Request a Feature", and "Contact Support".
 - **Feedback Form:**
@@ -24,11 +25,13 @@ Implement a high-quality, user-friendly support and feedback system that bridges
     - Current URL / View.
 
 ### 2. The Feedback Modal (`<FeedbackModal />`)
+
 - A compact, slide-over or modal version of the support form that can be triggered from anywhere in the application (e.g., via a "Feedback" button in the sidebar or footer).
 
 ## Technical Architecture
 
 ### 1. Feature Package (`@sous/features/support`)
+
 - **Components:**
   - `SupportForm`: The core form logic using `react-hook-form` and `zod`.
   - `SupportCategoryCard`: Visual selection for report types.
@@ -38,6 +41,7 @@ Implement a high-quality, user-friendly support and feedback system that bridges
   - `submitFeedbackAction`: A Server Action that forwards the request to the `@sous/api`.
 
 ### 2. API Domain (`apps/api/src/domains/support`)
+
 - **Controller:** `SupportController`
   - `POST /support/report`: Receives the feedback payload.
 - **Service:** `SupportService`
@@ -53,10 +57,10 @@ Implement a high-quality, user-friendly support and feedback system that bridges
 
 ```typescript
 interface SupportReport {
-  type: 'BUG' | 'FEATURE' | 'QUESTION';
+  type: "BUG" | "FEATURE" | "QUESTION";
   subject: string;
   description: string;
-  priority?: 'LOW' | 'MEDIUM' | 'HIGH';
+  priority?: "LOW" | "MEDIUM" | "HIGH";
   metadata: {
     appVersion: string;
     orgId: string;

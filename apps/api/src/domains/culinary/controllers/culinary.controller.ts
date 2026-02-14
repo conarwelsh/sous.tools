@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Patch, Delete, Body, Req, UseGuards, Query, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Req,
+  UseGuards,
+  Query,
+  Param,
+} from '@nestjs/common';
 import { CulinaryService } from '../services/culinary.service.js';
 import { JwtAuthGuard } from '../../iam/auth/guards/jwt-auth.guard.js';
 
@@ -28,7 +39,11 @@ export class CulinaryController {
     @Query('tags') tags?: string,
   ) {
     const tagList = tags ? tags.split(',') : undefined;
-    return this.culinaryService.getRecipes(req.user.organizationId, { search, source, tags: tagList });
+    return this.culinaryService.getRecipes(req.user.organizationId, {
+      search,
+      source,
+      tags: tagList,
+    });
   }
 
   @Post('recipes')
@@ -41,7 +56,11 @@ export class CulinaryController {
   }
 
   @Patch('recipes/:id')
-  async updateRecipe(@Param('id') id: string, @Body() body: any, @Req() req: any) {
+  async updateRecipe(
+    @Param('id') id: string,
+    @Body() body: any,
+    @Req() req: any,
+  ) {
     const { ingredients, steps, ...recipeData } = body;
     return this.culinaryService.updateRecipe(
       id,

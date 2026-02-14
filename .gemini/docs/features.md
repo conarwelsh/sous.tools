@@ -58,16 +58,16 @@
 
 ## Deployment Targets
 
-| Platform            | Strategy                          | Status          |
-| :------------------ | :-------------------------------- | :-------------- |
-| **Web / Admin**     | Vercel (Next.js)                  | ✅ Stable       |
-| **Android / iOS**   | Capacitor Shell (Flavor: tools)   | ✅ Stable       |
-| **KDS / POS**       | Capacitor Shell (Flavor: kds/pos) | ✅ Stable       |
-| **Signage Node**    | Android OS (Flavor: signage)      | ✅ Stable       |
-| **Signage Simulator** | Redroid (Docker)                | ✅ Stable       |
-| **Wear OS**         | Native Android (Kotlin/Compose)   | ✅ Functional  |
-| **Dev Bridge**      | WSL-Windows Health Recovery       | ✅ Stable       |
-| **Backend**         | Render (NestJS)                   | ✅ Stable       |
+| Platform              | Strategy                          | Status        |
+| :-------------------- | :-------------------------------- | :------------ |
+| **Web / Admin**       | Vercel (Next.js)                  | ✅ Stable     |
+| **Android / iOS**     | Capacitor Shell (Flavor: tools)   | ✅ Stable     |
+| **KDS / POS**         | Capacitor Shell (Flavor: kds/pos) | ✅ Stable     |
+| **Signage Node**      | Android OS (Flavor: signage)      | ✅ Stable     |
+| **Signage Simulator** | Redroid (Docker)                  | ✅ Stable     |
+| **Wear OS**           | Native Android (Kotlin/Compose)   | ✅ Functional |
+| **Dev Bridge**        | WSL-Windows Health Recovery       | ✅ Stable     |
+| **Backend**           | Render (NestJS)                   | ✅ Stable     |
 
 ## Infrastructure & Domains
 

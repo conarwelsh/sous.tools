@@ -22,21 +22,30 @@ export const OrderEmail = ({
       Purchase Order
     </Heading>
     <Text className="text-zinc-600 text-sm mb-6">
-      Dear {vendorName}, please find the purchase order from **{orgName}** below.
+      Dear {vendorName}, please find the purchase order from **{orgName}**
+      below.
     </Text>
-    
+
     <Section className="bg-zinc-50 p-6 rounded-2xl border border-zinc-100 mb-8">
-      <Text className="text-[10px] font-black uppercase text-zinc-400 mb-4 tracking-widest">Items Requested</Text>
+      <Text className="text-[10px] font-black uppercase text-zinc-400 mb-4 tracking-widest">
+        Items Requested
+      </Text>
       {items.map((item, idx) => (
         <div key={idx} className="flex justify-between items-center mb-3">
-          <Text className="text-sm font-bold text-zinc-900 m-0 uppercase">{item.name}</Text>
-          <Text className="text-sm font-mono text-zinc-500 m-0">{item.quantity} {item.unit}</Text>
+          <Text className="text-sm font-bold text-zinc-900 m-0 uppercase">
+            {item.name}
+          </Text>
+          <Text className="text-sm font-mono text-zinc-500 m-0">
+            {item.quantity} {item.unit}
+          </Text>
         </div>
       ))}
       {notes && (
         <>
           <Hr className="border-zinc-200 my-4" />
-          <Text className="text-[10px] font-black uppercase text-zinc-400 mb-1 tracking-widest">Notes</Text>
+          <Text className="text-[10px] font-black uppercase text-zinc-400 mb-1 tracking-widest">
+            Notes
+          </Text>
           <Text className="text-xs text-zinc-600 italic">{notes}</Text>
         </>
       )}

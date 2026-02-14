@@ -6,16 +6,16 @@ import { useAuth } from "../../iam/auth/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { gql } from "@apollo/client";
 import { useQuery, useSubscription } from "@apollo/client/react";
-import { 
-  Monitor, 
-  Smartphone, 
-  Watch, 
-  Terminal, 
-  Cpu, 
-  Wifi, 
+import {
+  Monitor,
+  Smartphone,
+  Watch,
+  Terminal,
+  Cpu,
+  Wifi,
   Activity,
   Settings as SettingsIcon,
-  Trash2
+  Trash2,
 } from "lucide-react";
 
 const GET_DEVICES = gql`
@@ -51,7 +51,7 @@ const DEVICE_UPDATED_SUBSCRIPTION = gql`
 export const HardwareManager = () => {
   const { user } = useAuth();
   const router = useRouter();
-  
+
   const orgId = user?.organizationId || "";
 
   const { data, loading, error, refetch } = useQuery<any>(GET_DEVICES, {
@@ -71,11 +71,16 @@ export const HardwareManager = () => {
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case "signage": return Monitor;
-      case "pos": return Smartphone;
-      case "kds": return Terminal;
-      case "watch": return Watch;
-      default: return Cpu;
+      case "signage":
+        return Monitor;
+      case "pos":
+        return Smartphone;
+      case "kds":
+        return Terminal;
+      case "watch":
+        return Watch;
+      default:
+        return Cpu;
     }
   };
 
@@ -124,9 +129,14 @@ export const HardwareManager = () => {
         {devices.map((device: any) => {
           const Icon = getTypeIcon(device.type);
           const metadata = device.metadata ? JSON.parse(device.metadata) : {};
-          const lastHeartbeat = device.lastHeartbeat ? new Date(device.lastHeartbeat) : null;
+          const lastHeartbeat = device.lastHeartbeat
+            ? new Date(device.lastHeartbeat)
+            : null;
           // Determine online status based on heartbeat (e.g., within last 60 seconds)
-          const isOnline = device.status === "online" && (lastHeartbeat && Date.now() - lastHeartbeat.getTime() < 60000);
+          const isOnline =
+            device.status === "online" &&
+            lastHeartbeat &&
+            Date.now() - lastHeartbeat.getTime() < 60000;
 
           return (
             <Card
@@ -135,12 +145,17 @@ export const HardwareManager = () => {
             >
               {/* Background Decor */}
               <div className="absolute -right-4 -top-4 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity">
-                  <Icon size={120} className="text-foreground" />
+                <Icon size={120} className="text-foreground" />
               </div>
 
               <div className="flex flex-row justify-between items-start mb-8 relative z-10">
                 <div className="h-14 w-14 rounded-2xl bg-muted border border-border flex items-center justify-center shadow-2xl">
-                  <Icon size={24} className={isOnline ? "text-primary" : "text-muted-foreground"} />
+                  <Icon
+                    size={24}
+                    className={
+                      isOnline ? "text-primary" : "text-muted-foreground"
+                    }
+                  />
                 </div>
                 <div className="flex flex-col items-end">
                   <div
@@ -149,7 +164,7 @@ export const HardwareManager = () => {
                     {isOnline ? "Online" : "Offline"}
                   </div>
                   <Text className="text-[8px] font-mono text-muted-foreground/50 uppercase">
-                      {device.hardwareId}
+                    {device.hardwareId}
                   </Text>
                 </div>
               </div>
@@ -168,37 +183,47 @@ export const HardwareManager = () => {
 
               {/* Metrics Grid */}
               <div className="grid grid-cols-2 gap-2 mb-8 relative z-10">
-                  <div className="bg-muted/40 rounded-xl p-3 border border-border/50">
-                    <div className="flex flex-row items-center gap-2 mb-1">
-                        <Activity size={10} className="text-muted-foreground" />
-                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Health</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-foreground uppercase truncate block">
-                        {metadata.platform || "Standard"}
+                <div className="bg-muted/40 rounded-xl p-3 border border-border/50">
+                  <div className="flex flex-row items-center gap-2 mb-1">
+                    <Activity size={10} className="text-muted-foreground" />
+                    <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">
+                      Health
                     </span>
                   </div>
-                  <div className="bg-muted/40 rounded-xl p-3 border border-border/50">
-                    <div className="flex flex-row items-center gap-2 mb-1">
-                        <Wifi size={10} className="text-muted-foreground" />
-                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Network</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-foreground uppercase truncate block">
-                        {device.ipAddress || "Connected"}
+                  <span className="text-[10px] font-bold text-foreground uppercase truncate block">
+                    {metadata.platform || "Standard"}
+                  </span>
+                </div>
+                <div className="bg-muted/40 rounded-xl p-3 border border-border/50">
+                  <div className="flex flex-row items-center gap-2 mb-1">
+                    <Wifi size={10} className="text-muted-foreground" />
+                    <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">
+                      Network
                     </span>
                   </div>
+                  <span className="text-[10px] font-bold text-foreground uppercase truncate block">
+                    {device.ipAddress || "Connected"}
+                  </span>
+                </div>
               </div>
 
               <div className="mt-auto pt-6 border-t border-border flex flex-row gap-2 relative z-10">
                 <Button className="flex-1 h-10 bg-muted hover:bg-primary/10 group/btn border border-transparent hover:border-primary/20">
                   <View className="flex flex-row items-center justify-center gap-2">
-                      <SettingsIcon size={14} className="text-muted-foreground group-hover/btn:text-primary" />
-                      <span className="text-muted-foreground group-hover/btn:text-foreground text-[10px] font-black uppercase tracking-widest">
-                        Manage
-                      </span>
+                    <SettingsIcon
+                      size={14}
+                      className="text-muted-foreground group-hover/btn:text-primary"
+                    />
+                    <span className="text-muted-foreground group-hover/btn:text-foreground text-[10px] font-black uppercase tracking-widest">
+                      Manage
+                    </span>
                   </View>
                 </Button>
                 <Button className="h-10 w-10 bg-muted hover:bg-destructive/20 flex items-center justify-center group/del">
-                  <Trash2 size={14} className="text-muted-foreground group-hover/del:text-destructive" />
+                  <Trash2
+                    size={14}
+                    className="text-muted-foreground group-hover/del:text-destructive"
+                  />
                 </Button>
               </div>
             </Card>

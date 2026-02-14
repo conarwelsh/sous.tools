@@ -38,22 +38,32 @@ export function TemplateSkeletonRenderer({
 
   const scaledStyles: React.CSSProperties = {
     ...styles,
-    display: styles.display || (type === 'container' ? 'flex' : undefined),
+    display: styles.display || (type === "container" ? "flex" : undefined),
     gridTemplateColumns: styles.gridTemplateColumns,
     gridTemplateRows: styles.gridTemplateRows,
     gap: styles.gap,
-    width: styles.width || ((type === "container" || type === "slot") ? "100%" : 'auto'),
-    height: styles.height || ((type === "container" || type === "slot") ? "100%" : 'auto'),
-    minWidth: type === 'fixed' ? (styles.minWidth || 120) : (styles.minWidth || (isEditMode ? 40 : 0)),
-    minHeight: type === 'fixed' ? (styles.minHeight || 80) : (styles.minHeight || (isEditMode ? 40 : 0)),
-    alignSelf: 'stretch',
-    justifySelf: 'stretch',
-    position: type === 'fixed' ? 'absolute' : 'relative',
-    left: type === 'fixed' ? (styles.left || '10%') : undefined,
-    top: type === 'fixed' ? (styles.top || '10%') : undefined,
-    zIndex: type === 'fixed' ? 100 : undefined,
+    width:
+      styles.width ||
+      (type === "container" || type === "slot" ? "100%" : "auto"),
+    height:
+      styles.height ||
+      (type === "container" || type === "slot" ? "100%" : "auto"),
+    minWidth:
+      type === "fixed"
+        ? styles.minWidth || 120
+        : styles.minWidth || (isEditMode ? 40 : 0),
+    minHeight:
+      type === "fixed"
+        ? styles.minHeight || 80
+        : styles.minHeight || (isEditMode ? 40 : 0),
+    alignSelf: "stretch",
+    justifySelf: "stretch",
+    position: type === "fixed" ? "absolute" : "relative",
+    left: type === "fixed" ? styles.left || "10%" : undefined,
+    top: type === "fixed" ? styles.top || "10%" : undefined,
+    zIndex: type === "fixed" ? 100 : undefined,
     transform: scale !== 1 ? `scale(${scale})` : undefined,
-    transformOrigin: 'top left',
+    transformOrigin: "top left",
   } as any;
 
   const handleClick = (e: React.MouseEvent) => {
@@ -67,7 +77,7 @@ export function TemplateSkeletonRenderer({
   };
 
   const getGridCount = (template?: string) => {
-    if (!template || typeof template !== 'string') return 1;
+    if (!template || typeof template !== "string") return 1;
     return template.trim().split(/\s+/).length;
   };
 
@@ -85,7 +95,9 @@ export function TemplateSkeletonRenderer({
     } else if (children) {
       childrenContent = children.map((child, index) => (
         <TemplateSkeletonRenderer
-          key={(child as any)._internalId || `${child.type}-${child.id || index}`}
+          key={
+            (child as any)._internalId || `${child.type}-${child.id || index}`
+          }
           node={child}
           isEditMode={isEditMode}
           onSlotClick={onSlotClick}
@@ -119,40 +131,48 @@ export function TemplateSkeletonRenderer({
     return childrenContent;
   };
 
-  const isSelected = selectedNodeId && (id === selectedNodeId || (node as any)._internalId === selectedNodeId);
+  const isSelected =
+    selectedNodeId &&
+    (id === selectedNodeId || (node as any)._internalId === selectedNodeId);
 
   const baseClasses = cn(
     "relative flex flex-col transition-all",
     (type === "container" || type === "slot") && "flex-1 w-full h-full",
-    styles.display === 'grid' && "layout-grid-container",
-    type === "slot" && "border-2 border-dashed border-border/50 bg-muted/5 hover:border-primary/50 hover:bg-primary/5 cursor-pointer",
-    type === "fixed" && "border-2 border-white/10 bg-card shadow-2xl rounded-2xl overflow-hidden",
-    isEditMode && type === "container" && "border border-dashed border-border/30 p-1 cursor-pointer hover:border-primary/30",
+    styles.display === "grid" && "layout-grid-container",
+    type === "slot" &&
+      "border-2 border-dashed border-border/50 bg-muted/5 hover:border-primary/50 hover:bg-primary/5 cursor-pointer",
+    type === "fixed" &&
+      "border-2 border-white/10 bg-card shadow-2xl rounded-2xl overflow-hidden",
+    isEditMode &&
+      type === "container" &&
+      "border border-dashed border-border/30 p-1 cursor-pointer hover:border-primary/30",
     isEditMode && type === "slot" && "p-1",
-    isSelected && "ring-2 ring-primary z-[60] bg-primary/5 shadow-[0_0_50px_rgba(14,165,233,0.3)] border-solid border-primary/50"
+    isSelected &&
+      "ring-2 ring-primary z-[60] bg-primary/5 shadow-[0_0_50px_rgba(14,165,233,0.3)] border-solid border-primary/50",
   );
 
   return (
-    <div
-      style={scaledStyles}
-      className={baseClasses}
-      onClick={handleClick}
-    >
+    <div style={scaledStyles} className={baseClasses} onClick={handleClick}>
       {/* Grid Helper Lines for Edit Mode */}
-      {isEditMode && type === 'container' && styles.display === 'grid' && (
-        <div 
-          className="absolute inset-0 pointer-events-none opacity-5 z-0" 
+      {isEditMode && type === "container" && styles.display === "grid" && (
+        <div
+          className="absolute inset-0 pointer-events-none opacity-5 z-0"
           style={{
-            display: 'grid',
+            display: "grid",
             gridTemplateColumns: styles.gridTemplateColumns as string,
             gridTemplateRows: styles.gridTemplateRows as string,
             gap: styles.gap as any,
           }}
         >
-          {Array.from({ 
-            length: getGridCount(styles.gridTemplateColumns as string) * getGridCount(styles.gridTemplateRows as string) 
+          {Array.from({
+            length:
+              getGridCount(styles.gridTemplateColumns as string) *
+              getGridCount(styles.gridTemplateRows as string),
           }).map((_, i) => (
-            <div key={i} className="border border-white min-h-[40px] min-w-[40px]" />
+            <div
+              key={i}
+              className="border border-white min-h-[40px] min-w-[40px]"
+            />
           ))}
         </div>
       )}
@@ -161,11 +181,16 @@ export function TemplateSkeletonRenderer({
       {isEditMode && !isRoot && (
         <div className="absolute top-0 left-0 bg-black/60 px-1.5 py-0.5 rounded-br z-20 pointer-events-none flex flex-row items-center gap-1.5 backdrop-blur-md">
           <span className="text-white/60 font-black uppercase text-[6px] tracking-widest">
-            {type === 'container' ? (styles.display === 'grid' ? 'grid' : 'flex') : type}{name ? `: ${name}` : ''}
+            {type === "container"
+              ? styles.display === "grid"
+                ? "grid"
+                : "flex"
+              : type}
+            {name ? `: ${name}` : ""}
           </span>
         </div>
       )}
-      
+
       {renderContent()}
     </div>
   );

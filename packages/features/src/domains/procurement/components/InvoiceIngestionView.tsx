@@ -1,7 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { DocumentIngestor, IngestionReviewer, EntityMapper } from "../../ingestion/index";
+import {
+  DocumentIngestor,
+  IngestionReviewer,
+  EntityMapper,
+} from "../../ingestion/index";
 import { View, Text, Input } from "@sous/ui";
 import { FileText, Calendar, User, DollarSign } from "lucide-react";
 
@@ -23,7 +27,7 @@ export function InvoiceIngestionView() {
   if (step === "upload") {
     return (
       <View className="flex-1 items-center justify-center bg-background p-8">
-        <DocumentIngestor 
+        <DocumentIngestor
           onUpload={handleUpload}
           isLoading={isProcessing}
           title="Invoice Ingestion"
@@ -49,24 +53,39 @@ export function InvoiceIngestionView() {
           <View className="flex-1 gap-2">
             <View className="flex-row items-center gap-2">
               <Calendar size={12} className="text-primary" />
-              <Text className="text-muted-foreground/60 font-bold uppercase text-[8px] tracking-widest">Date</Text>
+              <Text className="text-muted-foreground/60 font-bold uppercase text-[8px] tracking-widest">
+                Date
+              </Text>
             </View>
-            <Input defaultValue="2026-02-09" className="h-10 bg-muted/40 border-border text-xs" />
+            <Input
+              defaultValue="2026-02-09"
+              className="h-10 bg-muted/40 border-border text-xs"
+            />
           </View>
           <View className="flex-1 gap-2">
             <View className="flex-row items-center gap-2">
               <FileText size={12} className="text-primary" />
-              <Text className="text-muted-foreground/60 font-bold uppercase text-[8px] tracking-widest">Invoice #</Text>
+              <Text className="text-muted-foreground/60 font-bold uppercase text-[8px] tracking-widest">
+                Invoice #
+              </Text>
             </View>
-            <Input defaultValue="INV-99201" className="h-10 bg-muted/40 border-border text-xs" />
+            <Input
+              defaultValue="INV-99201"
+              className="h-10 bg-muted/40 border-border text-xs"
+            />
           </View>
         </View>
         <View className="gap-2">
           <View className="flex-row items-center gap-2">
             <User size={12} className="text-primary" />
-            <Text className="text-muted-foreground/60 font-bold uppercase text-[8px] tracking-widest">Vendor</Text>
+            <Text className="text-muted-foreground/60 font-bold uppercase text-[8px] tracking-widest">
+              Vendor
+            </Text>
           </View>
-          <Input defaultValue="Sysco Food Services" className="h-10 bg-muted/40 border-border text-xs" />
+          <Input
+            defaultValue="Sysco Food Services"
+            className="h-10 bg-muted/40 border-border text-xs"
+          />
         </View>
       </View>
 
@@ -82,44 +101,74 @@ export function InvoiceIngestionView() {
         </View>
 
         <View className="gap-4">
-          <EntityMapper 
+          <EntityMapper
             originalText="SYSCO RED TOM 5X6 25LB"
             suggestedMatch={{ id: "1", name: "Tomato, Red", confidence: 0.95 }}
             onMatch={(id) => console.log(id)}
           />
           <View className="flex-row gap-4 ml-4 pl-4 border-l-2 border-border">
-             <View className="flex-1 gap-1">
-                <Text className="text-muted-foreground/40 font-bold uppercase text-[8px]">Qty</Text>
-                <Input defaultValue="1" className="h-8 bg-muted/20 border-border text-[10px]" />
-             </View>
-             <View className="flex-1 gap-1">
-                <Text className="text-muted-foreground/40 font-bold uppercase text-[8px]">Unit</Text>
-                <Input defaultValue="CS" className="h-8 bg-muted/20 border-border text-[10px]" />
-             </View>
-             <View className="flex-1 gap-1">
-                <Text className="text-muted-foreground/40 font-bold uppercase text-[8px]">Price</Text>
-                <Input defaultValue="45.00" className="h-8 bg-muted/20 border-border text-[10px]" />
-             </View>
+            <View className="flex-1 gap-1">
+              <Text className="text-muted-foreground/40 font-bold uppercase text-[8px]">
+                Qty
+              </Text>
+              <Input
+                defaultValue="1"
+                className="h-8 bg-muted/20 border-border text-[10px]"
+              />
+            </View>
+            <View className="flex-1 gap-1">
+              <Text className="text-muted-foreground/40 font-bold uppercase text-[8px]">
+                Unit
+              </Text>
+              <Input
+                defaultValue="CS"
+                className="h-8 bg-muted/20 border-border text-[10px]"
+              />
+            </View>
+            <View className="flex-1 gap-1">
+              <Text className="text-muted-foreground/40 font-bold uppercase text-[8px]">
+                Price
+              </Text>
+              <Input
+                defaultValue="45.00"
+                className="h-8 bg-muted/20 border-border text-[10px]"
+              />
+            </View>
           </View>
 
-          <EntityMapper 
+          <EntityMapper
             originalText="B07X-SALT-KOSHER-3LB"
             suggestedMatch={{ id: "2", name: "Kosher Salt", confidence: 0.82 }}
             onMatch={(id) => console.log(id)}
           />
           <View className="flex-row gap-4 ml-4 pl-4 border-l-2 border-border">
-             <View className="flex-1 gap-1">
-                <Text className="text-muted-foreground/40 font-bold uppercase text-[8px]">Qty</Text>
-                <Input defaultValue="4" className="h-8 bg-muted/20 border-border text-[10px]" />
-             </View>
-             <View className="flex-1 gap-1">
-                <Text className="text-muted-foreground/40 font-bold uppercase text-[8px]">Unit</Text>
-                <Input defaultValue="EA" className="h-8 bg-muted/20 border-border text-[10px]" />
-             </View>
-             <View className="flex-1 gap-1">
-                <Text className="text-muted-foreground/40 font-bold uppercase text-[8px]">Price</Text>
-                <Input defaultValue="12.50" className="h-8 bg-muted/20 border-border text-[10px]" />
-             </View>
+            <View className="flex-1 gap-1">
+              <Text className="text-muted-foreground/40 font-bold uppercase text-[8px]">
+                Qty
+              </Text>
+              <Input
+                defaultValue="4"
+                className="h-8 bg-muted/20 border-border text-[10px]"
+              />
+            </View>
+            <View className="flex-1 gap-1">
+              <Text className="text-muted-foreground/40 font-bold uppercase text-[8px]">
+                Unit
+              </Text>
+              <Input
+                defaultValue="EA"
+                className="h-8 bg-muted/20 border-border text-[10px]"
+              />
+            </View>
+            <View className="flex-1 gap-1">
+              <Text className="text-muted-foreground/40 font-bold uppercase text-[8px]">
+                Price
+              </Text>
+              <Input
+                defaultValue="12.50"
+                className="h-8 bg-muted/20 border-border text-[10px]"
+              />
+            </View>
           </View>
         </View>
       </View>
@@ -127,18 +176,26 @@ export function InvoiceIngestionView() {
       {/* Totals */}
       <View className="bg-muted/40 p-6 rounded-2xl border border-border">
         <View className="flex-row justify-between mb-2">
-          <Text className="text-muted-foreground font-bold uppercase text-[10px]">Subtotal</Text>
+          <Text className="text-muted-foreground font-bold uppercase text-[10px]">
+            Subtotal
+          </Text>
           <Text className="text-foreground/80 font-mono text-xs">$95.00</Text>
         </View>
         <View className="flex-row justify-between mb-4">
-          <Text className="text-muted-foreground font-bold uppercase text-[10px]">Tax & Fees</Text>
+          <Text className="text-muted-foreground font-bold uppercase text-[10px]">
+            Tax & Fees
+          </Text>
           <Text className="text-foreground/80 font-mono text-xs">$5.00</Text>
         </View>
         <View className="flex-row justify-between border-t border-border pt-4">
-          <Text className="text-foreground font-black uppercase text-xs tracking-widest">Total</Text>
+          <Text className="text-foreground font-black uppercase text-xs tracking-widest">
+            Total
+          </Text>
           <View className="flex-row items-center gap-1">
             <DollarSign size={14} className="text-primary" />
-            <Text className="text-primary font-black text-xl tracking-tighter">100.00</Text>
+            <Text className="text-primary font-black text-xl tracking-tighter">
+              100.00
+            </Text>
           </View>
         </View>
       </View>
