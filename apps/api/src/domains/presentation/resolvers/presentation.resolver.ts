@@ -7,6 +7,8 @@ import {
   Field,
   ID,
   Subscription,
+  ResolveField,
+  Parent,
 } from '@nestjs/graphql';
 import { PresentationService } from '../services/presentation.service.js';
 import { Inject } from '@nestjs/common';
@@ -45,6 +47,17 @@ export class PresentationDisplayType {
   activeLayout?: LayoutType;
 }
 
+@Resolver(() => PresentationDisplayType)
+export class PresentationDisplayResolver {
+  constructor(private readonly presentationService: PresentationService) {}
+
+  @ResolveField(() => LayoutType, { nullable: true })
+  async activeLayout(@Parent() display: any) {
+    if (!display.hardwareId) return null;
+    return this.presentationService.getActiveLayoutByHardwareId(display.hardwareId);
+  }
+}
+
 @Resolver()
 export class PresentationResolver {
   constructor(
@@ -55,6 +68,11 @@ export class PresentationResolver {
   @Query(() => [LayoutType])
   async layouts(@Args('organizationId') orgId: string) {
     return this.presentationService.getLayouts(orgId);
+  }
+
+  @Query(() => [PresentationDisplayType])
+  async displays(@Args('organizationId') orgId: string) {
+    return this.presentationService.getDisplays(orgId);
   }
 
   @Query(() => LayoutType, { nullable: true })

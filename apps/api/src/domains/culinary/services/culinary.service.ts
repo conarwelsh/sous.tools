@@ -12,12 +12,21 @@ import {
 import { tags, tagAssignments } from '../../core/tags/tags.schema.js';
 import { eq, and, ilike, exists, desc } from 'drizzle-orm';
 import { logger } from '@sous/logger';
+import { PubSub } from 'graphql-subscriptions';
+import { Optional } from '@nestjs/common';
 
 @Injectable()
 export class CulinaryService {
   constructor(
     @Inject(DatabaseService) private readonly dbService: DatabaseService,
+    @Optional() @Inject('PUB_SUB') private readonly pubSub?: PubSub,
   ) {}
+
+  private publishCatalogUpdate(orgId: string) {
+    if (this.pubSub) {
+      this.pubSub.publish('catalogUpdated', { catalogUpdated: true, orgId });
+    }
+  }
 
   // --- Cook Notes ---
   async getCookNotes(recipeId: string) {
@@ -51,6 +60,11 @@ export class CulinaryService {
       .insert(categories)
       .values(data)
       .returning();
+    
+    if (result[0]) {
+      this.publishCatalogUpdate(result[0].organizationId);
+    }
+    
     return result[0];
   }
 
@@ -80,6 +94,11 @@ export class CulinaryService {
       .insert(products)
       .values(data)
       .returning();
+    
+    if (result[0]) {
+      this.publishCatalogUpdate(result[0].organizationId);
+    }
+    
     return result[0];
   }
 

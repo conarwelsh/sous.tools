@@ -8,11 +8,13 @@ import {
   ID,
   Int,
   Context,
+  Subscription,
 } from '@nestjs/graphql';
 import { Inject, forwardRef, Optional } from '@nestjs/common';
 import { CulinaryService } from '../services/culinary.service.js';
 import { IngestionService } from '../../ingestion/services/ingestion.service.js';
 import { IntegrationsService } from '../../integrations/services/integrations.service.js';
+import { PubSub } from 'graphql-subscriptions';
 
 @ObjectType()
 export class IngredientType {
@@ -237,6 +239,7 @@ export class CulinaryResolver {
     @Optional() private readonly ingestionService: IngestionService,
     @Inject(forwardRef(() => IntegrationsService))
     private readonly integrationsService: IntegrationsService,
+    @Inject('PUB_SUB') private readonly pubSub: PubSub,
   ) {}
 
   @Query(() => [IngredientType])
@@ -255,6 +258,14 @@ export class CulinaryResolver {
     @Args('categoryId', { nullable: true }) categoryId?: string,
   ) {
     return this.culinaryService.getProducts(orgId, categoryId);
+  }
+
+  @Subscription(() => Boolean, {
+    resolve: (payload) => payload.catalogUpdated,
+    filter: (payload, variables) => payload.orgId === variables.orgId,
+  })
+  catalogUpdated(@Args('orgId') orgId: string) {
+    return this.pubSub.asyncIterableIterator('catalogUpdated');
   }
 
   @Query(() => [RecipeType])

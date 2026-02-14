@@ -7,6 +7,7 @@ import { getHttpClient } from "@sous/client-sdk";
 import { useQuery, useSubscription } from "@apollo/client/react";
 import { GET_ACTIVE_LAYOUT, PRESENTATION_UPDATED_SUBSCRIPTION } from "@/lib/graphql";
 import { X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const SignageView = ({ id }: { id: string }) => {
   const [publicPresentation, setPublicPresentation] = useState<any>(null);
@@ -93,7 +94,7 @@ const SignageContent = ({ hardwareId }: { hardwareId: string }) => {
   // 1. Initial Fetch
   const { data, loading: queryLoading, error: queryError } = useQuery(GET_ACTIVE_LAYOUT, {
     variables: { hardwareId },
-    fetchPolicy: 'network-only' // Ensure we get latest data
+    fetchPolicy: 'network-only'
   });
 
   // 2. Real-time Subscription
@@ -149,10 +150,21 @@ const SignageContent = ({ hardwareId }: { hardwareId: string }) => {
   }
 
   return (
-    <PresentationRenderer
-      structure={presentation.structure}
-      slots={presentation.content}
-      customCss={presentation.config?.customCss || (presentation as any).customCss}
-    />
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={presentation.id}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex-1 h-full w-full"
+      >
+        <PresentationRenderer
+          structure={presentation.structure}
+          slots={presentation.content}
+          customCss={presentation.config?.customCss || (presentation as any).customCss}
+        />
+      </motion.div>
+    </AnimatePresence>
   );
 };

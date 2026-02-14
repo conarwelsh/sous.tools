@@ -9,6 +9,8 @@ import {
   Loader2,
   CheckCircle2,
   Link as LinkIcon,
+  Github,
+  Facebook,
 } from "lucide-react";
 import { useAuth, AuthService } from "@sous/features";
 
@@ -46,10 +48,16 @@ export default function PersonalSettingsPage() {
     window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google-login`;
   };
 
+  const handleLinkGithub = () => {
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/github-login`;
+  };
+
+  const handleLinkFacebook = () => {
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/facebook-login`;
+  };
+
   return (
     <View className="flex-1 bg-background p-8">
-      {/* ... header ... */}
-
       <View className="gap-8 max-w-4xl">
         <Card className="p-8 bg-card border-border">
           <View className="flex-row items-center gap-4 mb-8">
@@ -67,25 +75,70 @@ export default function PersonalSettingsPage() {
                   </Text>
                 </View>
 
-                {!(user as any)?.googleId ? (
-                  <Button
-                    onClick={handleLinkGoogle}
-                    variant="outline"
-                    className="h-10 border-border hover:bg-muted gap-2"
-                  >
-                    <GoogleLogo size={16} />
-                    <Text className="text-[10px] font-black uppercase tracking-widest">
-                      Link Google Profile
-                    </Text>
-                  </Button>
-                ) : (
-                  <View className="flex-row items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full">
-                    <CheckCircle2 size={12} className="text-emerald-500" />
-                    <Text className="text-emerald-500 font-black uppercase text-[8px] tracking-widest">
-                      Google Linked
-                    </Text>
-                  </View>
-                )}
+                <View className="flex-row gap-2">
+                  {/* Google */}
+                  {!(user as any)?.googleId ? (
+                    <Button
+                      onClick={handleLinkGoogle}
+                      variant="outline"
+                      className="h-10 border-border hover:bg-muted gap-2"
+                    >
+                      <GoogleLogo size={16} />
+                      <Text className="text-[10px] font-black uppercase tracking-widest">
+                        Link Google
+                      </Text>
+                    </Button>
+                  ) : (
+                    <View className="flex-row items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full">
+                      <CheckCircle2 size={12} className="text-emerald-500" />
+                      <Text className="text-emerald-500 font-black uppercase text-[8px] tracking-widest">
+                        Google
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* GitHub */}
+                  {!(user as any)?.githubId ? (
+                    <Button
+                      onClick={handleLinkGithub}
+                      variant="outline"
+                      className="h-10 border-border hover:bg-muted gap-2"
+                    >
+                      <Github size={16} />
+                      <Text className="text-[10px] font-black uppercase tracking-widest">
+                        Link GitHub
+                      </Text>
+                    </Button>
+                  ) : (
+                    <View className="flex-row items-center gap-2 bg-zinc-500/10 border border-zinc-500/20 px-3 py-1.5 rounded-full">
+                      <CheckCircle2 size={12} className="text-zinc-500" />
+                      <Text className="text-zinc-500 font-black uppercase text-[8px] tracking-widest">
+                        GitHub
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* Facebook */}
+                  {!(user as any)?.facebookId ? (
+                    <Button
+                      onClick={handleLinkFacebook}
+                      variant="outline"
+                      className="h-10 border-border hover:bg-muted gap-2"
+                    >
+                      <Facebook size={16} className="text-blue-600" />
+                      <Text className="text-[10px] font-black uppercase tracking-widest">
+                        Link Facebook
+                      </Text>
+                    </Button>
+                  ) : (
+                    <View className="flex-row items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 rounded-full">
+                      <CheckCircle2 size={12} className="text-blue-500" />
+                      <Text className="text-blue-500 font-black uppercase text-[8px] tracking-widest">
+                        Facebook
+                      </Text>
+                    </View>
+                  )}
+                </View>
               </View>
             </View>
           </View>

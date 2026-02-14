@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { POSLayout } from "./components/POSLayout";
 import { OrderGrid } from "./components/OrderGrid";
 import { Cart } from "./components/Cart";
 import { DevicePairingFlow } from "../hardware/components/DevicePairingFlow";
 import { View, Text, Button } from "@sous/ui";
 import { gql } from "@apollo/client";
-import { useQuery, useMutation } from "@apollo/client/react";
+import { useQuery, useMutation, useSubscription } from "@apollo/client/react";
 import { useAuth } from "../iam/auth/hooks/useAuth";
 import { Loader2, Settings, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,6 +24,12 @@ const GET_POS_CATALOG = gql`
       id
       name
     }
+  }
+`;
+
+const CATALOG_UPDATED_SUBSCRIPTION = gql`
+  subscription OnCatalogUpdated($orgId: String!) {
+    catalogUpdated(orgId: $orgId)
   }
 `;
 
@@ -54,10 +60,22 @@ export const POSFeature = () => {
   const [cart, setCart] = useState<any[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
-  const { data, loading } = useQuery<PosCatalogData>(GET_POS_CATALOG, {
+  const { data, loading, refetch } = useQuery<PosCatalogData>(GET_POS_CATALOG, {
     variables: { orgId },
     skip: !orgId,
   });
+
+  // Real-time catalog updates
+  const { data: subData } = useSubscription(CATALOG_UPDATED_SUBSCRIPTION, {
+    variables: { orgId },
+    skip: !orgId,
+  });
+
+  useEffect(() => {
+    if (subData?.catalogUpdated) {
+      void refetch();
+    }
+  }, [subData, refetch]);
 
   const [createOrder, { loading: isSubmitting }] = useMutation(CREATE_ORDER);
 

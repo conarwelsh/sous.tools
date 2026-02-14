@@ -74,9 +74,10 @@ export class HttpClient {
       const response = await fetch(url, { ...options, headers });
 
       if (!response.ok) {
+        console.error(`[HttpClient] Request failed with status ${response.status}: ${url}`);
         const error = await response
           .json()
-          .catch(() => ({ message: "An unknown error occurred" }));
+          .catch(() => ({ message: `HTTP Error ${response.status}` }));
         throw new Error(error.message || "API Request failed");
       }
 
@@ -91,19 +92,21 @@ export class HttpClient {
         return text as unknown as T;
       }
     } catch (e: any) {
-      // 1. Try Edge Node Fallback if cloud fails
+      // 1. Try Edge Node Fallback if cloud fails (e.g. timeout or connection error)
       if (!url.includes("sous.local") && !url.includes("localhost")) {
         console.warn(
-          `[HttpClient] Cloud API unreachable. Attempting Edge Node fallback...`,
+          `[HttpClient] Cloud API unreachable (${e.message}). Attempting Edge Node fallback...`,
         );
         const edgeUrl = url.replace(this.baseUrl, "http://sous.local:4000");
         try {
+          // IMPORTANT: strip the leading / if it exists because the recursive call adds it
+          const relativePath = path.startsWith("/") ? path : `/${path}`;
           return await this.request(
-            edgeUrl.replace("http://sous.local:4000", ""),
-            options,
+            relativePath,
+            { ...options, headers: Object.fromEntries((headers as any).entries()) }
           );
-        } catch (_edgeError) {
-          console.error(`[HttpClient] Edge Node also unreachable.`);
+        } catch (edgeError: any) {
+          console.error(`[HttpClient] Edge Node fallback also failed: ${edgeError.message}`);
         }
       }
 

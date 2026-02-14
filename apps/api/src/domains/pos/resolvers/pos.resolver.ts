@@ -3,8 +3,38 @@ import { UseGuards, Inject } from '@nestjs/common';
 import { GqlAuthGuard } from '../../iam/auth/guards/gql-auth.guard.js';
 import { CurrentUser } from '../../iam/auth/decorators/current-user.decorator.js';
 import { PosService } from '../services/pos.service.js';
-import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
+import { ObjectType, Field, ID, Int, InputType } from '@nestjs/graphql';
 import { PubSub } from 'graphql-subscriptions';
+
+@InputType()
+export class CreateOrderItemInput {
+  @Field()
+  productId: string;
+
+  @Field()
+  name: string;
+
+  @Field(() => Int)
+  quantity: number;
+
+  @Field(() => Int)
+  unitPrice: number;
+}
+
+@InputType()
+export class CreateOrderInput {
+  @Field(() => [CreateOrderItemInput])
+  items: CreateOrderItemInput[];
+
+  @Field(() => Int)
+  totalAmount: number;
+
+  @Field()
+  paymentMethod: string;
+
+  @Field()
+  source: string;
+}
 
 @ObjectType()
 export class PosLedger {
@@ -98,6 +128,22 @@ export class PosResolver {
     @Args('limit', { type: () => Int, defaultValue: 50 }) limit?: number,
   ) {
     return this.posService.getOrders(user.organizationId, status, limit);
+  }
+
+  /**
+   * Creates a new order and notifies KDS.
+   */
+  @Mutation(() => PosOrder)
+  async createOrder(
+    @CurrentUser() user: any,
+    @Args('input') input: CreateOrderInput,
+  ) {
+    const order = await this.posService.recordSale(user.organizationId, input, '');
+    
+    // Notify KDS
+    await this.pubSub.publish('orderUpdated', { orderUpdated: order });
+    
+    return order;
   }
 
   /**
